@@ -34,3 +34,10 @@ Dépôts : `stock-api` (Kotlin, Spring Boot) et `stock-web` (Next.js, shadcn/ui)
 
 - Composants UI via shadcn/ui (`components.json`) ; ne pas dupliquer un composant existant.
 - `npm run typecheck`, `npm run lint` et `npm run build` doivent passer avant chaque commit.
+
+# Branches
+
+- `main` : production. Jamais de push direct ; on y arrive uniquement par pull request depuis `develop`.
+- `develop` : intégration, branche par défaut.
+- `feature/<sujet>` (ou `fix/<sujet>`) : partent de `develop` et y reviennent par pull request.
+- Après un clone : `git config core.hooksPath .githooks` (le hook `pre-push` bloque les push vers `main`).

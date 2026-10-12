@@ -1,0 +1,9 @@
+#!/bin/sh
+# The GitHub plan does not enforce branch protection on private repos, so main is guarded here.
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+  if [ "$remote_ref" = "refs/heads/main" ]; then
+    echo "Push direct vers main refusé : ouvrez une pull request de develop vers main." >&2
+    exit 1
+  fi
+done
+exit 0
