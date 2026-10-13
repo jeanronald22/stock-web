@@ -38,6 +38,26 @@
     --color-card: var(--card);
     --color-foreground: var(--foreground);
     --color-background: var(--background);
+    --color-success: var(--success);
+    --color-success-muted: var(--success-muted);
+    --color-success-muted-foreground: var(--success-muted-foreground);
+    --color-warning: var(--warning);
+    --color-warning-muted: var(--warning-muted);
+    --color-warning-muted-foreground: var(--warning-muted-foreground);
+    --color-destructive-muted: var(--destructive-muted);
+    --color-destructive-muted-foreground: var(--destructive-muted-foreground);
+    --color-info-muted: var(--info-muted);
+    --color-info-muted-foreground: var(--info-muted-foreground);
+    --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+    --ease-carton: cubic-bezier(0.3, 1.5, 0.5, 1);
+    --animate-carton-drop: carton-drop var(--duration-brand) var(--ease-carton) both;
+
+    @keyframes carton-drop {
+        0% { transform: translateY(-18px); opacity: 0; }
+        60% { opacity: 1; }
+        100% { transform: none; opacity: 1; }
+    }
     --radius-sm: calc(var(--radius) * 0.6);
     --radius-md: calc(var(--radius) * 0.8);
     --radius-lg: var(--radius);
@@ -63,6 +83,16 @@
     --accent: oklch(0.97 0 0);
     --accent-foreground: oklch(0.205 0 0);
     --destructive: oklch(0.577 0.245 27.325);
+    --success: oklch(0.696 0.17 162.48);
+    --success-muted: oklch(0.979 0.021 166.113);
+    --success-muted-foreground: oklch(0.432 0.095 166.913);
+    --warning: oklch(0.666 0.179 58.318);
+    --warning-muted: oklch(0.987 0.022 95.277);
+    --warning-muted-foreground: oklch(0.473 0.137 46.201);
+    --destructive-muted: oklch(0.971 0.013 17.38);
+    --destructive-muted-foreground: oklch(0.505 0.213 27.518);
+    --info-muted: oklch(0.97 0 0);
+    --info-muted-foreground: oklch(0.371 0 0);
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
     --ring: oklch(0.708 0 0);
@@ -72,6 +102,10 @@
     --chart-4: oklch(0.508 0.118 165.612);
     --chart-5: oklch(0.432 0.095 166.913);
     --radius: 0.45rem;
+    --duration-fast: 120ms;
+    --duration-base: 200ms;
+    --duration-slow: 320ms;
+    --duration-brand: 600ms;
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
     --sidebar-primary: oklch(0.596 0.145 163.225);
@@ -98,6 +132,16 @@
     --accent: oklch(0.269 0 0);
     --accent-foreground: oklch(0.985 0 0);
     --destructive: oklch(0.704 0.191 22.216);
+    --success: oklch(0.696 0.17 162.48);
+    --success-muted: oklch(0.258 0.043 167);
+    --success-muted-foreground: oklch(0.845 0.143 164.978);
+    --warning: oklch(0.769 0.188 70.08);
+    --warning-muted: oklch(0.235 0.043 69.511);
+    --warning-muted-foreground: oklch(0.837 0.128 66.29);
+    --destructive-muted: oklch(0.211 0.058 21.84);
+    --destructive-muted-foreground: oklch(0.808 0.114 19.571);
+    --info-muted: oklch(0.239 0 0);
+    --info-muted-foreground: oklch(0.87 0 0);
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: oklch(0.556 0 0);
@@ -129,4 +173,15 @@
   html {
     @apply font-sans;
     }
+}
+
+/* 1 ms plutôt que `animation: none` : une animation en `both` (ex. carton-drop) doit
+   atteindre son état final, sinon l'élément resterait invisible. */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
 }
