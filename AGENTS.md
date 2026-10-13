@@ -24,7 +24,7 @@ Dépôts : `stock-api` (Kotlin, Spring Boot) et `stock-web` (Next.js, shadcn/ui)
 
 # Invariants métier
 
-- **Isolation entre entreprises** : toute donnée métier porte `organization_id`. L'entreprise active vient du jeton, jamais d'un paramètre envoyé par le client.
+- **Isolation entre entreprises** : toute donnée métier porte `organization_id`. L'entreprise active est envoyée dans l'en-tête `X-Organization-Id` et n'est jamais crue sans vérification : l'API contrôle à chaque requête que l'utilisateur en est membre actif.
 - **Le stock est un registre** : on ne modifie jamais `stock_movement`. Toute correction passe par un nouveau bon.
 - **Quantités en unité de base** de l'article ; cartons, m², etc. sont des conversions.
 - **Hors ligne d'abord** : identifiants UUID créés côté client, synchronisation idempotente.
