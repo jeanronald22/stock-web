@@ -52,6 +52,22 @@
     --ease-exit: cubic-bezier(0.4, 0, 1, 1);
     --ease-carton: cubic-bezier(0.3, 1.5, 0.5, 1);
     --animate-carton-drop: carton-drop var(--duration-brand) var(--ease-carton) both;
+    --animate-pillar-rise: pillar-rise 550ms var(--ease-standard) both;
+    --animate-arrow-slide: arrow-slide 550ms var(--ease-standard) both;
+    --animate-rise-in: rise-in var(--duration-brand) var(--ease-standard) both;
+
+    @keyframes pillar-rise {
+        from { transform: scaleY(0); }
+        to { transform: scaleY(1); }
+    }
+    @keyframes arrow-slide {
+        from { transform: translate(-6px, 6px); opacity: 0; }
+        to { transform: none; opacity: 1; }
+    }
+    @keyframes rise-in {
+        from { transform: translateY(8px); opacity: 0; }
+        to { transform: none; opacity: 1; }
+    }
 
     @keyframes carton-drop {
         0% { transform: translateY(-18px); opacity: 0; }
