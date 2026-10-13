@@ -12,12 +12,11 @@ npm install
 npm run dev                  # http://localhost:3100
 ```
 
-Connexion : ouvrir http://localhost:3100/connexion, saisir un numéro ; le code s'affiche dans
-`docker compose logs -f keycloak` (dossier `stock-api`).
+Connexion : ouvrir http://localhost:3100/connexion et saisir un numéro. Le code est écrit dans les
+journaux de **Keycloak**, pas dans ceux de l'API : depuis `stock-api`,
+`docker compose logs -f keycloak | grep "Code de connexion"`.
 
-Ports dédiés au projet : application web 3100, API 8081, Keycloak 8180, PostgreSQL 5436. Si la page se
-recharge en boucle en développement (« HMR hash mismatch »), un autre processus Next.js utilise le
-même dossier `.next` : l'arrêter, puis `rm -rf .next/dev` et relancer `npm run dev`.
+Ports dédiés au projet : application web 3100, API 8081, Keycloak 8180, PostgreSQL 5436.
 
 ## Configuration
 
