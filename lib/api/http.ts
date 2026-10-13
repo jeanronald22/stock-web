@@ -1,0 +1,94 @@
+import { ApiError, ProblemCode, type FieldError } from "./problem"
+
+/** En-têtes propres à l'API (stock-api, ApiHeaders). */
+export const ApiHeaders = {
+  organizationId: "X-Organization-Id",
+  idempotencyKey: "Idempotency-Key",
+  retryAfter: "Retry-After",
+} as const
+
+/** En-têtes HTTP standard utilisés par le client. */
+const StandardHeaders = {
+  accept: "Accept",
+  acceptLanguage: "Accept-Language",
+  authorization: "Authorization",
+  contentType: "Content-Type",
+} as const
+
+const PROBLEM_JSON = "application/problem+json"
+const JSON_TYPE = "application/json"
+const BEARER = "Bearer"
+const NO_CONTENT = 204
+
+export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
+
+export type ApiRequest = {
+  method: HttpMethod
+  path: string
+  body?: unknown
+  /** Clé stable entre deux essais de la même action, pour que l'API ne la traite qu'une fois. */
+  idempotencyKey?: string
+}
+
+export type ApiClientDependencies = {
+  baseUrl: string
+  getAccessToken: () => string | undefined
+  getLocale: () => string
+  getOrganizationId: () => string | null
+}
+
+export type ApiClient = <T>(request: ApiRequest) => Promise<T>
+
+export function createApiClient(deps: ApiClientDependencies): ApiClient {
+  return async function send<T>(request: ApiRequest): Promise<T> {
+    const headers = new Headers({
+      [StandardHeaders.accept]: `${JSON_TYPE}, ${PROBLEM_JSON}`,
+      [StandardHeaders.acceptLanguage]: deps.getLocale(),
+    })
+    const token = deps.getAccessToken()
+    if (token) headers.set(StandardHeaders.authorization, `${BEARER} ${token}`)
+    const organizationId = deps.getOrganizationId()
+    if (organizationId) headers.set(ApiHeaders.organizationId, organizationId)
+    if (request.idempotencyKey) headers.set(ApiHeaders.idempotencyKey, request.idempotencyKey)
+    if (request.body !== undefined) headers.set(StandardHeaders.contentType, JSON_TYPE)
+
+    let response: Response
+    try {
+      response = await fetch(new URL(request.path, deps.baseUrl), {
+        method: request.method,
+        headers,
+        body: request.body === undefined ? undefined : JSON.stringify(request.body),
+      })
+    } catch {
+      throw new ApiError(0, ProblemCode.networkUnavailable, "", "")
+    }
+
+    if (response.ok) {
+      return (response.status === NO_CONTENT ? undefined : await response.json()) as T
+    }
+    throw await toApiError(response)
+  }
+}
+
+async function toApiError(response: Response): Promise<ApiError> {
+  const retryAfter = Number(response.headers.get(ApiHeaders.retryAfter)) || undefined
+  if (!response.headers.get(StandardHeaders.contentType)?.includes(PROBLEM_JSON)) {
+    return new ApiError(response.status, ProblemCode.internalError, response.statusText, "", [], retryAfter)
+  }
+  const problem = (await response.json()) as {
+    code?: string
+    title?: string
+    detail?: string
+    errors?: FieldError[]
+    traceId?: string
+  }
+  return new ApiError(
+    response.status,
+    problem.code ?? ProblemCode.internalError,
+    problem.title ?? response.statusText,
+    problem.detail ?? "",
+    problem.errors ?? [],
+    retryAfter,
+    problem.traceId
+  )
+}

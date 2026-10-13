@@ -16,8 +16,15 @@ const tones = {
   },
 } as const
 
+/** Le symbole seul (le K) quand la place manque : charte, tailles minimales. */
+const viewBoxes = {
+  full: "0 0 196 48",
+  symbol: "0 0 48 48",
+} as const
+
 type KreskalaLogoProps = {
   tone?: keyof typeof tones
+  variant?: keyof typeof viewBoxes
   /** Joue l'ouverture de la charte : pilier, flèche, carton, puis le nom (1,6 s). */
   animated?: boolean
   className?: string
@@ -25,6 +32,7 @@ type KreskalaLogoProps = {
 
 function KreskalaLogo({
   tone = "brand",
+  variant = "full",
   animated = false,
   className,
 }: KreskalaLogoProps) {
@@ -32,7 +40,7 @@ function KreskalaLogo({
 
   return (
     <svg
-      viewBox="0 0 196 48"
+      viewBox={viewBoxes[variant]}
       role="img"
       aria-label="Kreskala"
       className={cn("h-12 w-auto", className)}
@@ -67,13 +75,15 @@ function KreskalaLogo({
             "origin-bottom animate-carton-drop [animation-delay:620ms] transform-fill"
         )}
       />
-      <path
-        d={WORDMARK_PATH}
-        className={cn(
-          colors.word,
-          animated && "animate-rise-in [animation-delay:950ms]"
-        )}
-      />
+      {variant === "full" && (
+        <path
+          d={WORDMARK_PATH}
+          className={cn(
+            colors.word,
+            animated && "animate-rise-in [animation-delay:950ms]"
+          )}
+        />
+      )}
     </svg>
   )
 }

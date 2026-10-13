@@ -1,0 +1,57 @@
+/**
+ * Codes d'erreur publics de l'API (stock-api, ProblemCode). NETWORK_UNAVAILABLE est propre au
+ * client : la requête n'a pas atteint l'API (réseau coupé).
+ */
+export const ProblemCode = {
+  unauthenticated: "unauthenticated",
+  accessDenied: "access-denied",
+  organizationRequired: "organization-required",
+  organizationIdInvalid: "organization-id-invalid",
+  organizationAccessDenied: "organization-access-denied",
+  validationFailed: "validation-failed",
+  identityIncomplete: "identity-incomplete",
+  profileConflict: "profile-conflict",
+  profileIncomplete: "profile-incomplete",
+  countryUnsupported: "country-unsupported",
+  organizationIdConflict: "organization-id-conflict",
+  organizationLimitReached: "organization-limit-reached",
+  organizationNotFound: "organization-not-found",
+  serviceBusy: "service-busy",
+  internalError: "internal-error",
+  networkUnavailable: "network-unavailable",
+} as const
+
+export type ProblemCodeValue = (typeof ProblemCode)[keyof typeof ProblemCode]
+
+export type FieldError = { field: string; message: string }
+
+const UNAUTHORIZED = 401
+
+/** Réponse d'erreur RFC 9457 de l'API, déjà traduite dans la langue de la requête. */
+export class ApiError extends Error {
+  constructor(
+    readonly status: number,
+    readonly code: string,
+    readonly title: string,
+    readonly detail: string,
+    readonly fieldErrors: FieldError[] = [],
+    readonly retryAfterSeconds?: number,
+    readonly traceId?: string
+  ) {
+    super(detail || title)
+    this.name = "ApiError"
+  }
+
+  /** Session expirée sans renouvellement possible : il faut se reconnecter. */
+  get isUnauthorized(): boolean {
+    return this.status === UNAUTHORIZED
+  }
+
+  /** Erreur passagère : l'action peut être relancée telle quelle. */
+  get isRetryable(): boolean {
+    return (
+      this.code === ProblemCode.serviceBusy ||
+      this.code === ProblemCode.networkUnavailable
+    )
+  }
+}

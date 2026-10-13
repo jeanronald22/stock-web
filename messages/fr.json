@@ -1,0 +1,125 @@
+{
+  "meta": {
+    "signIn": "Connexion",
+    "welcome": "Bienvenue",
+    "organizations": "Vos entreprises",
+    "dashboard": "Accueil"
+  },
+  "common": {
+    "retry": "Réessayer",
+    "back": "Retour",
+    "continue": "Continuer",
+    "signOut": "Se déconnecter",
+    "loading": "Chargement…",
+    "soon": "Bientôt"
+  },
+  "languages": {
+    "label": "Langue",
+    "fr": "Français",
+    "en": "English"
+  },
+  "configError": {
+    "title": "Impossible de démarrer",
+    "description": "L’application n’arrive pas à joindre le serveur. Vérifiez votre connexion, puis réessayez."
+  },
+  "signIn": {
+    "title": "Connexion sécurisée",
+    "description": "Nous vous emmenons vers la page de connexion…",
+    "manual": "Continuer vers la connexion"
+  },
+  "callback": {
+    "label": "Connexion en cours…",
+    "failedTitle": "La connexion n’a pas abouti",
+    "failedDescription": "Le lien de connexion a expiré ou a déjà servi. Recommencez, cela ne prend qu’un instant.",
+    "restart": "Se connecter à nouveau"
+  },
+  "errors": {
+    "network": "Pas de connexion internet. Rien n’est perdu : réessayez dès que le réseau revient.",
+    "generic": "Une erreur est survenue. Réessayez.",
+    "trace": "Code de suivi : {traceId}",
+    "loadTitle": "Impossible de charger votre espace"
+  },
+  "validation": {
+    "required": "Ce champ est obligatoire.",
+    "tooLong": "{max} caractères au maximum."
+  },
+  "welcome": {
+    "exit": "Quitter",
+    "step": "Étape {current} sur {total}",
+    "profile": {
+      "eyebrow": "Bienvenue",
+      "title": "Comment vous appelez-vous ?",
+      "description": "Votre nom apparaît sur les bons que vous validez : toute l’équipe sait qui a fait quoi.",
+      "firstName": "Prénom",
+      "firstNamePlaceholder": "Awa",
+      "lastName": "Nom",
+      "lastNamePlaceholder": "Bello"
+    },
+    "business": {
+      "eyebrow": "Votre entreprise",
+      "title": "Parlez-nous de votre entreprise",
+      "description": "Ces informations préparent votre espace. Vous pourrez les modifier plus tard.",
+      "name": "Nom de l’entreprise",
+      "namePlaceholder": "Quincaillerie Ngono",
+      "city": "Ville",
+      "cityPlaceholder": "Douala",
+      "sector": "Secteur d’activité",
+      "sectorPlaceholder": "Choisissez un secteur",
+      "country": "Pays",
+      "countryHint": "Kreskala est disponible au Cameroun pour commencer."
+    },
+    "sectors": {
+      "HARDWARE": "Quincaillerie",
+      "BUILDING_MATERIALS": "Matériaux de construction",
+      "FOOD": "Alimentation",
+      "PHARMACY": "Pharmacie",
+      "COSMETICS": "Cosmétique et beauté",
+      "ELECTRONICS": "Électronique",
+      "CLOTHING": "Habillement",
+      "OTHER": "Autre activité"
+    },
+    "countries": {
+      "CM": "Cameroun"
+    },
+    "submit": "Créer mon espace",
+    "done": {
+      "title": "Votre espace est prêt",
+      "description": "{name} est créée. Vous pouvez commencer à suivre votre stock.",
+      "cta": "Accéder à mon espace"
+    }
+  },
+  "organizations": {
+    "title": "Choisissez une entreprise",
+    "description": "Vous êtes membre de plusieurs entreprises. Vous pourrez en changer à tout moment.",
+    "create": "Créer une autre entreprise",
+    "roles": {
+      "OWNER": "Propriétaire",
+      "ADMIN": "Administrateur",
+      "MEMBER": "Membre"
+    }
+  },
+  "dashboard": {
+    "greeting": "Bonjour {name}",
+    "readyTitle": "Votre espace est prêt",
+    "readyDescription": "Les premiers outils de gestion du stock arrivent très bientôt. Voici ce qui vous attend.",
+    "steps": {
+      "products": {
+        "title": "Ajouter vos articles",
+        "description": "Carreaux, plomberie, sanitaire… avec leurs cartons, pièces et m²."
+      },
+      "warehouses": {
+        "title": "Créer vos dépôts",
+        "description": "Magasin, dépôt, entrepôt : chaque lieu a son propre stock."
+      },
+      "team": {
+        "title": "Inviter votre équipe",
+        "description": "Vos magasiniers reçoivent une invitation par WhatsApp."
+      }
+    }
+  },
+  "menu": {
+    "open": "Ouvrir le menu du compte",
+    "switchOrganization": "Changer d’entreprise",
+    "currentOrganization": "Entreprise active"
+  }
+}

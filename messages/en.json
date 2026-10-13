@@ -1,0 +1,125 @@
+{
+  "meta": {
+    "signIn": "Sign in",
+    "welcome": "Welcome",
+    "organizations": "Your businesses",
+    "dashboard": "Home"
+  },
+  "common": {
+    "retry": "Try again",
+    "back": "Back",
+    "continue": "Continue",
+    "signOut": "Sign out",
+    "loading": "Loading…",
+    "soon": "Soon"
+  },
+  "languages": {
+    "label": "Language",
+    "fr": "Français",
+    "en": "English"
+  },
+  "configError": {
+    "title": "Unable to start",
+    "description": "The app cannot reach the server. Check your connection, then try again."
+  },
+  "signIn": {
+    "title": "Secure sign-in",
+    "description": "Taking you to the sign-in page…",
+    "manual": "Continue to sign in"
+  },
+  "callback": {
+    "label": "Signing you in…",
+    "failedTitle": "Sign-in did not complete",
+    "failedDescription": "The sign-in link has expired or was already used. Start again, it only takes a moment.",
+    "restart": "Sign in again"
+  },
+  "errors": {
+    "network": "No internet connection. Nothing is lost: try again as soon as the network is back.",
+    "generic": "Something went wrong. Try again.",
+    "trace": "Trace code: {traceId}",
+    "loadTitle": "Unable to load your workspace"
+  },
+  "validation": {
+    "required": "This field is required.",
+    "tooLong": "{max} characters at most."
+  },
+  "welcome": {
+    "exit": "Exit",
+    "step": "Step {current} of {total}",
+    "profile": {
+      "eyebrow": "Welcome",
+      "title": "What is your name?",
+      "description": "Your name appears on the vouchers you approve, so the whole team knows who did what.",
+      "firstName": "First name",
+      "firstNamePlaceholder": "Awa",
+      "lastName": "Last name",
+      "lastNamePlaceholder": "Bello"
+    },
+    "business": {
+      "eyebrow": "Your business",
+      "title": "Tell us about your business",
+      "description": "This sets up your workspace. You can change it later.",
+      "name": "Business name",
+      "namePlaceholder": "Ngono Hardware",
+      "city": "City",
+      "cityPlaceholder": "Douala",
+      "sector": "Line of business",
+      "sectorPlaceholder": "Choose a line of business",
+      "country": "Country",
+      "countryHint": "Kreskala is available in Cameroon to begin with."
+    },
+    "sectors": {
+      "HARDWARE": "Hardware store",
+      "BUILDING_MATERIALS": "Building materials",
+      "FOOD": "Food and groceries",
+      "PHARMACY": "Pharmacy",
+      "COSMETICS": "Cosmetics and beauty",
+      "ELECTRONICS": "Electronics",
+      "CLOTHING": "Clothing",
+      "OTHER": "Other"
+    },
+    "countries": {
+      "CM": "Cameroon"
+    },
+    "submit": "Create my workspace",
+    "done": {
+      "title": "Your workspace is ready",
+      "description": "{name} has been created. You can start tracking your stock.",
+      "cta": "Go to my workspace"
+    }
+  },
+  "organizations": {
+    "title": "Choose a business",
+    "description": "You are a member of several businesses. You can switch at any time.",
+    "create": "Create another business",
+    "roles": {
+      "OWNER": "Owner",
+      "ADMIN": "Administrator",
+      "MEMBER": "Member"
+    }
+  },
+  "dashboard": {
+    "greeting": "Hello {name}",
+    "readyTitle": "Your workspace is ready",
+    "readyDescription": "The first stock management tools are coming very soon. Here is what is ahead.",
+    "steps": {
+      "products": {
+        "title": "Add your items",
+        "description": "Tiles, plumbing, sanitary ware… with their boxes, pieces and m²."
+      },
+      "warehouses": {
+        "title": "Set up your depots",
+        "description": "Shop, depot, warehouse: each place has its own stock."
+      },
+      "team": {
+        "title": "Invite your team",
+        "description": "Your storekeepers receive an invitation on WhatsApp."
+      }
+    }
+  },
+  "menu": {
+    "open": "Open account menu",
+    "switchOrganization": "Switch business",
+    "currentOrganization": "Active business"
+  }
+}

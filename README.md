@@ -1,21 +1,44 @@
-# Next.js template
+# stock-web
 
-This is a Next.js template with shadcn/ui.
+Application web (PWA) de Kreskala Stock : Next.js 16, React 19, shadcn/ui (Base UI), Tailwind 4.
 
-## Adding components
+## Démarrer en local
 
-To add components to your app, run the following command:
+Prérequis : la pile de `stock-api` (PostgreSQL, Keycloak, API), voir son README.
 
 ```bash
-npx shadcn@latest add button
+cp .env.example .env.local   # adresses de Keycloak et de l'API
+npm install
+npm run dev                  # http://localhost:3000
 ```
 
-This will place the ui components in the `components` directory.
+Connexion : saisir un numéro ; le code s'affiche dans `docker compose logs -f keycloak` (dossier `stock-api`).
 
-## Using components
+## Configuration
 
-To use the components in your app, import them as follows:
+Lue par le serveur à l'exécution (`/runtime-config`), jamais figée au build : une même image sert
+tous les environnements.
 
-```tsx
-import { Button } from "@/components/ui/button";
+| Variable | Rôle |
+|---|---|
+| `KEYCLOAK_URL` | adresse de Keycloak |
+| `KEYCLOAK_REALM` | realm (`kreskala`) |
+| `KEYCLOAK_CLIENT_ID` | client public (`stock-web`) |
+| `API_URL` | adresse de `stock-api` |
+
+## Vérifications
+
+```bash
+npm run typecheck && npm run lint && npm run build
+npm run test:e2e   # parcours complet contre la pile réelle, voir e2e/README.md
 ```
+
+## Organisation
+
+| Dossier | Contenu |
+|---|---|
+| `app/(app)` | espace connecté : connexion, inscription (`/bienvenue`), choix d'entreprise, accueil |
+| `lib/api` | client HTTP (jeton, langue, entreprise active, erreurs RFC 9457), requêtes TanStack Query |
+| `lib/auth` | connexion OIDC (Keycloak, PKCE) |
+| `messages` | textes FR et EN ; le français est la référence typée |
+| `components/ui` | composants shadcn alignés sur la charte (rayon 0,45 rem, cibles tactiles de 44 px) |
