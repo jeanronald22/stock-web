@@ -17,6 +17,7 @@ Dépôts : `stock-api` (Kotlin, Spring Boot) et `stock-web` (Next.js, shadcn/ui)
 # Règles de qualité du code
 
 - **Commentaires** : uniquement quand ils apportent ce que le code ne dit pas (règle métier, contrainte, raison d'un choix non évident). Aucun commentaire qui paraphrase le code, aucun commentaire décoratif.
+- **Aucune chaîne magique** : codes d'erreur, en-têtes, clés de stockage, routes, statuts et clés de configuration sont définis une seule fois (constante ou énumération) et référencés partout. Seuls les textes destinés à être lus restent en clair.
 - **SOLID strict** : une responsabilité par classe ou composant ; dépendre d'abstractions. Les fournisseurs externes (IA, OTP SMS/WhatsApp, paiement mobile money, stockage de fichiers) sont toujours derrière une interface.
 - **Relecture systématique** : relire chaque changement avant de le commiter (lisibilité, cas limites, sécurité, isolation entre entreprises, tests).
 - **Qualité production SaaS** : validation des entrées, erreurs explicites, idempotence, observabilité, tests automatisés, configuration par environnement, aucun secret dans le code.
