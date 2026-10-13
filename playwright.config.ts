@@ -9,6 +9,8 @@ export default defineConfig({
   fullyParallel: false,
   retries: 0,
   reporter: [["list"]],
+  // Le serveur de développement compile chaque écran à sa première visite.
+  expect: { timeout: 15_000 },
   use: {
     baseURL: process.env.E2E_BASE_URL ?? "http://localhost:3100",
     locale: "fr-FR",

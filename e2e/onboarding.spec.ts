@@ -30,8 +30,9 @@ test("un nouveau client se connecte par code, crée sa structure et arrive sur l
   await page.getByRole("button", { name: "Valider" }).click()
   await expect(page.getByText("Code incorrect.")).toBeVisible()
 
+  // La touche Entrée valide le code (et non « Modifier », placé plus haut dans la page).
   await page.getByLabel(/Code à \d+ chiffres/).fill(readLatestOtp(CAMEROON + localNumber))
-  await page.getByRole("button", { name: "Valider" }).click()
+  await page.getByLabel(/Code à \d+ chiffres/).press("Enter")
 
   await expect(page).toHaveURL(/\/bienvenue$/)
   await expect(page.getByRole("heading", { name: "Comment vous appelez-vous ?" })).toBeVisible()
