@@ -3,7 +3,7 @@
 Ils s'exécutent contre une pile réelle :
 
 1. `stock-api` : `docker compose up -d` (PostgreSQL, Keycloak avec le fournisseur de codes `console`),
-   puis `./mvnw spring-boot:run -Dspring-boot.run.profiles=local`.
+   puis `./mvnw spring-boot:run` (ou StockApiApplication dans l'IDE).
 2. `stock-web` : `npm run build && npm start`.
 3. `npx playwright test`.
 
