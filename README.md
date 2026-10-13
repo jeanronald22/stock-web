@@ -9,7 +9,7 @@ Prérequis : la pile de `stock-api` (PostgreSQL, Keycloak, API), voir son README
 ```bash
 cp .env.example .env.local   # adresses de Keycloak et de l'API
 npm install
-npm run dev                  # http://localhost:3000
+npm run dev                  # http://localhost:3100
 ```
 
 Connexion : saisir un numéro ; le code s'affiche dans `docker compose logs -f keycloak` (dossier `stock-api`).

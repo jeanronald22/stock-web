@@ -7,6 +7,6 @@ Ils s'exécutent contre une pile réelle :
 2. `stock-web` : `npm run build && npm start`.
 3. `npx playwright test`.
 
-Variables utiles : `E2E_BASE_URL` (par défaut `http://localhost:3000`) et
+Variables utiles : `E2E_BASE_URL` (par défaut `http://localhost:3100`) et
 `E2E_KEYCLOAK_COMPOSE_DIR` (par défaut `../stock-api`, pour lire les codes dans les journaux de Keycloak).
 Les captures de chaque étape sont dans `test-results/`.

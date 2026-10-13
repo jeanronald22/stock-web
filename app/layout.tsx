@@ -19,7 +19,7 @@ const fontMono = Geist_Mono({
 export const metadata: Metadata = {
   // Absolute URLs for Open Graph images; set per environment.
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
+    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3100"
   ),
   title: { default: "Kreskala Stock", template: "%s · Kreskala" },
   description: "Votre stock, au carton près.",
