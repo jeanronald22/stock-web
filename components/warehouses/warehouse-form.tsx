@@ -8,6 +8,7 @@ import { FormActions, FormSection } from "@/components/catalog/form-section"
 import { usePageTour } from "@/components/tour/tour-provider"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
+import { ReadOnlyNotice } from "@/components/workspace/read-only-notice"
 import type { Warehouse } from "@/lib/api/stock"
 import { Routes } from "@/lib/routes"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
@@ -19,9 +20,12 @@ import { WarehouseDetailsFields, WarehouseKindField } from "./warehouse-fields"
 export function WarehouseForm({
   warehouse,
   onConflict,
+  readOnly = false,
 }: {
   warehouse: Warehouse
   onConflict: () => void
+  /** Consultation seule : le rôle Stock ne permet pas de modifier les dépôts. */
+  readOnly?: boolean
 }) {
   const t = useTranslations()
   const router = useRouter()
@@ -34,29 +38,34 @@ export function WarehouseForm({
 
   return (
     <form onSubmit={(event) => void onSubmit(event)} noValidate>
-      <FormSection
-        title={t("warehouses.form.kind")}
-        {...tourAnchor(TourAnchors.warehouseKind)}
-      >
-        <WarehouseKindField form={form} />
-      </FormSection>
-      <FormSection title={t("warehouses.form.details")}>
-        <WarehouseDetailsFields form={form} />
-      </FormSection>
-      <FormActions>
-        <Button
-          type="button"
-          variant="ghost"
-          size="lg"
-          onClick={() => router.push(Routes.warehouses)}
+      {readOnly && <ReadOnlyNotice />}
+      <fieldset disabled={readOnly} className="contents">
+        <FormSection
+          title={t("warehouses.form.kind")}
+          {...tourAnchor(TourAnchors.warehouseKind)}
         >
-          {t("common.cancel")}
-        </Button>
-        <Button type="submit" size="lg" disabled={pending}>
-          {pending && <Spinner />}
-          {t("common.save")}
-        </Button>
-      </FormActions>
+          <WarehouseKindField form={form} />
+        </FormSection>
+        <FormSection title={t("warehouses.form.details")}>
+          <WarehouseDetailsFields form={form} />
+        </FormSection>
+      </fieldset>
+      {!readOnly && (
+        <FormActions>
+          <Button
+            type="button"
+            variant="ghost"
+            size="lg"
+            onClick={() => router.push(Routes.warehouses)}
+          >
+            {t("common.cancel")}
+          </Button>
+          <Button type="submit" size="lg" disabled={pending}>
+            {pending && <Spinner />}
+            {t("common.save")}
+          </Button>
+        </FormActions>
+      )}
     </form>
   )
 }

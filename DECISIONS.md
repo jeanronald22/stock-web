@@ -248,6 +248,29 @@ Réalignement sur D10 (tables `category`, `sku_warehouse.min_qty_base`) :
 - **Bons** : période du/au (jours inclus, fuseau des dépôts, Africa/Douala), plusieurs dépôts, fournisseur, type ; tri par date de l'opération, plus récents ou plus anciens d'abord.
 - Limite connue : le filtre fournisseur liste 100 fournisseurs actifs (une page de l'API) ; au-delà, passer par la fiche du fournisseur.
 
+## D25. Équipe : invitations et rôles (2026-10-14)
+
+Réalise `invitation` (Plateforme) et `stock_role` + `stock_role_warehouse` (Stock) de D10, selon D7 et D9 : un rôle global dans la Plateforme, un rôle par application.
+
+- **Rôle Plateforme** (gestion de l'équipe) : propriétaire, administrateur, membre. Le propriétaire et les administrateurs invitent, changent les rôles, désactivent ou réactivent un membre. Seul le propriétaire nomme ou retire un administrateur. Personne ne modifie ni ne désactive le propriétaire, ni ne se désactive soi-même.
+- **Rôle Stock** (le métier), avec les dépôts auxquels il donne accès :
+
+| | Gérant | Manager | Contrôleur | Magasinier |
+|---|---|---|---|---|
+| Dépôts | tous | les siens | les siens | les siens |
+| Voir stock et bons | oui | oui | oui | oui |
+| Réceptions, sorties | oui | oui | oui | oui |
+| Casse, ajustements, inventaires (lots B et C) | oui | oui | oui | non |
+| Seuils d'alerte | oui | oui | oui | non |
+| Articles, catégories, fournisseurs | oui | oui | non | non |
+| Créer, modifier, archiver un dépôt | oui | non | non | non |
+
+  Le propriétaire est gérant d'office. Un membre sans rôle Stock n'a pas accès à Stock. Le catalogue (articles, catégories, fournisseurs) se consulte par tous ; le stock, les bons et les dépôts se limitent aux dépôts du rôle. Un manager qui modifie un article ne touche qu'aux dépôts qui sont les siens.
+- **Invitation** : liée à une adresse e-mail, valable 7 jours, annulable, renvoyable (nouveau lien, l'ancien ne vaut plus). Un e-mail part avec le lien ; le lien peut aussi être copié (WhatsApp). Pour accepter, il faut être connecté avec cette adresse, confirmée ; une personne sans compte le crée depuis le lien. Seule l'empreinte (SHA-256) du jeton est conservée.
+- **Séparation des modules (D8)** : la Plateforme ne connaît pas les rôles Stock. L'application enregistre l'invitation (Plateforme), puis l'accès Stock prévu pour elle (Stock). À l'acceptation, la Plateforme publie un événement ; Stock transforme l'accès prévu en rôle du nouveau membre. Stock lit le rôle Plateforme par une interface (`TeamDirectory`), jamais par ses tables.
+- **E-mails** : envoyés par l'API derrière une interface (`InvitationMailer`), SMTP configurable (Mailpit en local), en français ou en anglais selon la langue de la personne qui invite.
+- **Précisions** : un magasinier peut créer le fournisseur d'une réception pendant sa saisie (nom et coordonnées), sans pouvoir le modifier ensuite ni toucher à son catalogue. Le propriétaire et les administrateurs voient tous les dépôts pour les attribuer, même sans rôle Stock. L'écran affiche en consultation seule ce que le rôle ne permet pas de modifier ; l'API refuse de toute façon.
+
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
 - [ ] Nom de la marque et nom du produit de stock (voir D7). Pistes : Kreskala, Kreskio, Tissero, NarvalWorks, FourmiLabs.

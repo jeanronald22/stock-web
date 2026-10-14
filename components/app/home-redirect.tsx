@@ -7,7 +7,9 @@ import { useEffect } from "react"
 
 import { useMe } from "@/lib/api/platform-queries"
 import { ApiError, ProblemCode } from "@/lib/api/problem"
+import { readPendingInvitation } from "@/lib/onboarding/pending-invitation"
 import { resolveHome } from "@/lib/onboarding/resolve-home"
+import { RecordRoutes } from "@/lib/routes"
 import { useActiveOrganization } from "@/lib/organization/active-organization"
 
 import { FullPageMessage } from "./full-page-message"
@@ -23,6 +25,12 @@ export function HomeRedirect() {
 
   useEffect(() => {
     if (!me.data) return
+    // Invitation ouverte avant la connexion : on la reprend, avant même de créer une entreprise.
+    const invitation = readPendingInvitation()
+    if (invitation) {
+      router.replace(RecordRoutes.invitation(invitation))
+      return
+    }
     const decision = resolveHome(me.data, activeOrganizationId)
     if (decision.activate) setActiveOrganizationId(decision.activate)
     router.replace(decision.route)

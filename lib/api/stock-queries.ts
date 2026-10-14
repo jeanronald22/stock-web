@@ -41,6 +41,8 @@ export const stockKeys = {
     [...stockKeys.all(organizationId), "item", id] as const,
   categories: (organizationId: string | null) =>
     [...stockKeys.all(organizationId), "categories"] as const,
+  myAccess: (organizationId: string | null) =>
+    [...stockKeys.all(organizationId), "my-access"] as const,
 }
 
 function useOrganizationId() {
@@ -238,4 +240,31 @@ export function useSaveCategory() {
 export function useDeleteCategory() {
   const { stock } = useApi()
   return useStockMutation((id: string) => stock.deleteCategory(id))
+}
+
+/** Rôle Stock de la personne connectée : l'application montre seulement ce qu'il permet. */
+export function useMyStockAccess() {
+  const { stock } = useApi()
+  const organizationId = useOrganizationId()
+  return useQuery({
+    queryKey: stockKeys.myAccess(organizationId),
+    queryFn: stock.myAccess,
+    enabled: !!organizationId,
+  })
+}
+
+/** Seuil d'alerte d'un dépôt, réglable aussi par un contrôleur. */
+export function useChangeThreshold() {
+  const { stock } = useApi()
+  return useStockMutation(
+    ({
+      itemId,
+      warehouseId,
+      minQuantity,
+    }: {
+      itemId: string
+      warehouseId: string
+      minQuantity: number | null
+    }) => stock.changeThreshold(itemId, warehouseId, minQuantity)
+  )
 }

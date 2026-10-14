@@ -11,6 +11,13 @@ export const StockPaths = {
   itemArchive: (id: string) => `/v1/items/${id}/archive`,
   itemRestore: (id: string) => `/v1/items/${id}/restore`,
   itemImage: (id: string) => `/v1/items/${id}/image`,
+  itemThreshold: (id: string, warehouseId: string) =>
+    `/v1/items/${id}/warehouses/${warehouseId}/threshold`,
+  myAccess: "/v1/stock/access/me",
+  access: "/v1/stock/access",
+  memberAccess: (subject: string) => `/v1/stock/access/members/${subject}`,
+  invitationAccess: (invitationId: string) =>
+    `/v1/stock/access/invitations/${invitationId}`,
   categories: "/v1/categories",
   category: (id: string) => `/v1/categories/${id}`,
 } as const
@@ -108,6 +115,61 @@ export type Category = {
 }
 
 export type CategoryInput = { name: string; parentId: string | null }
+
+/** Rôles Stock (stock-api, StockRole ; DECISIONS.md, D25) : seul le gérant a tous les dépôts. */
+export const stockRoles = [
+  "GENERAL_MANAGER",
+  "MANAGER",
+  "CONTROLLER",
+  "STOREKEEPER",
+] as const
+export type StockRole = (typeof stockRoles)[number]
+export const StockRole = {
+  generalManager: "GENERAL_MANAGER",
+  manager: "MANAGER",
+  controller: "CONTROLLER",
+  storekeeper: "STOREKEEPER",
+} as const satisfies Record<string, StockRole>
+
+export type StockPermission =
+  | "VIEW"
+  | "RECORD_MOVEMENTS"
+  | "CORRECT_STOCK"
+  | "SET_THRESHOLDS"
+  | "MANAGE_CATALOG"
+  | "MANAGE_WAREHOUSES"
+export const StockPermission = {
+  view: "VIEW",
+  recordMovements: "RECORD_MOVEMENTS",
+  correctStock: "CORRECT_STOCK",
+  setThresholds: "SET_THRESHOLDS",
+  manageCatalog: "MANAGE_CATALOG",
+  manageWarehouses: "MANAGE_WAREHOUSES",
+} as const satisfies Record<string, StockPermission>
+
+/** Accès Stock de la personne connectée ; role null : aucun accès à Stock. */
+export type MyStockAccess = {
+  role: StockRole | null
+  /** null : tous les dépôts. */
+  warehouseIds: string[] | null
+  permissions: StockPermission[]
+  owner: boolean
+}
+
+export type GranteeKind = "MEMBER" | "INVITATION"
+export const GranteeKind = {
+  member: "MEMBER",
+  invitation: "INVITATION",
+} as const satisfies Record<string, GranteeKind>
+
+export type StockGrant = {
+  kind: GranteeKind
+  granteeId: string
+  role: StockRole
+  warehouseIds: string[]
+}
+
+export type StockGrantInput = { role: StockRole; warehouseIds: string[] }
 
 export type Item = {
   id: string
@@ -281,6 +343,46 @@ export const stockApi = (send: ApiClient) => {
         ...scoped,
         method: "DELETE",
         path: StockPaths.itemImage(id),
+      }),
+
+    changeThreshold: (
+      id: string,
+      warehouseId: string,
+      minQuantity: number | null
+    ) =>
+      send<Item>({
+        ...scoped,
+        method: "PUT",
+        path: StockPaths.itemThreshold(id, warehouseId),
+        body: { minQuantity },
+      }),
+    myAccess: () =>
+      send<MyStockAccess>({
+        ...scoped,
+        method: "GET",
+        path: StockPaths.myAccess,
+      }),
+    grants: () =>
+      send<StockGrant[]>({ ...scoped, method: "GET", path: StockPaths.access }),
+    grantMember: (subject: string, input: StockGrantInput) =>
+      send<StockGrant>({
+        ...scoped,
+        method: "PUT",
+        path: StockPaths.memberAccess(subject),
+        body: input,
+      }),
+    revokeMember: (subject: string) =>
+      send<void>({
+        ...scoped,
+        method: "DELETE",
+        path: StockPaths.memberAccess(subject),
+      }),
+    grantInvitation: (invitationId: string, input: StockGrantInput) =>
+      send<StockGrant>({
+        ...scoped,
+        method: "PUT",
+        path: StockPaths.invitationAccess(invitationId),
+        body: input,
       }),
 
     categories: () =>

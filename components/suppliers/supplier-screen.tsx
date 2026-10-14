@@ -15,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 import { VoucherTypeBadge } from "@/components/vouchers/vouchers-screen"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
-import { CatalogStatus, type Item } from "@/lib/api/stock"
+import { CatalogStatus, type Item, StockPermission } from "@/lib/api/stock"
 import { useItemsPage } from "@/lib/api/stock-queries"
 import {
   useSaveSupplier,
@@ -27,6 +27,8 @@ import { useErrorMessage } from "@/lib/api/use-error-message"
 import { useVouchersPage } from "@/lib/api/voucher-queries"
 import { VoucherType } from "@/lib/api/vouchers"
 import { RecordRoutes, Routes } from "@/lib/routes"
+import { useStockAccess } from "@/components/workspace/stock-access"
+import { ReadOnlyNotice } from "@/components/workspace/read-only-notice"
 
 import { SupplierCatalog } from "./supplier-catalog"
 import { SupplierFields } from "./supplier-fields"
@@ -87,6 +89,7 @@ function SupplierDetails({
   const t = useTranslations()
   const errorMessage = useErrorMessage()
   const status = useSupplierStatus()
+  const canEdit = useStockAccess().can(StockPermission.manageCatalog)
   const archived = supplier.status === CatalogStatus.archived
   const { form, submit, pending } = useSupplierForm(supplier, onReload)
 
@@ -124,18 +127,20 @@ function SupplierDetails({
             {archived && (
               <Badge variant="secondary">{t("suppliers.restore.badge")}</Badge>
             )}
-            <ArchiveControl
-              archived={archived}
-              pending={status.isPending}
-              archiveLabels={{
-                action: t("suppliers.archive.action"),
-                title: t("suppliers.archive.title"),
-                description: t("suppliers.archive.description"),
-              }}
-              restoreLabel={t("suppliers.restore.action")}
-              onArchive={() => changeStatus(CatalogStatus.archived)}
-              onRestore={() => changeStatus(CatalogStatus.active)}
-            />
+            {canEdit && (
+              <ArchiveControl
+                archived={archived}
+                pending={status.isPending}
+                archiveLabels={{
+                  action: t("suppliers.archive.action"),
+                  title: t("suppliers.archive.title"),
+                  description: t("suppliers.archive.description"),
+                }}
+                restoreLabel={t("suppliers.restore.action")}
+                onArchive={() => changeStatus(CatalogStatus.archived)}
+                onRestore={() => changeStatus(CatalogStatus.active)}
+              />
+            )}
           </>
         }
       />
@@ -143,32 +148,43 @@ function SupplierDetails({
         title={t("suppliers.catalog.title")}
         description={t("suppliers.catalog.description")}
       >
-        <CatalogSection supplier={supplier} />
+        <CatalogSection supplier={supplier} readOnly={!canEdit} />
       </FormSection>
       <FormSection title={t("suppliers.receipts.title")}>
         <LatestReceipts supplierId={supplier.id} />
       </FormSection>
       <form onSubmit={(event) => void onSubmit(event)} noValidate>
-        {/* Première section de son formulaire, mais pas de la page : on garde le filet de séparation. */}
-        <FormSection
-          title={t("suppliers.form.contact")}
-          className="first:border-t first:pt-8"
-        >
-          <SupplierFields form={form} />
-        </FormSection>
-        <FormActions>
-          <Button type="submit" size="lg" disabled={pending}>
-            {pending && <Spinner />}
-            {t("common.save")}
-          </Button>
-        </FormActions>
+        {!canEdit && <ReadOnlyNotice />}
+        <fieldset disabled={!canEdit} className="contents">
+          {/* Première section de son formulaire, mais pas de la page : on garde le filet de séparation. */}
+          <FormSection
+            title={t("suppliers.form.contact")}
+            className="first:border-t first:pt-8"
+          >
+            <SupplierFields form={form} />
+          </FormSection>
+        </fieldset>
+        {canEdit && (
+          <FormActions>
+            <Button type="submit" size="lg" disabled={pending}>
+              {pending && <Spinner />}
+              {t("common.save")}
+            </Button>
+          </FormActions>
+        )}
       </form>
     </PageBody>
   )
 }
 
 /** Catalogue sur la fiche : chaque ajout ou retrait est enregistré aussitôt. */
-function CatalogSection({ supplier }: { supplier: Supplier }) {
+function CatalogSection({
+  supplier,
+  readOnly,
+}: {
+  supplier: Supplier
+  readOnly: boolean
+}) {
   const t = useTranslations()
   const errorMessage = useErrorMessage()
   const save = useSaveSupplier()
@@ -197,6 +213,7 @@ function CatalogSection({ supplier }: { supplier: Supplier }) {
 
   return (
     <SupplierCatalog
+      readOnly={readOnly}
       items={items.data?.items ?? []}
       busy={save.isPending}
       onAdd={(item: Item) =>

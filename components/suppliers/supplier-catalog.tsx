@@ -17,19 +17,24 @@ export function SupplierCatalog({
   onAdd,
   onRemove,
   busy,
+  readOnly,
 }: {
   items: Item[]
   onAdd: (item: Item) => void
   onRemove: (item: Item) => void
   busy?: boolean
+  /** Consultation seule : ni ajout ni retrait (rôle sans gestion du catalogue). */
+  readOnly?: boolean
 }) {
   const t = useTranslations("suppliers.catalog")
   return (
     <div className="space-y-4">
-      <ItemPicker
-        excludedIds={new Set(items.map((item) => item.id))}
-        onPick={onAdd}
-      />
+      {!readOnly && (
+        <ItemPicker
+          excludedIds={new Set(items.map((item) => item.id))}
+          onPick={onAdd}
+        />
+      )}
       {items.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t("empty")}</p>
       ) : (
@@ -45,16 +50,18 @@ export function SupplierCatalog({
                   </span>
                 )}
               </span>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                disabled={busy}
-                aria-label={`${t("remove")} · ${item.name}`}
-                onClick={() => onRemove(item)}
-              >
-                <XIcon />
-              </Button>
+              {!readOnly && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  disabled={busy}
+                  aria-label={`${t("remove")} · ${item.name}`}
+                  onClick={() => onRemove(item)}
+                >
+                  <XIcon />
+                </Button>
+              )}
             </li>
           ))}
         </ul>

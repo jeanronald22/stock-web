@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
-import { CatalogStatus, type Warehouse } from "@/lib/api/stock"
+import { CatalogStatus, type Warehouse, StockPermission } from "@/lib/api/stock"
 import {
   useItemsPage,
   useWarehouse,
@@ -22,6 +22,7 @@ import {
 } from "@/lib/api/stock-queries"
 import { useErrorMessage } from "@/lib/api/use-error-message"
 import { ListQueryParams, RecordRoutes, Routes } from "@/lib/routes"
+import { useStockAccess } from "@/components/workspace/stock-access"
 
 import { WarehouseForm } from "./warehouse-form"
 
@@ -78,6 +79,7 @@ function WarehouseDetails({
   const t = useTranslations("warehouses")
   const errorMessage = useErrorMessage()
   const status = useWarehouseStatus()
+  const canEdit = useStockAccess().can(StockPermission.manageWarehouses)
   const archived = warehouse.status === CatalogStatus.archived
 
   const changeStatus = (target: CatalogStatus) =>
@@ -109,23 +111,29 @@ function WarehouseDetails({
             {archived && (
               <Badge variant="secondary">{t("restore.badge")}</Badge>
             )}
-            <ArchiveControl
-              archived={archived}
-              pending={status.isPending}
-              archiveLabels={{
-                action: t("archive.action"),
-                title: t("archive.title"),
-                description: t("archive.description"),
-              }}
-              restoreLabel={t("restore.action")}
-              onArchive={() => changeStatus(CatalogStatus.archived)}
-              onRestore={() => changeStatus(CatalogStatus.active)}
-            />
+            {canEdit && (
+              <ArchiveControl
+                archived={archived}
+                pending={status.isPending}
+                archiveLabels={{
+                  action: t("archive.action"),
+                  title: t("archive.title"),
+                  description: t("archive.description"),
+                }}
+                restoreLabel={t("restore.action")}
+                onArchive={() => changeStatus(CatalogStatus.archived)}
+                onRestore={() => changeStatus(CatalogStatus.active)}
+              />
+            )}
           </>
         }
       />
       <WarehouseItems warehouse={warehouse} />
-      <WarehouseForm warehouse={warehouse} onConflict={onReload} />
+      <WarehouseForm
+        warehouse={warehouse}
+        onConflict={onReload}
+        readOnly={!canEdit}
+      />
     </PageBody>
   )
 }

@@ -46,11 +46,13 @@ import {
 } from "@/components/ui/table"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import { useVouchersPage } from "@/lib/api/voucher-queries"
+import { StockPermission } from "@/lib/api/stock"
 import { VoucherType, voucherTypes } from "@/lib/api/vouchers"
 import { useListParams } from "@/lib/list/use-list-params"
 import { RecordRoutes, Routes } from "@/lib/routes"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
 import { cn } from "@/lib/utils"
+import { useStockAccess } from "@/components/workspace/stock-access"
 
 import { PeriodFilter } from "./period-filter"
 import { useVoucherPdf } from "./use-voucher-pdf"
@@ -76,6 +78,7 @@ export function VoucherTypeBadge({ type }: { type: VoucherType }) {
 /** Actions de création, communes à la liste et à l'écran vide. */
 export function NewVoucherButtons({ className }: { className?: string }) {
   const t = useTranslations("vouchers")
+  if (!useStockAccess().can(StockPermission.recordMovements)) return null
   return (
     <div
       className={cn("flex flex-wrap gap-2", className)}

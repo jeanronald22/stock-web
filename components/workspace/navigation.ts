@@ -4,6 +4,7 @@ import {
   LayersIcon,
   ReceiptTextIcon,
   TruckIcon,
+  UsersIcon,
   WarehouseIcon,
   type LucideIcon,
 } from "lucide-react"
@@ -14,7 +15,16 @@ export type NavigationEntry = {
   href: string
   icon: LucideIcon
   /** Clé de message sous « nav ». */
-  label: "home" | "stock" | "vouchers" | "items" | "suppliers" | "warehouses"
+  label:
+    | "home"
+    | "stock"
+    | "vouchers"
+    | "items"
+    | "suppliers"
+    | "warehouses"
+    | "team"
+  /** Réservé au propriétaire et aux administrateurs (DECISIONS.md, D25). */
+  teamManagersOnly?: boolean
 }
 
 /** Menu de la barre latérale : n'y figurent que les écrans disponibles. */
@@ -25,6 +35,7 @@ export const workspaceNavigation: readonly NavigationEntry[] = [
   { href: Routes.items, icon: BoxesIcon, label: "items" },
   { href: Routes.suppliers, icon: TruckIcon, label: "suppliers" },
   { href: Routes.warehouses, icon: WarehouseIcon, label: "warehouses" },
+  { href: Routes.team, icon: UsersIcon, label: "team", teamManagersOnly: true },
 ]
 
 /** L'entrée reste active sur ses sous-écrans : /articles/nouveau garde « Articles » en surbrillance. */
