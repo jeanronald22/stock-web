@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 
+import { PageTransition } from "@/components/motion/page-transition"
+
 import { Dashboard } from "@/components/dashboard/dashboard"
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -9,5 +11,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function DashboardPage() {
-  return <Dashboard />
+  return (
+    <PageTransition>
+      <Dashboard />
+    </PageTransition>
+  )
 }
