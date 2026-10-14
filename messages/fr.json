@@ -3,7 +3,11 @@
     "signIn": "Connexion",
     "welcome": "Bienvenue",
     "organizations": "Vos entreprises",
-    "dashboard": "Accueil"
+    "dashboard": "Accueil",
+    "items": "Articles",
+    "newItem": "Nouvel article",
+    "warehouses": "Dépôts",
+    "newWarehouse": "Nouveau dépôt"
   },
   "common": {
     "retry": "Réessayer",
@@ -11,7 +15,11 @@
     "continue": "Continuer",
     "signOut": "Se déconnecter",
     "loading": "Chargement…",
-    "soon": "Bientôt"
+    "soon": "Bientôt",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "optional": "facultatif",
+    "reload": "Recharger"
   },
   "languages": {
     "label": "Langue",
@@ -41,7 +49,11 @@
   },
   "validation": {
     "required": "À remplir pour continuer.",
-    "tooLong": "{max} caractères au maximum."
+    "tooLong": "{max} caractères au maximum.",
+    "positive": "Indiquez une quantité supérieure à zéro.",
+    "wholeNumber": "Un nombre entier de pièces.",
+    "invalidNumber": "Indiquez un nombre, par exemple 12 ou 1,44.",
+    "duplicateName": "Deux conditionnements portent ce nom."
   },
   "welcome": {
     "exit": "Quitter",
@@ -101,19 +113,23 @@
   "dashboard": {
     "greeting": "Bonjour {name}",
     "readyTitle": "Tout est en place",
-    "readyDescription": "Les premiers outils de stock arrivent très bientôt. Voici ce que vous pourrez faire, dans l’ordre.",
+    "readyDescription": "Deux étapes pour démarrer : vos lieux de stock, puis vos articles.",
     "steps": {
       "products": {
         "title": "Créer vos articles",
-        "description": "Carreaux, ciment, plomberie… chacun compté dans son unité : carton, pièce ou m²."
+        "description": "Carreaux, ciment, plomberie… chacun compté dans son unité : carton, pièce ou m².",
+        "action": "Créer un article",
+        "done": "{count, plural, one {# article} other {# articles}}"
       },
       "warehouses": {
         "title": "Déclarer vos dépôts",
-        "description": "Boutique, dépôt, chantier : chaque lieu a son propre stock."
+        "description": "Boutique, dépôt, chantier : chaque lieu a son propre stock.",
+        "action": "Déclarer un dépôt",
+        "done": "{count, plural, one {# dépôt} other {# dépôts}}"
       },
       "team": {
         "title": "Inviter votre équipe",
-        "description": "Vos magasiniers reçoivent leur invitation sur WhatsApp."
+        "description": "Vos magasiniers recevront leur invitation par e-mail."
       }
     }
   },
@@ -121,5 +137,230 @@
     "open": "Ouvrir le menu du compte",
     "switchOrganization": "Changer d’entreprise",
     "currentOrganization": "Entreprise active"
+  },
+  "nav": {
+    "home": "Accueil",
+    "items": "Articles",
+    "warehouses": "Dépôts"
+  },
+  "workspace": {
+    "toggleSidebar": "Afficher ou masquer le menu",
+    "guide": "Guide"
+  },
+  "tours": {
+    "progress": "{current} sur {total}",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "done": "Compris",
+    "workspace": {
+      "navigation": {
+        "title": "Tout est ici",
+        "description": "Vos dépôts et vos articles se trouvent dans ce menu."
+      },
+      "nextSteps": {
+        "title": "Par où commencer",
+        "description": "Déclarez d’abord vos dépôts, puis créez vos articles."
+      },
+      "help": {
+        "title": "Besoin d’un rappel ?",
+        "description": "Ce bouton relance le guide de l’écran où vous êtes."
+      }
+    },
+    "warehouses": {
+      "create": {
+        "title": "Vos lieux de stock",
+        "description": "Boutique, dépôt ou chantier : chaque lieu a son propre stock."
+      }
+    },
+    "warehouseForm": {
+      "kind": {
+        "title": "Le type de lieu",
+        "description": "Il sert seulement à vous repérer. Vous pourrez le changer."
+      }
+    },
+    "items": {
+      "create": {
+        "title": "Votre catalogue",
+        "description": "Un article, c’est ce que vous stockez : carreau, ciment, robinet…"
+      },
+      "search": {
+        "title": "Retrouvez vite",
+        "description": "Tapez un morceau du nom ou de la référence."
+      },
+      "filter": {
+        "title": "Par dépôt",
+        "description": "N’affichez que les articles proposés dans un dépôt."
+      }
+    },
+    "itemForm": {
+      "baseUnit": {
+        "title": "L’unité de comptage",
+        "description": "Tout le stock de l’article est compté dans cette unité. Prenez la plus petite que vous vendez."
+      },
+      "packagings": {
+        "title": "Les conditionnements",
+        "description": "Carton, sac, palette : indiquez combien d’unités chacun contient."
+      },
+      "warehouses": {
+        "title": "Les dépôts",
+        "description": "Cochez seulement ceux où l’article est proposé. Il peut être dans un dépôt et pas dans un autre."
+      }
+    }
+  },
+  "units": {
+    "PIECE": {
+      "label": "Pièce",
+      "hint": "Robinets, sacs de ciment, pots de peinture…",
+      "quantity": "{count, plural, one {# pièce} other {# pièces}}"
+    },
+    "KILOGRAM": {
+      "label": "Kilogramme",
+      "hint": "Clous, pointes, fer vendus au poids",
+      "quantity": "{count, number} kg"
+    },
+    "LITRE": {
+      "label": "Litre",
+      "hint": "Peinture, huile, solvant au détail",
+      "quantity": "{count, number} L"
+    },
+    "METRE": {
+      "label": "Mètre",
+      "hint": "Câble, tuyau, fer à béton",
+      "quantity": "{count, number} m"
+    },
+    "SQUARE_METRE": {
+      "label": "Mètre carré",
+      "hint": "Carreaux, tôles, contreplaqué",
+      "quantity": "{count, number} m²"
+    },
+    "CUBIC_METRE": {
+      "label": "Mètre cube",
+      "hint": "Sable, gravier",
+      "quantity": "{count, number} m³"
+    }
+  },
+  "warehouses": {
+    "title": "Dépôts",
+    "description": "Les lieux où vous gardez du stock.",
+    "new": "Nouveau dépôt",
+    "kinds": {
+      "SHOP": {
+        "label": "Boutique",
+        "hint": "Là où vous vendez"
+      },
+      "WAREHOUSE": {
+        "label": "Dépôt",
+        "hint": "Là où vous stockez"
+      },
+      "SITE": {
+        "label": "Chantier",
+        "hint": "Du stock sur place, pour un temps"
+      }
+    },
+    "itemCount": "{count, plural, =0 {Aucun article} one {# article} other {# articles}}",
+    "empty": {
+      "title": "Déclarez votre premier dépôt",
+      "description": "Boutique, dépôt ou chantier : chaque lieu aura son propre stock."
+    },
+    "showArchived": "Voir les dépôts archivés",
+    "showActive": "Voir les dépôts actifs",
+    "archivedEmpty": "Aucun dépôt archivé.",
+    "form": {
+      "newTitle": "Nouveau dépôt",
+      "editTitle": "Modifier le dépôt",
+      "name": "Nom",
+      "namePlaceholder": "Dépôt de Bonabéri",
+      "kind": "Type de lieu",
+      "city": "Ville",
+      "cityPlaceholder": "Douala",
+      "address": "Adresse ou repère",
+      "addressPlaceholder": "Face à la station, Bonabéri",
+      "create": "Créer le dépôt",
+      "details": "Le lieu"
+    },
+    "created": "Dépôt créé.",
+    "saved": "Dépôt enregistré.",
+    "items": {
+      "title": "Articles proposés ici",
+      "seeAll": "Voir les articles",
+      "none": "Aucun article n’est encore proposé dans ce dépôt."
+    },
+    "archive": {
+      "action": "Archiver",
+      "title": "Archiver ce dépôt ?",
+      "description": "Il disparaît des listes et ne reçoit plus de nouveaux articles. Ceux déjà proposés y restent, et vous pourrez le restaurer.",
+      "done": "Dépôt archivé."
+    },
+    "restore": {
+      "action": "Restaurer",
+      "done": "Dépôt restauré.",
+      "badge": "Archivé"
+    },
+    "notFound": "Ce dépôt n’existe pas ou a été retiré."
+  },
+  "items": {
+    "title": "Articles",
+    "description": "Tout ce que vous stockez, avec ses unités et ses dépôts.",
+    "new": "Nouvel article",
+    "searchPlaceholder": "Rechercher un nom ou une référence",
+    "allWarehouses": "Tous les dépôts",
+    "total": "{count, plural, one {# article} other {# articles}}",
+    "loadMore": "Voir plus",
+    "empty": {
+      "title": "Créez votre premier article",
+      "description": "Carreau, ciment, robinet… avec son unité et ses conditionnements."
+    },
+    "noResult": {
+      "title": "Aucun article trouvé",
+      "description": "Essayez un autre mot ou un autre dépôt.",
+      "reset": "Tout afficher"
+    },
+    "warehouseCount": "{count, plural, =0 {Aucun dépôt} one {# dépôt} other {# dépôts}}",
+    "showArchived": "Voir les articles archivés",
+    "showActive": "Voir les articles actifs",
+    "form": {
+      "newTitle": "Nouvel article",
+      "editTitle": "Modifier l’article",
+      "identity": "L’article",
+      "counting": "Comptage",
+      "packagings": "Conditionnements",
+      "warehouses": "Dépôts",
+      "name": "Nom",
+      "namePlaceholder": "Carreau 60x60 beige",
+      "reference": "Référence",
+      "referencePlaceholder": "CAR-6060",
+      "description": "Description",
+      "descriptionPlaceholder": "Marque, couleur, usage…",
+      "baseUnit": "Unité de comptage",
+      "batchTracking": "Suivre les lots",
+      "batchTrackingHint": "Lot, nuance ou calibre noté à chaque réception : utile pour les carreaux et la peinture.",
+      "packagingsHint": "Facultatif. Par exemple : un carton contient 12 pièces.",
+      "packagingName": "Nom",
+      "packagingNamePlaceholder": "Carton",
+      "packagingQuantity": "Contient",
+      "addPackaging": "Ajouter un conditionnement",
+      "removePackaging": "Retirer ce conditionnement",
+      "packagingPreview": "1 {name} = {quantity}",
+      "warehousesHint": "Cochez les dépôts où cet article est proposé.",
+      "selectAll": "Tout cocher",
+      "selectNone": "Tout décocher",
+      "noWarehouse": "Aucun dépôt pour l’instant : l’article sera ajouté au catalogue, sans dépôt.",
+      "createWarehouse": "Créer un dépôt",
+      "create": "Créer l’article"
+    },
+    "created": "Article créé.",
+    "saved": "Article enregistré.",
+    "archive": {
+      "action": "Archiver",
+      "title": "Archiver cet article ?",
+      "description": "Il disparaît des listes et des bons à venir. Vous pourrez le restaurer.",
+      "done": "Article archivé."
+    },
+    "restore": {
+      "action": "Restaurer",
+      "done": "Article restauré.",
+      "badge": "Archivé"
+    },
+    "notFound": "Cet article n’existe pas ou a été retiré."
   }
 }

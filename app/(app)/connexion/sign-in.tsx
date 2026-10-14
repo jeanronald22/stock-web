@@ -15,7 +15,11 @@ import { HomeRedirect } from "@/components/app/home-redirect"
 export function SignIn() {
   const auth = useAuth()
   const t = useTranslations("signIn")
-  const shouldRedirect = !auth.isLoading && !auth.isAuthenticated && !auth.activeNavigator && !auth.error
+  const shouldRedirect =
+    !auth.isLoading &&
+    !auth.isAuthenticated &&
+    !auth.activeNavigator &&
+    !auth.error
 
   useEffect(() => {
     if (shouldRedirect) void auth.signinRedirect()

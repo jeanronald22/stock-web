@@ -1,0 +1,136 @@
+"use client"
+
+import Link from "next/link"
+import { useTranslations } from "next-intl"
+import { toast } from "sonner"
+
+import { ArchiveControl } from "@/components/catalog/archive-control"
+import { EmptyState } from "@/components/catalog/empty-state"
+import { SearchScene } from "@/components/illustrations/search-scene"
+import { Badge } from "@/components/ui/badge"
+import { buttonVariants } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
+import { PageBody, PageHeader } from "@/components/workspace/page-header"
+import { CatalogStatus, type Item, type Warehouse } from "@/lib/api/stock"
+import { useItem, useItemStatus, useWarehouses } from "@/lib/api/stock-queries"
+import { useErrorMessage } from "@/lib/api/use-error-message"
+import { Routes } from "@/lib/routes"
+
+import { ItemForm } from "./item-form"
+
+function FormSkeleton() {
+  return (
+    <PageBody className="max-w-4xl">
+      <Skeleton className="h-9 w-64" />
+      <Skeleton className="mt-8 h-48 rounded-2xl" />
+      <Skeleton className="mt-6 h-48 rounded-2xl" />
+    </PageBody>
+  )
+}
+
+export function NewItemScreen() {
+  const t = useTranslations("items")
+  const warehouses = useWarehouses()
+  if (warehouses.isPending) return <FormSkeleton />
+  return (
+    <PageBody className="max-w-4xl">
+      <PageHeader title={t("form.newTitle")} className="mb-8" />
+      <ItemForm warehouses={warehouses.data ?? []} />
+    </PageBody>
+  )
+}
+
+export function ItemScreen({ id }: { id: string }) {
+  const t = useTranslations("items")
+  const item = useItem(id)
+  const warehouses = useWarehouses()
+
+  if (item.isPending || warehouses.isPending) return <FormSkeleton />
+  if (!item.data) {
+    return (
+      <PageBody>
+        <EmptyState
+          illustration={<SearchScene />}
+          title={t("notFound")}
+          description=""
+          action={
+            <Link
+              href={Routes.items}
+              className={buttonVariants({ variant: "outline" })}
+            >
+              {t("title")}
+            </Link>
+          }
+        />
+      </PageBody>
+    )
+  }
+  // La clé suit la version : après « Recharger », le formulaire repart de la fiche à jour.
+  return (
+    <ItemDetails
+      key={item.data.version}
+      item={item.data}
+      warehouses={warehouses.data ?? []}
+      onReload={() => void item.refetch()}
+    />
+  )
+}
+
+function ItemDetails({
+  item,
+  warehouses,
+  onReload,
+}: {
+  item: Item
+  warehouses: Warehouse[]
+  onReload: () => void
+}) {
+  const t = useTranslations()
+  const errorMessage = useErrorMessage()
+  const status = useItemStatus()
+  const archived = item.status === CatalogStatus.archived
+
+  const changeStatus = (target: CatalogStatus) =>
+    status.mutate(
+      { id: item.id, status: target },
+      {
+        onSuccess: () =>
+          toast.success(
+            target === CatalogStatus.archived
+              ? t("items.archive.done")
+              : t("items.restore.done")
+          ),
+        onError: (error) => toast.error(errorMessage(error)),
+      }
+    )
+
+  return (
+    <PageBody className="max-w-4xl">
+      <PageHeader
+        title={item.name}
+        description={t(`units.${item.baseUnit}.label`)}
+        className="mb-8"
+        actions={
+          <>
+            {archived && (
+              <Badge variant="secondary">{t("items.restore.badge")}</Badge>
+            )}
+            <ArchiveControl
+              archived={archived}
+              pending={status.isPending}
+              archiveLabels={{
+                action: t("items.archive.action"),
+                title: t("items.archive.title"),
+                description: t("items.archive.description"),
+              }}
+              restoreLabel={t("items.restore.action")}
+              onArchive={() => changeStatus(CatalogStatus.archived)}
+              onRestore={() => changeStatus(CatalogStatus.active)}
+            />
+          </>
+        }
+      />
+      <ItemForm item={item} warehouses={warehouses} onConflict={onReload} />
+    </PageBody>
+  )
+}

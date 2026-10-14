@@ -9,8 +9,12 @@ import { useActiveOrganization } from "@/lib/organization/active-organization"
 
 import { createApiClient, type ApiClient } from "./http"
 import { platformApi } from "./platform"
+import { stockApi } from "./stock"
 
-type Api = { platform: ReturnType<typeof platformApi> }
+type Api = {
+  platform: ReturnType<typeof platformApi>
+  stock: ReturnType<typeof stockApi>
+}
 
 const ApiContext = createContext<Api | null>(null)
 
@@ -28,7 +32,7 @@ export function ApiProvider({ children }: { children: React.ReactNode }) {
       getLocale: () => locale,
       getOrganizationId: () => activeOrganizationId,
     })
-    return { platform: platformApi(send) }
+    return { platform: platformApi(send), stock: stockApi(send) }
   }, [apiUrl, token, locale, activeOrganizationId])
 
   return <ApiContext value={api}>{children}</ApiContext>

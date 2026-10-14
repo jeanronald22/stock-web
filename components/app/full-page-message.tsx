@@ -29,14 +29,22 @@ export function FullPageMessage({
           <span className="flex size-14 items-center justify-center rounded-2xl bg-muted">
             <Icon className="size-6 text-muted-foreground" aria-hidden />
           </span>
-          <h1 className="mt-6 text-2xl font-semibold tracking-tight text-balance">{title}</h1>
-          <p className="mt-2 text-muted-foreground text-pretty">{description}</p>
+          <h1 className="mt-6 text-2xl font-semibold tracking-tight text-balance">
+            {title}
+          </h1>
+          <p className="mt-2 text-pretty text-muted-foreground">
+            {description}
+          </p>
           {action && (
             <Button size="xl" className="mt-8 w-full" onClick={action.onClick}>
               {action.label}
             </Button>
           )}
-          {footnote && <p className="mt-4 font-mono text-xs text-muted-foreground">{footnote}</p>}
+          {footnote && (
+            <p className="mt-4 font-mono text-xs text-muted-foreground">
+              {footnote}
+            </p>
+          )}
         </div>
       </main>
     </div>
