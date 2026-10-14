@@ -11,7 +11,11 @@ export const platformKeys = {
 
 export function useMe(options: { enabled?: boolean } = {}) {
   const { platform } = useApi()
-  return useQuery({ queryKey: platformKeys.me, queryFn: platform.me, enabled: options.enabled })
+  return useQuery({
+    queryKey: platformKeys.me,
+    queryFn: platform.me,
+    enabled: options.enabled,
+  })
 }
 
 export function useUpdateProfile() {
@@ -19,7 +23,8 @@ export function useUpdateProfile() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (input: ProfileInput) => platform.updateProfile(input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: platformKeys.me }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: platformKeys.me }),
   })
 }
 
@@ -28,6 +33,7 @@ export function useCreateOrganization() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (input: NewOrganization) => platform.createOrganization(input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: platformKeys.me }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: platformKeys.me }),
   })
 }

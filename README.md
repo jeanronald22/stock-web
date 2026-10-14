@@ -12,9 +12,8 @@ npm install
 npm run dev                  # http://localhost:3100
 ```
 
-Connexion : ouvrir http://localhost:3100/connexion et saisir un numéro. Le code est écrit dans les
-journaux de **Keycloak**, pas dans ceux de l'API : depuis `stock-api`,
-`docker compose logs -f keycloak | grep "Code de connexion"`.
+Connexion : ouvrir http://localhost:3100/connexion, puis « Créer un compte ». Les e-mails de
+confirmation et de mot de passe oublié arrivent dans la boîte factice Mailpit : http://localhost:8025.
 
 Ports dédiés au projet : application web 3100, API 8081, Keycloak 8180, PostgreSQL 5436.
 

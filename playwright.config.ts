@@ -8,6 +8,8 @@ export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
   retries: 0,
+  // Parcours complet : inscription, e-mail, mot de passe, deux écrans, accueil, reconnexion.
+  timeout: 90_000,
   reporter: [["list"]],
   // Le serveur de développement compile chaque écran à sa première visite.
   expect: { timeout: 15_000 },

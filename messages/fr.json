@@ -19,28 +19,28 @@
     "en": "English"
   },
   "configError": {
-    "title": "Impossible de démarrer",
-    "description": "L’application n’arrive pas à joindre le serveur. Vérifiez votre connexion, puis réessayez."
+    "title": "Kreskala ne répond pas",
+    "description": "Impossible de joindre Kreskala pour le moment. Vérifiez votre connexion internet, puis réessayez."
   },
   "signIn": {
-    "title": "Connexion sécurisée",
-    "description": "Nous vous emmenons vers la page de connexion…",
-    "manual": "Continuer vers la connexion"
+    "title": "Un instant",
+    "description": "Nous ouvrons la page de connexion sécurisée…",
+    "manual": "Ouvrir la page de connexion"
   },
   "callback": {
-    "label": "Connexion en cours…",
+    "label": "Ouverture de votre espace…",
     "failedTitle": "La connexion n’a pas abouti",
-    "failedDescription": "Le lien de connexion a expiré ou a déjà servi. Recommencez, cela ne prend qu’un instant.",
-    "restart": "Se connecter à nouveau"
+    "failedDescription": "Le lien a expiré ou a déjà servi. Reconnectez-vous : cela ne prend qu’un instant.",
+    "restart": "Me reconnecter"
   },
   "errors": {
-    "network": "Pas de connexion internet. Rien n’est perdu : réessayez dès que le réseau revient.",
-    "generic": "Une erreur est survenue. Réessayez.",
-    "trace": "Code de suivi : {traceId}",
-    "loadTitle": "Impossible de charger votre espace"
+    "network": "Pas de réseau. Rien n’est perdu : réessayez dès que la connexion revient.",
+    "generic": "L’action n’a pas abouti. Réessayez dans un instant.",
+    "trace": "Code à donner au support : {traceId}",
+    "loadTitle": "Votre espace ne s’est pas chargé"
   },
   "validation": {
-    "required": "Ce champ est obligatoire.",
+    "required": "À remplir pour continuer.",
     "tooLong": "{max} caractères au maximum."
   },
   "welcome": {
@@ -49,7 +49,7 @@
     "profile": {
       "eyebrow": "Bienvenue",
       "title": "Comment vous appelez-vous ?",
-      "description": "Votre nom apparaît sur les bons que vous validez : toute l’équipe sait qui a fait quoi.",
+      "description": "Votre nom figure sur chaque bon que vous validez : toute l’équipe sait qui a reçu et qui a sorti.",
       "firstName": "Prénom",
       "firstNamePlaceholder": "Awa",
       "lastName": "Nom",
@@ -57,16 +57,16 @@
     },
     "business": {
       "eyebrow": "Votre entreprise",
-      "title": "Parlez-nous de votre entreprise",
-      "description": "Ces informations préparent votre espace. Vous pourrez les modifier plus tard.",
+      "title": "Quelle entreprise gérez-vous ?",
+      "description": "Ces informations préparent votre espace. Vous pourrez les modifier à tout moment.",
       "name": "Nom de l’entreprise",
       "namePlaceholder": "Quincaillerie Ngono",
       "city": "Ville",
       "cityPlaceholder": "Douala",
-      "sector": "Secteur d’activité",
-      "sectorPlaceholder": "Choisissez un secteur",
+      "sector": "Activité",
+      "sectorPlaceholder": "Que vendez-vous ?",
       "country": "Pays",
-      "countryHint": "Kreskala est disponible au Cameroun pour commencer."
+      "countryHint": "Kreskala démarre au Cameroun. D’autres pays suivront."
     },
     "sectors": {
       "HARDWARE": "Quincaillerie",
@@ -84,13 +84,13 @@
     "submit": "Créer mon espace",
     "done": {
       "title": "Votre espace est prêt",
-      "description": "{name} est créée. Vous pouvez commencer à suivre votre stock.",
-      "cta": "Accéder à mon espace"
+      "description": "{name} a désormais son espace Kreskala. Prochaine étape : vos articles et vos dépôts.",
+      "cta": "Ouvrir mon espace"
     }
   },
   "organizations": {
-    "title": "Choisissez une entreprise",
-    "description": "Vous êtes membre de plusieurs entreprises. Vous pourrez en changer à tout moment.",
+    "title": "Quelle entreprise ouvrez-vous ?",
+    "description": "Vous travaillez pour plusieurs entreprises. Vous passerez de l’une à l’autre à tout moment, depuis le menu.",
     "create": "Créer une autre entreprise",
     "roles": {
       "OWNER": "Propriétaire",
@@ -100,20 +100,20 @@
   },
   "dashboard": {
     "greeting": "Bonjour {name}",
-    "readyTitle": "Votre espace est prêt",
-    "readyDescription": "Les premiers outils de gestion du stock arrivent très bientôt. Voici ce qui vous attend.",
+    "readyTitle": "Tout est en place",
+    "readyDescription": "Les premiers outils de stock arrivent très bientôt. Voici ce que vous pourrez faire, dans l’ordre.",
     "steps": {
       "products": {
-        "title": "Ajouter vos articles",
-        "description": "Carreaux, plomberie, sanitaire… avec leurs cartons, pièces et m²."
+        "title": "Créer vos articles",
+        "description": "Carreaux, ciment, plomberie… chacun compté dans son unité : carton, pièce ou m²."
       },
       "warehouses": {
-        "title": "Créer vos dépôts",
-        "description": "Magasin, dépôt, entrepôt : chaque lieu a son propre stock."
+        "title": "Déclarer vos dépôts",
+        "description": "Boutique, dépôt, chantier : chaque lieu a son propre stock."
       },
       "team": {
         "title": "Inviter votre équipe",
-        "description": "Vos magasiniers reçoivent une invitation par WhatsApp."
+        "description": "Vos magasiniers reçoivent leur invitation sur WhatsApp."
       }
     }
   },

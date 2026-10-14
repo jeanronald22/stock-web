@@ -111,7 +111,7 @@
     --info-muted-foreground: oklch(0.371 0 0);
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
+    --ring: oklch(0.508 0.118 165.612);
     --chart-1: oklch(0.845 0.143 164.978);
     --chart-2: oklch(0.696 0.17 162.48);
     --chart-3: oklch(0.596 0.145 163.225);
@@ -160,7 +160,7 @@
     --info-muted-foreground: oklch(0.87 0 0);
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
+    --ring: oklch(0.696 0.17 162.48);
     --chart-1: oklch(0.845 0.143 164.978);
     --chart-2: oklch(0.696 0.17 162.48);
     --chart-3: oklch(0.596 0.145 163.225);
@@ -191,6 +191,68 @@
     }
 }
 
+/*
+ * Illustrations abstraites (components/illustrations) : blocs et cartons de la charte. Mêmes classes
+ * que le thème de connexion Keycloak ; la palette passe par des variables pour le fond clair, le
+ * mode sombre et le fond émeraude (.ill-on-brand).
+ */
+:root {
+    --ill-deep: oklch(0.378 0.077 168.94);
+    --ill-main: oklch(0.508 0.118 165.612);
+    --ill-mid: oklch(0.696 0.17 162.48);
+    --ill-light: oklch(0.845 0.143 164.978);
+    --ill-pale: oklch(0.905 0.093 164.15);
+    --ill-floor: oklch(0.922 0 0);
+    --ill-tape: oklch(1 0 0 / 0.55);
+}
+.dark, .ill-on-brand {
+    --ill-deep: oklch(0.262 0.051 172.552);
+    --ill-main: oklch(0.378 0.077 168.94);
+    --ill-pale: oklch(0.979 0.021 166.113);
+    --ill-floor: oklch(1 0 0 / 0.2);
+}
+.ill-deep { fill: var(--ill-deep); }
+.ill-main { fill: var(--ill-main); }
+.ill-mid { fill: var(--ill-mid); }
+.ill-light { fill: var(--ill-light); }
+.ill-pale { fill: var(--ill-pale); }
+.ill-floor { fill: var(--ill-floor); }
+.ill-tape { fill: var(--ill-tape); }
+.ill-stroke-main { stroke: var(--ill-main); }
+.ill-stroke-mid { stroke: var(--ill-mid); }
+.ill-stroke-light { stroke: var(--ill-light); }
+.ill-stroke-pale { stroke: var(--ill-pale); }
+
+/* Les blocs se posent avec le rebond du carton, l'un flotte, de petits carrés dérivent. */
+.ill-rise { transform-box: fill-box; transform-origin: 50% 100%; animation: ill-rise var(--duration-brand) var(--ease-carton) both; }
+.ill-delay-1 { animation-delay: 120ms; }
+.ill-delay-2 { animation-delay: 240ms; }
+.ill-delay-3 { animation-delay: 360ms; }
+.ill-float { animation: ill-float 4s ease-in-out 700ms infinite; }
+.ill-drift { transform-box: fill-box; transform-origin: center; animation: ill-drift 6s ease-in-out infinite; }
+@keyframes ill-rise { from { transform: translateY(-14px) scaleY(0.9); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes ill-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes ill-drift { 0%, 100% { transform: translate(0, 0) rotate(0); } 50% { transform: translate(4px, -6px) rotate(12deg); } }
+
+/*
+ * Transitions entre écrans (React <ViewTransition>, components/motion). Vers l'avant, le contenu
+ * part à gauche et le suivant arrive de droite ; l'inverse au retour. L'en-tête et la barre
+ * d'action restent immobiles : ce sont les repères de la personne.
+ */
+::view-transition { pointer-events: none; }
+::view-transition-old(.step-forward) { --slide-offset: -48px; animation: var(--duration-fast) ease-in both vt-fade reverse, var(--duration-slow) var(--ease-standard) both vt-slide reverse; }
+::view-transition-new(.step-forward) { --slide-offset: 48px; animation: var(--duration-base) ease-out var(--duration-fast) both vt-fade, var(--duration-slow) var(--ease-standard) both vt-slide; }
+::view-transition-old(.step-back) { --slide-offset: 48px; animation: var(--duration-fast) ease-in both vt-fade reverse, var(--duration-slow) var(--ease-standard) both vt-slide reverse; }
+::view-transition-new(.step-back) { --slide-offset: -48px; animation: var(--duration-base) ease-out var(--duration-fast) both vt-fade, var(--duration-slow) var(--ease-standard) both vt-slide; }
+::view-transition-old(.page-exit) { animation: var(--duration-fast) ease-in both vt-fade reverse; }
+::view-transition-new(.page-enter) { animation: var(--duration-base) ease-out var(--duration-fast) both vt-fade, var(--duration-slow) var(--ease-standard) both vt-rise; }
+::view-transition-group(app-header), ::view-transition-group(app-footer) { animation: none; z-index: 10; }
+::view-transition-old(app-header), ::view-transition-old(app-footer) { display: none; }
+::view-transition-new(app-header), ::view-transition-new(app-footer) { animation: none; }
+@keyframes vt-fade { from { opacity: 0; } }
+@keyframes vt-slide { from { translate: var(--slide-offset) 0; } }
+@keyframes vt-rise { from { translate: 0 12px; } }
+
 /* 1 ms plutôt que `animation: none` : une animation en `both` (ex. carton-drop) doit
    atteindre son état final, sinon l'élément resterait invisible. */
 @media (prefers-reduced-motion: reduce) {
@@ -199,5 +261,8 @@
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
     scroll-behavior: auto !important;
+  }
+  ::view-transition-old(*), ::view-transition-new(*), ::view-transition-group(*) {
+    animation: none !important;
   }
 }

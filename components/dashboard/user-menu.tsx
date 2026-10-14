@@ -40,7 +40,7 @@ export function UserMenu({ user }: { user: User }) {
       >
         <Avatar className="size-9">
           <AvatarFallback className="bg-foreground text-sm font-semibold text-background">
-            {initials(fullName || user.phone)}
+            {initials(fullName || user.email || user.phone || "")}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
@@ -48,7 +48,7 @@ export function UserMenu({ user }: { user: User }) {
         <DropdownMenuGroup>
           <DropdownMenuLabel className="flex flex-col">
             <span className="truncate font-semibold text-foreground">{fullName}</span>
-            <span className="font-mono text-xs font-normal">{user.phone}</span>
+            <span className="truncate text-xs font-normal">{user.email ?? user.phone}</span>
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

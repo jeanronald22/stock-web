@@ -1,6 +1,13 @@
 "use client"
 
-import { createContext, use, useCallback, useMemo, useSyncExternalStore } from "react"
+import {
+  createContext,
+  use,
+  useCallback,
+  useMemo,
+  useSyncExternalStore,
+} from "react"
+import { useAuth } from "react-oidc-context"
 
 import { StorageKeys } from "@/lib/storage-keys"
 
@@ -23,39 +30,66 @@ function subscribe(listener: () => void) {
   }
 }
 
-function read(): string | null {
+function storageKey(subject: string): string {
+  return StorageKeys.activeOrganizationPrefix + subject
+}
+
+function read(subject: string | undefined): string | null {
+  if (!subject) return null
   try {
-    return window.localStorage.getItem(StorageKeys.activeOrganization)
+    return window.localStorage.getItem(storageKey(subject))
   } catch {
     return null
   }
 }
 
 /**
- * Entreprise choisie sur cet appareil, retenue d'une ouverture à l'autre. Elle est envoyée à
- * l'API, qui vérifie à chaque requête que la personne en est toujours membre.
+ * Entreprise choisie sur cet appareil par la personne connectée, retenue d'une ouverture à l'autre.
+ * Elle est propre à chaque compte : celle d'un autre compte (téléphone partagé, changement de
+ * compte) n'est jamais envoyée. L'API vérifie à chaque requête que la personne en est membre.
  */
-export function ActiveOrganizationProvider({ children }: { children: React.ReactNode }) {
-  const activeOrganizationId = useSyncExternalStore(subscribe, read, () => null)
+export function ActiveOrganizationProvider({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const subject = useAuth().user?.profile.sub
+  const getSnapshot = useCallback(() => read(subject), [subject])
+  const activeOrganizationId = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    () => null
+  )
 
-  const setActiveOrganizationId = useCallback((id: string | null) => {
-    try {
-      if (id) window.localStorage.setItem(StorageKeys.activeOrganization, id)
-      else window.localStorage.removeItem(StorageKeys.activeOrganization)
-    } finally {
-      listeners.forEach((listener) => listener())
-    }
-  }, [])
+  const setActiveOrganizationId = useCallback(
+    (id: string | null) => {
+      if (!subject) return
+      try {
+        if (id) window.localStorage.setItem(storageKey(subject), id)
+        else window.localStorage.removeItem(storageKey(subject))
+      } finally {
+        listeners.forEach((listener) => listener())
+      }
+    },
+    [subject]
+  )
 
   const value = useMemo(
     () => ({ activeOrganizationId, setActiveOrganizationId }),
     [activeOrganizationId, setActiveOrganizationId]
   )
-  return <ActiveOrganizationContext value={value}>{children}</ActiveOrganizationContext>
+  return (
+    <ActiveOrganizationContext value={value}>
+      {children}
+    </ActiveOrganizationContext>
+  )
 }
 
 export function useActiveOrganization(): ActiveOrganization {
   const context = use(ActiveOrganizationContext)
-  if (!context) throw new Error("useActiveOrganization doit être utilisé sous ActiveOrganizationProvider")
+  if (!context)
+    throw new Error(
+      "useActiveOrganization doit être utilisé sous ActiveOrganizationProvider"
+    )
   return context
 }

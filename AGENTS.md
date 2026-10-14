@@ -30,6 +30,7 @@ Dépôts : `stock-api` (Kotlin, Spring Boot) et `stock-web` (Next.js, shadcn/ui)
 - **Hors ligne d'abord** : identifiants UUID créés côté client, synchronisation idempotente.
 - **L'IA propose, l'humain valide** : l'IA ne crée jamais de mouvement directement.
 - **Bilingue** : français et anglais dès le départ.
+- **Confidentialité** : une fonctionnalité qui traite de nouvelles données personnelles met à jour la politique de confidentialité dans le même changement (DECISIONS.md, D18).
 
 # Spécifique au front
 

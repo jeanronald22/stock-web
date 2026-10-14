@@ -1,20 +1,41 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { MapPinIcon } from "lucide-react"
+import { GlobeIcon, MapPinIcon, StoreIcon, TagIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { StorefrontScene } from "@/components/illustrations/storefront-scene"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { FieldLimits, type Organization } from "@/lib/api/platform"
 import { useCreateOrganization } from "@/lib/api/platform-queries"
 import { applyServerErrors } from "@/lib/forms/apply-server-errors"
-import { citySuggestions, defaultCountry, sectorCodes } from "@/lib/onboarding/catalog"
+import {
+  citySuggestions,
+  defaultCountry,
+  sectorCodes,
+} from "@/lib/onboarding/catalog"
 
 import { StepShell } from "./step-shell"
 import { useErrorMessage } from "@/lib/api/use-error-message"
@@ -43,7 +64,11 @@ export function BusinessStep({
   const [organizationId] = useState(() => crypto.randomUUID())
 
   const text = (max: number) =>
-    z.string().trim().min(1, t("validation.required")).max(max, t("validation.tooLong", { max }))
+    z
+      .string()
+      .trim()
+      .min(1, t("validation.required"))
+      .max(max, t("validation.tooLong", { max }))
   const form = useForm({
     resolver: zodResolver(
       z.object({
@@ -61,17 +86,22 @@ export function BusinessStep({
       {
         onSuccess: onCreated,
         onError: (error) => {
-          if (!applyServerErrors(error, FIELDS, form.setError)) toast.error(errorMessage(error))
+          if (!applyServerErrors(error, FIELDS, form.setError))
+            toast.error(errorMessage(error))
         },
       }
     )
   )
 
-  const sectorItems = sectorCodes.map((code) => ({ value: code, label: t(`welcome.sectors.${code}`) }))
+  const sectorItems = sectorCodes.map((code) => ({
+    value: code,
+    label: t(`welcome.sectors.${code}`),
+  }))
 
   return (
     <StepShell
       step={step}
+      illustration={<StorefrontScene />}
       totalSteps={totalSteps}
       eyebrow={t("welcome.business.eyebrow")}
       title={t("welcome.business.title")}
@@ -86,28 +116,40 @@ export function BusinessStep({
         <FieldGroup>
           <Field data-invalid={!!form.formState.errors.name}>
             <FieldLabel htmlFor="name">{t("welcome.business.name")}</FieldLabel>
-            <Input
-              id="name"
-              autoComplete="organization"
-              autoFocus
-              placeholder={t("welcome.business.namePlaceholder")}
-              aria-invalid={!!form.formState.errors.name}
-              {...form.register("name")}
-            />
+            <InputGroup>
+              <InputGroupInput
+                id="name"
+                autoComplete="organization"
+                autoFocus
+                placeholder={t("welcome.business.namePlaceholder")}
+                aria-invalid={!!form.formState.errors.name}
+                {...form.register("name")}
+              />
+              <InputGroupAddon>
+                <StoreIcon />
+              </InputGroupAddon>
+            </InputGroup>
             <FieldError errors={[form.formState.errors.name]} />
           </Field>
 
           <div className="grid gap-6 sm:grid-cols-2 sm:gap-4">
             <Field data-invalid={!!form.formState.errors.city}>
-              <FieldLabel htmlFor="city">{t("welcome.business.city")}</FieldLabel>
-              <Input
-                id="city"
-                autoComplete="address-level2"
-                list={CITY_LIST_ID}
-                placeholder={t("welcome.business.cityPlaceholder")}
-                aria-invalid={!!form.formState.errors.city}
-                {...form.register("city")}
-              />
+              <FieldLabel htmlFor="city">
+                {t("welcome.business.city")}
+              </FieldLabel>
+              <InputGroup>
+                <InputGroupInput
+                  id="city"
+                  autoComplete="address-level2"
+                  list={CITY_LIST_ID}
+                  placeholder={t("welcome.business.cityPlaceholder")}
+                  aria-invalid={!!form.formState.errors.city}
+                  {...form.register("city")}
+                />
+                <InputGroupAddon>
+                  <MapPinIcon />
+                </InputGroupAddon>
+              </InputGroup>
               <datalist id={CITY_LIST_ID}>
                 {citySuggestions[defaultCountry].map((city) => (
                   <option key={city} value={city} />
@@ -117,14 +159,31 @@ export function BusinessStep({
             </Field>
 
             <Field data-invalid={!!form.formState.errors.sector}>
-              <FieldLabel htmlFor="sector">{t("welcome.business.sector")}</FieldLabel>
+              <FieldLabel htmlFor="sector">
+                {t("welcome.business.sector")}
+              </FieldLabel>
               <Controller
                 control={form.control}
                 name="sector"
                 render={({ field, fieldState }) => (
-                  <Select items={sectorItems} value={field.value ?? null} onValueChange={(value) => field.onChange(value)}>
-                    <SelectTrigger id="sector" className="w-full" aria-invalid={fieldState.invalid} onBlur={field.onBlur}>
-                      <SelectValue placeholder={t("welcome.business.sectorPlaceholder")} />
+                  <Select
+                    items={sectorItems}
+                    value={field.value ?? null}
+                    onValueChange={(value) => field.onChange(value)}
+                  >
+                    <SelectTrigger
+                      id="sector"
+                      className="w-full"
+                      aria-invalid={fieldState.invalid}
+                      onBlur={field.onBlur}
+                    >
+                      <TagIcon
+                        className="size-5 text-muted-foreground"
+                        aria-hidden
+                      />
+                      <SelectValue
+                        placeholder={t("welcome.business.sectorPlaceholder")}
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {sectorItems.map((item) => (
@@ -143,10 +202,12 @@ export function BusinessStep({
           <Field>
             <FieldLabel>{t("welcome.business.country")}</FieldLabel>
             <div className="flex h-11 items-center gap-2 rounded-lg border bg-muted/40 px-3.5 text-base">
-              <MapPinIcon className="size-4 text-muted-foreground" aria-hidden />
+              <GlobeIcon className="size-5 text-muted-foreground" aria-hidden />
               {t(`welcome.countries.${defaultCountry}`)}
             </div>
-            <FieldDescription>{t("welcome.business.countryHint")}</FieldDescription>
+            <FieldDescription>
+              {t("welcome.business.countryHint")}
+            </FieldDescription>
           </Field>
         </FieldGroup>
       </form>

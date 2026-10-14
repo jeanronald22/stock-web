@@ -11,11 +11,18 @@ export type HomeDecision = {
  * Écran d'arrivée après la connexion (DECISIONS.md, D15) : inscription à terminer, entreprise
  * déjà choisie sur cet appareil, entreprise unique, ou choix parmi plusieurs.
  */
-export function resolveHome(me: Me, activeOrganizationId: string | null): HomeDecision {
+export function resolveHome(
+  me: Me,
+  activeOrganizationId: string | null
+): HomeDecision {
   if (!me.user.profileComplete || me.organizations.length === 0) {
     return { route: Routes.welcome }
   }
-  if (me.organizations.some((organization) => organization.id === activeOrganizationId)) {
+  if (
+    me.organizations.some(
+      (organization) => organization.id === activeOrganizationId
+    )
+  ) {
     return { route: Routes.dashboard }
   }
   if (me.organizations.length === 1) {

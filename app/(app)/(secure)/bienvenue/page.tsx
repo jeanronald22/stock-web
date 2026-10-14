@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 
+import { PageTransition } from "@/components/motion/page-transition"
+
 import { Welcome } from "@/components/onboarding/welcome"
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -9,5 +11,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function WelcomePage() {
-  return <Welcome />
+  return (
+    <PageTransition>
+      <Welcome />
+    </PageTransition>
+  )
 }

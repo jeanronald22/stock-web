@@ -21,7 +21,8 @@ export type Organization = {
 
 export type User = {
   id: string
-  phone: string
+  email: string | null
+  phone: string | null
   firstName: string | null
   lastName: string | null
   locale: string
@@ -53,5 +54,9 @@ export const platformApi = (send: ApiClient) => ({
   updateProfile: (input: ProfileInput) =>
     send<User>({ method: "PUT", path: PlatformPaths.meProfile, body: input }),
   createOrganization: (input: NewOrganization) =>
-    send<Organization>({ method: "POST", path: PlatformPaths.organizations, body: input }),
+    send<Organization>({
+      method: "POST",
+      path: PlatformPaths.organizations,
+      body: input,
+    }),
 })

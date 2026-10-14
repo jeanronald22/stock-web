@@ -6,8 +6,20 @@ import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
+import { UserRoundIcon } from "lucide-react"
+
+import { IdentityScene } from "@/components/illustrations/identity-scene"
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group"
 import { FieldLimits, type User } from "@/lib/api/platform"
 import { useUpdateProfile } from "@/lib/api/platform-queries"
 import { applyServerErrors } from "@/lib/forms/apply-server-errors"
@@ -39,17 +51,24 @@ export function ProfileStep({
     .string()
     .trim()
     .min(1, t("validation.required"))
-    .max(FieldLimits.personName, t("validation.tooLong", { max: FieldLimits.personName }))
+    .max(
+      FieldLimits.personName,
+      t("validation.tooLong", { max: FieldLimits.personName })
+    )
   const form = useForm({
     resolver: zodResolver(z.object({ firstName: name, lastName: name })),
-    defaultValues: { firstName: user.firstName ?? "", lastName: user.lastName ?? "" },
+    defaultValues: {
+      firstName: user.firstName ?? "",
+      lastName: user.lastName ?? "",
+    },
   })
 
   const submit = form.handleSubmit((values) =>
     updateProfile.mutate(values, {
       onSuccess: onDone,
       onError: (error) => {
-        if (!applyServerErrors(error, FIELDS, form.setError)) toast.error(errorMessage(error))
+        if (!applyServerErrors(error, FIELDS, form.setError))
+          toast.error(errorMessage(error))
       },
     })
   )
@@ -57,6 +76,7 @@ export function ProfileStep({
   return (
     <StepShell
       step={step}
+      illustration={<IdentityScene />}
       totalSteps={totalSteps}
       eyebrow={t("welcome.profile.eyebrow")}
       title={t("welcome.profile.title")}
@@ -70,16 +90,25 @@ export function ProfileStep({
         <FieldGroup className="sm:grid sm:grid-cols-2 sm:gap-4">
           {FIELDS.map((field) => (
             <Field key={field} data-invalid={!!form.formState.errors[field]}>
-              <FieldLabel htmlFor={field}>{t(`welcome.profile.${field}`)}</FieldLabel>
-              <Input
-                id={field}
-                autoComplete={field === "firstName" ? "given-name" : "family-name"}
-                autoCapitalize="words"
-                autoFocus={field === "firstName"}
-                placeholder={t(`welcome.profile.${field}Placeholder`)}
-                aria-invalid={!!form.formState.errors[field]}
-                {...form.register(field)}
-              />
+              <FieldLabel htmlFor={field}>
+                {t(`welcome.profile.${field}`)}
+              </FieldLabel>
+              <InputGroup>
+                <InputGroupInput
+                  id={field}
+                  autoComplete={
+                    field === "firstName" ? "given-name" : "family-name"
+                  }
+                  autoCapitalize="words"
+                  autoFocus={field === "firstName"}
+                  placeholder={t(`welcome.profile.${field}Placeholder`)}
+                  aria-invalid={!!form.formState.errors[field]}
+                  {...form.register(field)}
+                />
+                <InputGroupAddon>
+                  <UserRoundIcon />
+                </InputGroupAddon>
+              </InputGroup>
               <FieldError errors={[form.formState.errors[field]]} />
             </Field>
           ))}
