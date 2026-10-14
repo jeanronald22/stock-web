@@ -1,47 +1,42 @@
-import { expect, test } from "@playwright/test"
+import { expect, test, type Page, type TestInfo } from "@playwright/test"
 
-import { readLatestOtp } from "./otp"
+import { waitForActionLink } from "./mailbox"
 
-const CAMEROON = "+237"
+const PASSWORD = "un carton bien rangé"
 
-/** Nouveau numéro à chaque exécution : les envois sont limités par numéro. */
-function randomLocalNumber(): string {
-  return `6${Math.floor(10_000_000 + Math.random() * 89_999_999)}`
+/** Les écrans s'animent à l'apparition : la capture attend leur état final. */
+async function shot(page: Page, testInfo: TestInfo, name: string) {
+  await page.evaluate(() => Promise.all(document.getAnimations().map((animation) => animation.finished)))
+  await page.screenshot({ path: testInfo.outputPath(`${name}.png`), fullPage: true })
 }
 
-test("un nouveau client se connecte par code, crée sa structure et arrive sur l'accueil", async ({ page }, testInfo) => {
-  // Les écrans s'animent à l'apparition : la capture attend leur état final.
-  const shot = async (name: string) => {
-    await page.evaluate(() => Promise.all(document.getAnimations().map((animation) => animation.finished)))
-    await page.screenshot({ path: testInfo.outputPath(`${name}.png`), fullPage: true })
-  }
-  const localNumber = randomLocalNumber()
+test("un nouveau client crée son compte, confirme son e-mail, crée sa structure, puis se reconnecte", async ({ page }, testInfo) => {
+  const email = `awa.${Date.now()}.${testInfo.project.name}@exemple.cm`
 
   await page.goto("/connexion")
-  await expect(page.getByRole("heading", { name: "Bienvenue" })).toBeVisible()
-  await shot("01-numero")
+  await expect(page.getByRole("heading", { name: "Bon retour" })).toBeVisible()
+  await shot(page, testInfo, "01-connexion")
+  await page.getByRole("link", { name: "Créer un compte" }).click()
 
-  await page.getByLabel("Numéro de téléphone").fill(localNumber)
-  await page.getByRole("button", { name: "Continuer" }).click()
-  await expect(page.getByRole("heading", { name: "Saisissez le code" })).toBeVisible()
-  await shot("02-code")
+  await expect(page.getByRole("heading", { name: "Créez votre compte" })).toBeVisible()
+  await page.getByLabel("Adresse e-mail").fill(email)
+  await page.getByLabel("Mot de passe", { exact: true }).fill("court")
+  await page.getByLabel("Confirmez le mot de passe").fill("court")
+  await page.getByRole("button", { name: "Créer un compte" }).click()
+  await expect(page.locator(".kk-field-error").first()).toBeVisible()
+  await shot(page, testInfo, "02-inscription-erreur")
 
-  await page.getByLabel(/Code à \d+ chiffres/).fill("000000")
-  await page.getByRole("button", { name: "Valider" }).click()
-  await expect(page.getByText("Code incorrect.")).toBeVisible()
+  await page.getByLabel("Mot de passe", { exact: true }).fill(PASSWORD)
+  await page.getByLabel("Confirmez le mot de passe").fill(PASSWORD)
+  await page.getByRole("button", { name: "Créer un compte" }).click()
 
-  // La touche Entrée valide le code (et non « Modifier », placé plus haut dans la page).
-  await page.getByLabel(/Code à \d+ chiffres/).fill(readLatestOtp(CAMEROON + localNumber))
-  await page.getByLabel(/Code à \d+ chiffres/).press("Enter")
+  await expect(page.getByRole("heading", { name: "Vérifiez votre e-mail" })).toBeVisible()
+  await shot(page, testInfo, "03-verification")
+  await page.goto(await waitForActionLink(email))
 
   await expect(page).toHaveURL(/\/bienvenue$/)
-  await expect(page.getByRole("heading", { name: "Comment vous appelez-vous ?" })).toBeVisible()
-  await page.getByRole("button", { name: "Continuer" }).click()
-  await expect(page.getByText("Ce champ est obligatoire.").first()).toBeVisible()
-  await shot("03-profil-erreurs")
   await page.getByLabel("Prénom").fill("Awa")
   await page.getByLabel("Nom", { exact: true }).fill("Bello")
-  await shot("04-profil")
   await page.getByRole("button", { name: "Continuer" }).click()
 
   await expect(page.getByRole("heading", { name: "Parlez-nous de votre entreprise" })).toBeVisible()
@@ -49,18 +44,19 @@ test("un nouveau client se connecte par code, crée sa structure et arrive sur l
   await page.getByLabel("Ville").fill("Douala")
   await page.getByLabel("Secteur d’activité").click()
   await page.getByRole("option", { name: "Quincaillerie" }).click()
-  await shot("05-entreprise")
   await page.getByRole("button", { name: "Créer mon espace" }).click()
-
-  await expect(page.getByRole("heading", { name: "Votre espace est prêt" })).toBeVisible()
-  await shot("06-termine")
   await page.getByRole("button", { name: "Accéder à mon espace" }).click()
 
-  await expect(page).toHaveURL(/\/accueil$/)
   await expect(page.getByRole("heading", { name: "Bonjour Awa" })).toBeVisible()
-  await shot("07-accueil")
+  await shot(page, testInfo, "04-accueil")
 
-  // Revenir sur l'application mène directement à l'accueil : profil complet, entreprise retenue.
+  // Déconnexion, puis retour par e-mail et mot de passe : directement sur l'accueil.
+  await page.getByRole("button", { name: "Ouvrir le menu du compte" }).click()
+  await page.getByRole("menuitem", { name: "Se déconnecter" }).click()
   await page.goto("/connexion")
+  await expect(page.getByRole("heading", { name: "Bon retour" })).toBeVisible()
+  await page.getByLabel("Adresse e-mail").fill(email)
+  await page.getByLabel("Mot de passe", { exact: true }).fill(PASSWORD)
+  await page.getByLabel("Mot de passe", { exact: true }).press("Enter")
   await expect(page).toHaveURL(/\/accueil$/)
 })

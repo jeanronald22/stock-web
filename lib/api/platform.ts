@@ -21,7 +21,8 @@ export type Organization = {
 
 export type User = {
   id: string
-  phone: string
+  email: string | null
+  phone: string | null
   firstName: string | null
   lastName: string | null
   locale: string
