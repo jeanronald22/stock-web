@@ -1,6 +1,6 @@
 "use client"
 
-import { LockIcon, PrinterIcon } from "lucide-react"
+import { DownloadIcon, LockIcon, PrinterIcon } from "lucide-react"
 import Link from "next/link"
 import { useFormatter, useTranslations } from "next-intl"
 
@@ -8,8 +8,9 @@ import { EmptyState } from "@/components/catalog/empty-state"
 import { SearchScene } from "@/components/illustrations/search-scene"
 import { useQuantityLabel } from "@/components/items/describe"
 import { ItemThumb } from "@/components/items/item-thumb"
-import { buttonVariants } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Spinner } from "@/components/ui/spinner"
 import {
   Table,
   TableBody,
@@ -23,6 +24,7 @@ import { useVoucher } from "@/lib/api/voucher-queries"
 import { VoucherType } from "@/lib/api/vouchers"
 import { RecordRoutes, Routes } from "@/lib/routes"
 
+import { useVoucherPdf } from "./use-voucher-pdf"
 import { VoucherTypeBadge } from "./vouchers-screen"
 
 /** Bon validé : en lecture seule, une correction passe par un nouveau bon. */
@@ -98,13 +100,7 @@ export function VoucherScreen({ id }: { id: string }) {
         actions={
           <>
             <VoucherTypeBadge type={data.type} />
-            <Link
-              href={RecordRoutes.voucherPrint(data.id)}
-              className={buttonVariants({ variant: "outline" })}
-            >
-              <PrinterIcon />
-              {t("vouchers.print.action")}
-            </Link>
+            <VoucherPdfActions id={data.id} />
           </>
         }
       />
@@ -196,5 +192,30 @@ export function VoucherScreen({ id }: { id: string }) {
         {t("vouchers.detail.immutable")}
       </p>
     </PageBody>
+  )
+}
+
+function VoucherPdfActions({ id }: { id: string }) {
+  const t = useTranslations("vouchers.print")
+  const pdf = useVoucherPdf()
+  return (
+    <>
+      <Button
+        variant="outline"
+        disabled={pdf.busy}
+        onClick={() => void pdf.print(id)}
+      >
+        {pdf.busy ? <Spinner /> : <PrinterIcon />}
+        {t("action")}
+      </Button>
+      <Button
+        variant="outline"
+        disabled={pdf.busy}
+        onClick={() => void pdf.download(id)}
+      >
+        <DownloadIcon />
+        {t("download")}
+      </Button>
+    </>
   )
 }

@@ -3,6 +3,7 @@
 import {
   ArrowDownToLineIcon,
   ArrowUpFromLineIcon,
+  DownloadIcon,
   EllipsisVerticalIcon,
   FileTextIcon,
   PrinterIcon,
@@ -45,9 +46,10 @@ import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import { useVouchersPage } from "@/lib/api/voucher-queries"
 import { VoucherType, voucherTypes } from "@/lib/api/vouchers"
 import { useListParams } from "@/lib/list/use-list-params"
+
+import { useVoucherPdf } from "./use-voucher-pdf"
 import { RecordRoutes, Routes } from "@/lib/routes"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
-import { printVoucher } from "@/lib/vouchers/direct-print"
 import { cn } from "@/lib/utils"
 
 const ALL_TYPES = "all"
@@ -264,6 +266,7 @@ export function VouchersScreen() {
 function VoucherRowMenu({ id, number }: { id: string; number: string }) {
   const t = useTranslations("vouchers.menu")
   const router = useRouter()
+  const pdf = useVoucherPdf()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -283,9 +286,19 @@ function VoucherRowMenu({ id, number }: { id: string; number: string }) {
           <FileTextIcon />
           {t("detail")}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => printVoucher(id)}>
+        <DropdownMenuItem
+          disabled={pdf.busy}
+          onClick={() => void pdf.print(id)}
+        >
           <PrinterIcon />
           {t("print")}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={pdf.busy}
+          onClick={() => void pdf.download(id)}
+        >
+          <DownloadIcon />
+          {t("download")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

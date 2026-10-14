@@ -139,14 +139,16 @@ test("réception puis sortie : le stock suit, une sortie trop forte est refusée
   await page.emulateMedia({ colorScheme: "dark" })
   await shot(page, testInfo, "02a-bon-sombre")
   await page.emulateMedia({ colorScheme: "light" })
-  await page.getByRole("link", { name: "Imprimer" }).click()
-  await expect(page.getByText("Bon de réception")).toBeVisible()
-  await expect(page.getByText("Livré par (nom et signature)")).toBeVisible()
-  // Document sans photo, ni mention sur l'immuabilité (réservée à l'écran).
-  await expect(page.locator(".voucher-sheet img")).toHaveCount(0)
-  await expect(page.getByText("Un bon validé ne se modifie pas")).toBeHidden()
-  await shot(page, testInfo, "02b-bon-imprimable")
-  await page.getByRole("link", { name: "Retour au bon" }).click()
+  // PDF téléchargé sans passer par l'impression : nom du bon, vrai fichier PDF.
+  const pdfDownload = page.waitForEvent("download")
+  await page.getByRole("button", { name: "Télécharger le PDF" }).click()
+  const pdfFile = await pdfDownload
+  expect(pdfFile.suggestedFilename()).toBe(`REC-${year}-0001.pdf`)
+  const pdfPath = testInfo.outputPath(pdfFile.suggestedFilename())
+  await pdfFile.saveAs(pdfPath)
+  expect(
+    (await import("node:fs")).readFileSync(pdfPath).subarray(0, 5).toString()
+  ).toBe("%PDF-")
   await page
     .getByRole("navigation", { name: "Fil d’Ariane" })
     .getByRole("link", { name: "Bons" })
@@ -204,14 +206,17 @@ test("réception puis sortie : le stock suit, une sortie trop forte est refusée
   await expect(page.getByText("1–2 sur 2")).toBeVisible()
   await shot(page, testInfo, "05-bons")
 
-  // Menu d'une ligne : impression directe (cadre invisible, retiré après impression), puis détail.
-  await page
-    .getByRole("button", { name: `Actions du bon REC-${year}-0001` })
-    .click()
+  // Menu d'une ligne : impression (le PDF dans un cadre invisible), téléchargement, détail.
+  const actions = page.getByRole("button", {
+    name: `Actions du bon REC-${year}-0001`,
+  })
+  await actions.click()
   await page.getByRole("menuitem", { name: "Imprimer" }).click()
-  const frame = page.locator(`iframe[src*="/imprimer?direct"]`)
-  await expect(frame).toHaveCount(1)
-  await expect(frame).toHaveCount(0)
+  await expect(page.locator('iframe[src^="blob:"]')).toHaveCount(1)
+  await actions.click()
+  const menuDownload = page.waitForEvent("download")
+  await page.getByRole("menuitem", { name: "Télécharger le PDF" }).click()
+  expect((await menuDownload).suggestedFilename()).toBe(`REC-${year}-0001.pdf`)
   await page
     .getByRole("button", { name: `Actions du bon REC-${year}-0001` })
     .click()

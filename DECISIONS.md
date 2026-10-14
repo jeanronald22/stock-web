@@ -202,7 +202,7 @@ Côté utilisateur, ce sont les écrans de « Mon compte » : créer son entrepr
 - **Annuaire des fournisseurs** (nom unique, coordonnées facultatives) et **catalogue** de chacun : les articles qu'il livre. Le catalogue se remplit de lui-même à chaque réception, et peut aussi se modifier sur la fiche.
 - **Réception** : le fournisseur se choisit à côté du dépôt, ou se crée à la volée en tapant son nom ; ses articles sont proposés d'abord (« Tout le catalogue » d'un clic). Son nom du jour est recopié sur le bon. Une sortie garde un champ libre (client, chantier).
 - **Photo de l'article** partout où il est listé : tableaux des articles et du stock, recherche, lignes de saisie, fiche de bon, aperçu du dépôt, catalogue fournisseur, bon imprimé.
-- **Bon imprimable** (A4) : entreprise, numéro, dépôt, fournisseur ou client, lignes avec photo, cases de signature (validé par, livré ou reçu par) ; impression ou PDF par le navigateur.
+- **Bon en PDF** (A4), généré dans l'application (@react-pdf/renderer, chargé au premier usage) : entreprise, numéro, dépôt, fournisseur ou client, lignes, cases de signature, pied de page en bas de chaque page avec sa numérotation. « Télécharger le PDF » l'enregistre (REC-2026-0001.pdf) ; « Imprimer » ouvre la boîte d'impression sur ce même PDF. Depuis la fiche du bon et depuis le menu de chaque ligne de la liste. Pas de photo sur le document.
 - Politique de confidentialité passée en version 0.4 (coordonnées des fournisseurs).
 
 ## Questions ouvertes

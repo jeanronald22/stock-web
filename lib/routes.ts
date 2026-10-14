@@ -28,7 +28,6 @@ export const RecordRoutes = {
   item: (id: string) => `${Routes.items}/${id}`,
   warehouse: (id: string) => `${Routes.warehouses}/${id}`,
   voucher: (id: string) => `${Routes.vouchers}/${id}`,
-  voucherPrint: (id: string) => `${Routes.vouchers}/${id}/imprimer`,
   supplier: (id: string) => `${Routes.suppliers}/${id}`,
 } as const
 
@@ -48,9 +47,4 @@ export const ARCHIVED_STATUS_PARAM = "archives"
 /** Paramètre d'adresse des pages publiques : langue imposée par le lien (écrans de connexion). */
 export const PublicQueryParams = {
   lang: "lang",
-} as const
-
-/** Paramètre de la page d'impression : ouverte depuis la liste, elle imprime d'elle-même. */
-export const PrintParams = {
-  direct: "direct",
 } as const

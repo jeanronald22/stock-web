@@ -12,7 +12,6 @@
     "newReceipt": "Nouvelle réception",
     "newIssue": "Nouvelle sortie",
     "stock": "Stock",
-    "printVoucher": "Bon à imprimer",
     "suppliers": "Fournisseurs",
     "newSupplier": "Nouveau fournisseur"
   },
@@ -561,19 +560,19 @@
     },
     "print": {
       "action": "Imprimer",
-      "back": "Retour au bon",
       "receiptTitle": "Bon de réception",
       "issueTitle": "Bon de sortie",
       "validatedBy": "Validé par",
       "deliveredBy": "Livré par (nom et signature)",
       "receivedBy": "Reçu par (nom et signature)",
-      "signature": "Signature",
-      "footer": "Enregistré le {date}."
+      "footer": "Enregistré le {date}.",
+      "download": "Télécharger le PDF"
     },
     "menu": {
       "open": "Actions du bon {number}",
       "detail": "Ouvrir le détail",
-      "print": "Imprimer"
+      "print": "Imprimer",
+      "download": "Télécharger le PDF"
     }
   },
   "stock": {

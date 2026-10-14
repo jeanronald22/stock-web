@@ -12,7 +12,6 @@
     "newReceipt": "New receipt",
     "newIssue": "New issue",
     "stock": "Stock",
-    "printVoucher": "Printable voucher",
     "suppliers": "Suppliers",
     "newSupplier": "New supplier"
   },
@@ -561,19 +560,19 @@
     },
     "print": {
       "action": "Print",
-      "back": "Back to voucher",
       "receiptTitle": "Goods receipt",
       "issueTitle": "Goods issue",
       "validatedBy": "Approved by",
       "deliveredBy": "Delivered by (name and signature)",
       "receivedBy": "Received by (name and signature)",
-      "signature": "Signature",
-      "footer": "Recorded on {date}."
+      "footer": "Recorded on {date}.",
+      "download": "Download PDF"
     },
     "menu": {
       "open": "Actions for voucher {number}",
       "detail": "Open details",
-      "print": "Print"
+      "print": "Print",
+      "download": "Download PDF"
     }
   },
   "stock": {
