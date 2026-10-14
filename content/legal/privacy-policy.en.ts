@@ -38,9 +38,10 @@ export const privacyPolicyEn: PrivacyPolicyContent = {
             "Your account: email address, password, first name, last name and preferred language. Your password is never stored in clear text: we only keep an irreversible fingerprint of it.",
             "Your business: name, city, country, line of business, your team role (owner, administrator or member) and your Stock role (general manager, manager, controller or storekeeper), with the warehouses assigned to you.",
             "Invitations: the invited person’s email address, the name of the person who invites, and the invitation status. The invitation link is never stored: we only keep an irreversible fingerprint of it.",
-            "Receipt and issue vouchers: your name appears on them when you approve them, with the supplier or customer you enter. An approved voucher is never changed: it is your stock’s record.",
+            "Vouchers (receipt, issue, transfer, damage, adjustment): your name appears on them when you approve them, with the supplier or customer you enter. An approved voucher is never changed: it is your stock’s record.",
             "Your suppliers’ contact details (name, phone, email, address): your business is responsible for them, Kreskala keeps them on its behalf.",
             "The item photos you upload. Choose photos of products: avoid photos in which a person can be recognised.",
+            "Damage photos attached to a voucher, as proof of the goods’ condition. Same advice: photograph the goods, not people.",
             "Technical sign-in data: date and time, IP address, browser type, and a trace code attached to each error so we can fix it.",
           ],
         },
@@ -102,7 +103,7 @@ export const privacyPolicyEn: PrivacyPolicyContent = {
           items: [
             "Members of your business see that business’s data, according to their role. They never see another business’s data.",
             "Kreskala’s teams only access it when needed: support you asked for, fixing an error, security.",
-            "Our technical providers act only on our instructions and are bound by confidentiality. Item photos are kept at Cloudflare (R2 service), in a private space: they are only shown through temporary links, given only to members of your business. The full list (hosting, email delivery) will be published here before the service opens.",
+            "Our technical providers act only on our instructions and are bound by confidentiality. Item and damage photos are kept at Cloudflare (R2 service), in a private space: they are only shown through temporary links, given only to members of your business. The full list (hosting, email delivery) will be published here before the service opens.",
           ],
         },
         {
@@ -135,6 +136,7 @@ export const privacyPolicyEn: PrivacyPolicyContent = {
             "Notifications: ninety days, after which they are deleted.",
             "Invitations: the link is valid for seven days. The invitation then stays in the team history as long as the business account is open.",
             "Item photos: as long as the item has that photo. Once replaced or removed, the previous photo is erased straight away.",
+            "Damage photos: as long as the voucher they prove, that is while the business account is open. They cannot be removed one by one.",
           ],
         },
       ],

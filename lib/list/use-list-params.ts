@@ -4,17 +4,14 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useMemo } from "react"
 
 import { CatalogStatus, StockState } from "@/lib/api/stock"
-import {
-  VoucherOrder,
-  voucherTypes,
-  type VoucherType,
-} from "@/lib/api/vouchers"
+import { VoucherOrder } from "@/lib/api/vouchers"
 import {
   ARCHIVED_STATUS_PARAM,
   ListQueryParams,
   OLDEST_FIRST_PARAM,
   StockAlertParam,
 } from "@/lib/routes"
+import { VoucherKind } from "@/lib/vouchers/voucher-kinds"
 
 /** Nombres de lignes proposés ; le premier de la liste n'est pas le défaut (voir DEFAULT_PAGE_SIZE). */
 export const PAGE_SIZES = [25, 50, 100] as const
@@ -40,7 +37,7 @@ export type ListParams = {
   page: number
   size: number
   status: CatalogStatus
-  voucherType: VoucherType | undefined
+  voucherKind: VoucherKind | undefined
   /** Jours inclus, AAAA-MM-JJ. */
   from: string | undefined
   to: string | undefined
@@ -103,8 +100,8 @@ export function useListParams() {
       searchParams.get(ListQueryParams.status) === ARCHIVED_STATUS_PARAM
         ? CatalogStatus.archived
         : CatalogStatus.active,
-    voucherType: voucherTypes.find(
-      (type) => type === searchParams.get(ListQueryParams.voucherType)
+    voucherKind: Object.values(VoucherKind).find(
+      (kind) => kind === searchParams.get(ListQueryParams.voucherType)
     ),
     from: day(searchParams.get(ListQueryParams.from)),
     to: day(searchParams.get(ListQueryParams.to)),
@@ -160,8 +157,8 @@ export function useListParams() {
         status:
           status === CatalogStatus.archived ? ARCHIVED_STATUS_PARAM : undefined,
       }),
-    setVoucherType: (type: VoucherType | undefined) =>
-      update({ voucherType: type }),
+    setVoucherKind: (kind: VoucherKind | undefined) =>
+      update({ voucherType: kind }),
     setPeriod: (from: string | undefined, to: string | undefined) =>
       update({ from, to }),
     setOrder: (order: VoucherOrder) =>

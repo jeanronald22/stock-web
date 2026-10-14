@@ -37,23 +37,47 @@ export function useVoucherPdf() {
   const toData = useCallback(
     (voucher: Voucher): VoucherPdfData => {
       const receipt = voucher.type === VoucherType.receipt
+      // Transfert : départ et arrivée ; l'autre bout n'est ni un fournisseur ni un client.
+      const from = voucher.destination ? voucher.warehouse : voucher.source
+      const to =
+        voucher.destination ?? (voucher.source ? voucher.warehouse : null)
+      const places =
+        from && to
+          ? [
+              { label: t("detail.from"), value: from.name },
+              { label: t("detail.to"), value: to.name },
+            ]
+          : [{ label: t("detail.warehouse"), value: voucher.warehouse.name }]
+      // Casse et ajustement : pas de tiers, mais un motif.
+      const party = voucher.reason
+        ? [
+            {
+              label: t("detail.reason"),
+              value: t(`reasons.${voucher.reason}.label`),
+            },
+          ]
+        : from && to
+          ? []
+          : [
+              {
+                label: receipt ? t("detail.supplier") : t("detail.customer"),
+                value: voucher.counterparty ?? EMPTY,
+              },
+            ]
       return {
         fileName: voucher.number + PDF_EXTENSION,
         organization: { name: organization.name, city: organization.city },
-        title: receipt ? t("print.receiptTitle") : t("print.issueTitle"),
+        title: t(`print.titles.${voucher.type}`),
         number: voucher.number,
         facts: [
-          { label: t("detail.warehouse"), value: voucher.warehouse.name },
+          ...places,
           {
             label: t("detail.date"),
             value: format.dateTime(new Date(voucher.occurredAt), {
               dateStyle: "long",
             }),
           },
-          {
-            label: receipt ? t("detail.supplier") : t("detail.customer"),
-            value: voucher.counterparty ?? EMPTY,
-          },
+          ...party,
           {
             label: t("detail.reference"),
             value: voucher.documentReference ?? EMPTY,
@@ -72,7 +96,25 @@ export function useVoucherPdf() {
           entered: line.packagingName
             ? `${format.number(line.enteredQuantity)} ${line.packagingName}`
             : EMPTY,
-          quantity: quantityLabel(line.baseUnit, line.quantity),
+          quantity:
+            voucher.type === VoucherType.adjustment
+              ? t("print.countedOf", {
+                  counted: quantityLabel(line.baseUnit, line.quantity),
+                  book: quantityLabel(
+                    line.baseUnit,
+                    line.expectedQuantity ?? 0
+                  ),
+                })
+              : line.expectedQuantity !== null &&
+                  line.expectedQuantity !== line.quantity
+                ? t("print.receivedOf", {
+                    received: quantityLabel(line.baseUnit, line.quantity),
+                    expected: quantityLabel(
+                      line.baseUnit,
+                      line.expectedQuantity
+                    ),
+                  })
+                : quantityLabel(line.baseUnit, line.quantity),
         })),
         lineCount: t("lineCount", { count: voucher.lines.length }),
         note: voucher.note
@@ -81,7 +123,11 @@ export function useVoucherPdf() {
         signatures: [
           { label: t("print.validatedBy"), name: voucher.createdByName },
           {
-            label: receipt ? t("print.deliveredBy") : t("print.receivedBy"),
+            label: voucher.reason
+              ? t("print.witnessedBy")
+              : receipt
+                ? t("print.deliveredBy")
+                : t("print.receivedBy"),
             name: "",
           },
         ],

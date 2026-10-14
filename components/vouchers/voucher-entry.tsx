@@ -1,12 +1,17 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { PlusIcon, WarehouseIcon } from "lucide-react"
+import { ArrowRightLeftIcon, PlusIcon, WarehouseIcon } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useRef, useState } from "react"
-import { Controller, useForm, useWatch } from "react-hook-form"
+import {
+  Controller,
+  useForm,
+  useWatch,
+  type UseFormReturn,
+} from "react-hook-form"
 import { useAuth } from "react-oidc-context"
 import { toast } from "sonner"
 
@@ -25,16 +30,18 @@ import { Spinner } from "@/components/ui/spinner"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import { useWorkspace } from "@/components/workspace/workspace-context"
 import { CatalogStatus, type Warehouse } from "@/lib/api/stock"
-import { useWarehouses } from "@/lib/api/stock-queries"
+import { useTransferDestinations, useWarehouses } from "@/lib/api/stock-queries"
 import { useErrorMessage } from "@/lib/api/use-error-message"
-import { useRecordVoucher } from "@/lib/api/voucher-queries"
-import { shortagesOf, VoucherType } from "@/lib/api/vouchers"
+import { useAddVoucherPhoto, useRecordVoucher } from "@/lib/api/voucher-queries"
+import { shortagesOf, VoucherType, type EntryType } from "@/lib/api/vouchers"
 import { RecordRoutes, Routes } from "@/lib/routes"
 import {
   readLastWarehouse,
   rememberLastWarehouse,
 } from "@/lib/vouchers/last-warehouse"
 
+import { DamagePhotosField } from "./damage-photos-field"
+import { ReasonField } from "./reason-field"
 import { SupplierField } from "./supplier-field"
 import { VoucherDetailsFields } from "./voucher-details-fields"
 import {
@@ -45,7 +52,7 @@ import {
 } from "./voucher-form-schema"
 import { VoucherLinesField } from "./voucher-lines-field"
 
-export function VoucherEntry({ type }: { type: VoucherType }) {
+export function VoucherEntry({ type }: { type: EntryType }) {
   const t = useTranslations("common")
   const warehouses = useWarehouses(CatalogStatus.active, { fresh: true })
   // Liste à jour avant de proposer un dépôt : un collègue vient peut-être d'en déclarer un.
@@ -55,15 +62,15 @@ export function VoucherEntry({ type }: { type: VoucherType }) {
 }
 
 /**
- * Réception ou sortie sur un seul écran, pensé pour aller vite : dépôt déjà choisi, recherche
- * d'article au clavier, détails facultatifs à côté. Après validation, l'écran se vide pour le bon
- * suivant (même dépôt, même date).
+ * Réception, sortie, transfert, casse ou ajustement sur un seul écran, pensé pour aller vite :
+ * dépôt déjà choisi, recherche d'article au clavier, détails à côté. Après validation, l'écran se
+ * vide pour le bon suivant (même dépôt, même date).
  */
 function VoucherEntryForm({
   type,
   warehouses,
 }: {
-  type: VoucherType
+  type: EntryType
   warehouses: Warehouse[]
 }) {
   const t = useTranslations()
@@ -74,9 +81,13 @@ function VoucherEntryForm({
   const { organization } = useWorkspace()
   const record = useRecordVoucher()
   const searchRef = useRef<HTMLInputElement>(null)
+  const transfer = type === VoucherType.transferOut
   // Un identifiant par bon : renvoyé après une coupure réseau, le même bon n'est pas compté deux fois.
   const [voucherId, setVoucherId] = useState(() => crypto.randomUUID())
   const [today] = useState(todayOn)
+  // Casse : photos choisies avant la validation, envoyées juste après (le bon doit exister).
+  const [photos, setPhotos] = useState<File[]>([])
+  const addPhoto = useAddVoucherPhoto()
 
   const [defaultWarehouseId] = useState(() => {
     const last = readLastWarehouse(subject, organization.id)
@@ -97,12 +108,17 @@ function VoucherEntryForm({
           batchRequired: t("vouchers.form.batchRequired"),
           linesRequired: t("vouchers.form.linesRequired"),
           futureDate: t("vouchers.form.futureDate"),
+          reasonRequired: t("vouchers.reasons.required"),
+          noteRequired: t("vouchers.form.noteRequired"),
         },
-        today
+        today,
+        type
       )
     ),
     defaultValues: {
       warehouseId: defaultWarehouseId,
+      destinationWarehouseId: "",
+      reason: "",
       supplier: null,
       lines: [],
       counterparty: "",
@@ -135,6 +151,18 @@ function VoucherEntryForm({
     return shortages.length > 0
   }
 
+  /** Le bon est déjà enregistré : une photo refusée se rajoute depuis sa fiche. */
+  const sendPhotos = async (id: string): Promise<boolean> => {
+    for (const file of photos) {
+      try {
+        await addPhoto.mutateAsync({ id, file })
+      } catch {
+        return false
+      }
+    }
+    return true
+  }
+
   const submit = async (values: VoucherFormValues) => {
     try {
       const voucher = await record.mutateAsync({
@@ -142,8 +170,11 @@ function VoucherEntryForm({
         input: toVoucherInput(type, values, today),
       })
       rememberLastWarehouse(subject, organization.id, values.warehouseId)
-      toast.success(
-        t(`vouchers.entry.${type}.done`, { number: voucher.number }),
+      const photosSent = await sendPhotos(voucher.id)
+      toast[photosSent ? "success" : "warning"](
+        photosSent
+          ? t(`vouchers.entry.${type}.done`, { number: voucher.number })
+          : t("vouchers.photos.partial", { number: voucher.number }),
         {
           action: {
             label: t("vouchers.entry.see"),
@@ -159,6 +190,7 @@ function VoucherEntryForm({
         documentReference: "",
         note: "",
       })
+      setPhotos([])
       setVoucherId(crypto.randomUUID())
       searchRef.current?.focus()
     } catch (error) {
@@ -172,9 +204,11 @@ function VoucherEntryForm({
       type="submit"
       size="xl"
       className="w-full"
-      disabled={record.isPending}
+      disabled={record.isPending || addPhoto.isPending}
     >
-      {record.isPending && <Spinner data-icon="inline-start" />}
+      {(record.isPending || addPhoto.isPending) && (
+        <Spinner data-icon="inline-start" />
+      )}
       {t(`vouchers.entry.${type}.submit`, { count: lineCount })}
     </Button>
   )
@@ -219,7 +253,9 @@ function VoucherEntryForm({
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor="warehouseId">
-                      {t("vouchers.form.warehouse")}
+                      {transfer
+                        ? t("vouchers.form.fromWarehouse")
+                        : t("vouchers.form.warehouse")}
                     </FieldLabel>
                     <Select
                       items={warehouses.map((warehouse) => ({
@@ -255,6 +291,7 @@ function VoucherEntryForm({
                 )}
               />
             )}
+            {transfer && <DestinationField form={form} />}
             {type === VoucherType.receipt && (
               <Controller
                 control={form.control}
@@ -285,6 +322,12 @@ function VoucherEntryForm({
         </div>
 
         <aside className="space-y-6 rounded-2xl border p-5 lg:sticky lg:top-20">
+          {(type === VoucherType.damage || type === VoucherType.adjustment) && (
+            <ReasonField form={form} type={type} />
+          )}
+          {type === VoucherType.damage && (
+            <DamagePhotosField files={photos} onChange={setPhotos} />
+          )}
           <VoucherDetailsFields form={form} type={type} today={today} />
           <div className="hidden lg:block">{submitButton}</div>
         </aside>
@@ -295,5 +338,57 @@ function VoucherEntryForm({
         </div>
       </form>
     </PageBody>
+  )
+}
+
+/** Dépôt d'arrivée d'un transfert : tous les dépôts actifs sauf celui de départ (D27). */
+function DestinationField({
+  form,
+}: {
+  form: UseFormReturn<VoucherFormValues>
+}) {
+  const t = useTranslations("vouchers.form")
+  const destinations = useTransferDestinations().data ?? []
+  const source = useWatch({ control: form.control, name: "warehouseId" })
+  const options = destinations
+    .filter((warehouse) => warehouse.id !== source)
+    .map((warehouse) => ({ value: warehouse.id, label: warehouse.name }))
+  return (
+    <Controller
+      control={form.control}
+      name="destinationWarehouseId"
+      render={({ field, fieldState }) => (
+        <Field data-invalid={fieldState.invalid}>
+          <FieldLabel htmlFor="destinationWarehouseId">
+            {t("toWarehouse")}
+          </FieldLabel>
+          <Select
+            items={options}
+            value={field.value || null}
+            onValueChange={(value) => field.onChange(value ?? "")}
+          >
+            <SelectTrigger
+              id="destinationWarehouseId"
+              className="w-full"
+              aria-invalid={fieldState.invalid}
+            >
+              <ArrowRightLeftIcon
+                className="size-5 text-muted-foreground"
+                aria-hidden
+              />
+              <SelectValue placeholder={t("chooseDestination")} />
+            </SelectTrigger>
+            <SelectContent>
+              {options.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FieldError errors={[fieldState.error]} />
+        </Field>
+      )}
+    />
   )
 }

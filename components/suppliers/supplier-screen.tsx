@@ -236,7 +236,7 @@ function LatestReceipts({ supplierId }: { supplierId: string }) {
   const t = useTranslations()
   const format = useFormatter()
   const search = useMemo(
-    () => ({ type: VoucherType.receipt, supplierId }),
+    () => ({ types: [VoucherType.receipt], supplierId }),
     [supplierId]
   )
   const receipts = useVouchersPage(search, 0, LATEST_RECEIPTS)

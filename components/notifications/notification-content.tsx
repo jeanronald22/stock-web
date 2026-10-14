@@ -4,6 +4,9 @@ import {
   BellRingIcon,
   KeyRoundIcon,
   MailOpenIcon,
+  FileWarningIcon,
+  PackageCheckIcon,
+  TruckIcon,
   UserPlusIcon,
   type LucideIcon,
 } from "lucide-react"
@@ -20,6 +23,9 @@ export const notificationIcons: Record<NotificationType, LucideIcon> = {
   [NotificationType.memberJoined]: UserPlusIcon,
   [NotificationType.invitationReceived]: MailOpenIcon,
   [NotificationType.accessChanged]: KeyRoundIcon,
+  [NotificationType.transferSent]: TruckIcon,
+  [NotificationType.transferReceived]: PackageCheckIcon,
+  [NotificationType.receiptDiscrepancy]: FileWarningIcon,
 }
 
 /** Titre et détail d'une notification, traduits depuis son type et ses paramètres (D26). */
@@ -84,6 +90,63 @@ export function useNotificationText() {
                 warehouses,
               })
             : t("ACCESS_CHANGED.revoked"),
+        }
+      }
+      case NotificationType.transferSent:
+        return {
+          title: t("TRANSFER_SENT.title", {
+            number: params.voucherNumber ?? "",
+            destination: params.warehouseName ?? "",
+          }),
+          detail: t("TRANSFER_SENT.detail", {
+            source: params.sourceName ?? "",
+            count: params.lineCount ?? 0,
+          }),
+        }
+      case NotificationType.receiptDiscrepancy: {
+        const gaps = params.discrepancies ?? []
+        return {
+          title: t("RECEIPT_DISCREPANCY.title", {
+            number: params.voucherNumber ?? "",
+          }),
+          detail: gaps
+            .slice(0, LISTED_ITEMS)
+            .map((gap) =>
+              t("RECEIPT_DISCREPANCY.gap", {
+                name: gap.name,
+                expected: quantityLabel(gap.baseUnit, Number(gap.expected)),
+                received: quantityLabel(gap.baseUnit, Number(gap.received)),
+              })
+            )
+            .join(" · "),
+        }
+      }
+      case NotificationType.transferReceived: {
+        const gaps = params.discrepancies ?? []
+        return {
+          title: t("TRANSFER_RECEIVED.title", {
+            number: params.voucherNumber ?? "",
+            destination: params.warehouseName ?? "",
+          }),
+          detail:
+            gaps.length === 0
+              ? t("TRANSFER_RECEIVED.complete")
+              : gaps
+                  .slice(0, LISTED_ITEMS)
+                  .map((gap) =>
+                    t("TRANSFER_RECEIVED.gap", {
+                      name: gap.name,
+                      expected: quantityLabel(
+                        gap.baseUnit,
+                        Number(gap.expected)
+                      ),
+                      received: quantityLabel(
+                        gap.baseUnit,
+                        Number(gap.received)
+                      ),
+                    })
+                  )
+                  .join(" · "),
         }
       }
     }

@@ -13,6 +13,9 @@ export const Routes = {
   vouchers: "/bons",
   newReceipt: "/bons/reception",
   newIssue: "/bons/sortie",
+  newTransfer: "/bons/transfert",
+  newDamage: "/bons/casse",
+  newAdjustment: "/bons/ajustement",
   stock: "/stock",
   suppliers: "/fournisseurs",
   newSupplier: "/fournisseurs/nouveau",
@@ -33,6 +36,8 @@ export const RecordRoutes = {
   item: (id: string) => `${Routes.items}/${id}`,
   warehouse: (id: string) => `${Routes.warehouses}/${id}`,
   voucher: (id: string) => `${Routes.vouchers}/${id}`,
+  /** Réception d'un transfert au dépôt d'arrivée (D27). */
+  transferReceipt: (id: string) => `${Routes.vouchers}/${id}/receptionner`,
   supplier: (id: string) => `${Routes.suppliers}/${id}`,
   member: (userId: string) => `${Routes.team}/${userId}`,
   invitation: (token: string) =>

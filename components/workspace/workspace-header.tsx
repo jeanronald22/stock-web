@@ -3,12 +3,13 @@
 import { CircleHelpIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 
-import { KreskalaLogo } from "@/components/brand/kreskala-logo"
 import { NotificationBell } from "@/components/notifications/notification-bell"
 import { useCurrentTour } from "@/components/tour/tour-provider"
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
+
+import { OrganizationSwitcher } from "./organization-switcher"
 
 export function WorkspaceHeader() {
   const t = useTranslations("workspace")
@@ -21,7 +22,7 @@ export function WorkspaceHeader() {
         aria-label={t("toggleSidebar")}
         {...(isMobile ? tourAnchor(TourAnchors.menuButton) : {})}
       />
-      <KreskalaLogo variant="symbol" className="size-7 md:hidden" />
+      <OrganizationSwitcher />
       <div className="flex-1" />
       <Button
         variant="ghost"

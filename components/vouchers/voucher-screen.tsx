@@ -1,6 +1,11 @@
 "use client"
 
-import { DownloadIcon, LockIcon, PrinterIcon } from "lucide-react"
+import {
+  DownloadIcon,
+  LockIcon,
+  PackageCheckIcon,
+  PrinterIcon,
+} from "lucide-react"
 import Link from "next/link"
 import { useFormatter, useTranslations } from "next-intl"
 
@@ -20,12 +25,19 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
+import { useStockAccess } from "@/components/workspace/stock-access"
+import { StockPermission } from "@/lib/api/stock"
 import { useVoucher } from "@/lib/api/voucher-queries"
-import { VoucherType } from "@/lib/api/vouchers"
+import { movementOf, TransferState, VoucherType } from "@/lib/api/vouchers"
 import { RecordRoutes, Routes } from "@/lib/routes"
 
 import { useVoucherPdf } from "./use-voucher-pdf"
-import { VoucherTypeBadge } from "./vouchers-screen"
+import { VoucherPhotos } from "./voucher-photos"
+import {
+  DiscrepancyBadge,
+  TransferStateBadge,
+  VoucherTypeBadge,
+} from "./vouchers-screen"
 
 /** Bon validé : en lecture seule, une correction passe par un nouveau bon. */
 export function VoucherScreen({ id }: { id: string }) {
@@ -33,6 +45,7 @@ export function VoucherScreen({ id }: { id: string }) {
   const format = useFormatter()
   const quantityLabel = useQuantityLabel()
   const voucher = useVoucher(id)
+  const { can, covers } = useStockAccess()
 
   if (voucher.isPending) {
     return (
@@ -64,8 +77,20 @@ export function VoucherScreen({ id }: { id: string }) {
 
   const data = voucher.data
   const receipt = data.type === VoucherType.receipt
+  const adjustment = data.type === VoucherType.adjustment
+  // Envoi : départ ici, arrivée en destination. Réception de transfert : départ en source.
+  const from = data.destination ? data.warehouse : data.source
+  const to = data.destination ?? (data.source ? data.warehouse : null)
+  const linked = data.receipt ?? data.transfer
   const facts = [
-    { label: t("vouchers.detail.warehouse"), value: data.warehouse.name },
+    ...(from && to
+      ? [
+          { label: t("vouchers.detail.from"), value: from.name },
+          { label: t("vouchers.detail.to"), value: to.name },
+        ]
+      : [
+          { label: t("vouchers.detail.warehouse"), value: data.warehouse.name },
+        ]),
     {
       label: t("vouchers.detail.date"),
       value: format.dateTime(new Date(data.occurredAt), { dateStyle: "long" }),
@@ -75,6 +100,10 @@ export function VoucherScreen({ id }: { id: string }) {
         ? t("vouchers.detail.supplier")
         : t("vouchers.detail.customer"),
       value: data.counterparty,
+    },
+    data.reason && {
+      label: t("vouchers.detail.reason"),
+      value: t(`vouchers.reasons.${data.reason}.label`),
     },
     data.documentReference && {
       label: t("vouchers.detail.reference"),
@@ -100,7 +129,23 @@ export function VoucherScreen({ id }: { id: string }) {
         actions={
           <>
             <VoucherTypeBadge type={data.type} />
+            {data.transferState && (
+              <TransferStateBadge state={data.transferState} />
+            )}
+            {data.hasDiscrepancy && <DiscrepancyBadge />}
             <VoucherPdfActions id={data.id} />
+            {data.transferState === TransferState.inTransit &&
+              data.destination &&
+              covers(data.destination.id) &&
+              can(StockPermission.recordMovements) && (
+                <Link
+                  href={RecordRoutes.transferReceipt(data.id)}
+                  className={buttonVariants()}
+                >
+                  <PackageCheckIcon />
+                  {t("vouchers.receive.action")}
+                </Link>
+              )}
           </>
         }
       />
@@ -112,6 +157,27 @@ export function VoucherScreen({ id }: { id: string }) {
           </div>
         ))}
       </dl>
+
+      {linked && (
+        <p className="mt-4 text-sm text-muted-foreground">
+          {t(
+            data.receipt
+              ? "vouchers.detail.receivedBy"
+              : "vouchers.detail.concludes",
+            {
+              date: format.dateTime(new Date(linked.occurredAt), {
+                dateStyle: "long",
+              }),
+            }
+          )}{" "}
+          <Link
+            href={RecordRoutes.voucher(linked.id)}
+            className="font-mono font-semibold text-foreground hover:underline"
+          >
+            {linked.number}
+          </Link>
+        </p>
+      )}
 
       <div className="mt-6 overflow-hidden rounded-2xl border">
         <Table>
@@ -170,14 +236,55 @@ export function VoucherScreen({ id }: { id: string }) {
                   )}
                 </TableCell>
                 <TableCell className="pr-4 text-right font-semibold tabular-nums">
-                  {receipt ? "+" : "−"}{" "}
-                  {quantityLabel(line.baseUnit, line.quantity)}
+                  <MovementLabel
+                    movement={movementOf(data.type, line)}
+                    format={(quantity) =>
+                      quantityLabel(line.baseUnit, quantity)
+                    }
+                  />
+                  {line.expectedQuantity !== null &&
+                    (adjustment ? (
+                      <p className="text-xs font-normal text-muted-foreground">
+                        {t("vouchers.detail.counted", {
+                          book: quantityLabel(
+                            line.baseUnit,
+                            line.expectedQuantity
+                          ),
+                          counted: quantityLabel(line.baseUnit, line.quantity),
+                        })}
+                      </p>
+                    ) : (
+                      line.expectedQuantity !== line.quantity && (
+                        <p className="text-xs font-normal text-warning-muted-foreground">
+                          {t(
+                            receipt
+                              ? "vouchers.detail.announced"
+                              : "vouchers.detail.expected",
+                            {
+                              quantity: quantityLabel(
+                                line.baseUnit,
+                                line.expectedQuantity
+                              ),
+                            }
+                          )}
+                        </p>
+                      )
+                    ))}
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
+
+      {data.type === VoucherType.damage && (
+        <VoucherPhotos
+          voucher={data}
+          canAdd={
+            can(StockPermission.correctStock) && covers(data.warehouse.id)
+          }
+        />
+      )}
 
       {data.note && (
         <div className="mt-6 rounded-2xl border p-5">
@@ -192,6 +299,24 @@ export function VoucherScreen({ id }: { id: string }) {
         {t("vouchers.detail.immutable")}
       </p>
     </PageBody>
+  )
+}
+
+/** « + 12 pièces », « − 3 pièces », ou « inchangé » pour un comptage conforme. */
+function MovementLabel({
+  movement,
+  format,
+}: {
+  movement: number
+  format: (quantity: number) => string
+}) {
+  const t = useTranslations("vouchers.detail")
+  if (movement === 0)
+    return <span className="text-muted-foreground">{t("unchanged")}</span>
+  return (
+    <>
+      {movement > 0 ? "+" : "−"} {format(Math.abs(movement))}
+    </>
   )
 }
 

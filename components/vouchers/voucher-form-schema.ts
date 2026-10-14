@@ -7,9 +7,13 @@ import {
   type Packaging,
 } from "@/lib/api/stock"
 import {
+  correctionTypes,
+  OTHER_REASON,
   VoucherLimits,
   VoucherType,
+  type EntryType,
   type VoucherInput,
+  type VoucherReason,
 } from "@/lib/api/vouchers"
 import { parseQuantity } from "@/lib/forms/quantity"
 
@@ -25,6 +29,8 @@ export type VoucherFormMessages = {
   batchRequired: string
   linesRequired: string
   futureDate: string
+  reasonRequired: string
+  noteRequired: string
 }
 
 /** Copie de l'article choisi, pour convertir et vérifier la saisie sans relire l'API. */
@@ -38,13 +44,20 @@ const itemSnapshot = z.object({
 
 export function voucherFormSchema(
   messages: VoucherFormMessages,
-  today: string
+  today: string,
+  type: EntryType
 ) {
+  const transfer = type === VoucherType.transferOut
+  const correction = correctionTypes.has(type)
+  // Seul un comptage peut trouver zéro ; une autre ligne déplace une quantité.
+  const zeroAllowed = type === VoucherType.adjustment
   const text = (max: number) =>
     z.string().trim().max(max, messages.tooLong(max))
   return z
     .object({
       warehouseId: z.string().min(1, messages.required),
+      // Envoi de transfert : le dépôt d'arrivée, autre que celui de départ.
+      destinationWarehouseId: z.string(),
       // Réception : fournisseur de l'annuaire (son nom remplace le champ libre).
       supplier: z.custom<{ id: string; name: string } | null>(),
       lines: z
@@ -56,10 +69,14 @@ export function voucherFormSchema(
             quantity: z.string(),
             unit: z.string(),
             batch: text(VoucherLimits.batch),
+            // Réception : quantité annoncée par le bon de livraison, vide si non saisie.
+            expected: z.string(),
           })
         )
         .min(1, messages.linesRequired)
         .max(VoucherLimits.lines),
+      // Casse et ajustement : le motif (vide pour les autres bons).
+      reason: z.string(),
       counterparty: text(VoucherLimits.counterparty),
       documentReference: text(VoucherLimits.documentReference),
       note: text(VoucherLimits.note),
@@ -69,8 +86,29 @@ export function voucherFormSchema(
         .refine((date) => date <= today, messages.futureDate),
     })
     .superRefine((values, context) => {
+      if (transfer && !values.destinationWarehouseId)
+        context.addIssue({
+          code: "custom",
+          path: ["destinationWarehouseId"],
+          message: messages.required,
+        })
+      if (correction && !values.reason)
+        context.addIssue({
+          code: "custom",
+          path: ["reason"],
+          message: messages.reasonRequired,
+        })
+      if (correction && values.reason === OTHER_REASON && !values.note.trim())
+        context.addIssue({
+          code: "custom",
+          path: ["note"],
+          message: messages.noteRequired,
+        })
       values.lines.forEach((line, index) => {
-        const issue = (field: "quantity" | "batch", message: string) =>
+        const issue = (
+          field: "quantity" | "batch" | "expected",
+          message: string
+        ) =>
           context.addIssue({
             code: "custom",
             path: ["lines", index, field],
@@ -78,13 +116,17 @@ export function voucherFormSchema(
           })
         const entered = parseQuantity(line.quantity)
         if (entered === null) return issue("quantity", messages.invalidNumber)
-        if (entered <= 0) return issue("quantity", messages.positive)
-        const base = baseQuantity(line.item, entered, line.unit)
-        if (
-          wholeQuantityUnits.has(line.item.baseUnit) &&
-          !Number.isInteger(base)
-        )
-          issue("quantity", messages.wholeNumber)
+        if (entered <= 0 && !(zeroAllowed && entered === 0))
+          return issue("quantity", messages.positive)
+        const whole = (value: number) =>
+          !wholeQuantityUnits.has(line.item.baseUnit) ||
+          Number.isInteger(baseQuantity(line.item, value, line.unit))
+        if (!whole(entered)) issue("quantity", messages.wholeNumber)
+        if (line.expected.trim()) {
+          const expected = parseQuantity(line.expected)
+          if (expected === null) issue("expected", messages.invalidNumber)
+          else if (!whole(expected)) issue("expected", messages.wholeNumber)
+        }
         if (line.item.batchTracking && !line.batch.trim())
           issue("batch", messages.batchRequired)
       })
@@ -121,6 +163,7 @@ export function newLine(item: Item): VoucherFormLine {
     quantity: "",
     unit: BASE_UNIT_CHOICE,
     batch: "",
+    expected: "",
   }
 }
 
@@ -133,7 +176,7 @@ export function todayOn(): string {
 }
 
 export function toVoucherInput(
-  type: VoucherType,
+  type: EntryType,
   values: VoucherFormValues,
   today: string
 ): VoucherInput {
@@ -149,11 +192,22 @@ export function toVoucherInput(
     counterparty: values.counterparty || undefined,
     documentReference: values.documentReference || undefined,
     note: values.note || undefined,
+    destinationWarehouseId:
+      type === VoucherType.transferOut
+        ? values.destinationWarehouseId
+        : undefined,
+    reason: correctionTypes.has(type)
+      ? (values.reason as VoucherReason)
+      : undefined,
     lines: values.lines.map((line) => ({
       itemId: line.itemId,
       quantity: parseQuantity(line.quantity) ?? 0,
       packagingName: line.unit === BASE_UNIT_CHOICE ? undefined : line.unit,
       batch: line.item.batchTracking ? line.batch.trim() : undefined,
+      expectedQuantity:
+        type === VoucherType.receipt && line.expected.trim()
+          ? (parseQuantity(line.expected) ?? undefined)
+          : undefined,
     })),
   }
 }

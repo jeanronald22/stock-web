@@ -11,7 +11,12 @@ import { useActiveOrganization } from "@/lib/organization/active-organization"
 
 import { useApi } from "./api-provider"
 import { stockKeys } from "./stock-queries"
-import type { StockSearch, VoucherInput, VoucherSearch } from "./vouchers"
+import type {
+  StockSearch,
+  TransferReceiptInput,
+  VoucherInput,
+  VoucherSearch,
+} from "./vouchers"
 
 /** Sous la clé du stock de l'entreprise : un bon enregistré rafraîchit aussi articles et dépôts. */
 export const voucherKeys = {
@@ -83,6 +88,42 @@ export function useItemStock(itemId: string | undefined) {
     queryKey: voucherKeys.itemStock(organizationId, itemId ?? ""),
     queryFn: () => vouchers.itemStock(itemId!),
     enabled: !!organizationId && !!itemId,
+  })
+}
+
+export function useReceiveTransfer() {
+  const { vouchers } = useApi()
+  const queryClient = useQueryClient()
+  const organizationId = useOrganizationId()
+  return useMutation({
+    mutationFn: ({
+      transferId,
+      id,
+      input,
+    }: {
+      transferId: string
+      id: string
+      input: TransferReceiptInput
+    }) => vouchers.receiveTransfer(transferId, id, input),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: stockKeys.all(organizationId),
+      }),
+  })
+}
+
+export function useAddVoucherPhoto() {
+  const { vouchers } = useApi()
+  const queryClient = useQueryClient()
+  const organizationId = useOrganizationId()
+  return useMutation({
+    mutationFn: ({ id, file }: { id: string; file: File }) =>
+      vouchers.addPhoto(id, file),
+    onSuccess: (voucher) =>
+      queryClient.setQueryData(
+        voucherKeys.voucher(organizationId, voucher.id),
+        voucher
+      ),
   })
 }
 
