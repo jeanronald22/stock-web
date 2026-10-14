@@ -1,0 +1,420 @@
+<title>Modèle de données Plateforme & Stock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: reference sheet. Principles first, then one block per module (diagram + table cards), then a worked example. Green = Plateforme, ochre = Stock (same family as the architecture page) */
+:root {
+  --bg: #F2F5F2;
+  --surface: #FFFFFF;
+  --fg: #16231E;
+  --muted: #5A6A63;
+  --line: #D3DCD7;
+  --line-strong: #B5C3BC;
+  --plat: #1E6E5A;
+  --plat-soft: #E1EFEA;
+  --stock: #A85A12;
+  --stock-soft: #F7EADB;
+  --pos: #1E7A3E;
+  --neg: #B03A2E;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1613; --surface: #17211D; --fg: #E4EDE9; --muted: #93A49C; --line: #2A3833; --line-strong: #3B4C45;
+    --plat: #55C2A2; --plat-soft: #18332B; --stock: #E8A35C; --stock-soft: #3A2716; --pos: #5FCB86; --neg: #F08174;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1613; --surface: #17211D; --fg: #E4EDE9; --muted: #93A49C; --line: #2A3833; --line-strong: #3B4C45;
+  --plat: #55C2A2; --plat-soft: #18332B; --stock: #E8A35C; --stock-soft: #3A2716; --pos: #5FCB86; --neg: #F08174;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 1rem; line-height: 1.55; }
+.wrap { max-width: 76rem; margin: 0 auto; padding: 0 16px; padding-block: 2.5rem 4rem; display: grid; gap: 3rem; }
+.prose { max-width: 44rem; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h1 { font-size: clamp(1.9rem, 4.5vw, 2.7rem); font-weight: 800; }
+h2 { font-size: 1.6rem; font-weight: 600; }
+h3 { font-size: 1.05rem; font-weight: 600; }
+p { margin: 0 0 .7rem; }
+.eyebrow { font-family: var(--mono); font-size: .76rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: .5rem; }
+code, .mono { font-family: var(--mono); font-size: .86em; }
+.lead { color: var(--muted); font-size: 1.08rem; margin-top: .8rem; }
+
+nav.toc { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.2rem; }
+nav.toc a { font-family: var(--mono); font-size: .8rem; text-decoration: none; color: var(--fg); border: 1px solid var(--line-strong); border-radius: 999px; padding: .3rem .8rem; }
+nav.toc a:hover, nav.toc a:focus-visible { border-color: var(--fg); outline: none; }
+
+section { display: grid; gap: 1.25rem; scroll-margin-top: 1rem; }
+.sec-head { display: grid; gap: .4rem; max-width: 46rem; }
+.schema-tag { font-family: var(--mono); font-size: .78rem; padding: .15rem .55rem; border-radius: 4px; justify-self: start; }
+.plat .schema-tag { background: var(--plat-soft); color: var(--plat); }
+.stock .schema-tag { background: var(--stock-soft); color: var(--stock); }
+
+.principles { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 1rem; }
+.pr { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.1rem; display: grid; gap: .35rem; align-content: start; min-width: 0; }
+.pr p { margin: 0; color: var(--muted); font-size: .95rem; }
+.pr .why { color: var(--fg); font-size: .88rem; }
+
+.er { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1rem; overflow-x: auto; }
+.er pre.mermaid { margin: 0; min-width: 640px; }
+.er-note { font-size: .9rem; color: var(--muted); }
+
+.groups { display: grid; gap: 1.75rem; }
+.group-title { font-family: var(--mono); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: .4rem; margin-bottom: .9rem; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: 1rem; align-items: start; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; min-width: 0; overflow: hidden; }
+.card header { padding: .85rem 1rem .7rem; display: grid; gap: .2rem; border-bottom: 1px solid var(--line); }
+.plat .card header { border-top: 3px solid var(--plat); }
+.stock .card header { border-top: 3px solid var(--stock); }
+.card .tname { font-family: var(--mono); font-weight: 500; font-size: .95rem; }
+.card .fr { font-family: var(--display); font-weight: 600; font-size: 1.05rem; }
+.card .desc { color: var(--muted); font-size: .88rem; margin: 0; }
+.cols { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.cols td { padding: .38rem 1rem; border-top: 1px solid var(--line); vertical-align: top; }
+.cols tr:first-child td { border-top: 0; }
+.cols td.c { font-family: var(--mono); white-space: nowrap; }
+.cols td.n { color: var(--muted); }
+.cols td.n .ty { font-family: var(--mono); font-size: .92em; color: var(--muted); opacity: .85; }
+.k { font-family: var(--mono); font-size: .68rem; padding: 0 .3rem; border-radius: 3px; margin-left: .35rem; border: 1px solid var(--line-strong); color: var(--muted); }
+.k.pk { color: var(--fg); border-color: var(--fg); }
+
+/* Worked example */
+.example { display: grid; gap: 1rem; }
+.story { display: grid; gap: 1rem; }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.1rem; display: grid; gap: .7rem; min-width: 0; }
+.step h3 { display: flex; gap: .6rem; align-items: baseline; flex-wrap: wrap; }
+.step .num { font-family: var(--mono); color: var(--stock); font-size: .9rem; }
+.rows { overflow-x: auto; }
+.rows table { border-collapse: collapse; font-size: .82rem; min-width: 34rem; width: 100%; }
+.rows th { text-align: left; font-family: var(--mono); font-weight: 500; font-size: .72rem; color: var(--muted); padding: .35rem .6rem; border-bottom: 1px solid var(--line-strong); white-space: nowrap; }
+.rows td { font-family: var(--mono); padding: .35rem .6rem; border-bottom: 1px solid var(--line); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.rows caption { text-align: left; font-family: var(--mono); font-size: .78rem; color: var(--stock); padding-bottom: .3rem; }
+.pos { color: var(--pos); font-weight: 500; }
+.neg { color: var(--neg); font-weight: 500; }
+.result { display: flex; flex-wrap: wrap; gap: .4rem 1rem; align-items: baseline; padding: .6rem .8rem; background: var(--stock-soft); border-radius: 6px; font-size: .95rem; }
+.result b { font-family: var(--display); font-size: 1.15rem; }
+.footnote { color: var(--muted); font-size: .9rem; max-width: 46rem; }
+</style>
+
+<main class="wrap">
+  <header class="prose">
+    <div class="eyebrow">MVP · PostgreSQL · 2 schémas</div>
+    <h1>Modèle de données Plateforme &amp; Stock</h1>
+    <p class="lead">Toutes les tables du MVP, avec leurs colonnes et un exemple réel tiré du terrain : une réception de carreaux, puis des sorties, chez une quincaillerie de Douala.</p>
+    <nav class="toc" aria-label="Sommaire">
+      <a href="#principes">Principes</a>
+      <a href="#plateforme">Plateforme · 16 tables</a>
+      <a href="#stock">Stock · 20 tables</a>
+      <a href="#exemple">Exemple pas à pas</a>
+    </nav>
+  </header>
+
+  <section id="principes">
+    <div class="sec-head">
+      <div class="eyebrow">Les règles qui guident tout le modèle</div>
+      <h2>Huit principes</h2>
+    </div>
+    <div class="principles" id="principles"></div>
+  </section>
+
+  <section id="plateforme" class="plat">
+    <div class="sec-head">
+      <span class="schema-tag">schéma platform</span>
+      <h2>Module Plateforme</h2>
+      <p>Le fichier clients de la marque : entreprises, membres, KYB, abonnements. Partagé par toutes les futures applications.</p>
+    </div>
+    <div class="er">
+<pre class="mermaid">
+erDiagram
+  country ||--o{ organization : "pays"
+  country ||--o{ plan_price : "prix local"
+  user_account ||--o{ membership : "appartient"
+  organization ||--o{ membership : "regroupe"
+  organization ||--o{ organization_identifier : "RCCM, NIU"
+  organization ||--o{ invitation : "invite"
+  organization ||--o{ kyb_document : "fournit"
+  organization ||--o{ kyb_decision : "historique"
+  organization ||--o{ subscription : "souscrit"
+  organization ||--o{ usage_record : "consomme"
+  app ||--o{ plan : "propose"
+  plan ||--o{ plan_price : "tarifs"
+  plan ||--o{ subscription : "formule"
+  subscription ||--o{ payment : "réglée par"
+  user_account ||--o{ device : "utilise"
+  device ||--o{ device_pin : "PIN"
+</pre>
+    </div>
+    <div class="groups" id="plat-groups"></div>
+  </section>
+
+  <section id="stock" class="stock">
+    <div class="sec-head">
+      <span class="schema-tag">schéma stock</span>
+      <h2>Module Stock</h2>
+      <p>Toutes les tables portent <code>organization_id</code>. Aucune clé étrangère ne pointe vers le schéma <code>platform</code> : les identifiants d'entreprise et d'utilisateur sont de simples UUID (règle D8).</p>
+    </div>
+    <div class="er">
+<pre class="mermaid">
+erDiagram
+  category ||--o{ product : "classe"
+  product ||--|{ sku : "variantes"
+  sku ||--o{ sku_unit : "conditionnements"
+  unit ||--o{ sku_unit : "unité"
+  sku ||--o{ lot : "lots et nuances"
+  sku ||--o{ sku_warehouse : "seuils"
+  warehouse ||--o{ sku_warehouse : "par dépôt"
+  warehouse ||--o{ location : "emplacements"
+  partner ||--o{ stock_document : "fournisseur ou client"
+  warehouse ||--o{ stock_document : "dépôt"
+  stock_document ||--|{ stock_document_line : "lignes"
+  sku ||--o{ stock_document_line : "article"
+  lot ||--o{ stock_document_line : "lot"
+  stock_document_line ||--|{ stock_movement : "génère"
+  stock_movement }o--|| stock_level : "met à jour"
+  warehouse ||--o{ inventory_count : "inventorie"
+  inventory_count ||--|{ inventory_count_line : "comptages"
+  ai_suggestion |o--o| stock_document : "pré-remplit"
+  stock_role ||--o{ stock_role_warehouse : "limité à"
+  warehouse ||--o{ stock_role_warehouse : "dépôt"
+</pre>
+    </div>
+    <p class="er-note">Le schéma ne montre que les liens principaux. <code>attachment</code> (photos) se rattache à plusieurs tables et n'y figure pas.</p>
+    <div class="groups" id="stock-groups"></div>
+  </section>
+
+  <section id="exemple" class="example">
+    <div class="sec-head">
+      <div class="eyebrow">Exemple fictif · Quincaillerie Ngono, Douala</div>
+      <h2>Ce qui s'écrit en base, pas à pas</h2>
+      <p>Article <code>CAR-GP-6060</code> : carreau granito Gris Perle 60x60. Unité de base : la pièce. 1 carton = 4 pièces = 1,44 m².</p>
+    </div>
+    <div class="story" id="story"></div>
+    <p class="footnote">On n'écrit jamais directement dans <code>stock_level</code>. On crée un bon, on le valide, il génère des mouvements, et les mouvements mettent à jour le stock. Une erreur se corrige par un nouveau bon, jamais en modifiant l'historique.</p>
+  </section>
+</main>
+
+<script>
+const principles = [
+  ["Deux schémas séparés", "<code>platform</code> et <code>stock</code> dans la même base PostgreSQL, sans clé étrangère entre eux.", "Stock pourra devenir un service séparé sans réécriture (D3, D8)."],
+  ["Chaque ligne appartient à une entreprise", "Toutes les tables de Stock portent <code>organization_id</code>. PostgreSQL vérifie en plus, avec la sécurité par ligne (RLS), qu'une entreprise ne voit jamais les données d'une autre.", "Une seule base pour tous les clients, sans risque de fuite."],
+  ["Le stock est un registre", "Chaque entrée ou sortie est un mouvement qu'on ne modifie jamais. <code>stock_level</code> n'est qu'un total recalculé à partir des mouvements.", "On sait toujours qui a fait quoi, quand, et pourquoi le stock est à ce chiffre."],
+  ["Quantités en unité de base", "Le stock est compté dans la plus petite unité (la pièce). Cartons et m² sont des conversions.", "Les cartons ouverts sont suivis naturellement : « 7 cartons + 2 pièces »."],
+  ["Produit → article → lot", "Un produit a des variantes (format, diamètre). Chaque variante est un article avec sa référence. Les lots (nuance, calibre) sont activés par article.", "Répond aux erreurs de nuance et aux confusions de référence vues sur le terrain."],
+  ["Pensé pour le hors-ligne", "Les identifiants (UUID) sont créés sur le téléphone. Le numéro de bon (BR-2026-00042) est donné par le serveur à la synchronisation. Chaque ligne a un <code>row_version</code>.", "Pas de doublons à la reconnexion, synchronisation par différence."],
+  ["L'IA propose, l'humain valide", "Chaque proposition de l'IA est gardée dans <code>ai_suggestion</code> et liée au bon qu'elle a pré-rempli. Elle ne crée jamais de mouvement directement.", "Traçabilité, mesure de la qualité, calcul des quotas."],
+  ["Le pays est une donnée", "Monnaie, langues, indicatif, fuseau horaire et identifiants d'entreprise (RCCM, NIU) sont dans la table <code>country</code>.", "Ouvrir le Sénégal ou la Côte d'Ivoire = ajouter une ligne."]
+];
+document.getElementById("principles").innerHTML = principles.map(([t, p, w]) =>
+  `<article class="pr"><h3>${t}</h3><p>${p}</p><p class="why">→ ${w}</p></article>`).join("");
+
+// [column, type, key, note]
+const C = {
+  id: ["id", "uuid", "PK", ""],
+  org: ["organization_id", "uuid", "", "entreprise propriétaire"],
+  created: ["created_at", "timestamptz", "", ""],
+  rv: ["row_version", "bigint", "", "pour la synchronisation"]
+};
+
+const platform = [
+  { group: "Identité et entreprises", tables: [
+    { n: "country", fr: "Pays", d: "Tout ce qui change d'un pays à l'autre.", c: [
+      ["code", "char(2)", "PK", "CM"], ["name", "text", "", "Cameroun"], ["currency", "char(3)", "", "XAF"],
+      ["locales", "text[]", "", "{fr, en}"], ["phone_prefix", "text", "", "+237"], ["timezone", "text", "", "Africa/Douala"],
+      ["business_id_types", "jsonb", "", "[\"RCCM\", \"NIU\"]"], ["active", "boolean", "", ""]]},
+    { n: "user_account", fr: "Utilisateur", d: "Une personne. La connexion est gérée par Keycloak, ici on garde le profil.", c: [
+      C.id, ["keycloak_id", "uuid", "UQ", "lien avec Keycloak"], ["phone_e164", "text", "UQ", "+2376…"], ["email", "text", "", "facultatif"],
+      ["first_name", "text", "", ""], ["last_name", "text", "", ""], ["locale", "text", "", "fr ou en"],
+      ["status", "text", "", "ACTIVE · DISABLED"], C.created]},
+    { n: "organization", fr: "Entreprise", d: "Le client qui paie. Une seule fiche pour toutes les applications.", c: [
+      C.id, ["name", "text", "", "Quincaillerie Ngono"], ["country_code", "char(2)", "FK", "→ country"], ["city", "text", "", "Douala"],
+      ["sector", "text", "", "Matériaux de construction"], ["phone_e164", "text", "", ""], ["address", "text", "", "facultatif"],
+      ["kyb_level", "smallint", "", "0 · 1 · 2"], ["kyb_status", "text", "", "NONE · PENDING · APPROVED · REJECTED"],
+      ["status", "text", "", "ACTIVE · SUSPENDED"], ["created_by", "uuid", "FK", "→ user_account"], C.created]},
+    { n: "organization_identifier", fr: "Identifiant légal", d: "Facultatif : les entreprises informelles restent acceptées.", c: [
+      C.id, ["organization_id", "uuid", "FK", ""], ["type", "text", "", "RCCM · NIU"], ["value", "text", "", ""], ["verified_at", "timestamptz", "", "null tant que non vérifié"]]},
+  ]},
+  { group: "Équipe", tables: [
+    { n: "membership", fr: "Membre", d: "Relie une personne à une entreprise, avec un rôle global. Unique par (entreprise, personne).", c: [
+      C.id, ["organization_id", "uuid", "FK", ""], ["user_id", "uuid", "FK", "→ user_account"],
+      ["role", "text", "", "OWNER · ADMIN · MEMBER"], ["status", "text", "", "ACTIVE · DISABLED"], ["joined_at", "timestamptz", "", ""]]},
+    { n: "invitation", fr: "Invitation", d: "Envoyée par WhatsApp. Peut porter directement le rôle dans une application.", c: [
+      C.id, ["organization_id", "uuid", "FK", ""], ["phone_e164", "text", "", "numéro invité"], ["role", "text", "", "rôle global"],
+      ["app_code", "text", "", "STOCK (facultatif)"], ["app_role", "text", "", "STOREKEEPER (facultatif)"],
+      ["token_hash", "text", "", "le lien n'est jamais stocké en clair"], ["status", "text", "", "PENDING · ACCEPTED · EXPIRED · REVOKED"],
+      ["expires_at", "timestamptz", "", ""], ["invited_by", "uuid", "FK", "→ user_account"]]},
+  ]},
+  { group: "KYB", tables: [
+    { n: "kyb_document", fr: "Document KYB", d: "Fichier chiffré dans un stockage privé, supprimé après la durée de conservation.", c: [
+      C.id, ["organization_id", "uuid", "FK", ""], ["type", "text", "", "ID_CARD · PASSPORT · RCCM · NIU · SHOP_PHOTO"],
+      ["storage_key", "text", "", "chemin dans le stockage privé"], ["status", "text", "", "PENDING · APPROVED · REJECTED"],
+      ["rejection_reason", "text", "", ""], ["reviewed_by", "uuid", "", "membre de votre équipe"], ["reviewed_at", "timestamptz", "", ""],
+      ["delete_after", "date", "", "conservation limitée"]]},
+    { n: "kyb_decision", fr: "Décision KYB", d: "Historique de chaque changement de niveau.", c: [
+      C.id, ["organization_id", "uuid", "FK", ""], ["from_level", "smallint", "", "0"], ["to_level", "smallint", "", "1"],
+      ["decision", "text", "", "APPROVED · REJECTED"], ["reason", "text", "", ""], ["decided_by", "uuid", "", ""], ["decided_at", "timestamptz", "", ""]]},
+  ]},
+  { group: "Offres et abonnements", tables: [
+    { n: "app", fr: "Application", d: "Une ligne par logiciel de la famille.", c: [
+      ["code", "text", "PK", "STOCK · RH · FACTU"], ["name", "text", "", "Stock"], ["status", "text", "", "ACTIVE · COMING_SOON"]]},
+    { n: "plan", fr: "Formule", d: "Les limites décident de ce qui est débloqué.", c: [
+      C.id, ["app_code", "text", "FK", "→ app"], ["code", "text", "", "TRIAL · STARTER · PRO"], ["name", "text", "", ""],
+      ["limits", "jsonb", "", "{\"warehouses\":3, \"users\":10, \"ai_per_month\":300}"]]},
+    { n: "plan_price", fr: "Prix par pays", d: "Montants en unité mineure (le franc CFA n'a pas de centimes).", c: [
+      C.id, ["plan_id", "uuid", "FK", ""], ["country_code", "char(2)", "FK", "CM"], ["currency", "char(3)", "", "XAF"],
+      ["amount_minor", "bigint", "", "montant"], ["period", "text", "", "MONTH · YEAR"]]},
+    { n: "subscription", fr: "Abonnement", d: "Un par (entreprise, application). C'est ici que l'accès est autorisé ou bloqué.", c: [
+      C.id, ["organization_id", "uuid", "FK", ""], ["app_code", "text", "FK", ""], ["plan_id", "uuid", "FK", ""],
+      ["status", "text", "", "TRIAL · ACTIVE · PAST_DUE · EXPIRED · CANCELLED"], ["trial_ends_at", "timestamptz", "", ""],
+      ["current_period_end", "timestamptz", "", "payé jusqu'au…"]]},
+    { n: "payment", fr: "Paiement", d: "Paiement de l'abonnement à votre SaaS (pas la facturation du client).", c: [
+      C.id, ["subscription_id", "uuid", "FK", ""], ["amount_minor", "bigint", "", ""], ["currency", "char(3)", "", "XAF"],
+      ["provider", "text", "", "MTN_MOMO · ORANGE_MONEY"], ["provider_ref", "text", "", "référence de l'opérateur"],
+      ["payer_phone", "text", "", ""], ["status", "text", "", "PENDING · SUCCEEDED · FAILED"], ["paid_at", "timestamptz", "", ""]]},
+    { n: "usage_record", fr: "Consommation", d: "Compte les appels IA pour appliquer les quotas de la formule.", c: [
+      C.id, ["organization_id", "uuid", "FK", ""], ["app_code", "text", "", "STOCK"], ["metric", "text", "", "AI_TEXT · AI_VOICE · AI_PHOTO"],
+      ["quantity", "integer", "", "1"], ["occurred_at", "timestamptz", "", ""]]},
+  ]},
+  { group: "Appareils", tables: [
+    { n: "device", fr: "Appareil", d: "Le gérant voit les téléphones connectés et peut en déconnecter un.", c: [
+      C.id, ["user_id", "uuid", "FK", "dernier utilisateur"], ["name", "text", "", "Tecno Spark, dépôt Bonabéri"], ["platform", "text", "", "android · ios · web"],
+      ["last_seen_at", "timestamptz", "", ""], ["revoked_at", "timestamptz", "", "null = actif"]]},
+    { n: "device_pin", fr: "PIN sur appareil", d: "Changement rapide d'utilisateur sur un téléphone partagé.", c: [
+      ["device_id", "uuid", "PK", ""], ["user_id", "uuid", "PK", ""], ["pin_hash", "text", "", "jamais en clair"], ["failed_attempts", "smallint", "", "blocage après 5"]]},
+  ]},
+];
+
+const stock = [
+  { group: "Droits dans Stock", tables: [
+    { n: "stock_role", fr: "Rôle Stock", d: "Le rôle métier d'une personne dans Stock, pour une entreprise.", c: [
+      C.id, C.org, ["user_id", "uuid", "", "UUID venant de la Plateforme"], ["role", "text", "", "MANAGER · CONTROLLER · STOREKEEPER · VIEWER"],
+      ["all_warehouses", "boolean", "", "false = limité aux dépôts listés"]]},
+    { n: "stock_role_warehouse", fr: "Accès par dépôt", d: "Ex. : Awa n'a accès qu'au dépôt Bonabéri.", c: [
+      ["stock_role_id", "uuid", "PK", ""], ["warehouse_id", "uuid", "PK", ""]]},
+  ]},
+  { group: "Lieux", tables: [
+    { n: "warehouse", fr: "Dépôt", d: "Magasin, dépôt ou entrepôt. Un dépôt virtuel « En transit » par entreprise sert aux transferts.", c: [
+      C.id, C.org, ["code", "text", "", "BNB"], ["name", "text", "", "Dépôt Bonabéri"], ["type", "text", "", "SHOP · DEPOT · TRANSIT"],
+      ["city", "text", "", "Douala"], ["active", "boolean", "", ""], C.rv]},
+    { n: "location", fr: "Emplacement", d: "Facultatif : allée, rayon, niveau.", c: [
+      C.id, C.org, ["warehouse_id", "uuid", "FK", ""], ["code", "text", "", "A-03-2"], ["label", "text", "", "Allée A, rayon 3, niveau 2"], ["active", "boolean", "", ""], C.rv]},
+  ]},
+  { group: "Catalogue", tables: [
+    { n: "category", fr: "Catégorie", d: "Arborescence libre.", c: [
+      C.id, C.org, ["parent_id", "uuid", "FK", "→ category"], ["name", "text", "", "Carreaux › Sol"], C.rv]},
+    { n: "unit", fr: "Unité", d: "Unités standard (organization_id vide) ou propres à l'entreprise.", c: [
+      C.id, ["organization_id", "uuid", "", "null = standard"], ["code", "text", "", "PIECE · CARTON · M2 · M · PAQUET · PALETTE · KG"],
+      ["name", "text", "", "Carton"], ["allows_decimal", "boolean", "", "oui pour m² et mètre"]]},
+    { n: "product", fr: "Produit", d: "La fiche commune à plusieurs variantes.", c: [
+      C.id, C.org, ["category_id", "uuid", "FK", ""], ["name", "text", "", "Carreau granito Gris Perle"], ["brand", "text", "", ""],
+      ["description", "text", "", ""], ["photo_id", "uuid", "FK", "→ attachment"], ["status", "text", "", "ACTIVE · ARCHIVED"], C.rv]},
+    { n: "sku", fr: "Article", d: "Ce qu'on stocke vraiment : une variante avec sa référence. Unique par (entreprise, code).", c: [
+      C.id, C.org, ["product_id", "uuid", "FK", ""], ["code", "text", "UQ", "CAR-GP-6060"], ["supplier_ref", "text", "", "référence fournisseur"],
+      ["barcode", "text", "", "facultatif"], ["attributes", "jsonb", "", "{\"format\":\"60x60\", \"finition\":\"mat\"}"],
+      ["base_unit_id", "uuid", "FK", "PIECE"], ["track_lots", "boolean", "", "true pour les carreaux"], ["status", "text", "", ""], C.rv]},
+    { n: "sku_unit", fr: "Conditionnement", d: "Conversions vers l'unité de base.", c: [
+      C.id, ["sku_id", "uuid", "FK", ""], ["unit_id", "uuid", "FK", ""], ["factor", "numeric(18,6)", "", "CARTON = 4 · M2 = 2,777778"],
+      ["is_default_receive", "boolean", "", "on reçoit en cartons"], ["is_default_issue", "boolean", "", "on sort en cartons"]]},
+    { n: "sku_warehouse", fr: "Réglage par dépôt", d: "Seuil d'alerte et emplacement habituel.", c: [
+      ["sku_id", "uuid", "PK", ""], ["warehouse_id", "uuid", "PK", ""], ["min_qty_base", "numeric(18,3)", "", "40 (= 10 cartons)"],
+      ["default_location_id", "uuid", "FK", ""], C.rv]},
+    { n: "lot", fr: "Lot", d: "Lot, nuance et calibre d'un même article. Unique par (article, lot, nuance, calibre).", c: [
+      C.id, C.org, ["sku_id", "uuid", "FK", ""], ["lot_code", "text", "", "L2409"], ["shade", "text", "", "nuance : B2"],
+      ["caliber", "text", "", "calibre : 9"], ["received_at", "date", "", ""], ["note", "text", "", ""], C.rv]},
+    { n: "partner", fr: "Tiers", d: "Fournisseurs, clients ou chantiers. Juste de quoi tracer les bons.", c: [
+      C.id, C.org, ["type", "text", "", "SUPPLIER · CUSTOMER · SITE"], ["name", "text", "", "Chantier Koné, Bonamoussadi"], ["phone_e164", "text", "", ""], C.rv]},
+  ]},
+  { group: "Bons et mouvements", tables: [
+    { n: "stock_document", fr: "Bon", d: "Réception, sortie, retour, transfert, casse ou ajustement. Créé sur le téléphone, même hors ligne.", c: [
+      ["id", "uuid", "PK", "créé sur le téléphone"], C.org, ["type", "text", "", "RECEIPT · ISSUE · RETURN · TRANSFER · DAMAGE · ADJUSTMENT"],
+      ["number", "text", "", "BR-2026-00042, donné par le serveur"], ["status", "text", "", "DRAFT · PENDING · VALIDATED · IN_TRANSIT · RECEIVED · CANCELLED"],
+      ["warehouse_id", "uuid", "FK", "dépôt concerné"], ["dest_warehouse_id", "uuid", "FK", "transfert uniquement"], ["partner_id", "uuid", "FK", ""],
+      ["external_ref", "text", "", "n° de facture ou de BL : FAC-8841"], ["source", "text", "", "MANUAL · AI_TEXT · AI_VOICE · AI_PHOTO"],
+      ["ai_suggestion_id", "uuid", "FK", ""], ["note", "text", "", ""], ["created_by", "uuid", "", ""], ["device_id", "uuid", "", ""],
+      ["occurred_at", "timestamptz", "", "heure sur le téléphone"], ["validated_by", "uuid", "", ""], ["validated_at", "timestamptz", "", ""],
+      ["synced_at", "timestamptz", "", "arrivée au serveur"], C.rv]},
+    { n: "stock_document_line", fr: "Ligne de bon", d: "Ce que l'utilisateur a saisi, et sa conversion.", c: [
+      C.id, ["document_id", "uuid", "FK", ""], ["sku_id", "uuid", "FK", ""], ["lot_id", "uuid", "FK", ""], ["location_id", "uuid", "FK", ""],
+      ["unit_id", "uuid", "FK", "unité saisie : CARTON"], ["qty_entered", "numeric(18,3)", "", "20"], ["qty_base", "numeric(18,3)", "", "80 pièces"],
+      ["qty_expected_base", "numeric(18,3)", "", "annoncé sur le BL : 88"], ["qty_received_base", "numeric(18,3)", "", "transfert reçu à l'arrivée"],
+      ["reason", "text", "", "casse : DÉCHARGEMENT"], ["photo_id", "uuid", "FK", "photo de la casse"], ["unit_cost_minor", "bigint", "", "facultatif, pour valoriser le stock"]]},
+    { n: "stock_movement", fr: "Mouvement", d: "Le registre. Écrit à la validation d'un bon, jamais modifié ni supprimé.", c: [
+      C.id, C.org, ["document_id", "uuid", "FK", ""], ["line_id", "uuid", "FK", ""], ["warehouse_id", "uuid", "FK", ""], ["location_id", "uuid", "FK", ""],
+      ["sku_id", "uuid", "FK", ""], ["lot_id", "uuid", "FK", ""], ["qty_delta_base", "numeric(18,3)", "", "+80 ou −48"],
+      ["occurred_at", "timestamptz", "", ""], ["recorded_at", "timestamptz", "", ""], ["user_id", "uuid", "", ""]]},
+    { n: "stock_level", fr: "Stock actuel", d: "Total par (dépôt, article, lot, emplacement), mis à jour avec chaque mouvement pour lire vite.", c: [
+      C.org, ["warehouse_id", "uuid", "PK", ""], ["sku_id", "uuid", "PK", ""], ["lot_id", "uuid", "PK", "null si non suivi"], ["location_id", "uuid", "PK", "null si non suivi"],
+      ["qty_base", "numeric(18,3)", "", "30"], ["updated_at", "timestamptz", "", ""], C.rv]},
+  ]},
+  { group: "Inventaire", tables: [
+    { n: "inventory_count", fr: "Inventaire", d: "Complet ou tournant. À la clôture, les écarts créent un bon d'ajustement.", c: [
+      C.id, C.org, ["warehouse_id", "uuid", "FK", ""], ["type", "text", "", "FULL · CYCLE"], ["status", "text", "", "OPEN · COUNTING · REVIEW · CLOSED"],
+      ["scope", "jsonb", "", "{\"categories\":[\"Carreaux\"]}"], ["started_by", "uuid", "", ""], ["started_at", "timestamptz", "", ""],
+      ["closed_at", "timestamptz", "", ""], ["adjustment_document_id", "uuid", "FK", "→ stock_document"], C.rv]},
+    { n: "inventory_count_line", fr: "Ligne de comptage", d: "Avec double comptage quand l'écart est important.", c: [
+      C.id, ["count_id", "uuid", "FK", ""], ["sku_id", "uuid", "FK", ""], ["lot_id", "uuid", "FK", ""], ["location_id", "uuid", "FK", ""],
+      ["qty_expected_base", "numeric(18,3)", "", "stock théorique au départ"], ["qty_counted_base", "numeric(18,3)", "", ""], ["counted_by", "uuid", "", ""],
+      ["qty_recount_base", "numeric(18,3)", "", "second comptage"], ["recounted_by", "uuid", "", ""], ["variance_reason", "text", "", ""], C.rv]},
+  ]},
+  { group: "Fichiers et IA", tables: [
+    { n: "attachment", fr: "Pièce jointe", d: "Photos de produits, de casse, de bons de livraison.", c: [
+      C.id, C.org, ["storage_key", "text", "", ""], ["mime", "text", "", "image/jpeg"], ["size_bytes", "integer", "", ""],
+      ["owner_type", "text", "", "PRODUCT · DOCUMENT_LINE · AI_SUGGESTION"], ["owner_id", "uuid", "", ""], ["created_by", "uuid", "", ""], C.created]},
+    { n: "ai_suggestion", fr: "Proposition IA", d: "Ce qu'on a demandé à l'IA, ce qu'elle a proposé, et ce que l'humain en a fait.", c: [
+      C.id, C.org, ["user_id", "uuid", "", ""], ["input_type", "text", "", "TEXT · VOICE · PHOTO"],
+      ["input_text", "text", "", "« sorti 12 cartons gris 60x60 lot B chantier Koné »"], ["input_attachment_id", "uuid", "FK", "audio ou photo"],
+      ["model", "text", "", ""], ["proposal", "jsonb", "", "bon pré-rempli"], ["status", "text", "", "PROPOSED · ACCEPTED · EDITED · REJECTED"],
+      ["document_id", "uuid", "FK", "bon créé"], ["latency_ms", "integer", "", ""], C.created]},
+  ]},
+];
+
+function renderGroups(el, groups) {
+  el.innerHTML = groups.map(g => `
+    <div><div class="group-title">${g.group}</div><div class="cards">${g.tables.map(t => `
+      <article class="card">
+        <header><span class="tname">${t.n}</span><span class="fr">${t.fr}</span><p class="desc">${t.d}</p></header>
+        <table class="cols"><tbody>${t.c.map(([c, ty, k, n]) => `
+          <tr><td class="c">${c}${k ? `<span class="k${k === "PK" ? " pk" : ""}">${k}</span>` : ""}</td>
+          <td class="n"><span class="ty">${ty}</span>${n ? ` · ${n}` : ""}</td></tr>`).join("")}
+        </tbody></table>
+      </article>`).join("")}</div></div>`).join("");
+}
+renderGroups(document.getElementById("plat-groups"), platform);
+renderGroups(document.getElementById("stock-groups"), stock);
+
+const steps = [
+  { t: "Réception du fournisseur", sub: "Le BL annonce 22 cartons, 20 arrivent. Lot L2409, nuance B2, calibre 9.",
+    tables: [
+      { cap: "stock_document", h: ["number", "type", "status", "warehouse", "partner", "external_ref"],
+        r: [["BR-2026-00042", "RECEIPT", "VALIDATED", "Dépôt Bonabéri", "Céramiques du Littoral", "BL-5531"]] },
+      { cap: "stock_document_line", h: ["sku", "lot", "unit", "qty_entered", "qty_base", "qty_expected_base"],
+        r: [["CAR-GP-6060", "L2409 · B2 · 9", "CARTON", "20", "80", "88"]] },
+      { cap: "stock_movement", h: ["sku", "lot", "warehouse", "qty_delta_base"], r: [["CAR-GP-6060", "L2409", "BNB", "<span class=pos>+80</span>"]] },
+    ], res: ["80 pièces", "20 cartons · 28,8 m²", "L'écart de 2 cartons avec le BL reste visible pour la réclamation."] },
+  { t: "Sortie vers un chantier, saisie par l'IA", sub: "Awa dicte : « sorti 12 cartons gris 60x60 lot B chantier Koné ». Elle vérifie et valide.",
+    tables: [
+      { cap: "ai_suggestion", h: ["input_type", "status", "document"], r: [["VOICE", "ACCEPTED", "BS-2026-00118"]] },
+      { cap: "stock_document", h: ["number", "type", "source", "partner", "external_ref"], r: [["BS-2026-00118", "ISSUE", "AI_VOICE", "Chantier Koné", "FAC-8841"]] },
+      { cap: "stock_movement", h: ["sku", "lot", "warehouse", "qty_delta_base"], r: [["CAR-GP-6060", "L2409", "BNB", "<span class=neg>−48</span>"]] },
+    ], res: ["32 pièces", "8 cartons", "Sous le seuil de 40 pièces (10 cartons) : alerte de réapprovisionnement."] },
+  { t: "Vente de 2 pièces dans un carton ouvert", sub: "Le cas « cartons ouverts » du questionnaire : aucune manipulation spéciale.",
+    tables: [
+      { cap: "stock_document_line", h: ["sku", "unit", "qty_entered", "qty_base"], r: [["CAR-GP-6060", "PIECE", "2", "2"]] },
+      { cap: "stock_movement", h: ["sku", "lot", "warehouse", "qty_delta_base"], r: [["CAR-GP-6060", "L2409", "BNB", "<span class=neg>−2</span>"]] },
+    ], res: ["30 pièces", "7 cartons + 2 pièces", "Le carton entamé reste suivi à la pièce près."] },
+];
+document.getElementById("story").innerHTML = steps.map((s, i) => `
+  <article class="step">
+    <h3><span class="num">${i + 1}</span>${s.t}</h3>
+    <p style="margin:0;color:var(--muted)">${s.sub}</p>
+    ${s.tables.map(tb => `<div class="rows"><table><caption>${tb.cap}</caption>
+      <thead><tr>${tb.h.map(h => `<th>${h}</th>`).join("")}</tr></thead>
+      <tbody>${tb.r.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`).join("")}
+    <div class="result"><span>stock_level :</span><b>${s.res[0]}</b><span>affiché « ${s.res[1]} »</span>${s.res[2] ? `<span style="color:var(--muted)">${s.res[2]}</span>` : ""}</div>
+  </article>`).join("");
+</script>

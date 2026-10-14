@@ -17,6 +17,7 @@ import { useErrorMessage } from "@/lib/api/use-error-message"
 import { Routes } from "@/lib/routes"
 
 import { ItemForm } from "./item-form"
+import { ItemStockPanel } from "./item-stock-panel"
 
 function FormSkeleton() {
   return (
@@ -96,6 +97,10 @@ function ItemDetails({
     <PageBody>
       <PageHeader
         title={item.name}
+        breadcrumbs={[
+          { label: t("items.title"), href: Routes.items },
+          { label: item.name },
+        ]}
         description={t(`units.${item.baseUnit}.label`)}
         className="mb-8"
         actions={
@@ -118,6 +123,7 @@ function ItemDetails({
           </>
         }
       />
+      <ItemStockPanel item={item} />
       <ItemForm item={item} warehouses={warehouses} onConflict={onReload} />
     </PageBody>
   )

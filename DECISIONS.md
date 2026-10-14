@@ -186,6 +186,68 @@ Côté utilisateur, ce sont les écrans de « Mon compte » : créer son entrepr
 - Politique de confidentialité passée en version 0.2 (photos, Cloudflare R2).
 - Listes : filtre « Actifs / Archivés » à côté des autres filtres, conservé dans l'adresse (`statut=archives`).
 
+## D21. Bons de réception et de sortie, registre du stock (2026-10-14)
+
+- Un bon est validé dès son enregistrement (pas de brouillon pour l'instant) et signé du nom de la personne. Numéro par type et par année : REC-2026-0001, SOR-2026-0001, sans trou (un bon refusé rend son numéro).
+- **Registre immuable** : bons, lignes et mouvements ne se modifient ni ne se suppriment ; la base l'impose (droits retirés au rôle applicatif, déclencheur pour tous). Une erreur se corrige par un nouveau bon.
+- **Pas de stock négatif** : une sortie est tout ou rien ; le décompte est atomique (deux sorties simultanées ne consomment pas le même stock) ; le refus détaille le disponible, affiché sous chaque ligne en cause.
+- Saisie en unité de base ou en conditionnement (converti) ; lot obligatoire pour un article suivi par lot (choisi parmi les lots en stock pour une sortie) ; pièces entières.
+- Une réception référence l'article dans le dépôt. L'unité de base d'un article se verrouille à son premier mouvement.
+- **Saisie rapide sur un seul écran**, sans assistant : la réception et la sortie se font plusieurs fois par jour, l'écran doit faire gagner du temps. Dernier dépôt déjà choisi ; recherche d'article au clavier, curseur sur la quantité à l'ajout, Entrée pour revenir à la recherche ; détails facultatifs à côté ; après validation, l'écran se vide pour le bon suivant (même dépôt, même date). Les assistants restent pour les créations occasionnelles (article, dépôt).
+- Autres écrans : liste des bons paginée et filtrée, fiche de bon en lecture seule, stock par dépôt avec lots et ruptures, stock sur la fiche de l'article.
+- Politique de confidentialité passée en version 0.3 (nom sur les bons, fournisseurs et clients).
+
+## D22. Fournisseurs, photos partout, bons imprimables (2026-10-14)
+
+- **Annuaire des fournisseurs** (nom unique, coordonnées facultatives) et **catalogue** de chacun : les articles qu'il livre. Le catalogue se remplit de lui-même à chaque réception, et peut aussi se modifier sur la fiche.
+- **Réception** : le fournisseur se choisit à côté du dépôt, ou se crée à la volée en tapant son nom ; ses articles sont proposés d'abord (« Tout le catalogue » d'un clic). Son nom du jour est recopié sur le bon. Une sortie garde un champ libre (client, chantier).
+- **Photo de l'article** partout où il est listé : tableaux des articles et du stock, recherche, lignes de saisie, fiche de bon, aperçu du dépôt, catalogue fournisseur, bon imprimé.
+- **Bon en PDF** (A4), généré dans l'application (@react-pdf/renderer, chargé au premier usage) : entreprise, numéro, dépôt, fournisseur ou client, lignes, cases de signature, pied de page en bas de chaque page avec sa numérotation. « Télécharger le PDF » l'enregistre (REC-2026-0001.pdf) ; « Imprimer » ouvre la boîte d'impression sur ce même PDF. Depuis la fiche du bon et depuis le menu de chaque ligne de la liste. Pas de photo sur le document.
+- Politique de confidentialité passée en version 0.4 (coordonnées des fournisseurs).
+
+## D23. Revue : écarts au modèle validé (D10) et plan de réalignement (2026-10-14)
+
+Les articles, dépôts, fournisseurs et bons (D19 à D22) ont été construits sans repartir du modèle validé (`docs/modele-donnees.html`) ni du questionnaire terrain (`docs/questionnaire-controleur-stock.pdf`). Écarts constatés :
+
+| Modèle D10 | Construit | Écart |
+|---|---|---|
+| `category` (arborescence) | rien | **manquant** : pas de catégories |
+| `sku_warehouse.min_qty_base` (seuil par dépôt), « alerte avant rupture » (questionnaire, Q44) | référencement sans seuil | **manquant** : ni seuil ni alerte |
+| `product` → `sku` (variantes : format, diamètre ; `attributes`, `barcode`, `supplier_ref`) | un seul niveau « article » | **simplifié** : pas de variantes, ni code-barres, ni référence fournisseur |
+| `unit` + `sku_unit` (facteur, conditionnement par défaut en réception et en sortie) | unité fixe + conditionnements sans défaut | **simplifié** |
+| `lot` (code, nuance, calibre, date) | texte libre « lot » | **simplifié** : nuance et calibre non distingués |
+| `partner` SUPPLIER · CUSTOMER · SITE | fournisseurs seulement | **partiel** : clients et chantiers en texte libre |
+| `stock_document` RECEIPT · ISSUE · RETURN · TRANSFER · DAMAGE · ADJUSTMENT | réception et sortie | **manquant** : retours, transferts (dépôt « En transit »), casse (motif, photo), ajustements |
+| Statuts DRAFT · PENDING · VALIDATED · IN_TRANSIT · RECEIVED · CANCELLED | validé à l'enregistrement (D21) | **écart assumé**, à revoir avec les transferts |
+| `qty_expected_base` (quantité annoncée sur le BL) | rien | **manquant** : l'écart à la réception (Q11, Q12) n'est pas tracé |
+| `location` (emplacements, Q27-Q28) | rien | **manquant** |
+| `inventory_count` + lignes, double comptage | rien | **prévu**, pas fait |
+| `stock_role` + accès par dépôt | tout membre peut tout faire | **manquant** |
+| Hors ligne : `row_version`, `device_id`, `synced_at`, `source` | identifiants créés par le client seulement | **partiel** |
+| `attachment` (pièces jointes génériques) | `item_image` (photo d'article) | **spécialisé** |
+| `ai_suggestion` (D5, MVP) | rien | **prévu**, pas fait |
+
+Écrans demandés le 2026-10-14 : filtres combinables sur les articles (catégorie, plusieurs dépôts, fournisseur, état du stock), filtre des bons par période et par type, tri par date croissante ou décroissante.
+
+**Plan de réalignement**, par lots livrables :
+- **Lot A** (livré, voir D24) : catégories ; seuils par dépôt et alertes (stock bas, rupture) ; filtres combinables des articles et du stock ; filtres des bons (période, type, dépôt, fournisseur) et tri par date.
+- **Lot B** : tiers clients et chantiers ; bons de retour, de casse (motif, photo) et d'ajustement ; quantité annoncée sur le BL et écart à la réception ; transferts entre dépôts (en transit, quantité reçue à l'arrivée).
+- **Lot C** : inventaires (complet, tournant, double comptage, ajustement à la clôture) ; emplacements.
+- **Lot D** : produit et variantes, table des unités, lot avec nuance et calibre ; rôles Stock par dépôt ; synchronisation hors ligne ; IA (D5).
+
+**Règle** : toute nouvelle fonctionnalité part des tables de D10 ; un écart volontaire est noté ici avant le code.
+
+## D24. Lot A : catégories, seuils d'alerte, filtres combinables (2026-10-14)
+
+Réalignement sur D10 (tables `category`, `sku_warehouse.min_qty_base`) :
+- **Catégories** (`stock.category`, V11) : arborescence libre, nom unique parmi les catégories de même parent, déplacement sans boucle, suppression d'une catégorie vide seulement. Gérées depuis la liste des articles (bouton « Catégories »), choisies dans la fiche. Filtrer une catégorie inclut ses sous-catégories.
+- **Seuil d'alerte par dépôt** (`item_warehouse.min_quantity`, en unité de base) saisi sous chaque dépôt coché de la fiche article. Écart de nom assumé : `item_warehouse` tient le rôle de `sku_warehouse` tant que les variantes (lot D) n'existent pas.
+- **États** : seul un article dont le seuil est renseigné est surveillé. Rupture : stock nul dans le dépôt ; stock bas : positif et au seuil ou en dessous. Seuil 0 : alerte seulement en rupture ; vide : jamais d'alerte (un article proposé partout mais stocké à un seul endroit ne crie pas en permanence). Calcul par la vue `stock.item_stock_state` (`security_invoker`, la sécurité par ligne s'applique).
+- **Filtres combinables** dans l'adresse : plusieurs dépôts (OU entre eux), catégorie, fournisseur, niveau de stock (« à commander », « stock bas », « en rupture »), statut ; ET entre filtres. Dépôt et alerte portent sur la même ligne : « Akwa + à commander » ne montre que ce qui manque à Akwa. « Effacer les filtres » quand un filtre est posé.
+- **Stock et accueil** : badge et détail par dépôt (« Boutique Akwa : 3 pièces, seuil 5 ») ; l'accueil annonce les articles à commander quand il y en a.
+- **Bons** : période du/au (jours inclus, fuseau des dépôts, Africa/Douala), plusieurs dépôts, fournisseur, type ; tri par date de l'opération, plus récents ou plus anciens d'abord.
+- Limite connue : le filtre fournisseur liste 100 fournisseurs actifs (une page de l'API) ; au-delà, passer par la fiche du fournisseur.
+
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
 - [ ] Nom de la marque et nom du produit de stock (voir D7). Pistes : Kreskala, Kreskio, Tissero, NarvalWorks, FourmiLabs.

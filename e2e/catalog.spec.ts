@@ -3,6 +3,7 @@ import path from "node:path"
 import { expect, test, type Page } from "@playwright/test"
 
 import {
+  callApi,
   dismissTour,
   navigateTo,
   redirectApi,
@@ -133,23 +134,32 @@ test("articles et dépôts : un article proposé dans un dépôt et pas dans l'a
   ).toBeVisible()
   await page.getByRole("button", { name: "Annuler" }).click()
 
-  // Filtre par dépôt : chaque article n'apparaît que là où il est proposé.
-  await page.getByRole("combobox", { name: "Tous les dépôts" }).click()
-  await page.getByRole("option", { name: "Dépôt Bonabéri" }).click()
+  // Filtre par dépôt : chaque article n'apparaît que là où il est proposé ; deux dépôts cochés,
+  // les articles de l'un ou de l'autre.
+  const warehouseFilter = page.getByRole("button", {
+    name: "Filtrer par dépôt",
+  })
+  const pickWarehouse = async (name: string) => {
+    await warehouseFilter.click()
+    await page.getByRole("menuitemcheckbox", { name }).click()
+    await page.keyboard.press("Escape")
+  }
+  await pickWarehouse("Dépôt Bonabéri")
   await expect(
     page.getByRole("link", { name: /Carreau 60x60 beige/ })
   ).toBeVisible()
   await expect(page.getByRole("link", { name: /Ciment/ })).toBeHidden()
-  await page.getByRole("combobox", { name: "Tous les dépôts" }).click()
-  await page.getByRole("option", { name: "Boutique Akwa" }).click()
+  await pickWarehouse("Boutique Akwa")
+  await expect(warehouseFilter).toContainText("2 dépôts")
   await expect(
     page.getByRole("link", { name: /Ciment CPJ 42,5/ })
   ).toBeVisible()
+  await expect(page.getByRole("link", { name: /Carreau/ })).toBeVisible()
+  await pickWarehouse("Dépôt Bonabéri")
   await expect(page.getByRole("link", { name: /Carreau/ })).toBeHidden()
 
   // Recherche par un morceau du nom.
-  await page.getByRole("combobox", { name: "Tous les dépôts" }).click()
-  await page.getByRole("option", { name: "Tous les dépôts" }).click()
+  await page.getByRole("button", { name: "Effacer les filtres" }).click()
   await page.getByRole("searchbox").fill("carr")
   await expect(
     page.getByRole("link", { name: /Carreau 60x60 beige/ })
@@ -158,30 +168,13 @@ test("articles et dépôts : un article proposé dans un dépôt et pas dans l'a
 
   // Pagination : 26 articles de plus, créés directement par l'API avec la session de la page.
   await page.getByRole("searchbox").fill("")
-  await page.evaluate(async (count) => {
-    const token = Object.entries(localStorage).find(([key]) =>
-      key.startsWith("kreskala.oidc.user")
-    )?.[1]
-    const organizationId = Object.entries(localStorage).find(([key]) =>
-      key.startsWith("kreskala.active-organization.")
-    )?.[1]
-    const { access_token: accessToken } = JSON.parse(token ?? "{}")
-    for (let index = 1; index <= count; index++) {
-      await fetch("http://localhost:8081/v1/items", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "X-Organization-Id": organizationId ?? "",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: crypto.randomUUID(),
-          name: `Vis ${String(index).padStart(2, "0")}`,
-          baseUnit: "PIECE",
-        }),
-      })
-    }
-  }, 26)
+  for (let index = 1; index <= 26; index++) {
+    await callApi(page, "POST", "/v1/items", {
+      id: crypto.randomUUID(),
+      name: `Vis ${String(index).padStart(2, "0")}`,
+      baseUnit: "PIECE",
+    })
+  }
   await page.goto("/articles?lignes=25")
   await expect(page.getByText("1–25 sur 28")).toBeVisible()
   await page.getByRole("button", { name: "Page suivante" }).click()

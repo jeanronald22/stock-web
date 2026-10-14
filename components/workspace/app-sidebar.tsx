@@ -42,8 +42,8 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     isActive={isActiveEntry(entry, pathname)}
                     tooltip={t(entry.label)}
-                    // L'écran courant se repère d'un coup d'œil : couleur de la marque, texte appuyé.
-                    className="data-active:bg-primary/10 data-active:font-semibold data-active:text-primary data-active:hover:bg-primary/15 data-active:hover:text-primary"
+                    // L'écran courant se repère d'un coup d'œil : couleur de la marque ; bandeau plein en mode sombre.
+                    className="data-active:bg-primary/10 data-active:font-semibold data-active:text-primary data-active:hover:bg-primary/15 data-active:hover:text-primary dark:data-active:bg-primary dark:data-active:text-primary-foreground dark:data-active:hover:bg-primary/90 dark:data-active:hover:text-primary-foreground"
                     render={
                       <Link
                         href={entry.href}

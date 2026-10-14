@@ -18,6 +18,9 @@ export const TourAnchors = {
   itemBaseUnit: "item-base-unit",
   itemPackagings: "item-packagings",
   itemWarehouses: "item-warehouses",
+  newVoucher: "new-voucher",
+  stockWarehouseFilter: "stock-warehouse-filter",
+  newSupplier: "new-supplier",
 } as const
 export type TourAnchor = (typeof TourAnchors)[keyof typeof TourAnchors]
 
@@ -49,6 +52,9 @@ export const tours = {
     { anchor: TourAnchors.itemSearch, key: "search" },
     { anchor: TourAnchors.itemWarehouseFilter, key: "filter" },
   ],
+  vouchers: [{ anchor: TourAnchors.newVoucher, key: "create" }],
+  stock: [{ anchor: TourAnchors.stockWarehouseFilter, key: "filter" }],
+  suppliers: [{ anchor: TourAnchors.newSupplier, key: "create" }],
   itemForm: [
     { anchor: TourAnchors.itemBaseUnit, key: "baseUnit" },
     { anchor: TourAnchors.itemPackagings, key: "packagings" },

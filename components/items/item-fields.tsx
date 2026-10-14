@@ -2,8 +2,9 @@
 
 import { HashIcon, TagIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { Controller, type UseFormReturn } from "react-hook-form"
+import { Controller, useWatch, type UseFormReturn } from "react-hook-form"
 
+import { useCategoryTree } from "@/components/categories/use-category-tree"
 import {
   Field,
   FieldContent,
@@ -17,6 +18,13 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { baseUnits, type Warehouse } from "@/lib/api/stock"
@@ -28,7 +36,10 @@ import { WarehouseChecklist } from "./warehouse-checklist"
 
 type ItemFormProps = { form: UseFormReturn<ItemFormValues> }
 
-/** Nom, référence et description. */
+/** Valeur « Sans catégorie » : aucun identifiant ne peut la prendre. */
+const NO_CATEGORY = "none"
+
+/** Nom, référence, catégorie et description. */
 export function ItemIdentityFields({
   form,
   autoFocus,
@@ -76,6 +87,7 @@ export function ItemIdentityFields({
         </InputGroup>
         <FieldError errors={[errors.reference]} />
       </Field>
+      <ItemCategoryField form={form} />
       <Field data-invalid={!!errors.description}>
         <FieldLabel htmlFor="description">
           {t("items.form.description")} {optional}
@@ -89,6 +101,66 @@ export function ItemIdentityFields({
         <FieldError errors={[errors.description]} />
       </Field>
     </FieldGroup>
+  )
+}
+
+/** Catégorie de l'article ; les catégories se créent depuis la liste des articles. */
+function ItemCategoryField({ form }: ItemFormProps) {
+  const t = useTranslations()
+  const { nodes } = useCategoryTree()
+  const error = form.formState.errors.categoryId
+  const items = [
+    { value: NO_CATEGORY, label: t("items.form.noCategory") },
+    ...nodes.map((node) => ({ value: node.category.id, label: node.path })),
+  ]
+  return (
+    <Controller
+      control={form.control}
+      name="categoryId"
+      render={({ field }) => (
+        <Field data-invalid={!!error}>
+          <FieldLabel htmlFor="categoryId">
+            {t("items.form.category")}{" "}
+            <span className="font-normal text-muted-foreground">
+              ({t("common.optional")})
+            </span>
+          </FieldLabel>
+          <Select
+            items={items}
+            value={field.value ?? NO_CATEGORY}
+            onValueChange={(next) =>
+              field.onChange(!next || next === NO_CATEGORY ? null : next)
+            }
+          >
+            <SelectTrigger
+              id="categoryId"
+              className="w-full"
+              aria-invalid={!!error}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={NO_CATEGORY}>
+                {t("items.form.noCategory")}
+              </SelectItem>
+              {nodes.map((node) => (
+                <SelectItem key={node.category.id} value={node.category.id}>
+                  <span
+                    style={{ paddingInlineStart: `${node.depth * 0.875}rem` }}
+                  >
+                    {node.category.name}
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {nodes.length === 0 && (
+            <FieldDescription>{t("items.form.categoryHint")}</FieldDescription>
+          )}
+          <FieldError errors={[error]} />
+        </Field>
+      )}
+    />
   )
 }
 
@@ -134,6 +206,7 @@ export function ItemCountingFields({ form }: ItemFormProps) {
           </div>
         )}
       />
+      <FieldError errors={[form.formState.errors.baseUnit]} />
       <Controller
         control={form.control}
         name="batchTracking"
@@ -173,20 +246,28 @@ export function ItemWarehousesField({
   form,
   warehouses,
 }: ItemFormProps & { warehouses: Warehouse[] }) {
+  const t = useTranslations("units")
+  const baseUnit = useWatch({ control: form.control, name: "baseUnit" })
+  const errors = form.formState.errors.warehouses
   return (
     <>
       <Controller
         control={form.control}
-        name="warehouseIds"
+        name="warehouses"
         render={({ field }) => (
           <WarehouseChecklist
             warehouses={warehouses}
             value={field.value}
             onChange={field.onChange}
+            unitLabel={t(`${baseUnit}.short`)}
+            errors={Array.isArray(errors) ? errors : undefined}
           />
         )}
       />
-      <FieldError errors={[form.formState.errors.warehouseIds]} />
+      {/* Erreur de la liste elle-même (dépôt devenu indisponible), pas d'un seuil. */}
+      <FieldError
+        errors={[errors?.root ?? (Array.isArray(errors) ? undefined : errors)]}
+      />
     </>
   )
 }

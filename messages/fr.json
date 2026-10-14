@@ -7,7 +7,13 @@
     "items": "Articles",
     "newItem": "Nouvel article",
     "warehouses": "Dépôts",
-    "newWarehouse": "Nouveau dépôt"
+    "newWarehouse": "Nouveau dépôt",
+    "vouchers": "Bons",
+    "newReceipt": "Nouvelle réception",
+    "newIssue": "Nouvelle sortie",
+    "stock": "Stock",
+    "suppliers": "Fournisseurs",
+    "newSupplier": "Nouveau fournisseur"
   },
   "common": {
     "retry": "Réessayer",
@@ -53,7 +59,8 @@
     "positive": "Indiquez une quantité supérieure à zéro.",
     "wholeNumber": "Un nombre entier de pièces.",
     "invalidNumber": "Indiquez un nombre, par exemple 12 ou 1,44.",
-    "duplicateName": "Deux conditionnements portent ce nom."
+    "duplicateName": "Deux conditionnements portent ce nom.",
+    "email": "Cette adresse e-mail ne semble pas complète."
   },
   "welcome": {
     "exit": "Quitter",
@@ -130,7 +137,18 @@
       "team": {
         "title": "Inviter votre équipe",
         "description": "Vos magasiniers recevront leur invitation par e-mail."
+      },
+      "receipt": {
+        "title": "Enregistrer une réception",
+        "description": "La marchandise arrive : le stock du dépôt se met à jour aussitôt.",
+        "action": "Nouvelle réception",
+        "done": "{count, plural, one {# bon} other {# bons}}"
       }
+    },
+    "alerts": {
+      "title": "{count, plural, one {# article à commander} other {# articles à commander}}",
+      "seeAll": "Voir tout",
+      "where": "{warehouse} : {quantity}"
     }
   },
   "menu": {
@@ -141,11 +159,15 @@
   "nav": {
     "home": "Accueil",
     "items": "Articles",
-    "warehouses": "Dépôts"
+    "warehouses": "Dépôts",
+    "vouchers": "Bons",
+    "stock": "Stock",
+    "suppliers": "Fournisseurs"
   },
   "workspace": {
     "toggleSidebar": "Afficher ou masquer le menu",
-    "guide": "Guide"
+    "guide": "Guide",
+    "breadcrumbs": "Fil d’Ariane"
   },
   "tours": {
     "progress": "{current} sur {total}",
@@ -188,8 +210,8 @@
         "description": "Tapez un morceau du nom ou de la référence."
       },
       "filter": {
-        "title": "Par dépôt",
-        "description": "N’affichez que les articles proposés dans un dépôt."
+        "title": "Filtres combinables",
+        "description": "Cochez un ou plusieurs dépôts, puis affinez par catégorie, fournisseur ou niveau de stock."
       }
     },
     "itemForm": {
@@ -205,38 +227,62 @@
         "title": "Les dépôts",
         "description": "Cochez seulement ceux où l’article est proposé. Il peut être dans un dépôt et pas dans un autre."
       }
+    },
+    "vouchers": {
+      "create": {
+        "title": "Entrées et sorties",
+        "description": "Une réception augmente le stock du dépôt, une sortie le diminue. Chaque bon est signé et ne se modifie plus."
+      }
+    },
+    "stock": {
+      "filter": {
+        "title": "Dépôt par dépôt",
+        "description": "Choisissez un ou plusieurs dépôts ; « Stock bas » et « Rupture » suivent le seuil d’alerte de chaque dépôt."
+      }
+    },
+    "suppliers": {
+      "create": {
+        "title": "Vos fournisseurs",
+        "description": "Choisissez-en un sur une réception : ses articles sont proposés d’abord, et son catalogue se remplit seul."
+      }
     }
   },
   "units": {
     "PIECE": {
       "label": "Pièce",
       "hint": "Robinets, sacs de ciment, pots de peinture…",
-      "quantity": "{count, plural, one {# pièce} other {# pièces}}"
+      "quantity": "{count, plural, one {# pièce} other {# pièces}}",
+      "short": "pièces"
     },
     "KILOGRAM": {
       "label": "Kilogramme",
       "hint": "Clous, pointes, fer vendus au poids",
-      "quantity": "{count, number} kg"
+      "quantity": "{count, number} kg",
+      "short": "kg"
     },
     "LITRE": {
       "label": "Litre",
       "hint": "Peinture, huile, solvant au détail",
-      "quantity": "{count, number} L"
+      "quantity": "{count, number} L",
+      "short": "L"
     },
     "METRE": {
       "label": "Mètre",
       "hint": "Câble, tuyau, fer à béton",
-      "quantity": "{count, number} m"
+      "quantity": "{count, number} m",
+      "short": "m"
     },
     "SQUARE_METRE": {
       "label": "Mètre carré",
       "hint": "Carreaux, tôles, contreplaqué",
-      "quantity": "{count, number} m²"
+      "quantity": "{count, number} m²",
+      "short": "m²"
     },
     "CUBIC_METRE": {
       "label": "Mètre cube",
       "hint": "Sable, gravier",
-      "quantity": "{count, number} m³"
+      "quantity": "{count, number} m³",
+      "short": "m³"
     }
   },
   "warehouses": {
@@ -353,7 +399,13 @@
       "createWarehouse": "Créer un dépôt",
       "create": "Créer l’article",
       "photo": "Photo",
-      "photoHint": "Facultatif. Elle aide l’équipe à reconnaître l’article au dépôt."
+      "photoHint": "Facultatif. Elle aide l’équipe à reconnaître l’article au dépôt.",
+      "category": "Catégorie",
+      "noCategory": "Sans catégorie",
+      "categoryHint": "Créez vos catégories depuis la liste des articles, bouton « Catégories ».",
+      "minQuantity": "Seuil d’alerte",
+      "minQuantityPlaceholder": "Aucune alerte",
+      "minQuantityHint": "Seuil d’alerte : l’article passe « à commander » quand le stock du dépôt descend à ce niveau. 0 : alerte seulement en rupture. Vide : jamais d’alerte."
     },
     "created": "Article créé.",
     "saved": "Article enregistré.",
@@ -424,6 +476,265 @@
       "label": "Statut",
       "ACTIVE": "Actifs",
       "ARCHIVED": "Archivés"
+    },
+    "allWarehouses": "Tous les dépôts",
+    "allCategories": "Toutes les catégories",
+    "categoryFilter": "Filtrer par catégorie",
+    "allSuppliers": "Tous les fournisseurs",
+    "supplierFilter": "Filtrer par fournisseur",
+    "warehouseFilter": "Filtrer par dépôt",
+    "warehouseCount": "{count, plural, one {# dépôt} other {# dépôts}}",
+    "clearFilters": "Effacer les filtres",
+    "stockAlert": {
+      "label": "Filtrer par niveau de stock",
+      "all": "Tous les niveaux",
+      "any": "À commander",
+      "low": "Stock bas",
+      "out": "En rupture"
     }
+  },
+  "vouchers": {
+    "title": "Bons",
+    "description": "Chaque entrée et chaque sortie de stock, validée et signée.",
+    "newReceipt": "Nouvelle réception",
+    "newIssue": "Nouvelle sortie",
+    "types": {
+      "RECEIPT": "Réception",
+      "ISSUE": "Sortie"
+    },
+    "allTypes": "Tous les bons",
+    "receipts": "Réceptions",
+    "issues": "Sorties",
+    "empty": {
+      "title": "Aucun bon pour l’instant",
+      "description": "Enregistrez votre première réception : le stock de vos dépôts se mettra à jour aussitôt."
+    },
+    "table": {
+      "number": "Numéro",
+      "date": "Date",
+      "warehouse": "Dépôt",
+      "counterparty": "Fournisseur ou client",
+      "lines": "Lignes",
+      "createdBy": "Validé par"
+    },
+    "lineCount": "{count, plural, one {# article} other {# articles}}",
+    "notFound": "Ce bon n’existe pas ou a été retiré.",
+    "detail": {
+      "warehouse": "Dépôt",
+      "date": "Date de l’opération",
+      "supplier": "Fournisseur",
+      "customer": "Client ou destination",
+      "reference": "Référence du document",
+      "createdBy": "Validé par",
+      "recordedAt": "Enregistré le {date}",
+      "note": "Note",
+      "item": "Article",
+      "batch": "Lot",
+      "entered": "Saisie",
+      "quantity": "Quantité",
+      "immutable": "Un bon validé ne se modifie pas : pour corriger, enregistrez un nouveau bon."
+    },
+    "form": {
+      "noWarehouse": "Aucun dépôt actif. Déclarez d’abord un dépôt.",
+      "createWarehouse": "Déclarer un dépôt",
+      "searchItem": "Rechercher un article à ajouter",
+      "noItem": "Aucun article trouvé.",
+      "noItemInWarehouse": "Aucun article trouvé dans ce dépôt.",
+      "addedLines": "{count, plural, =0 {Aucun article ajouté} one {# article ajouté} other {# articles ajoutés}}",
+      "quantity": "Quantité",
+      "unit": "Unité",
+      "batch": "Lot",
+      "batchPlaceholder": "N12, calibre 2…",
+      "chooseBatch": "Choisissez un lot",
+      "remove": "Retirer cet article",
+      "available": "Disponible : {quantity}",
+      "nothingAvailable": "Rien en stock dans ce dépôt",
+      "converted": "= {quantity}",
+      "linesRequired": "Ajoutez au moins un article.",
+      "batchRequired": "Indiquez le lot.",
+      "shortage": "Il n’y a que {available} dans ce dépôt.",
+      "supplier": "Fournisseur",
+      "supplierPlaceholder": "Cimencam, grossiste du marché…",
+      "customer": "Client ou destination",
+      "customerPlaceholder": "Chantier Bonamoussadi, client…",
+      "reference": "Référence du document",
+      "referencePlaceholder": "N° du bon de livraison ou de la facture",
+      "date": "Date de l’opération",
+      "note": "Note",
+      "notePlaceholder": "Un carton abîmé, un écart constaté…",
+      "futureDate": "La date ne peut pas être dans le futur.",
+      "warehouse": "Dépôt",
+      "chooseWarehouse": "Choisissez le dépôt",
+      "supplierSearch": "Rechercher ou ajouter un fournisseur",
+      "addSupplier": "Ajouter « {name} » aux fournisseurs",
+      "supplierCreated": "{name} ajouté aux fournisseurs.",
+      "changeSupplier": "Changer de fournisseur",
+      "supplierItems": "Articles de {name}",
+      "allItems": "Tout le catalogue",
+      "noSupplierItem": "Pas encore d’article chez ce fournisseur : il s’ajoutera de lui-même à la réception."
+    },
+    "entry": {
+      "see": "Voir le bon",
+      "shortages": "Stock insuffisant : corrigez les lignes signalées.",
+      "RECEIPT": {
+        "title": "Nouvelle réception",
+        "description": "La marchandise arrive : le stock du dépôt augmente à la validation.",
+        "submit": "{count, plural, =0 {Valider la réception} one {Valider la réception · # article} other {Valider la réception · # articles}}",
+        "done": "Réception {number} validée."
+      },
+      "ISSUE": {
+        "title": "Nouvelle sortie",
+        "description": "La marchandise part : le stock du dépôt diminue à la validation.",
+        "submit": "{count, plural, =0 {Valider la sortie} one {Valider la sortie · # article} other {Valider la sortie · # articles}}",
+        "done": "Sortie {number} validée."
+      }
+    },
+    "print": {
+      "action": "Imprimer",
+      "receiptTitle": "Bon de réception",
+      "issueTitle": "Bon de sortie",
+      "validatedBy": "Validé par",
+      "deliveredBy": "Livré par (nom et signature)",
+      "receivedBy": "Reçu par (nom et signature)",
+      "footer": "Enregistré le {date}.",
+      "download": "Télécharger le PDF"
+    },
+    "menu": {
+      "open": "Actions du bon {number}",
+      "detail": "Ouvrir le détail",
+      "print": "Imprimer",
+      "download": "Télécharger le PDF"
+    },
+    "period": {
+      "from": "Du",
+      "to": "Au",
+      "fromLabel": "Bons à partir du",
+      "toLabel": "Bons jusqu’au",
+      "newestFirst": "Plus récents d’abord",
+      "oldestFirst": "Plus anciens d’abord"
+    },
+    "noResult": "Aucun bon ne correspond à ces filtres.",
+    "clearFilters": "Effacer les filtres"
+  },
+  "stock": {
+    "title": "Stock",
+    "description": "Ce que vous avez, dépôt par dépôt, en temps réel.",
+    "searchPlaceholder": "Rechercher un article",
+    "allWarehouses": "Tous les dépôts",
+    "table": {
+      "item": "Article",
+      "batches": "Lots",
+      "quantity": "En stock"
+    },
+    "empty": {
+      "title": "Rien à compter pour l’instant",
+      "description": "Le stock apparaît ici dès votre première réception."
+    },
+    "noResult": {
+      "title": "Aucun article trouvé",
+      "description": "Essayez un autre mot ou un autre dépôt.",
+      "reset": "Tout afficher"
+    },
+    "byWarehouse": "Stock par dépôt",
+    "noStock": "Aucun stock pour l’instant.",
+    "state": {
+      "OK": "Stock suffisant",
+      "LOW": "Stock bas",
+      "OUT": "Rupture"
+    },
+    "alert": "{warehouse} : {quantity}, seuil {threshold}"
+  },
+  "suppliers": {
+    "title": "Fournisseurs",
+    "description": "Qui vous livre quoi : chaque réception enrichit leur catalogue.",
+    "new": "Nouveau fournisseur",
+    "searchPlaceholder": "Rechercher un fournisseur",
+    "empty": {
+      "title": "Ajoutez vos fournisseurs",
+      "description": "Leur catalogue se remplit de lui-même à chaque réception : la suivante se saisit plus vite."
+    },
+    "noResult": {
+      "title": "Aucun fournisseur trouvé",
+      "description": "Essayez un autre nom.",
+      "reset": "Tout afficher"
+    },
+    "table": {
+      "name": "Fournisseur",
+      "contact": "Contact",
+      "items": "Catalogue"
+    },
+    "itemCount": "{count, plural, =0 {Aucun article} one {# article} other {# articles}}",
+    "form": {
+      "name": "Nom",
+      "namePlaceholder": "Cimencam, grossiste du marché Mboppi…",
+      "phone": "Téléphone",
+      "phonePlaceholder": "+237 6 99 00 00 00",
+      "email": "E-mail",
+      "emailPlaceholder": "commandes@fournisseur.cm",
+      "address": "Adresse",
+      "addressPlaceholder": "Zone industrielle de Bassa, Douala",
+      "note": "Note",
+      "notePlaceholder": "Livre le mardi, délai de paiement 30 jours…",
+      "contact": "Coordonnées",
+      "create": "Ajouter le fournisseur"
+    },
+    "wizard": {
+      "eyebrow": "Nouveau fournisseur",
+      "identity": {
+        "title": "Qui est ce fournisseur ?",
+        "description": "Son nom suffit ; ses coordonnées aident à le joindre."
+      },
+      "catalog": {
+        "title": "Que vous livre-t-il ?",
+        "description": "Facultatif : ses articles s’ajouteront aussi d’eux-mêmes à chaque réception."
+      }
+    },
+    "catalog": {
+      "title": "Catalogue",
+      "description": "Les articles qu’il vous livre, proposés d’abord sur ses réceptions.",
+      "add": "Ajouter un article à son catalogue",
+      "remove": "Retirer du catalogue",
+      "empty": "Aucun article pour l’instant : ils s’ajouteront à chaque réception.",
+      "added": "Article ajouté au catalogue.",
+      "removed": "Article retiré du catalogue."
+    },
+    "receipts": {
+      "title": "Dernières réceptions",
+      "none": "Aucune réception de ce fournisseur pour l’instant."
+    },
+    "created": "Fournisseur ajouté.",
+    "saved": "Fournisseur enregistré.",
+    "archive": {
+      "action": "Archiver",
+      "title": "Archiver ce fournisseur ?",
+      "description": "Il n’est plus proposé sur les réceptions. Ses bons restent, et vous pourrez le restaurer.",
+      "done": "Fournisseur archivé."
+    },
+    "restore": {
+      "action": "Restaurer",
+      "done": "Fournisseur restauré.",
+      "badge": "Archivé"
+    },
+    "notFound": "Ce fournisseur n’existe pas ou a été retiré."
+  },
+  "categories": {
+    "open": "Catégories",
+    "title": "Catégories d’articles",
+    "description": "Rangez vos articles par familles et sous-familles : Électricité › Câbles, Carreaux › Sol…",
+    "empty": "Aucune catégorie pour l’instant. Créez la première ci-dessus.",
+    "name": "Nom de la catégorie",
+    "namePlaceholder": "Électricité",
+    "add": "Ajouter",
+    "parent": "Dans",
+    "root": "Catégorie principale",
+    "moveTo": "Ranger dans",
+    "itemCount": "{count, plural, =0 {aucun article} one {# article} other {# articles}}",
+    "actions": "Actions pour {name}",
+    "addChild": "Ajouter une sous-catégorie",
+    "edit": "Renommer ou déplacer",
+    "delete": "Supprimer",
+    "deleted": "Catégorie « {name} » supprimée.",
+    "save": "Enregistrer",
+    "cancel": "Annuler"
   }
 }

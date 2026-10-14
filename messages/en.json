@@ -7,7 +7,13 @@
     "items": "Items",
     "newItem": "New item",
     "warehouses": "Depots",
-    "newWarehouse": "New depot"
+    "newWarehouse": "New depot",
+    "vouchers": "Vouchers",
+    "newReceipt": "New receipt",
+    "newIssue": "New issue",
+    "stock": "Stock",
+    "suppliers": "Suppliers",
+    "newSupplier": "New supplier"
   },
   "common": {
     "retry": "Try again",
@@ -53,7 +59,8 @@
     "positive": "Enter a quantity above zero.",
     "wholeNumber": "A whole number of pieces.",
     "invalidNumber": "Enter a number, for example 12 or 1.44.",
-    "duplicateName": "Two packagings have this name."
+    "duplicateName": "Two packagings have this name.",
+    "email": "This email address does not look complete."
   },
   "welcome": {
     "exit": "Exit",
@@ -130,7 +137,18 @@
       "team": {
         "title": "Invite your team",
         "description": "Your storekeepers will receive their invitation by email."
+      },
+      "receipt": {
+        "title": "Record a receipt",
+        "description": "Goods arrive: the depot’s stock updates straight away.",
+        "action": "New receipt",
+        "done": "{count, plural, one {# voucher} other {# vouchers}}"
       }
+    },
+    "alerts": {
+      "title": "{count, plural, one {# item to reorder} other {# items to reorder}}",
+      "seeAll": "See all",
+      "where": "{warehouse}: {quantity}"
     }
   },
   "menu": {
@@ -141,11 +159,15 @@
   "nav": {
     "home": "Home",
     "items": "Items",
-    "warehouses": "Depots"
+    "warehouses": "Depots",
+    "vouchers": "Vouchers",
+    "stock": "Stock",
+    "suppliers": "Suppliers"
   },
   "workspace": {
     "toggleSidebar": "Show or hide the menu",
-    "guide": "Guide"
+    "guide": "Guide",
+    "breadcrumbs": "Breadcrumb"
   },
   "tours": {
     "progress": "{current} of {total}",
@@ -188,8 +210,8 @@
         "description": "Type part of the name or reference."
       },
       "filter": {
-        "title": "By depot",
-        "description": "Show only the items offered in one depot."
+        "title": "Combinable filters",
+        "description": "Tick one or more warehouses, then narrow down by category, supplier or stock level."
       }
     },
     "itemForm": {
@@ -205,38 +227,62 @@
         "title": "Depots",
         "description": "Tick only those where the item is offered. It can be in one depot and not in another."
       }
+    },
+    "vouchers": {
+      "create": {
+        "title": "Receipts and issues",
+        "description": "A receipt increases the depot’s stock, an issue decreases it. Each voucher is signed and can no longer change."
+      }
+    },
+    "stock": {
+      "filter": {
+        "title": "Warehouse by warehouse",
+        "description": "Pick one or more warehouses; “Low stock” and “Out of stock” follow each warehouse’s alert threshold."
+      }
+    },
+    "suppliers": {
+      "create": {
+        "title": "Your suppliers",
+        "description": "Pick one on a receipt: their items are offered first, and their catalogue fills itself."
+      }
     }
   },
   "units": {
     "PIECE": {
       "label": "Piece",
       "hint": "Taps, bags of cement, paint tins…",
-      "quantity": "{count, plural, one {# piece} other {# pieces}}"
+      "quantity": "{count, plural, one {# piece} other {# pieces}}",
+      "short": "pcs"
     },
     "KILOGRAM": {
       "label": "Kilogram",
       "hint": "Nails, iron sold by weight",
-      "quantity": "{count, number} kg"
+      "quantity": "{count, number} kg",
+      "short": "kg"
     },
     "LITRE": {
       "label": "Litre",
       "hint": "Paint, oil, solvent sold loose",
-      "quantity": "{count, number} L"
+      "quantity": "{count, number} L",
+      "short": "L"
     },
     "METRE": {
       "label": "Metre",
       "hint": "Cable, pipe, rebar",
-      "quantity": "{count, number} m"
+      "quantity": "{count, number} m",
+      "short": "m"
     },
     "SQUARE_METRE": {
       "label": "Square metre",
       "hint": "Tiles, roofing sheets, plywood",
-      "quantity": "{count, number} m²"
+      "quantity": "{count, number} m²",
+      "short": "m²"
     },
     "CUBIC_METRE": {
       "label": "Cubic metre",
       "hint": "Sand, gravel",
-      "quantity": "{count, number} m³"
+      "quantity": "{count, number} m³",
+      "short": "m³"
     }
   },
   "warehouses": {
@@ -353,7 +399,13 @@
       "createWarehouse": "Create a depot",
       "create": "Create item",
       "photo": "Photo",
-      "photoHint": "Optional. It helps the team recognise the item at the depot."
+      "photoHint": "Optional. It helps the team recognise the item at the depot.",
+      "category": "Category",
+      "noCategory": "No category",
+      "categoryHint": "Create your categories from the item list, “Categories” button.",
+      "minQuantity": "Alert threshold",
+      "minQuantityPlaceholder": "No alert",
+      "minQuantityHint": "Alert threshold: the item becomes “to reorder” when the warehouse stock drops to this level. 0: alert only when out of stock. Empty: never alert."
     },
     "created": "Item created.",
     "saved": "Item saved.",
@@ -424,6 +476,265 @@
       "label": "Status",
       "ACTIVE": "Active",
       "ARCHIVED": "Archived"
+    },
+    "allWarehouses": "All depots",
+    "allCategories": "All categories",
+    "categoryFilter": "Filter by category",
+    "allSuppliers": "All suppliers",
+    "supplierFilter": "Filter by supplier",
+    "warehouseFilter": "Filter by warehouse",
+    "warehouseCount": "{count, plural, one {# warehouse} other {# warehouses}}",
+    "clearFilters": "Clear filters",
+    "stockAlert": {
+      "label": "Filter by stock level",
+      "all": "All levels",
+      "any": "To reorder",
+      "low": "Low stock",
+      "out": "Out of stock"
     }
+  },
+  "vouchers": {
+    "title": "Vouchers",
+    "description": "Every stock receipt and issue, approved and signed.",
+    "newReceipt": "New receipt",
+    "newIssue": "New issue",
+    "types": {
+      "RECEIPT": "Receipt",
+      "ISSUE": "Issue"
+    },
+    "allTypes": "All vouchers",
+    "receipts": "Receipts",
+    "issues": "Issues",
+    "empty": {
+      "title": "No vouchers yet",
+      "description": "Record your first receipt: your depots’ stock updates straight away."
+    },
+    "table": {
+      "number": "Number",
+      "date": "Date",
+      "warehouse": "Depot",
+      "counterparty": "Supplier or customer",
+      "lines": "Lines",
+      "createdBy": "Approved by"
+    },
+    "lineCount": "{count, plural, one {# item} other {# items}}",
+    "notFound": "This voucher does not exist or was removed.",
+    "detail": {
+      "warehouse": "Depot",
+      "date": "Operation date",
+      "supplier": "Supplier",
+      "customer": "Customer or destination",
+      "reference": "Document reference",
+      "createdBy": "Approved by",
+      "recordedAt": "Recorded on {date}",
+      "note": "Note",
+      "item": "Item",
+      "batch": "Batch",
+      "entered": "Entered",
+      "quantity": "Quantity",
+      "immutable": "An approved voucher cannot be changed: to correct it, record a new voucher."
+    },
+    "form": {
+      "noWarehouse": "No active depot. Declare a depot first.",
+      "createWarehouse": "Declare a depot",
+      "searchItem": "Search an item to add",
+      "noItem": "No items found.",
+      "noItemInWarehouse": "No items found in this depot.",
+      "addedLines": "{count, plural, =0 {No items added} one {# item added} other {# items added}}",
+      "quantity": "Quantity",
+      "unit": "Unit",
+      "batch": "Batch",
+      "batchPlaceholder": "N12, caliber 2…",
+      "chooseBatch": "Choose a batch",
+      "remove": "Remove this item",
+      "available": "Available: {quantity}",
+      "nothingAvailable": "Nothing in stock in this depot",
+      "converted": "= {quantity}",
+      "linesRequired": "Add at least one item.",
+      "batchRequired": "Enter the batch.",
+      "shortage": "There is only {available} in this depot.",
+      "supplier": "Supplier",
+      "supplierPlaceholder": "Cimencam, market wholesaler…",
+      "customer": "Customer or destination",
+      "customerPlaceholder": "Bonamoussadi site, customer…",
+      "reference": "Document reference",
+      "referencePlaceholder": "Delivery note or invoice number",
+      "date": "Operation date",
+      "note": "Note",
+      "notePlaceholder": "A damaged box, a discrepancy…",
+      "futureDate": "The date cannot be in the future.",
+      "warehouse": "Depot",
+      "chooseWarehouse": "Choose the depot",
+      "supplierSearch": "Search or add a supplier",
+      "addSupplier": "Add “{name}” to suppliers",
+      "supplierCreated": "{name} added to suppliers.",
+      "changeSupplier": "Change supplier",
+      "supplierItems": "{name}’s items",
+      "allItems": "Whole catalogue",
+      "noSupplierItem": "No items from this supplier yet: they are added automatically on receipt."
+    },
+    "entry": {
+      "see": "See voucher",
+      "shortages": "Insufficient stock: correct the flagged lines.",
+      "RECEIPT": {
+        "title": "New receipt",
+        "description": "Goods arrive: the depot’s stock increases on approval.",
+        "submit": "{count, plural, =0 {Approve receipt} one {Approve receipt · # item} other {Approve receipt · # items}}",
+        "done": "Receipt {number} approved."
+      },
+      "ISSUE": {
+        "title": "New issue",
+        "description": "Goods leave: the depot’s stock decreases on approval.",
+        "submit": "{count, plural, =0 {Approve issue} one {Approve issue · # item} other {Approve issue · # items}}",
+        "done": "Issue {number} approved."
+      }
+    },
+    "print": {
+      "action": "Print",
+      "receiptTitle": "Goods receipt",
+      "issueTitle": "Goods issue",
+      "validatedBy": "Approved by",
+      "deliveredBy": "Delivered by (name and signature)",
+      "receivedBy": "Received by (name and signature)",
+      "footer": "Recorded on {date}.",
+      "download": "Download PDF"
+    },
+    "menu": {
+      "open": "Actions for voucher {number}",
+      "detail": "Open details",
+      "print": "Print",
+      "download": "Download PDF"
+    },
+    "period": {
+      "from": "From",
+      "to": "To",
+      "fromLabel": "Vouchers from",
+      "toLabel": "Vouchers until",
+      "newestFirst": "Newest first",
+      "oldestFirst": "Oldest first"
+    },
+    "noResult": "No voucher matches these filters.",
+    "clearFilters": "Clear filters"
+  },
+  "stock": {
+    "title": "Stock",
+    "description": "What you have, depot by depot, in real time.",
+    "searchPlaceholder": "Search an item",
+    "allWarehouses": "All depots",
+    "table": {
+      "item": "Item",
+      "batches": "Batches",
+      "quantity": "In stock"
+    },
+    "empty": {
+      "title": "Nothing to count yet",
+      "description": "Stock appears here after your first receipt."
+    },
+    "noResult": {
+      "title": "No items found",
+      "description": "Try another word or another depot.",
+      "reset": "Show everything"
+    },
+    "byWarehouse": "Stock by depot",
+    "noStock": "No stock yet.",
+    "state": {
+      "OK": "Enough stock",
+      "LOW": "Low stock",
+      "OUT": "Out of stock"
+    },
+    "alert": "{warehouse}: {quantity}, threshold {threshold}"
+  },
+  "suppliers": {
+    "title": "Suppliers",
+    "description": "Who delivers what: every receipt enriches their catalogue.",
+    "new": "New supplier",
+    "searchPlaceholder": "Search a supplier",
+    "empty": {
+      "title": "Add your suppliers",
+      "description": "Their catalogue fills itself with every receipt: the next one is faster to enter."
+    },
+    "noResult": {
+      "title": "No supplier found",
+      "description": "Try another name.",
+      "reset": "Show everything"
+    },
+    "table": {
+      "name": "Supplier",
+      "contact": "Contact",
+      "items": "Catalogue"
+    },
+    "itemCount": "{count, plural, =0 {No items} one {# item} other {# items}}",
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "Cimencam, Mboppi market wholesaler…",
+      "phone": "Phone",
+      "phonePlaceholder": "+237 6 99 00 00 00",
+      "email": "Email",
+      "emailPlaceholder": "orders@supplier.cm",
+      "address": "Address",
+      "addressPlaceholder": "Bassa industrial zone, Douala",
+      "note": "Note",
+      "notePlaceholder": "Delivers on Tuesdays, 30-day payment terms…",
+      "contact": "Contact details",
+      "create": "Add supplier"
+    },
+    "wizard": {
+      "eyebrow": "New supplier",
+      "identity": {
+        "title": "Who is this supplier?",
+        "description": "The name is enough; contact details help you reach them."
+      },
+      "catalog": {
+        "title": "What do they deliver?",
+        "description": "Optional: their items are also added automatically on every receipt."
+      }
+    },
+    "catalog": {
+      "title": "Catalogue",
+      "description": "The items they deliver, offered first on their receipts.",
+      "add": "Add an item to their catalogue",
+      "remove": "Remove from catalogue",
+      "empty": "No items yet: they are added on every receipt.",
+      "added": "Item added to the catalogue.",
+      "removed": "Item removed from the catalogue."
+    },
+    "receipts": {
+      "title": "Latest receipts",
+      "none": "No receipts from this supplier yet."
+    },
+    "created": "Supplier added.",
+    "saved": "Supplier saved.",
+    "archive": {
+      "action": "Archive",
+      "title": "Archive this supplier?",
+      "description": "They are no longer offered on receipts. Their vouchers remain, and you can restore them.",
+      "done": "Supplier archived."
+    },
+    "restore": {
+      "action": "Restore",
+      "done": "Supplier restored.",
+      "badge": "Archived"
+    },
+    "notFound": "This supplier does not exist or was removed."
+  },
+  "categories": {
+    "open": "Categories",
+    "title": "Item categories",
+    "description": "Group your items into families and sub-families: Electrical › Cables, Tiles › Floor…",
+    "empty": "No category yet. Create the first one above.",
+    "name": "Category name",
+    "namePlaceholder": "Electrical",
+    "add": "Add",
+    "parent": "In",
+    "root": "Main category",
+    "moveTo": "Move to",
+    "itemCount": "{count, plural, =0 {no items} one {# item} other {# items}}",
+    "actions": "Actions for {name}",
+    "addChild": "Add a subcategory",
+    "edit": "Rename or move",
+    "delete": "Delete",
+    "deleted": "Category “{name}” deleted.",
+    "save": "Save",
+    "cancel": "Cancel"
   }
 }

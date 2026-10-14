@@ -1,18 +1,23 @@
 import { cn } from "@/lib/utils"
 
+import { Breadcrumbs, type Crumb } from "./breadcrumbs"
+
 /** Titre d'écran : une ligne d'explication au plus, actions à droite (en dessous sur téléphone). */
 export function PageHeader({
   title,
   description,
   actions,
+  breadcrumbs,
   className,
 }: {
   title: string
   description?: string
   actions?: React.ReactNode
+  /** Fiches et saisies : chemin depuis la liste, avec retour. */
+  breadcrumbs?: Crumb[]
   className?: string
 }) {
-  return (
+  const header = (
     <div
       className={cn(
         "flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between",
@@ -27,7 +32,18 @@ export function PageHeader({
           <p className="mt-1 text-muted-foreground">{description}</p>
         )}
       </div>
-      {actions && <div className="flex shrink-0 gap-2">{actions}</div>}
+      {actions && (
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          {actions}
+        </div>
+      )}
+    </div>
+  )
+  if (!breadcrumbs) return header
+  return (
+    <div>
+      <Breadcrumbs items={breadcrumbs} />
+      {header}
     </div>
   )
 }

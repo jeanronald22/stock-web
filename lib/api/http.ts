@@ -104,7 +104,7 @@ async function toApiError(response: Response): Promise<ApiError> {
       retryAfter
     )
   }
-  const problem = (await response.json()) as {
+  const problem = (await response.json()) as Record<string, unknown> & {
     code?: string
     title?: string
     detail?: string
@@ -118,6 +118,7 @@ async function toApiError(response: Response): Promise<ApiError> {
     problem.detail ?? "",
     problem.errors ?? [],
     retryAfter,
-    problem.traceId
+    problem.traceId,
+    problem
   )
 }

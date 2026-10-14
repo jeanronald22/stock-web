@@ -13,6 +13,7 @@ import { useActiveOrganization } from "@/lib/organization/active-organization"
 import { useApi } from "./api-provider"
 import {
   CatalogStatus,
+  type CategoryInput,
   type ItemInput,
   type ItemSearch,
   type WarehouseInput,
@@ -38,19 +39,29 @@ export const stockKeys = {
     [...stockKeys.all(organizationId), "item-count"] as const,
   item: (organizationId: string | null, id: string) =>
     [...stockKeys.all(organizationId), "item", id] as const,
+  categories: (organizationId: string | null) =>
+    [...stockKeys.all(organizationId), "categories"] as const,
 }
 
 function useOrganizationId() {
   return useActiveOrganization().activeOrganizationId
 }
 
-export function useWarehouses(status: CatalogStatus = CatalogStatus.active) {
+/**
+ * Dépôts de l'entreprise. [fresh] : relus à chaque ouverture de l'écran, pour les assistants qui
+ * choisissent un dépôt par défaut (un collègue vient peut-être d'en déclarer un).
+ */
+export function useWarehouses(
+  status: CatalogStatus = CatalogStatus.active,
+  { fresh = false }: { fresh?: boolean } = {}
+) {
   const { stock } = useApi()
   const organizationId = useOrganizationId()
   return useQuery({
     queryKey: stockKeys.warehouses(organizationId, status),
     queryFn: () => stock.warehouses(status),
     enabled: !!organizationId,
+    refetchOnMount: fresh ? "always" : true,
   })
 }
 
@@ -193,4 +204,38 @@ export function useUploadItemImage() {
 export function useRemoveItemImage() {
   const { stock } = useApi()
   return useStockMutation((id: string) => stock.removeItemImage(id))
+}
+
+/** Toutes les catégories, à plat (voir categoryTree) : quelques dizaines au plus. */
+export function useCategories() {
+  const { stock } = useApi()
+  const organizationId = useOrganizationId()
+  return useQuery({
+    queryKey: stockKeys.categories(organizationId),
+    queryFn: () => stock.categories(),
+    enabled: !!organizationId,
+  })
+}
+
+export function useSaveCategory() {
+  const { stock } = useApi()
+  return useStockMutation(
+    ({
+      id,
+      version,
+      input,
+    }: {
+      id: string
+      version?: number
+      input: CategoryInput
+    }) =>
+      version === undefined
+        ? stock.createCategory(id, input)
+        : stock.updateCategory(id, version, input)
+  )
+}
+
+export function useDeleteCategory() {
+  const { stock } = useApi()
+  return useStockMutation((id: string) => stock.deleteCategory(id))
 }

@@ -9,6 +9,7 @@ import { toast } from "sonner"
 import { ArchiveControl } from "@/components/catalog/archive-control"
 import { EmptyState } from "@/components/catalog/empty-state"
 import { SearchScene } from "@/components/illustrations/search-scene"
+import { ItemThumb } from "@/components/items/item-thumb"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -97,6 +98,10 @@ function WarehouseDetails({
     <PageBody>
       <PageHeader
         title={warehouse.name}
+        breadcrumbs={[
+          { label: t("title"), href: Routes.warehouses },
+          { label: warehouse.name },
+        ]}
         description={t(`kinds.${warehouse.kind}.label`)}
         className="mb-8"
         actions={
@@ -128,7 +133,10 @@ function WarehouseDetails({
 /** Aperçu des articles proposés dans ce dépôt, avec un lien vers la liste filtrée. */
 function WarehouseItems({ warehouse }: { warehouse: Warehouse }) {
   const t = useTranslations("warehouses")
-  const search = useMemo(() => ({ warehouseId: warehouse.id }), [warehouse.id])
+  const search = useMemo(
+    () => ({ warehouseIds: [warehouse.id] }),
+    [warehouse.id]
+  )
   const items = useItemsPage(search, 0, PREVIEW_ITEMS)
   const preview = items.data?.items ?? []
   const listHref = `${Routes.items}?${ListQueryParams.warehouse}=${warehouse.id}`
@@ -159,8 +167,13 @@ function WarehouseItems({ warehouse }: { warehouse: Warehouse }) {
             <li key={item.id}>
               <Link
                 href={RecordRoutes.item(item.id)}
-                className="inline-flex rounded-full border bg-background px-3 py-1 text-sm transition-colors hover:bg-muted"
+                className="inline-flex items-center gap-2 rounded-full border bg-background py-1 pr-3 pl-1 text-sm transition-colors hover:bg-muted"
               >
+                <ItemThumb
+                  imageUrl={item.imageUrl}
+                  size="sm"
+                  className="size-6 rounded-full"
+                />
                 {item.name}
               </Link>
             </li>

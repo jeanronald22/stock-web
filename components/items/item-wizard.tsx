@@ -12,7 +12,7 @@ import { MeasureScene } from "@/components/illustrations/measure-scene"
 import { PackagingScene } from "@/components/illustrations/packaging-scene"
 import { PhotoScene } from "@/components/illustrations/photo-scene"
 import { FormWizard, type WizardStep } from "@/components/wizard/form-wizard"
-import type { Warehouse } from "@/lib/api/stock"
+import { CatalogStatus, type Warehouse } from "@/lib/api/stock"
 import { useUploadItemImage, useWarehouses } from "@/lib/api/stock-queries"
 import { ListQueryParams, Routes } from "@/lib/routes"
 
@@ -28,8 +28,9 @@ import { useItemForm } from "./use-item-form"
 
 export function ItemWizard() {
   const t = useTranslations("common")
-  const warehouses = useWarehouses()
-  if (!warehouses.data) return <Splash label={t("loading")} />
+  const warehouses = useWarehouses(CatalogStatus.active, { fresh: true })
+  if (!warehouses.data || !warehouses.isFetchedAfterMount)
+    return <Splash label={t("loading")} />
   return <ItemWizardSteps warehouses={warehouses.data} />
 }
 
@@ -59,7 +60,7 @@ function ItemWizardSteps({ warehouses }: { warehouses: Warehouse[] }) {
       illustration: <CatalogScene />,
       title: t("items.wizard.identity.title"),
       description: t("items.wizard.identity.description"),
-      fields: ["name", "reference", "description"],
+      fields: ["name", "reference", "categoryId", "description"],
       content: <ItemIdentityFields form={form} autoFocus />,
     },
     {
@@ -91,7 +92,7 @@ function ItemWizardSteps({ warehouses }: { warehouses: Warehouse[] }) {
       illustration: <DepotsScene />,
       title: t("items.wizard.warehouses.title"),
       description: t("items.wizard.warehouses.description"),
-      fields: ["warehouseIds"],
+      fields: ["warehouses"],
       content: <ItemWarehousesField form={form} warehouses={warehouses} />,
     },
   ]

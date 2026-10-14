@@ -65,7 +65,11 @@ export async function openNavigation(page: Page) {
 
 export async function navigateTo(page: Page, entry: string) {
   await openNavigation(page)
-  await page.getByRole("link", { name: entry, exact: true }).click()
+  // Le menu latéral seulement : un fil d'Ariane peut porter le même nom.
+  await page
+    .locator('[data-sidebar="sidebar"]')
+    .getByRole("link", { name: entry, exact: true })
+    .click()
 }
 
 /** Inscription complète d'un nouveau client, jusqu'à l'accueil de son espace. */
@@ -97,4 +101,84 @@ export async function signUpWithBusiness(
   await page.getByRole("button", { name: "Ouvrir mon espace" }).click()
   await expect(page.getByRole("heading", { name: "Bonjour Awa" })).toBeVisible()
   return email
+}
+
+/**
+ * Appel à l'API avec la session de la page (jeton et entreprise active) : prépare des données
+ * sans repasser par les écrans. Passe par l'adresse de l'application, donc par redirectApi.
+ */
+export async function callApi<T>(
+  page: Page,
+  method: string,
+  path: string,
+  body?: unknown
+): Promise<T> {
+  const source = process.env.E2E_APP_API_URL ?? "http://localhost:8081"
+  return page.evaluate(
+    async ({ method, url, body }) => {
+      const entries = Object.entries(localStorage)
+      const user = entries.find(([key]) =>
+        key.startsWith("kreskala.oidc.user")
+      )?.[1]
+      const organizationId =
+        entries.find(([key]) =>
+          key.startsWith("kreskala.active-organization.")
+        )?.[1] ?? ""
+      const { access_token: accessToken } = JSON.parse(user ?? "{}")
+      const response = await fetch(url, {
+        method,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "X-Organization-Id": organizationId,
+          "Content-Type": "application/json",
+        },
+        body: body === undefined ? undefined : JSON.stringify(body),
+      })
+      if (!response.ok)
+        throw new Error(
+          `${method} ${url} : ${response.status} ${await response.text()}`
+        )
+      return response.json()
+    },
+    { method, url: source + path, body }
+  ) as Promise<T>
+}
+
+/** Dépose une photo sur un article, avec la session de la page (multipart, comme l'application). */
+export async function uploadItemPhoto(
+  page: Page,
+  itemId: string,
+  filePath: string
+) {
+  const source = process.env.E2E_APP_API_URL ?? "http://localhost:8081"
+  const base64 = (await import("node:fs"))
+    .readFileSync(filePath)
+    .toString("base64")
+  await page.evaluate(
+    async ({ url, base64 }) => {
+      const entries = Object.entries(localStorage)
+      const user = entries.find(([key]) =>
+        key.startsWith("kreskala.oidc.user")
+      )?.[1]
+      const organizationId =
+        entries.find(([key]) =>
+          key.startsWith("kreskala.active-organization.")
+        )?.[1] ?? ""
+      const { access_token: accessToken } = JSON.parse(user ?? "{}")
+      const bytes = Uint8Array.from(atob(base64), (char) => char.charCodeAt(0))
+      const body = new FormData()
+      body.append("file", new File([bytes], "photo.png", { type: "image/png" }))
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "X-Organization-Id": organizationId,
+        },
+        body,
+      })
+      if (!response.ok)
+        throw new Error(`Photo : ${response.status} ${await response.text()}`)
+    },
+    { url: `${source}/v1/items/${itemId}/image`, base64 }
+  )
 }

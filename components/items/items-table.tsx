@@ -1,6 +1,6 @@
 "use client"
 
-import { BoxIcon, ChevronRightIcon } from "lucide-react"
+import { ChevronRightIcon } from "lucide-react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 
@@ -18,9 +18,8 @@ import { CatalogStatus, type Item } from "@/lib/api/stock"
 import { RecordRoutes } from "@/lib/routes"
 import { cn } from "@/lib/utils"
 
-import { useFileUrl } from "@/lib/api/use-file-url"
-
 import { useQuantityLabel } from "./describe"
+import { ItemThumb } from "./item-thumb"
 
 /** Noms de dépôts montrés dans une ligne ; au-delà, « +2 ». */
 const VISIBLE_WAREHOUSES = 2
@@ -33,16 +32,18 @@ const VISIBLE_WAREHOUSES = 2
 export function ItemsTable({
   items,
   warehouseNames,
+  categoryPaths,
   stale,
 }: {
   items: Item[]
   warehouseNames: ReadonlyMap<string, string>
+  /** Chemin de chaque catégorie : « Électricité › Câbles ». */
+  categoryPaths: ReadonlyMap<string, string>
   /** Page précédente affichée pendant le chargement de la suivante. */
   stale: boolean
 }) {
   const t = useTranslations()
   const quantity = useQuantityLabel()
-  const fileUrl = useFileUrl()
 
   return (
     <Table className={cn("transition-opacity", stale && "opacity-60")}>
@@ -63,29 +64,17 @@ export function ItemsTable({
       </TableHeader>
       <TableBody>
         {items.map((item) => {
-          const names = item.warehouseIds.flatMap(
-            (id) => warehouseNames.get(id) ?? []
+          const names = item.warehouses.flatMap(
+            (placement) => warehouseNames.get(placement.warehouseId) ?? []
           )
+          const category = item.categoryId
+            ? categoryPaths.get(item.categoryId)
+            : undefined
           return (
             <TableRow key={item.id} className="relative cursor-pointer">
-              <TableCell className="py-3 pl-4">
+              <TableCell className="py-3 pl-4 whitespace-normal">
                 <div className="flex items-center gap-3">
-                  <span
-                    className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary/10 text-primary"
-                    aria-hidden
-                  >
-                    {item.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element -- lien signé de l'API, hors optimisation Next
-                      <img
-                        src={fileUrl(item.imageUrl) ?? undefined}
-                        alt=""
-                        loading="lazy"
-                        className="size-full object-cover"
-                      />
-                    ) : (
-                      <BoxIcon className="size-4" />
-                    )}
-                  </span>
+                  <ItemThumb imageUrl={item.imageUrl} />
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <Link
@@ -100,15 +89,19 @@ export function ItemsTable({
                         </Badge>
                       )}
                     </div>
-                    {item.reference && (
-                      <p className="font-mono text-xs text-muted-foreground">
-                        {item.reference}
+                    {(item.reference || category) && (
+                      <p className="truncate text-xs text-muted-foreground">
+                        {item.reference && (
+                          <span className="font-mono">{item.reference}</span>
+                        )}
+                        {item.reference && category && " · "}
+                        {category}
                       </p>
                     )}
                     <p className="truncate text-xs text-muted-foreground md:hidden">
                       {t(`units.${item.baseUnit}.label`)} ·{" "}
                       {t("items.warehouseCount", {
-                        count: item.warehouseIds.length,
+                        count: item.warehouses.length,
                       })}
                     </p>
                   </div>
