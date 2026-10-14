@@ -159,6 +159,14 @@ Côté utilisateur, ce sont les écrans de « Mon compte » : créer son entrepr
 - **E-mails** : SMTP configurable (variables `SMTP_*`), Mailpit en local. Le fournisseur de production reste à choisir.
 - **Téléphone** : facultatif sur le profil ; il servira aux invitations WhatsApp et au retour de la connexion par code.
 
+## D18. Politique de confidentialité tenue à jour au fil du produit (2026-10-14)
+
+- Fondée sur la loi n° 2024/017 du 23 décembre 2024 relative à la protection des données à caractère personnel au Cameroun. Page publique `/confidentialite` (FR/EN, `?lang=` imposé par les écrans de connexion).
+- Elle ne décrit que ce que Kreskala fait réellement. **Toute fonctionnalité qui collecte, partage ou conserve de nouvelles données complète la politique dans le même changement** (`content/legal/privacy-policy.{fr,en}.ts`), puis avance `PrivacyPolicyRelease` (version, date).
+- Kreskala est responsable du traitement pour les comptes ; l'entreprise cliente l'est pour ses données de stock, Kreskala agissant alors pour son compte.
+- Mention sous les formulaires de connexion et d'inscription : « En continuant, vous confirmez avoir lu notre politique de confidentialité ». Pas « vous acceptez » : la loi exige un consentement spécifique ; un accord global à une politique n'en est pas un. Les données du compte reposent sur l'exécution du service, pas sur ce clic.
+- À compléter avant l'ouverture : identité juridique de l'éditeur (forme, siège, RCCM), adresse `confidentialite@kreskala.com` à créer et relever, pays d'hébergement et liste des prestataires (hébergeur, envoi d'e-mails), durée de conservation des journaux, fermeture de compte dans l'application, conditions d'utilisation (même composant `LegalDocument`).
+
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
 - [ ] Nom de la marque et nom du produit de stock (voir D7). Pistes : Kreskala, Kreskio, Tissero, NarvalWorks, FourmiLabs.

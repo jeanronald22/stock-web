@@ -6,7 +6,14 @@ export const Routes = {
   welcome: "/bienvenue",
   organizations: "/entreprises",
   dashboard: "/accueil",
+  /** Publique : ouverte depuis les écrans de connexion (Keycloak), avant toute connexion. */
+  privacy: "/confidentialite",
   runtimeConfig: "/runtime-config",
 } as const
 
 export type AppRoute = (typeof Routes)[keyof typeof Routes]
+
+/** Paramètre d'adresse des pages publiques : langue imposée par le lien (écrans de connexion). */
+export const PublicQueryParams = {
+  lang: "lang",
+} as const
