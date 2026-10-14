@@ -182,3 +182,15 @@ export function useItemStatus() {
         : stock.restoreItem(id)
   )
 }
+
+export function useUploadItemImage() {
+  const { stock } = useApi()
+  return useStockMutation(({ id, file }: { id: string; file: File }) =>
+    stock.uploadItemImage(id, file)
+  )
+}
+
+export function useRemoveItemImage() {
+  const { stock } = useApi()
+  return useStockMutation((id: string) => stock.removeItemImage(id))
+}

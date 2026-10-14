@@ -3,17 +3,18 @@
 import { MapPinIcon, PlusIcon } from "lucide-react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
-import { useState } from "react"
 
 import { EmptyState } from "@/components/catalog/empty-state"
+import { StatusFilter } from "@/components/catalog/status-filter"
 import { DepotScene } from "@/components/illustrations/depot-scene"
 import { usePageTour } from "@/components/tour/tour-provider"
 import { Badge } from "@/components/ui/badge"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import { CatalogStatus, type Warehouse } from "@/lib/api/stock"
 import { useWarehouses } from "@/lib/api/stock-queries"
+import { useListParams } from "@/lib/list/use-list-params"
 import { RecordRoutes, Routes } from "@/lib/routes"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
 
@@ -23,8 +24,11 @@ const SKELETON_CARDS = 3
 
 export function WarehousesScreen() {
   const t = useTranslations("warehouses")
-  const [status, setStatus] = useState<CatalogStatus>(CatalogStatus.active)
+  const list = useListParams()
+  const { status } = list.params
   const warehouses = useWarehouses(status)
+  // Moins de cent dépôts par entreprise : la liste des archivés se charge entière, sans pagination.
+  const archivedWarehouses = useWarehouses(CatalogStatus.archived)
   const archived = status === CatalogStatus.archived
   // Sans dépôt, l'action est portée par l'écran vide : pas de second bouton dans l'en-tête.
   const empty =
@@ -50,7 +54,14 @@ export function WarehousesScreen() {
         actions={empty ? undefined : newButton}
       />
 
-      <div className="mt-8">
+      {/* Filtre visible dès qu'il y a de quoi filtrer : sinon, l'écran vide suffit. */}
+      {(!empty || !!archivedWarehouses.data?.length) && (
+        <div className="mt-8 flex">
+          <StatusFilter value={status} onChange={list.setStatus} />
+        </div>
+      )}
+
+      <div className="mt-6">
         {warehouses.isPending ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
             {Array.from({ length: SKELETON_CARDS }, (_, index) => (
@@ -79,18 +90,6 @@ export function WarehousesScreen() {
             action={newButton}
           />
         )}
-      </div>
-
-      <div className="mt-10 text-center">
-        <Button
-          variant="link"
-          onClick={() =>
-            setStatus(archived ? CatalogStatus.active : CatalogStatus.archived)
-          }
-          className="text-muted-foreground"
-        >
-          {archived ? t("showActive") : t("showArchived")}
-        </Button>
       </div>
     </PageBody>
   )

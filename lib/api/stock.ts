@@ -10,6 +10,7 @@ export const StockPaths = {
   item: (id: string) => `/v1/items/${id}`,
   itemArchive: (id: string) => `/v1/items/${id}/archive`,
   itemRestore: (id: string) => `/v1/items/${id}/restore`,
+  itemImage: (id: string) => `/v1/items/${id}/image`,
 } as const
 
 /** Paramètres de recherche des listes (stock-api, StockApi et PageParams). */
@@ -90,6 +91,8 @@ export type Item = {
   version: number
   createdAt: string
   updatedAt: string
+  /** Lien signé vers la photo, relatif à l'API (voir useFileUrl) ; null sans photo. */
+  imageUrl: string | null
 }
 
 export type ItemInput = {
@@ -107,6 +110,14 @@ export type ItemSearch = {
   warehouseId?: string
   status?: CatalogStatus
 }
+
+/** Photos acceptées par l'API (stock-api, ImageFormat et ItemImageService). */
+export const ItemImageRules = {
+  types: ["image/jpeg", "image/png", "image/webp"],
+  maxBytes: 5 * 1024 * 1024,
+  /** Nom de la partie du formulaire multipart (stock-api, StockApi.IMAGE_PART). */
+  part: "file",
+} as const
 
 export type Page<T> = { items: T[]; page: number; size: number; total: number }
 
@@ -208,6 +219,22 @@ export const stockApi = (send: ApiClient) => {
         ...scoped,
         method: "POST",
         path: StockPaths.itemRestore(id),
+      }),
+    uploadItemImage: (id: string, file: File) => {
+      const body = new FormData()
+      body.append(ItemImageRules.part, file)
+      return send<Item>({
+        ...scoped,
+        method: "PUT",
+        path: StockPaths.itemImage(id),
+        body,
+      })
+    },
+    removeItemImage: (id: string) =>
+      send<Item>({
+        ...scoped,
+        method: "DELETE",
+        path: StockPaths.itemImage(id),
       }),
   }
 }

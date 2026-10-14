@@ -262,8 +262,6 @@
       "title": "Déclarez votre premier dépôt",
       "description": "Boutique, dépôt ou chantier : chaque lieu aura son propre stock."
     },
-    "showArchived": "Voir les dépôts archivés",
-    "showActive": "Voir les dépôts actifs",
     "archivedEmpty": "Aucun dépôt archivé.",
     "form": {
       "newTitle": "Nouveau dépôt",
@@ -325,8 +323,6 @@
       "reset": "Tout afficher"
     },
     "warehouseCount": "{count, plural, =0 {Aucun dépôt} one {# dépôt} other {# dépôts}}",
-    "showArchived": "Voir les articles archivés",
-    "showActive": "Voir les articles actifs",
     "form": {
       "newTitle": "Nouvel article",
       "editTitle": "Modifier l’article",
@@ -355,7 +351,9 @@
       "selectNone": "Tout décocher",
       "noWarehouse": "Aucun dépôt pour l’instant : l’article sera ajouté au catalogue, sans dépôt.",
       "createWarehouse": "Créer un dépôt",
-      "create": "Créer l’article"
+      "create": "Créer l’article",
+      "photo": "Photo",
+      "photoHint": "Facultatif. Elle aide l’équipe à reconnaître l’article au dépôt."
     },
     "created": "Article créé.",
     "saved": "Article enregistré.",
@@ -388,6 +386,10 @@
       "warehouses": {
         "title": "Où le proposez-vous ?",
         "description": "Cochez seulement les dépôts concernés."
+      },
+      "photo": {
+        "title": "Une photo de l’article ?",
+        "description": "Facultatif. Elle aide l’équipe à le reconnaître au premier coup d’œil."
       }
     },
     "table": {
@@ -404,5 +406,24 @@
     "perPage": "Lignes par page",
     "previous": "Page précédente",
     "next": "Page suivante"
+  },
+  "images": {
+    "choose": "Ajouter une photo",
+    "hint": "Glissez-la ici ou touchez pour choisir. JPEG, PNG ou WebP, 5 Mo au plus.",
+    "preview": "Photo de l’article",
+    "replace": "Changer",
+    "remove": "Retirer",
+    "unsupported": "Choisissez une photo JPEG, PNG ou WebP.",
+    "tooLarge": "La photo dépasse {max} Mo. Choisissez-en une plus légère.",
+    "saved": "Photo enregistrée.",
+    "removed": "Photo retirée.",
+    "uploadFailed": "L’article est créé, mais sa photo n’a pas pu être envoyée. Ajoutez-la depuis sa fiche."
+  },
+  "catalog": {
+    "status": {
+      "label": "Statut",
+      "ACTIVE": "Actifs",
+      "ARCHIVED": "Archivés"
+    }
   }
 }

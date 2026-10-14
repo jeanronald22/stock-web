@@ -1,3 +1,5 @@
+import path from "node:path"
+
 import { expect, test, type Page } from "@playwright/test"
 
 import {
@@ -9,6 +11,8 @@ import {
 } from "./support"
 
 test.beforeEach(async ({ context }) => redirectApi(context))
+
+const PHOTO = path.join(import.meta.dirname, "fixtures", "carreau.png")
 
 const next = (page: Page) =>
   page.getByRole("button", { name: "Continuer" }).click()
@@ -61,6 +65,15 @@ test("articles et dépôts : un article proposé dans un dépôt et pas dans l'a
   await page.getByLabel(/Référence/).fill("CAR-6060")
   await shot(page, testInfo, "03-assistant-article")
   await next(page)
+  await expect(
+    page.getByRole("heading", { name: "Une photo de l’article ?" })
+  ).toBeVisible()
+  await page.locator("input[type=file]").setInputFiles(PHOTO)
+  await expect(
+    page.getByRole("img", { name: "Photo de l’article" })
+  ).toBeVisible()
+  await shot(page, testInfo, "03b-assistant-photo")
+  await next(page)
   await page.getByRole("radio", { name: /Mètre carré/ }).click()
   await next(page)
   await page.getByRole("button", { name: "Ajouter un conditionnement" }).click()
@@ -81,8 +94,7 @@ test("articles et dépôts : un article proposé dans un dépôt et pas dans l'a
   // Ciment : compté à la pièce ; 2,5 sacs par palette est refusé dès l'étape des conditionnements.
   await page.getByRole("link", { name: "Nouvel article" }).click()
   await page.getByLabel("Nom", { exact: true }).fill("Ciment CPJ 42,5")
-  await next(page)
-  await next(page)
+  for (let step = 0; step < 3; step++) await next(page)
   await page.getByRole("button", { name: "Ajouter un conditionnement" }).click()
   await page.getByRole("textbox", { name: "Nom" }).fill("Palette")
   await page.getByRole("textbox", { name: "Contient" }).fill("2,5")
@@ -95,13 +107,23 @@ test("articles et dépôts : un article proposé dans un dépôt et pas dans l'a
   await expect(
     page.getByRole("link", { name: /Ciment CPJ 42,5/ })
   ).toBeVisible()
+  // La photo du carreau s'affiche en vignette, chargée par son lien signé.
+  const thumbnail = page
+    .getByRole("row", { name: /Carreau 60x60 beige/ })
+    .locator("img")
+  await expect(thumbnail).toHaveAttribute("src", /\/v1\/files\//)
+  await expect
+    .poll(() =>
+      thumbnail.evaluate((image: HTMLImageElement) => image.naturalWidth)
+    )
+    .toBeGreaterThan(0)
   await shot(page, testInfo, "05-articles")
 
   // Référence déjà prise : refusée par l'API à la fin, l'assistant revient à la première étape.
   await page.getByRole("link", { name: "Nouvel article" }).click()
   await page.getByLabel("Nom", { exact: true }).fill("Autre carreau")
   await page.getByLabel(/Référence/).fill("car-6060")
-  for (let step = 0; step < 3; step++) await next(page)
+  for (let step = 0; step < 4; step++) await next(page)
   await page.getByRole("button", { name: "Créer l’article" }).click()
   await expect(
     page.getByRole("heading", { name: "Quel article ajoutez-vous ?" })
@@ -166,6 +188,28 @@ test("articles et dépôts : un article proposé dans un dépôt et pas dans l'a
   await expect(page.getByText("26–28 sur 28")).toBeVisible()
   await expect(page).toHaveURL(/page=2/)
   await shot(page, testInfo, "07-articles-page-2")
+
+  // Archivé, le ciment quitte la liste ; le filtre « Archivés » le retrouve.
+  await page.goto("/articles")
+  await page.getByRole("link", { name: /Ciment CPJ 42,5/ }).click()
+  await dismissTour(page, "L’unité de comptage")
+  await page.getByRole("button", { name: "Archiver" }).click()
+  await page
+    .getByRole("alertdialog")
+    .getByRole("button", { name: "Archiver" })
+    .click()
+  await expect(page.getByText("Article archivé.")).toBeVisible()
+  await navigateTo(page, "Articles")
+  await expect(
+    page.getByRole("link", { name: /Carreau 60x60 beige/ })
+  ).toBeVisible()
+  await expect(page.getByRole("link", { name: /Ciment/ })).toBeHidden()
+  await page.getByRole("combobox", { name: "Statut" }).click()
+  await page.getByRole("option", { name: "Archivés" }).click()
+  await expect(
+    page.getByRole("link", { name: /Ciment CPJ 42,5/ })
+  ).toBeVisible()
+  await expect(page).toHaveURL(/statut=archives/)
 
   // La fiche du dépôt montre ses articles ; son guide s'ouvre seul, puis se relance à la demande.
   await navigateTo(page, "Dépôts")

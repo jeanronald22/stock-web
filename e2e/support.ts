@@ -18,10 +18,10 @@ export async function redirectApi(context: BrowserContext) {
   const target = process.env.E2E_API_URL
   const source = process.env.E2E_APP_API_URL ?? "http://localhost:8081"
   if (!target) return
-  await context.route(`${source}/**`, async (route) => {
-    const url = route.request().url().replace(source, target)
-    await route.fulfill({ response: await route.fetch({ url }) })
-  })
+  // continue (et non fetch + fulfill) : la requête part telle quelle, corps binaire compris (photos).
+  await context.route(`${source}/**`, (route) =>
+    route.continue({ url: route.request().url().replace(source, target) })
+  )
 }
 
 /**

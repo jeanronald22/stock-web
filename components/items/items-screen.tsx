@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl"
 import { useEffect, useMemo, useState } from "react"
 
 import { EmptyState } from "@/components/catalog/empty-state"
+import { StatusFilter } from "@/components/catalog/status-filter"
 import { TablePagination } from "@/components/catalog/table-pagination"
 import { CatalogScene } from "@/components/illustrations/catalog-scene"
 import { SearchScene } from "@/components/illustrations/search-scene"
@@ -42,9 +43,8 @@ const SKELETON_ROWS = 8
 export function ItemsScreen() {
   const t = useTranslations("items")
   const list = useListParams()
-  const { text, warehouseId, page, size } = list.params
+  const { text, warehouseId, page, size, status } = list.params
   const [typed, setTyped] = useState(text)
-  const [status, setStatus] = useState<CatalogStatus>(CatalogStatus.active)
   const archived = status === CatalogStatus.archived
 
   const { setText } = list
@@ -166,6 +166,7 @@ export function ItemsScreen() {
                 ))}
               </SelectContent>
             </Select>
+            <StatusFilter value={status} onChange={list.setStatus} />
           </div>
 
           <div className="mt-6 overflow-hidden rounded-2xl border">
@@ -209,18 +210,6 @@ export function ItemsScreen() {
           </div>
         </>
       )}
-
-      <div className="mt-10 text-center">
-        <Button
-          variant="link"
-          className="text-muted-foreground"
-          onClick={() =>
-            setStatus(archived ? CatalogStatus.active : CatalogStatus.archived)
-          }
-        >
-          {archived ? t("showActive") : t("showArchived")}
-        </Button>
-      </div>
     </PageBody>
   )
 }

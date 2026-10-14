@@ -29,7 +29,11 @@ export const ListQueryParams = {
   search: "q",
   page: "page",
   size: "lignes",
+  status: "statut",
 } as const
+
+/** Valeur de « statut » pour les fiches archivées ; absente, la liste montre les fiches actives. */
+export const ARCHIVED_STATUS_PARAM = "archives"
 
 /** Paramètre d'adresse des pages publiques : langue imposée par le lien (écrans de connexion). */
 export const PublicQueryParams = {

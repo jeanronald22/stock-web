@@ -177,6 +177,15 @@ Côté utilisateur, ce sont les écrans de « Mon compte » : créer son entrepr
 - Tous les membres peuvent gérer le catalogue pour l'instant ; les droits par rôle arrivent avec l'invitation de l'équipe.
 - Interface : barre latérale (panneau sur téléphone), illustrations animées pour les écrans vides, visite guidée driver.js à la première visite de chaque écran (relançable par « Guide »), textes limités à l'essentiel.
 
+## D20. Photos d'articles et stockage de fichiers (2026-10-14)
+
+- Une photo par article (JPEG, PNG ou WebP, 5 Mo au plus, format reconnu au contenu), ajoutée dans l'assistant de création ou depuis la fiche.
+- **Stockage derrière une interface** (`FileStorage`) : Cloudflare R2 en production (API compatible S3, compartiment privé), disque en local. Choix par configuration (`STORAGE_PROVIDER`) ; démarrage refusé si R2 est incomplet.
+- **Accès** : les photos sont servies par l'API sur un lien signé (HMAC, `STORAGE_SIGNING_SECRET`), stable pendant une heure pour le cache du navigateur, valable deux heures au plus. Même comportement quel que soit le stockage ; un CDN pourra être ajouté plus tard sans changer l'application.
+- Clé de fichier unique à chaque dépôt (jamais réécrite) ; ancienne photo effacée après validation ; table `item_image` séparée de l'article, pour qu'une photo ne crée pas de conflit de version avec une modification en cours.
+- Politique de confidentialité passée en version 0.2 (photos, Cloudflare R2).
+- Listes : filtre « Actifs / Archivés » à côté des autres filtres, conservé dans l'adresse (`statut=archives`).
+
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
 - [ ] Nom de la marque et nom du produit de stock (voir D7). Pistes : Kreskala, Kreskio, Tissero, NarvalWorks, FourmiLabs.

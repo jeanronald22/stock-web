@@ -89,5 +89,5 @@ export function useItemForm(
     }
   }
 
-  return { form, submit, pending: save.isPending }
+  return { form, submit, pending: save.isPending, itemId: id }
 }

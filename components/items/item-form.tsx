@@ -18,6 +18,7 @@ import {
   ItemPackagingsFields,
   ItemWarehousesField,
 } from "./item-fields"
+import { ItemPhotoField } from "./item-photo"
 import { useItemForm } from "./use-item-form"
 
 /** Fiche d'un article : tout est modifiable sur un seul écran. */
@@ -41,6 +42,12 @@ export function ItemForm({
 
   return (
     <form onSubmit={(event) => void onSubmit(event)} noValidate>
+      <FormSection
+        title={t("items.form.photo")}
+        description={t("items.form.photoHint")}
+      >
+        <ItemPhotoField item={item} />
+      </FormSection>
       <FormSection title={t("items.form.identity")}>
         <ItemIdentityFields form={form} />
       </FormSection>

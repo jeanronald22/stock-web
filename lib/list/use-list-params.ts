@@ -3,7 +3,8 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback } from "react"
 
-import { ListQueryParams } from "@/lib/routes"
+import { CatalogStatus } from "@/lib/api/stock"
+import { ARCHIVED_STATUS_PARAM, ListQueryParams } from "@/lib/routes"
 
 /** Nombres de lignes proposés ; le premier de la liste n'est pas le défaut (voir DEFAULT_PAGE_SIZE). */
 export const PAGE_SIZES = [25, 50, 100] as const
@@ -15,6 +16,7 @@ export type ListParams = {
   /** Page affichée, à partir de 0 (l'adresse montre « page=1 » pour la première). */
   page: number
   size: number
+  status: CatalogStatus
 }
 
 function positiveInteger(value: string | null): number | null {
@@ -38,6 +40,10 @@ export function useListParams() {
     page: (positiveInteger(searchParams.get(ListQueryParams.page)) ?? 1) - 1,
     size:
       PAGE_SIZES.find((candidate) => candidate === size) ?? DEFAULT_PAGE_SIZE,
+    status:
+      searchParams.get(ListQueryParams.status) === ARCHIVED_STATUS_PARAM
+        ? CatalogStatus.archived
+        : CatalogStatus.active,
   }
 
   const update = useCallback(
@@ -70,6 +76,11 @@ export function useListParams() {
       update({ page: page > 0 ? page + 1 : undefined }),
     setSize: (pageSize: number) =>
       update({ size: pageSize === DEFAULT_PAGE_SIZE ? undefined : pageSize }),
+    setStatus: (status: CatalogStatus) =>
+      update({
+        status:
+          status === CatalogStatus.archived ? ARCHIVED_STATUS_PARAM : undefined,
+      }),
     reset: () => update({ search: undefined, warehouse: undefined }),
   }
 }

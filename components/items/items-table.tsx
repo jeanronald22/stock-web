@@ -18,6 +18,8 @@ import { CatalogStatus, type Item } from "@/lib/api/stock"
 import { RecordRoutes } from "@/lib/routes"
 import { cn } from "@/lib/utils"
 
+import { useFileUrl } from "@/lib/api/use-file-url"
+
 import { useQuantityLabel } from "./describe"
 
 /** Noms de dépôts montrés dans une ligne ; au-delà, « +2 ». */
@@ -40,6 +42,7 @@ export function ItemsTable({
 }) {
   const t = useTranslations()
   const quantity = useQuantityLabel()
+  const fileUrl = useFileUrl()
 
   return (
     <Table className={cn("transition-opacity", stale && "opacity-60")}>
@@ -68,10 +71,20 @@ export function ItemsTable({
               <TableCell className="py-3 pl-4">
                 <div className="flex items-center gap-3">
                   <span
-                    className="hidden size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary sm:flex"
+                    className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary/10 text-primary"
                     aria-hidden
                   >
-                    <BoxIcon className="size-4" />
+                    {item.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- lien signé de l'API, hors optimisation Next
+                      <img
+                        src={fileUrl(item.imageUrl) ?? undefined}
+                        alt=""
+                        loading="lazy"
+                        className="size-full object-cover"
+                      />
+                    ) : (
+                      <BoxIcon className="size-4" />
+                    )}
                   </span>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
