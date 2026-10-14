@@ -12,6 +12,8 @@ import { notificationApi } from "./notifications"
 import { platformApi } from "./platform"
 import { stockApi } from "./stock"
 import { supplierApi } from "./suppliers"
+import { customerApi } from "./customers"
+import { inventoryApi } from "./inventories"
 import { voucherApi } from "./vouchers"
 
 type Api = {
@@ -19,6 +21,8 @@ type Api = {
   stock: ReturnType<typeof stockApi>
   vouchers: ReturnType<typeof voucherApi>
   suppliers: ReturnType<typeof supplierApi>
+  customers: ReturnType<typeof customerApi>
+  inventories: ReturnType<typeof inventoryApi>
   notifications: ReturnType<typeof notificationApi>
 }
 
@@ -43,6 +47,8 @@ export function ApiProvider({ children }: { children: React.ReactNode }) {
       stock: stockApi(send),
       vouchers: voucherApi(send),
       suppliers: supplierApi(send),
+      customers: customerApi(send),
+      inventories: inventoryApi(send),
       notifications: notificationApi(send),
     }
   }, [apiUrl, token, locale, activeOrganizationId])

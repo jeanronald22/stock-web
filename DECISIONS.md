@@ -231,8 +231,8 @@ Les articles, dépôts, fournisseurs et bons (D19 à D22) ont été construits s
 
 **Plan de réalignement**, par lots livrables :
 - **Lot A** (livré, voir D24) : catégories ; seuils par dépôt et alertes (stock bas, rupture) ; filtres combinables des articles et du stock ; filtres des bons (période, type, dépôt, fournisseur) et tri par date.
-- **Lot B** (en cours : transferts D27 ; casse, ajustements, écarts à la réception D28) : tiers clients et chantiers ; bons de retour, de casse (motif, photo) et d'ajustement ; quantité annoncée sur le BL et écart à la réception ; transferts entre dépôts (en transit, quantité reçue à l'arrivée).
-- **Lot C** : inventaires (complet, tournant, double comptage, ajustement à la clôture) ; emplacements.
+- **Lot B** (transferts D27 ; casse, ajustements, écarts à la réception D28 ; clients et chantiers D30 ; retours D31) : tiers clients et chantiers ; bons de retour, de casse (motif, photo) et d'ajustement ; quantité annoncée sur le BL et écart à la réception ; transferts entre dépôts (en transit, quantité reçue à l'arrivée).
+- **Lot C** (en cours : inventaire D32) : inventaires (complet, tournant, double comptage, ajustement à la clôture) ; emplacements.
 - **Lot D** : produit et variantes, table des unités, lot avec nuance et calibre ; rôles Stock par dépôt ; synchronisation hors ligne ; IA (D5).
 
 **Règle** : toute nouvelle fonctionnalité part des tables de D10 ; un écart volontaire est noté ici avant le code.
@@ -315,6 +315,36 @@ Modèle D10 : `stock_document` DAMAGE et ADJUSTMENT, `stock_document_line.reason
 ## D29. Menu latéral par compartiments (2026-10-14)
 
 - Jusqu'à 5 entrées, le menu reste à plat. Au-delà, il se range par compartiments : l'accueil en tête (sans titre), puis Opérations (stock, bons), Catalogue (articles, fournisseurs, dépôts), Administration (équipe). Une entrée nouvelle va dans un compartiment existant ; un compartiment nouveau seulement pour un domaine nouveau (voir aussi : pas d'onglet inutile).
+
+## D30. Lot B : clients et chantiers (2026-10-14)
+
+Modèle D10 : `partner` de type CUSTOMER ou SITE (nom, téléphone). Questionnaire : les livraisons sur chantier se contrôlent avec la facture (Q17).
+
+- **Annuaire** (`stock.customer`) : nom (unique dans l'entreprise), genre (client ou chantier), téléphone, adresse (où livrer), note ; archivable comme un fournisseur. Écart assumé avec D10 : une table à part plutôt qu'un `partner` commun, puisque les fournisseurs ont déjà la leur avec un catalogue ; le rapprochement se fera si un même tiers doit un jour être les deux.
+- **Sortie** : le client ou chantier se choisit dans l'annuaire, ou se crée sans quitter la saisie (magasinier compris, comme un fournisseur, D25) ; le nom est recopié sur le bon (le bon garde le nom du jour). Le texte libre reste possible pour un passage sans fiche.
+- **Fiche** : coordonnées et dernières sorties et retours, pour répondre à « qu'a-t-on livré à ce chantier ? ». Liste des bons filtrable par client.
+- **Écran** : pas d'entrée de menu en plus (D29) : « Fournisseurs » devient « Contacts », avec deux onglets, fournisseurs et clients.
+- **Droits** : comme les fournisseurs : tous consultent, le gérant et les managers modifient et archivent.
+
+## D31. Lot B : retours client et fournisseur (2026-10-14)
+
+Modèle D10 : `stock_document` RETURN. Questionnaire : un retour client est aujourd'hui saisi comme une réception, « contre le numéro de facture » (Q16) ; une mauvaise nuance livrée est rapportée puis échangée (Q22).
+
+- **Deux types**, car le sens du stock diffère : retour client (RCL-2026-0001, le stock remonte) et retour fournisseur (RFO-2026-0001, le stock part). Écart assumé avec D10 (un seul RETURN).
+- **Bon d'origine, facultatif** : un retour client peut partir d'une sortie, un retour fournisseur d'une réception (« Enregistrer un retour » sur la fiche du bon). Les lignes sont alors proposées avec ce qui reste à retourner ; on ne retourne pas plus que ce qui est sorti ou entré (tous retours du même bon cumulés), ni un article qui n'y figurait pas. Le tiers et la référence sont repris du bon d'origine. Sans bon d'origine (vieux papier, facture d'un autre outil), le retour se saisit librement avec la référence de la facture.
+- **Droits** : droit de mouvement sur le dépôt (le magasinier les saisit, Q16). Un retour fournisseur peut déclencher l'alerte de stock, comme une sortie.
+- **Écran** : dans « Bons » (« Autre opération »), sur la fiche du bon d'origine, qui liste aussi ses retours.
+
+## D32. Lot C : inventaire d'un dépôt (2026-10-14)
+
+Modèle D10 : `inventory_count` (complet ou tournant, périmètre par catégorie, clôture qui crée un bon d'ajustement) et `inventory_count_line` (théorique, compté, second comptage). Questionnaire : inventaires « parfois », sur papier (Q30-Q32).
+
+- **Ouverture** : un dépôt, tout le dépôt (complet) ou une catégorie et ses sous-catégories (tournant). Un seul inventaire ouvert par dépôt. Droit de correction (gérant, manager, contrôleur).
+- **Feuille de comptage** : les articles proposés dans le dépôt (dans le périmètre), lot par lot ; on saisit le compté, à l'unité ou au conditionnement. Comptage à l'aveugle : le stock théorique ne s'affiche qu'une fois la ligne comptée, pour ne pas influencer la personne qui compte. Entrée enregistre et passe à la ligne suivante. Recherche et filtres « à compter », « comptés », « écarts ». Un article trouvé hors feuille s'ajoute. Le magasinier peut compter (le comptage ne change pas le stock) ; seule la clôture demande le droit de correction. Écart assumé avec D25, qui réservait les inventaires aux correcteurs.
+- **Stock vivant** : le magasin n'est pas fermé pendant l'inventaire. Chaque comptage retient le stock théorique de l'instant ; à la clôture, l'écart (compté − théorique de l'instant) s'applique au stock du moment, ce qui garde juste tout ce qui est entré ou sorti entre-temps. Si un écart ferait passer le stock sous zéro, la clôture est refusée et la ligne est à recompter.
+- **Double comptage** : une ligne en écart peut être recomptée (idéalement par une autre personne) ; le second comptage est retenu, le premier reste visible.
+- **Clôture** : un bon d'ajustement (motif « inventaire ») porte tous les écarts ; les articles non comptés ne bougent pas (l'écran le dit avant de clôturer). Sans écart, l'inventaire se clôt sans bon. Un inventaire peut aussi être annulé : rien ne bouge.
+- **Écran** : pas d'onglet en plus : on lance et reprend un inventaire depuis « Stock », qui signale les inventaires en cours ; l'historique s'y consulte aussi ; le bon d'ajustement renvoie à son inventaire.
 
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).

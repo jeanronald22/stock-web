@@ -158,7 +158,7 @@ test("réception puis sortie : le stock suit, une sortie trop forte est refusée
   ).toBeVisible()
 
   // La réception a rempli le catalogue du fournisseur.
-  await navigateTo(page, "Fournisseurs")
+  await navigateTo(page, "Contacts")
   await dismissTour(page, "Vos fournisseurs")
   await expect(
     page.getByRole("row", { name: /Cimencam.*2 articles/ })

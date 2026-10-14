@@ -1,9 +1,14 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ArrowRightLeftIcon, PlusIcon, WarehouseIcon } from "lucide-react"
+import {
+  ArrowRightLeftIcon,
+  PlusIcon,
+  Undo2Icon,
+  WarehouseIcon,
+} from "lucide-react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useRef, useState } from "react"
 import {
@@ -16,6 +21,9 @@ import { useAuth } from "react-oidc-context"
 import { toast } from "sonner"
 
 import { Splash } from "@/components/app/splash"
+import { EmptyState } from "@/components/catalog/empty-state"
+import { SearchScene } from "@/components/illustrations/search-scene"
+import { ValidatedScene } from "@/components/illustrations/validated-scene"
 import { useQuantityLabel } from "@/components/items/describe"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
@@ -32,19 +40,33 @@ import { useWorkspace } from "@/components/workspace/workspace-context"
 import { CatalogStatus, type Warehouse } from "@/lib/api/stock"
 import { useTransferDestinations, useWarehouses } from "@/lib/api/stock-queries"
 import { useErrorMessage } from "@/lib/api/use-error-message"
-import { useAddVoucherPhoto, useRecordVoucher } from "@/lib/api/voucher-queries"
-import { shortagesOf, VoucherType, type EntryType } from "@/lib/api/vouchers"
-import { RecordRoutes, Routes } from "@/lib/routes"
+import {
+  useAddVoucherPhoto,
+  useRecordVoucher,
+  useReturnable,
+} from "@/lib/api/voucher-queries"
+import {
+  customerTypes,
+  returnOrigins,
+  shortagesOf,
+  supplierTypes,
+  VoucherType,
+  type EntryType,
+  type Returnable,
+} from "@/lib/api/vouchers"
+import { EntryQueryParams, RecordRoutes, Routes } from "@/lib/routes"
 import {
   readLastWarehouse,
   rememberLastWarehouse,
 } from "@/lib/vouchers/last-warehouse"
 
+import { CustomerField } from "./customer-field"
 import { DamagePhotosField } from "./damage-photos-field"
 import { ReasonField } from "./reason-field"
 import { SupplierField } from "./supplier-field"
 import { VoucherDetailsFields } from "./voucher-details-fields"
 import {
+  newLine,
   todayOn,
   toVoucherInput,
   voucherFormSchema,
@@ -52,26 +74,85 @@ import {
 } from "./voucher-form-schema"
 import { VoucherLinesField } from "./voucher-lines-field"
 
+/** Retour depuis un bon (D31, ?origine=…) : les lignes qui restent à retourner sont proposées. */
 export function VoucherEntry({ type }: { type: EntryType }) {
-  const t = useTranslations("common")
+  const t = useTranslations()
+  const searchParams = useSearchParams()
+  const originId =
+    type in returnOrigins
+      ? (searchParams.get(EntryQueryParams.origin) ?? undefined)
+      : undefined
   const warehouses = useWarehouses(CatalogStatus.active, { fresh: true })
+  const origin = useReturnable(originId)
   // Liste à jour avant de proposer un dépôt : un collègue vient peut-être d'en déclarer un.
-  if (!warehouses.data || !warehouses.isFetchedAfterMount)
-    return <Splash label={t("loading")} />
-  return <VoucherEntryForm type={type} warehouses={warehouses.data} />
+  if (
+    !warehouses.data ||
+    !warehouses.isFetchedAfterMount ||
+    (originId && origin.isPending)
+  )
+    return <Splash label={t("common.loading")} />
+  if (originId && !origin.data) {
+    return (
+      <PageBody>
+        <EmptyState
+          illustration={<SearchScene />}
+          title={t("vouchers.notFound")}
+          description=""
+          action={
+            <Link
+              href={Routes.vouchers}
+              className={buttonVariants({ variant: "outline" })}
+            >
+              {t("vouchers.title")}
+            </Link>
+          }
+        />
+      </PageBody>
+    )
+  }
+  if (origin.data?.lines.every((line) => line.remaining === 0)) {
+    return (
+      <PageBody>
+        <EmptyState
+          illustration={<ValidatedScene />}
+          title={t("vouchers.returns.nothingLeft.title")}
+          description={t("vouchers.returns.nothingLeft.description", {
+            number: origin.data.origin.number,
+          })}
+          action={
+            <Link
+              href={RecordRoutes.voucher(origin.data.origin.id)}
+              className={buttonVariants({ variant: "outline" })}
+            >
+              {origin.data.origin.number}
+            </Link>
+          }
+        />
+      </PageBody>
+    )
+  }
+  return (
+    <VoucherEntryForm
+      type={type}
+      warehouses={warehouses.data}
+      origin={origin.data}
+    />
+  )
 }
 
 /**
- * Réception, sortie, transfert, casse ou ajustement sur un seul écran, pensé pour aller vite :
+ * Réception, sortie, transfert, casse, ajustement ou retour sur un seul écran, pensé pour aller vite :
  * dépôt déjà choisi, recherche d'article au clavier, détails à côté. Après validation, l'écran se
  * vide pour le bon suivant (même dépôt, même date).
  */
 function VoucherEntryForm({
   type,
   warehouses,
+  origin,
 }: {
   type: EntryType
   warehouses: Warehouse[]
+  origin: Returnable | undefined
 }) {
   const t = useTranslations()
   const router = useRouter()
@@ -90,6 +171,12 @@ function VoucherEntryForm({
   const addPhoto = useAddVoucherPhoto()
 
   const [defaultWarehouseId] = useState(() => {
+    // Retour depuis un bon : son dépôt d'abord.
+    if (
+      origin &&
+      warehouses.some((warehouse) => warehouse.id === origin.warehouse.id)
+    )
+      return origin.warehouse.id
     const last = readLastWarehouse(subject, organization.id)
     if (last && warehouses.some((warehouse) => warehouse.id === last))
       return last
@@ -110,6 +197,7 @@ function VoucherEntryForm({
           futureDate: t("vouchers.form.futureDate"),
           reasonRequired: t("vouchers.reasons.required"),
           noteRequired: t("vouchers.form.noteRequired"),
+          exceedsOrigin: t("vouchers.returns.exceeds"),
         },
         today,
         type
@@ -120,7 +208,17 @@ function VoucherEntryForm({
       destinationWarehouseId: "",
       reason: "",
       supplier: null,
-      lines: [],
+      customer: null,
+      originId: origin?.origin.id ?? "",
+      lines: (origin?.lines ?? [])
+        .filter((line) => line.remaining > 0)
+        .map((line) =>
+          newLine(line.item, {
+            batch: line.batch ?? "",
+            limit: line.remaining,
+            quantity: String(line.remaining),
+          })
+        ),
       counterparty: "",
       documentReference: "",
       note: "",
@@ -129,6 +227,7 @@ function VoucherEntryForm({
   })
   const lineCount = useWatch({ control: form.control, name: "lines" }).length
   const supplier = useWatch({ control: form.control, name: "supplier" })
+  const fromOrigin = !!origin
 
   /** Sortie refusée : le disponible réel s'affiche sous chaque ligne en manque. */
   const placeShortages = (error: unknown): boolean => {
@@ -170,6 +269,14 @@ function VoucherEntryForm({
         input: toVoucherInput(type, values, today),
       })
       rememberLastWarehouse(subject, organization.id, values.warehouseId)
+      // Un retour depuis un bon est complet : on ouvre le bon plutôt qu'un écran vide.
+      if (fromOrigin) {
+        toast.success(
+          t(`vouchers.entry.${type}.done`, { number: voucher.number })
+        )
+        router.replace(RecordRoutes.voucher(voucher.id))
+        return
+      }
       const photosSent = await sendPhotos(voucher.id)
       toast[photosSent ? "success" : "warning"](
         photosSent
@@ -185,6 +292,7 @@ function VoucherEntryForm({
       form.reset({
         ...values,
         supplier: null,
+        customer: null,
         lines: [],
         counterparty: "",
         documentReference: "",
@@ -223,6 +331,7 @@ function VoucherEntryForm({
         ]}
         description={t(`vouchers.entry.${type}.description`)}
       />
+      {origin && <OriginBanner origin={origin} />}
       <form
         onSubmit={(event) => void form.handleSubmit(submit)(event)}
         noValidate
@@ -292,7 +401,7 @@ function VoucherEntryForm({
               />
             )}
             {transfer && <DestinationField form={form} />}
-            {type === VoucherType.receipt && (
+            {supplierTypes.has(type) && !fromOrigin && (
               <Controller
                 control={form.control}
                 name="supplier"
@@ -312,12 +421,16 @@ function VoucherEntryForm({
                 )}
               />
             )}
+            {customerTypes.has(type) && !fromOrigin && (
+              <PartyCustomerField form={form} />
+            )}
           </div>
           <VoucherLinesField
             form={form}
             type={type}
             searchRef={searchRef}
             supplier={supplier}
+            fromOrigin={fromOrigin}
           />
         </div>
 
@@ -338,6 +451,53 @@ function VoucherEntryForm({
         </div>
       </form>
     </PageBody>
+  )
+}
+
+/** Retour depuis un bon : de quel bon, de qui ; les lignes en reprennent ce qui reste. */
+function OriginBanner({ origin }: { origin: Returnable }) {
+  const t = useTranslations("vouchers.returns")
+  return (
+    <p className="mt-6 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl border bg-muted/40 px-4 py-3 text-sm">
+      <Undo2Icon className="size-4 text-muted-foreground" aria-hidden />
+      {t("from")}
+      <Link
+        href={RecordRoutes.voucher(origin.origin.id)}
+        className="font-mono font-semibold hover:underline"
+      >
+        {origin.origin.number}
+      </Link>
+      {origin.counterparty && (
+        <span className="text-muted-foreground">· {origin.counterparty}</span>
+      )}
+    </p>
+  )
+}
+
+/** Client ou chantier d'une sortie ou d'un retour client (D30). */
+function PartyCustomerField({
+  form,
+}: {
+  form: UseFormReturn<VoucherFormValues>
+}) {
+  const t = useTranslations()
+  const customer = useWatch({ control: form.control, name: "customer" })
+  const counterparty = useWatch({ control: form.control, name: "counterparty" })
+  return (
+    <Field>
+      <FieldLabel htmlFor="customer">
+        {t("vouchers.form.customer")}{" "}
+        <span className="font-normal text-muted-foreground">
+          ({t("common.optional")})
+        </span>
+      </FieldLabel>
+      <CustomerField
+        customer={customer}
+        counterparty={customer ? "" : counterparty}
+        onCustomerChange={(chosen) => form.setValue("customer", chosen)}
+        onCounterpartyChange={(name) => form.setValue("counterparty", name)}
+      />
+    </Field>
   )
 }
 

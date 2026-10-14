@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl"
 import { Controller, type UseFormReturn } from "react-hook-form"
 
-import { ChoiceCard } from "@/components/team/stock-access-fields"
+import { ChoiceCard } from "@/components/catalog/choice-card"
 import { FieldError } from "@/components/ui/field"
 import { voucherReasons, type VoucherType } from "@/lib/api/vouchers"
 

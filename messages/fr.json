@@ -22,7 +22,11 @@
     "newTransfer": "Nouveau transfert",
     "transferReceipt": "Réception de transfert",
     "newDamage": "Nouvelle casse",
-    "newAdjustment": "Ajustement de stock"
+    "newAdjustment": "Ajustement de stock",
+    "customers": "Clients et chantiers",
+    "inventory": "Inventaire",
+    "newCustomerReturn": "Retour client",
+    "newSupplierReturn": "Retour fournisseur"
   },
   "common": {
     "retry": "Réessayer",
@@ -188,14 +192,14 @@
     "warehouses": "Dépôts",
     "vouchers": "Bons",
     "stock": "Stock",
-    "suppliers": "Fournisseurs",
     "team": "Équipe",
     "sections": {
       "overview": "Vue d’ensemble",
       "operations": "Opérations",
       "catalog": "Catalogue",
       "administration": "Administration"
-    }
+    },
+    "contacts": "Contacts"
   },
   "workspace": {
     "toggleSidebar": "Afficher ou masquer le menu",
@@ -539,7 +543,9 @@
       "TRANSFER_OUT": "Transfert",
       "TRANSFER_IN": "Réception de transfert",
       "DAMAGE": "Casse",
-      "ADJUSTMENT": "Ajustement"
+      "ADJUSTMENT": "Ajustement",
+      "CUSTOMER_RETURN": "Retour client",
+      "SUPPLIER_RETURN": "Retour fournisseur"
     },
     "allTypes": "Tous les bons",
     "empty": {
@@ -578,7 +584,11 @@
       "reason": "Motif",
       "announced": "Annoncé : {quantity}",
       "counted": "Théorique {book}, compté {counted}",
-      "unchanged": "Inchangé"
+      "unchanged": "Inchangé",
+      "returnOf": "Retour du bon",
+      "returns": "{count, plural, one {Retour :} other {Retours :}}",
+      "closesInventory": "Écarts de l’inventaire :",
+      "seeInventory": "voir l’inventaire"
     },
     "form": {
       "noWarehouse": "Aucun dépôt actif. Déclarez d’abord un dépôt.",
@@ -601,7 +611,7 @@
       "shortage": "Il n’y a que {available} dans ce dépôt.",
       "supplier": "Fournisseur",
       "supplierPlaceholder": "Cimencam, grossiste du marché…",
-      "customer": "Client ou destination",
+      "customer": "Client ou chantier",
       "customerPlaceholder": "Chantier Bonamoussadi, client…",
       "reference": "Référence du document",
       "referencePlaceholder": "N° du bon de livraison ou de la facture",
@@ -630,7 +640,16 @@
       "noGap": "Conforme",
       "noteRequired": "Expliquez ce qui s’est passé.",
       "noteRequiredPlaceholder": "Ce qui s’est passé, en quelques mots",
-      "correctionReferencePlaceholder": "N° de la fiche de comptage ou du constat"
+      "correctionReferencePlaceholder": "N° de la fiche de comptage ou du constat",
+      "customerSearch": "Rechercher ou ajouter un client, un chantier",
+      "changeCustomer": "Changer de client",
+      "customerCreated": "{name} ajouté aux contacts.",
+      "addCustomer": {
+        "CUSTOMER": "Ajouter le client « {name} »",
+        "SITE": "Ajouter le chantier « {name} »"
+      },
+      "useWithoutRecord": "Juste « {name} », sans fiche",
+      "withoutRecord": "sans fiche"
     },
     "entry": {
       "see": "Voir le bon",
@@ -664,6 +683,18 @@
         "description": "Indiquez ce que vous avez compté : le stock prend cette valeur à la validation, l’écart avec le théorique est gardé.",
         "submit": "{count, plural, =0 {Valider le comptage} one {Valider le comptage · # article} other {Valider le comptage · # articles}}",
         "done": "Ajustement {number} validé."
+      },
+      "CUSTOMER_RETURN": {
+        "title": "Retour client",
+        "description": "La marchandise revient au dépôt : le stock augmente à la validation.",
+        "submit": "{count, plural, =0 {Valider le retour} one {Valider le retour · # article} other {Valider le retour · # articles}}",
+        "done": "Retour {number} validé."
+      },
+      "SUPPLIER_RETURN": {
+        "title": "Retour fournisseur",
+        "description": "La marchandise repart chez le fournisseur : le stock diminue à la validation.",
+        "submit": "{count, plural, =0 {Valider le retour} one {Valider le retour · # article} other {Valider le retour · # articles}}",
+        "done": "Retour {number} validé."
       }
     },
     "print": {
@@ -679,7 +710,9 @@
         "TRANSFER_OUT": "Bon de transfert",
         "TRANSFER_IN": "Réception de transfert",
         "DAMAGE": "Bon de casse",
-        "ADJUSTMENT": "Bon d’ajustement"
+        "ADJUSTMENT": "Bon d’ajustement",
+        "CUSTOMER_RETURN": "Bon de retour client",
+        "SUPPLIER_RETURN": "Bon de retour fournisseur"
       },
       "receivedOf": "{received} reçus sur {expected}",
       "countedOf": "{counted} comptés (théorique {book})",
@@ -709,7 +742,8 @@
       "inTransit": "Transferts en route",
       "damages": "Casses",
       "adjustments": "Ajustements",
-      "discrepancies": "Réceptions avec écart"
+      "discrepancies": "Réceptions avec écart",
+      "returns": "Retours"
     },
     "transferState": {
       "IN_TRANSIT": "En route",
@@ -737,7 +771,9 @@
     "operations": {
       "transfer": "Vers un autre dépôt",
       "damage": "Marchandise abîmée, périmée ou perdue",
-      "adjustment": "Mettre le stock au compté"
+      "adjustment": "Mettre le stock au compté",
+      "customerReturn": "Marchandise rapportée par un client",
+      "supplierReturn": "Marchandise renvoyée à un fournisseur"
     },
     "newDamage": "Casse",
     "newAdjustment": "Ajustement de stock",
@@ -772,6 +808,10 @@
       "OTHER": {
         "label": "Autre",
         "hint": "Expliquez dans la note."
+      },
+      "INVENTORY": {
+        "label": "Inventaire",
+        "hint": "Écarts constatés à la clôture d’un inventaire."
       }
     },
     "photos": {
@@ -787,6 +827,21 @@
       "tooLarge": "Photo trop lourde : {max} Mo au plus.",
       "partial": "Casse {number} enregistrée, mais des photos n’ont pas pu être envoyées : ajoutez-les depuis le bon.",
       "addLabel": "Ajouter une photo"
+    },
+    "newCustomerReturn": "Retour client",
+    "newSupplierReturn": "Retour fournisseur",
+    "returns": {
+      "nothingLeft": {
+        "title": "Tout est déjà revenu",
+        "description": "Les articles du bon {number} ont déjà tous été retournés."
+      },
+      "exceeds": "Au plus ce qui reste à retourner.",
+      "from": "Retour du bon",
+      "remaining": "Reste à retourner : {quantity}",
+      "action": {
+        "CUSTOMER_RETURN": "Enregistrer un retour",
+        "SUPPLIER_RETURN": "Renvoyer au fournisseur"
+      }
     }
   },
   "stock": {
@@ -1147,6 +1202,188 @@
         "title": "Réception {number} : écart avec le bon de livraison",
         "gap": "{name} : {received} reçus sur {expected} annoncés"
       }
+    }
+  },
+  "contacts": {
+    "title": "Contacts",
+    "suppliers": "Fournisseurs",
+    "customers": "Clients et chantiers"
+  },
+  "customers": {
+    "title": "Clients et chantiers",
+    "description": "À qui vous livrez, et où : chaque sortie peut en garder la trace.",
+    "new": "Nouveau client",
+    "newDescription": "Un client ou un chantier, avec de quoi le joindre et le trouver.",
+    "searchPlaceholder": "Rechercher un client ou un chantier",
+    "allKinds": "Clients et chantiers",
+    "kindFilter": "Genre",
+    "kinds": {
+      "CUSTOMER": {
+        "label": "Client",
+        "hint": "Une personne ou une entreprise.",
+        "plural": "Clients"
+      },
+      "SITE": {
+        "label": "Chantier",
+        "hint": "Un lieu de livraison : construction, rénovation.",
+        "plural": "Chantiers"
+      }
+    },
+    "empty": {
+      "title": "Aucun client pour l’instant",
+      "description": "Ajoutez vos clients et vos chantiers, ou créez-les pendant une sortie."
+    },
+    "noResult": {
+      "title": "Aucun client trouvé",
+      "description": "Essayez un autre nom, ou effacez les filtres.",
+      "reset": "Effacer les filtres"
+    },
+    "table": {
+      "name": "Nom",
+      "phone": "Téléphone",
+      "address": "Adresse"
+    },
+    "restore": {
+      "badge": "Archivé",
+      "action": "Restaurer",
+      "done": "Client restauré."
+    },
+    "archive": {
+      "action": "Archiver",
+      "title": "Archiver ce client ?",
+      "description": "Il n’est plus proposé sur les sorties. Ses bons restent, et vous pourrez le restaurer.",
+      "done": "Client archivé."
+    },
+    "created": "{name} ajouté.",
+    "saved": "Fiche enregistrée.",
+    "notFound": "Client introuvable",
+    "form": {
+      "kind": "Genre",
+      "name": "Nom",
+      "namePlaceholder": "Chantier Koné, Bonamoussadi",
+      "phone": "Téléphone",
+      "phonePlaceholder": "+237 6 99 00 00 00",
+      "address": "Adresse",
+      "addressPlaceholder": "Bonamoussadi, après la pharmacie",
+      "note": "Note",
+      "notePlaceholder": "Livrer le matin, demander M. Koné…",
+      "create": "Ajouter",
+      "contact": "Coordonnées"
+    },
+    "vouchers": {
+      "title": "Sorties et retours",
+      "description": "Ce qui lui a été livré, et ce qu’il a rapporté.",
+      "none": "Aucune sortie pour l’instant.",
+      "all": "Voir les {count} bons"
+    }
+  },
+  "inventory": {
+    "start": {
+      "open": "Faire un inventaire",
+      "title": "Nouvel inventaire",
+      "description": "On compte ce qu’il y a vraiment ; à la clôture, le stock prend les quantités comptées.",
+      "warehouse": "Dépôt",
+      "chooseWarehouse": "Choisissez le dépôt",
+      "scope": "Que compter ?",
+      "scopes": {
+        "full": {
+          "label": "Tout le dépôt",
+          "hint": "Inventaire complet, article par article."
+        },
+        "cycle": {
+          "label": "Une catégorie",
+          "hint": "Inventaire tournant : une partie à la fois, sans tout arrêter."
+        }
+      },
+      "noCategory": "Rangez d’abord vos articles en catégories.",
+      "submit": "Ouvrir la feuille de comptage"
+    },
+    "status": {
+      "OPEN": "En cours",
+      "CLOSED": "Clôturé",
+      "CANCELLED": "Annulé"
+    },
+    "openTitle": "Inventaires en cours",
+    "inProgress": "Inventaire en cours · {warehouse}",
+    "progress": "{counted} sur {lines} comptés",
+    "resume": "Reprendre",
+    "history": {
+      "open": "Inventaires passés",
+      "title": "Inventaires",
+      "description": "Les derniers inventaires de vos dépôts.",
+      "empty": "Aucun inventaire pour l’instant.",
+      "newer": "Plus récents",
+      "older": "Plus anciens"
+    },
+    "notFound": "Inventaire introuvable",
+    "backToStock": "Retour au stock",
+    "title": "Inventaire · {warehouse}",
+    "stock": "Stock",
+    "breadcrumb": "Inventaire",
+    "cycleOf": "Catégorie {category}",
+    "full": "Tout le dépôt",
+    "startedBy": "Ouvert par {name}, le {date}",
+    "progressTitle": "Avancement",
+    "gapsTitle": "Écarts",
+    "closedWithAdjustment": "Clôturé : les écarts ont été inscrits au stock par le bon d’ajustement.",
+    "closedWithoutGap": "Clôturé sans écart : le stock était juste.",
+    "searchPlaceholder": "Rechercher un article",
+    "filterLabel": "Lignes",
+    "filters": {
+      "TO_COUNT": "À compter",
+      "COUNTED": "Comptés",
+      "GAPS": "Écarts",
+      "all": "Tout"
+    },
+    "allCounted": "Tout est compté. Un correcteur peut clôturer l’inventaire.",
+    "noLine": "Aucune ligne.",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "page": "Page {page} sur {pages}",
+    "close": {
+      "action": "Clôturer",
+      "title": "Clôturer l’inventaire ?",
+      "summary": "{gaps, plural, =0 {Aucun écart : le stock ne bouge pas.} one {# écart sera inscrit au stock par un bon d’ajustement.} other {# écarts seront inscrits au stock par un bon d’ajustement.}} {uncounted, plural, =0 {} one {# ligne non comptée ne bougera pas.} other {# lignes non comptées ne bougeront pas.}}",
+      "confirm": "Clôturer",
+      "done": "Inventaire clôturé : bon {number}.",
+      "doneWithoutGap": "Inventaire clôturé, sans écart.",
+      "moved": "{count, plural, one {Une ligne est à recompter : le stock a bougé depuis.} other {# lignes sont à recompter : le stock a bougé depuis.}}"
+    },
+    "cancel": {
+      "action": "Annuler l’inventaire",
+      "title": "Annuler cet inventaire ?",
+      "description": "Les comptages sont abandonnés et le stock ne bouge pas.",
+      "done": "Inventaire annulé."
+    },
+    "line": {
+      "invalid": "Entrez une quantité.",
+      "whole": "À l’unité : pas de décimale.",
+      "batch": "Lot {batch}",
+      "firstCount": "1er comptage :",
+      "counted": "Compté :",
+      "recount": "2e comptage :",
+      "recountAction": "Recompter",
+      "correct": "Corriger",
+      "recountHint": "Second comptage, de préférence par une autre personne : c’est lui qui sera retenu.",
+      "countedPlaceholder": "Compté",
+      "unit": "Unité",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "noGap": "Conforme",
+      "gap": "Écart {quantity}",
+      "book": "(théorique {quantity})",
+      "countLabel": "Quantité comptée",
+      "recountLabel": "Second comptage"
+    },
+    "found": {
+      "open": "Article trouvé",
+      "title": "Article trouvé hors de la feuille",
+      "description": "Un article qui n’était pas attendu ici : comptez-le, il rejoint la feuille.",
+      "change": "Changer",
+      "batch": "Lot",
+      "quantity": "Quantité comptée ({unit})",
+      "submit": "Enregistrer le comptage",
+      "done": "{name} compté."
     }
   }
 }

@@ -16,9 +16,14 @@ export const Routes = {
   newTransfer: "/bons/transfert",
   newDamage: "/bons/casse",
   newAdjustment: "/bons/ajustement",
+  /** Retours (D31) ; depuis un bon : ?origine=<id du bon>. */
+  newCustomerReturn: "/bons/retour-client",
+  newSupplierReturn: "/bons/retour-fournisseur",
   stock: "/stock",
   suppliers: "/fournisseurs",
   newSupplier: "/fournisseurs/nouveau",
+  /** Clients et chantiers : second onglet de « Contacts » (D30). */
+  customers: "/clients",
   team: "/equipe",
   notificationSettings: "/notifications",
   newInvitation: "/equipe/inviter",
@@ -39,9 +44,18 @@ export const RecordRoutes = {
   /** Réception d'un transfert au dépôt d'arrivée (D27). */
   transferReceipt: (id: string) => `${Routes.vouchers}/${id}/receptionner`,
   supplier: (id: string) => `${Routes.suppliers}/${id}`,
+  customer: (id: string) => `${Routes.customers}/${id}`,
+  /** Inventaire d'un dépôt (D32), ouvert depuis « Stock ». */
+  inventory: (id: string) => `${Routes.stock}/inventaires/${id}`,
   member: (userId: string) => `${Routes.team}/${userId}`,
   invitation: (token: string) =>
     `${Routes.invitation}/${encodeURIComponent(token)}`,
+} as const
+
+/** Paramètres d'adresse des écrans de saisie. */
+export const EntryQueryParams = {
+  /** Retour : le bon dont il part. */
+  origin: "origine",
 } as const
 
 /** Filtres des listes conservés dans l'adresse : un lien partagé ouvre la même vue. */
@@ -55,6 +69,9 @@ export const ListQueryParams = {
   voucherType: "type",
   category: "categorie",
   supplier: "fournisseur",
+  customer: "client",
+  /** Clients ou chantiers seulement (voir CustomerKindParam). */
+  customerKind: "genre",
   stockAlert: "alerte",
   from: "du",
   to: "au",
@@ -69,6 +86,14 @@ export const StockAlertParam = {
 } as const
 export type StockAlertParam =
   (typeof StockAlertParam)[keyof typeof StockAlertParam]
+
+/** Valeurs de « genre » dans la liste des clients. */
+export const CustomerKindParam = {
+  customers: "clients",
+  sites: "chantiers",
+} as const
+export type CustomerKindParam =
+  (typeof CustomerKindParam)[keyof typeof CustomerKindParam]
 
 /** Valeur de « ordre » pour les bons les plus anciens d'abord ; absente, les plus récents d'abord. */
 export const OLDEST_FIRST_PARAM = "anciens"

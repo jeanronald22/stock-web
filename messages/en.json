@@ -22,7 +22,11 @@
     "newTransfer": "New transfer",
     "transferReceipt": "Transfer receipt",
     "newDamage": "New damage",
-    "newAdjustment": "Stock adjustment"
+    "newAdjustment": "Stock adjustment",
+    "customers": "Customers and sites",
+    "inventory": "Stocktake",
+    "newCustomerReturn": "Customer return",
+    "newSupplierReturn": "Supplier return"
   },
   "common": {
     "retry": "Try again",
@@ -188,14 +192,14 @@
     "warehouses": "Depots",
     "vouchers": "Vouchers",
     "stock": "Stock",
-    "suppliers": "Suppliers",
     "team": "Team",
     "sections": {
       "overview": "Overview",
       "operations": "Operations",
       "catalog": "Catalogue",
       "administration": "Administration"
-    }
+    },
+    "contacts": "Contacts"
   },
   "workspace": {
     "toggleSidebar": "Show or hide the menu",
@@ -539,7 +543,9 @@
       "TRANSFER_OUT": "Transfer",
       "TRANSFER_IN": "Transfer receipt",
       "DAMAGE": "Damage",
-      "ADJUSTMENT": "Adjustment"
+      "ADJUSTMENT": "Adjustment",
+      "CUSTOMER_RETURN": "Customer return",
+      "SUPPLIER_RETURN": "Supplier return"
     },
     "allTypes": "All vouchers",
     "empty": {
@@ -578,7 +584,11 @@
       "reason": "Reason",
       "announced": "Announced: {quantity}",
       "counted": "Book {book}, counted {counted}",
-      "unchanged": "Unchanged"
+      "unchanged": "Unchanged",
+      "returnOf": "Return of voucher",
+      "returns": "{count, plural, one {Return:} other {Returns:}}",
+      "closesInventory": "Gaps of the stocktake:",
+      "seeInventory": "see the stocktake"
     },
     "form": {
       "noWarehouse": "No active depot. Declare a depot first.",
@@ -601,7 +611,7 @@
       "shortage": "There is only {available} in this depot.",
       "supplier": "Supplier",
       "supplierPlaceholder": "Cimencam, market wholesaler…",
-      "customer": "Customer or destination",
+      "customer": "Customer or site",
       "customerPlaceholder": "Bonamoussadi site, customer…",
       "reference": "Document reference",
       "referencePlaceholder": "Delivery note or invoice number",
@@ -630,7 +640,16 @@
       "noGap": "Matches",
       "noteRequired": "Explain what happened.",
       "noteRequiredPlaceholder": "What happened, in a few words",
-      "correctionReferencePlaceholder": "Count sheet or report number"
+      "correctionReferencePlaceholder": "Count sheet or report number",
+      "customerSearch": "Search or add a customer, a site",
+      "changeCustomer": "Change customer",
+      "customerCreated": "{name} added to contacts.",
+      "addCustomer": {
+        "CUSTOMER": "Add the customer “{name}”",
+        "SITE": "Add the site “{name}”"
+      },
+      "useWithoutRecord": "Just “{name}”, without a record",
+      "withoutRecord": "no record"
     },
     "entry": {
       "see": "See voucher",
@@ -664,6 +683,18 @@
         "description": "Enter what you counted: stock takes this value on validation, and the gap with the book quantity is kept.",
         "submit": "{count, plural, =0 {Validate the count} one {Validate the count · # item} other {Validate the count · # items}}",
         "done": "Adjustment {number} validated."
+      },
+      "CUSTOMER_RETURN": {
+        "title": "Customer return",
+        "description": "The goods come back to the warehouse: stock increases on validation.",
+        "submit": "{count, plural, =0 {Validate the return} one {Validate the return · # item} other {Validate the return · # items}}",
+        "done": "Return {number} validated."
+      },
+      "SUPPLIER_RETURN": {
+        "title": "Supplier return",
+        "description": "The goods go back to the supplier: stock decreases on validation.",
+        "submit": "{count, plural, =0 {Validate the return} one {Validate the return · # item} other {Validate the return · # items}}",
+        "done": "Return {number} validated."
       }
     },
     "print": {
@@ -679,7 +710,9 @@
         "TRANSFER_OUT": "Transfer voucher",
         "TRANSFER_IN": "Transfer receipt",
         "DAMAGE": "Damage voucher",
-        "ADJUSTMENT": "Adjustment voucher"
+        "ADJUSTMENT": "Adjustment voucher",
+        "CUSTOMER_RETURN": "Customer return voucher",
+        "SUPPLIER_RETURN": "Supplier return voucher"
       },
       "receivedOf": "{received} received of {expected}",
       "countedOf": "{counted} counted (book {book})",
@@ -709,7 +742,8 @@
       "inTransit": "Transfers on the way",
       "damages": "Damage",
       "adjustments": "Adjustments",
-      "discrepancies": "Receipts with discrepancy"
+      "discrepancies": "Receipts with discrepancy",
+      "returns": "Returns"
     },
     "transferState": {
       "IN_TRANSIT": "On the way",
@@ -737,7 +771,9 @@
     "operations": {
       "transfer": "To another warehouse",
       "damage": "Broken, expired or lost goods",
-      "adjustment": "Set stock to what you counted"
+      "adjustment": "Set stock to what you counted",
+      "customerReturn": "Goods brought back by a customer",
+      "supplierReturn": "Goods sent back to a supplier"
     },
     "newDamage": "Damage",
     "newAdjustment": "Stock adjustment",
@@ -772,6 +808,10 @@
       "OTHER": {
         "label": "Other",
         "hint": "Explain in the note."
+      },
+      "INVENTORY": {
+        "label": "Stocktake",
+        "hint": "Gaps found when closing a stocktake."
       }
     },
     "photos": {
@@ -787,6 +827,21 @@
       "tooLarge": "Photo too large: {max} MB at most.",
       "partial": "Damage {number} recorded, but some photos could not be sent: add them from the voucher.",
       "addLabel": "Add a photo"
+    },
+    "newCustomerReturn": "Customer return",
+    "newSupplierReturn": "Supplier return",
+    "returns": {
+      "nothingLeft": {
+        "title": "Everything is already back",
+        "description": "All the items of voucher {number} have already been returned."
+      },
+      "exceeds": "At most what remains to return.",
+      "from": "Return of voucher",
+      "remaining": "Left to return: {quantity}",
+      "action": {
+        "CUSTOMER_RETURN": "Record a return",
+        "SUPPLIER_RETURN": "Send back to supplier"
+      }
     }
   },
   "stock": {
@@ -1147,6 +1202,188 @@
         "title": "Receipt {number}: discrepancy with the delivery note",
         "gap": "{name}: {received} received of {expected} announced"
       }
+    }
+  },
+  "contacts": {
+    "title": "Contacts",
+    "suppliers": "Suppliers",
+    "customers": "Customers and sites"
+  },
+  "customers": {
+    "title": "Customers and sites",
+    "description": "Who you deliver to, and where: every issue can keep track of it.",
+    "new": "New customer",
+    "newDescription": "A customer or a site, with how to reach and find them.",
+    "searchPlaceholder": "Search for a customer or a site",
+    "allKinds": "Customers and sites",
+    "kindFilter": "Kind",
+    "kinds": {
+      "CUSTOMER": {
+        "label": "Customer",
+        "hint": "A person or a company.",
+        "plural": "Customers"
+      },
+      "SITE": {
+        "label": "Site",
+        "hint": "A delivery place: construction, renovation.",
+        "plural": "Sites"
+      }
+    },
+    "empty": {
+      "title": "No customers yet",
+      "description": "Add your customers and sites, or create them during an issue."
+    },
+    "noResult": {
+      "title": "No customer found",
+      "description": "Try another name, or clear the filters.",
+      "reset": "Clear filters"
+    },
+    "table": {
+      "name": "Name",
+      "phone": "Phone",
+      "address": "Address"
+    },
+    "restore": {
+      "badge": "Archived",
+      "action": "Restore",
+      "done": "Customer restored."
+    },
+    "archive": {
+      "action": "Archive",
+      "title": "Archive this customer?",
+      "description": "They are no longer offered on issues. Their vouchers remain, and you can restore them.",
+      "done": "Customer archived."
+    },
+    "created": "{name} added.",
+    "saved": "Record saved.",
+    "notFound": "Customer not found",
+    "form": {
+      "kind": "Kind",
+      "name": "Name",
+      "namePlaceholder": "Koné site, Bonamoussadi",
+      "phone": "Phone",
+      "phonePlaceholder": "+237 6 99 00 00 00",
+      "address": "Address",
+      "addressPlaceholder": "Bonamoussadi, past the pharmacy",
+      "note": "Note",
+      "notePlaceholder": "Deliver in the morning, ask for Mr Koné…",
+      "create": "Add",
+      "contact": "Contact details"
+    },
+    "vouchers": {
+      "title": "Issues and returns",
+      "description": "What was delivered to them, and what they brought back.",
+      "none": "No issues yet.",
+      "all": "See the {count} vouchers"
+    }
+  },
+  "inventory": {
+    "start": {
+      "open": "Take stock",
+      "title": "New stocktake",
+      "description": "Count what is really there; on closing, stock takes the counted quantities.",
+      "warehouse": "Warehouse",
+      "chooseWarehouse": "Choose the warehouse",
+      "scope": "What to count?",
+      "scopes": {
+        "full": {
+          "label": "The whole warehouse",
+          "hint": "Full stocktake, item by item."
+        },
+        "cycle": {
+          "label": "One category",
+          "hint": "Cycle count: one part at a time, without stopping everything."
+        }
+      },
+      "noCategory": "First sort your items into categories.",
+      "submit": "Open the count sheet"
+    },
+    "status": {
+      "OPEN": "In progress",
+      "CLOSED": "Closed",
+      "CANCELLED": "Cancelled"
+    },
+    "openTitle": "Stocktakes in progress",
+    "inProgress": "Stocktake in progress · {warehouse}",
+    "progress": "{counted} of {lines} counted",
+    "resume": "Resume",
+    "history": {
+      "open": "Past stocktakes",
+      "title": "Stocktakes",
+      "description": "The latest stocktakes of your warehouses.",
+      "empty": "No stocktake yet.",
+      "newer": "Newer",
+      "older": "Older"
+    },
+    "notFound": "Stocktake not found",
+    "backToStock": "Back to stock",
+    "title": "Stocktake · {warehouse}",
+    "stock": "Stock",
+    "breadcrumb": "Stocktake",
+    "cycleOf": "Category {category}",
+    "full": "Whole warehouse",
+    "startedBy": "Opened by {name} on {date}",
+    "progressTitle": "Progress",
+    "gapsTitle": "Gaps",
+    "closedWithAdjustment": "Closed: the gaps were recorded in stock by the adjustment voucher.",
+    "closedWithoutGap": "Closed without gaps: stock was right.",
+    "searchPlaceholder": "Search for an item",
+    "filterLabel": "Lines",
+    "filters": {
+      "TO_COUNT": "To count",
+      "COUNTED": "Counted",
+      "GAPS": "Gaps",
+      "all": "All"
+    },
+    "allCounted": "Everything is counted. A controller can close the stocktake.",
+    "noLine": "No lines.",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page} of {pages}",
+    "close": {
+      "action": "Close",
+      "title": "Close the stocktake?",
+      "summary": "{gaps, plural, =0 {No gaps: stock does not move.} one {# gap will be recorded in stock by an adjustment voucher.} other {# gaps will be recorded in stock by an adjustment voucher.}} {uncounted, plural, =0 {} one {# uncounted line will not move.} other {# uncounted lines will not move.}}",
+      "confirm": "Close",
+      "done": "Stocktake closed: voucher {number}.",
+      "doneWithoutGap": "Stocktake closed, without gaps.",
+      "moved": "{count, plural, one {One line must be recounted: stock moved since.} other {# lines must be recounted: stock moved since.}}"
+    },
+    "cancel": {
+      "action": "Cancel the stocktake",
+      "title": "Cancel this stocktake?",
+      "description": "Counts are dropped and stock does not move.",
+      "done": "Stocktake cancelled."
+    },
+    "line": {
+      "invalid": "Enter a quantity.",
+      "whole": "By the unit: no decimals.",
+      "batch": "Batch {batch}",
+      "firstCount": "1st count:",
+      "counted": "Counted:",
+      "recount": "2nd count:",
+      "recountAction": "Recount",
+      "correct": "Correct",
+      "recountHint": "Second count, ideally by someone else: it is the one kept.",
+      "countedPlaceholder": "Counted",
+      "unit": "Unit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "noGap": "Matches",
+      "gap": "Gap {quantity}",
+      "book": "(book {quantity})",
+      "countLabel": "Counted quantity",
+      "recountLabel": "Second count"
+    },
+    "found": {
+      "open": "Item found",
+      "title": "Item found outside the sheet",
+      "description": "An item not expected here: count it, it joins the sheet.",
+      "change": "Change",
+      "batch": "Batch",
+      "quantity": "Counted quantity ({unit})",
+      "submit": "Save the count",
+      "done": "{name} counted."
     }
   }
 }

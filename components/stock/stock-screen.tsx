@@ -37,6 +37,7 @@ import {
 import { NewVoucherButtons } from "@/components/vouchers/vouchers-screen"
 
 import { StockStateBadge } from "./stock-state-badge"
+import { InventoryBar } from "@/components/inventory/inventory-bar"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import { StockState } from "@/lib/api/stock"
 import { useStockPage } from "@/lib/api/voucher-queries"
@@ -88,6 +89,7 @@ export function StockScreen() {
         description={t("description")}
         actions={<NewVoucherButtons />}
       />
+      <InventoryBar />
       {empty ? (
         <EmptyState
           illustration={<ShelfScene />}

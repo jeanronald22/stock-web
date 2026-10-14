@@ -1,9 +1,9 @@
 import {
   BoxesIcon,
+  ContactRoundIcon,
   HouseIcon,
   LayersIcon,
   ReceiptTextIcon,
-  TruckIcon,
   UsersIcon,
   WarehouseIcon,
   type LucideIcon,
@@ -16,14 +16,10 @@ export type NavigationEntry = {
   icon: LucideIcon
   /** Clé de message sous « nav ». */
   label:
-    | "home"
-    | "stock"
-    | "vouchers"
-    | "items"
-    | "suppliers"
-    | "warehouses"
-    | "team"
+    "home" | "stock" | "vouchers" | "items" | "contacts" | "warehouses" | "team"
   section: NavigationSection
+  /** Autres écrans de l'entrée : « Contacts » couvre fournisseurs et clients (D30). */
+  alsoActiveOn?: readonly string[]
   /** Réservé au propriétaire et aux administrateurs (DECISIONS.md, D25). */
   teamManagersOnly?: boolean
 }
@@ -83,9 +79,10 @@ export const workspaceNavigation: readonly NavigationEntry[] = [
   { href: Routes.items, icon: BoxesIcon, label: "items", section: "catalog" },
   {
     href: Routes.suppliers,
-    icon: TruckIcon,
-    label: "suppliers",
+    icon: ContactRoundIcon,
+    label: "contacts",
     section: "catalog",
+    alsoActiveOn: [Routes.customers],
   },
   {
     href: Routes.warehouses,
@@ -107,5 +104,7 @@ export function isActiveEntry(
   entry: NavigationEntry,
   pathname: string
 ): boolean {
-  return pathname === entry.href || pathname.startsWith(`${entry.href}/`)
+  return [entry.href, ...(entry.alsoActiveOn ?? [])].some(
+    (href) => pathname === href || pathname.startsWith(`${href}/`)
+  )
 }
