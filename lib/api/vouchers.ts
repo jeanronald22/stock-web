@@ -1,6 +1,7 @@
 import type { ApiClient } from "./http"
 import { isProblem, ProblemCode } from "./problem"
 import {
+  ItemImageRules,
   query,
   type BaseUnit,
   type Item,
@@ -13,6 +14,7 @@ export const VoucherPaths = {
   vouchers: "/v1/vouchers",
   voucher: (id: string) => `/v1/vouchers/${id}`,
   transferReceipt: (id: string) => `/v1/vouchers/${id}/receipt`,
+  photos: (id: string) => `/v1/vouchers/${id}/photos`,
   stock: "/v1/stock",
   itemStock: (itemId: string) => `/v1/stock/items/${itemId}`,
 } as const
@@ -27,6 +29,7 @@ export const VoucherQueryParams = {
   to: "to",
   order: "order",
   transferState: "transferState",
+  discrepancy: "discrepancy",
   search: "q",
   page: "page",
   size: "size",
@@ -47,6 +50,8 @@ export const voucherTypes = [
   "ISSUE",
   "TRANSFER_OUT",
   "TRANSFER_IN",
+  "DAMAGE",
+  "ADJUSTMENT",
 ] as const
 export type VoucherType = (typeof voucherTypes)[number]
 export const VoucherType = {
@@ -54,13 +59,44 @@ export const VoucherType = {
   issue: "ISSUE",
   transferOut: "TRANSFER_OUT",
   transferIn: "TRANSFER_IN",
+  damage: "DAMAGE",
+  adjustment: "ADJUSTMENT",
 } as const satisfies Record<string, VoucherType>
 
-/** Bons qui font entrer du stock dans leur dépôt ; les autres le font sortir. */
+/** Casse et ajustement corrigent le stock : droit de correction, motif obligatoire (D28). */
+export const correctionTypes: ReadonlySet<VoucherType> = new Set([
+  VoucherType.damage,
+  VoucherType.adjustment,
+])
+
+/** Motifs proposés pour chaque type (stock-api, VoucherReason) ; « autre » demande une note. */
+export const voucherReasons = {
+  [VoucherType.damage]: ["BROKEN", "DAMAGED", "EXPIRED", "LOST", "OTHER"],
+  [VoucherType.adjustment]: ["COUNT", "ENTRY_ERROR", "OTHER"],
+} as const
+export type VoucherReason =
+  | (typeof voucherReasons)[typeof VoucherType.damage][number]
+  | (typeof voucherReasons)[typeof VoucherType.adjustment][number]
+export const OTHER_REASON = "OTHER" satisfies VoucherReason
+
+/** Photos d'une casse (stock-api, StockLimits.PHOTOS_PER_VOUCHER). */
+export const MAX_VOUCHER_PHOTOS = 5
+
+/** Bons qui font entrer du stock dans leur dépôt ; un ajustement va dans les deux sens. */
 export const incomingTypes: ReadonlySet<VoucherType> = new Set([
   VoucherType.receipt,
   VoucherType.transferIn,
 ])
+
+/** Mouvement signé d'une ligne, en unité de base : l'ajustement va du théorique au compté. */
+export function movementOf(
+  type: VoucherType,
+  line: Pick<VoucherLine, "quantity" | "expectedQuantity">
+): number {
+  if (type === VoucherType.adjustment)
+    return line.quantity - (line.expectedQuantity ?? 0)
+  return incomingTypes.has(type) ? line.quantity : -line.quantity
+}
 
 /** Bons saisis dans l'écran de saisie ; la réception d'un transfert part de l'envoi. */
 export type EntryType = Exclude<VoucherType, typeof VoucherType.transferIn>
@@ -98,6 +134,9 @@ export type VoucherSummary = {
   /** Envoi de transfert : dépôt d'arrivée et état. */
   destination: WarehouseRef | null
   transferState: TransferState | null
+  reason: VoucherReason | null
+  /** Une ligne reçue autrement qu'attendu (bon de livraison, transfert). */
+  hasDiscrepancy: boolean
 }
 
 export type VoucherLine = {
@@ -112,7 +151,7 @@ export type VoucherLine = {
   enteredQuantity: number
   packagingName: string | null
   batch: string | null
-  /** Réception de transfert : quantité envoyée ; [quantity] est la quantité reçue. */
+  /** Attendu : envoyé (transfert), annoncé (bon de livraison) ou théorique (ajustement). */
   expectedQuantity: number | null
 }
 
@@ -126,6 +165,8 @@ export type Voucher = Omit<VoucherSummary, "lineCount"> & {
   /** Envoi : sa réception (null en transit). Réception : l'envoi qu'elle conclut. */
   receipt: VoucherRef | null
   transfer: VoucherRef | null
+  /** Liens signés vers les photos (casse), relatifs à l'API (voir useFileUrl). */
+  photoUrls: string[]
 }
 
 export type VoucherLineInput = {
@@ -134,6 +175,8 @@ export type VoucherLineInput = {
   /** Absent : quantité dans l'unité de base. */
   packagingName?: string
   batch?: string
+  /** Réception : quantité annoncée par le bon de livraison, dans la même unité. */
+  expectedQuantity?: number
 }
 
 export type VoucherInput = {
@@ -147,6 +190,8 @@ export type VoucherInput = {
   note?: string
   /** Envoi de transfert : le dépôt d'arrivée. */
   destinationWarehouseId?: string
+  /** Casse et ajustement : le motif. */
+  reason?: VoucherReason
   lines: VoucherLineInput[]
 }
 
@@ -202,6 +247,8 @@ export type ItemStock = { itemId: string; warehouses: WarehouseStock[] }
 export type VoucherSearch = {
   types?: VoucherType[]
   transferState?: TransferState
+  /** Réceptions qui ne correspondent pas à l'attendu. */
+  discrepancy?: boolean
   warehouseIds?: string[]
   supplierId?: string
   from?: string
@@ -227,6 +274,9 @@ export const voucherApi = (send: ApiClient) => {
           query({
             [VoucherQueryParams.type]: search.types,
             [VoucherQueryParams.transferState]: search.transferState,
+            [VoucherQueryParams.discrepancy]: search.discrepancy
+              ? String(true)
+              : undefined,
             [VoucherQueryParams.warehouseId]: search.warehouseIds,
             [VoucherQueryParams.supplierId]: search.supplierId,
             [VoucherQueryParams.from]: search.from,
@@ -247,6 +297,16 @@ export const voucherApi = (send: ApiClient) => {
         path: VoucherPaths.transferReceipt(transferId),
         body: { id, ...input },
       }),
+    addPhoto: (id: string, file: File) => {
+      const body = new FormData()
+      body.append(ItemImageRules.part, file)
+      return send<Voucher>({
+        ...scoped,
+        method: "POST",
+        path: VoucherPaths.photos(id),
+        body,
+      })
+    },
     voucher: (id: string) =>
       send<Voucher>({
         ...scoped,

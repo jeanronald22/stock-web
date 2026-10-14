@@ -17,6 +17,7 @@ export const notificationTypes = [
   "ACCESS_CHANGED",
   "TRANSFER_SENT",
   "TRANSFER_RECEIVED",
+  "RECEIPT_DISCREPANCY",
 ] as const
 export type NotificationType = (typeof notificationTypes)[number]
 export const NotificationType = {
@@ -26,6 +27,7 @@ export const NotificationType = {
   accessChanged: "ACCESS_CHANGED",
   transferSent: "TRANSFER_SENT",
   transferReceived: "TRANSFER_RECEIVED",
+  receiptDiscrepancy: "RECEIPT_DISCREPANCY",
 } as const satisfies Record<string, NotificationType>
 
 /** Paramètres de chaque type (stock-api, NotificationParams). */
@@ -36,7 +38,7 @@ export type StockAlertLine = {
   threshold: string | null
   baseUnit: BaseUnit
 }
-/** Ligne d'une réception de transfert en écart. */
+/** Ligne d'une réception (de transfert ou fournisseur) en écart. */
 export type TransferGap = {
   name: string
   expected: string

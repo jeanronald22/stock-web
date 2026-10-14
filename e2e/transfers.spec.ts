@@ -46,7 +46,8 @@ test("transfert : envoyé d'un dépôt, en route, réceptionné à l'arrivée av
   // Envoi, depuis l'écran des bons : départ, arrivée, articles.
   await navigateTo(page, "Bons")
   await dismissTour(page, "Entrées et sorties")
-  await page.getByRole("link", { name: "Transfert" }).first().click()
+  await page.getByRole("button", { name: "Autre opération" }).first().click()
+  await page.getByRole("menuitem", { name: /Transfert/ }).click()
   await expect(
     page.getByRole("heading", { name: "Nouveau transfert" })
   ).toBeVisible()

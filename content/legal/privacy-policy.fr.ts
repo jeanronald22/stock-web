@@ -45,9 +45,10 @@ export const privacyPolicyFr: PrivacyPolicyContent = {
             "Votre compte : adresse e-mail, mot de passe, prénom, nom et langue préférée. Votre mot de passe n’est jamais conservé en clair : nous n’en gardons qu’une empreinte irréversible.",
             "Votre entreprise : nom, ville, pays, activité, votre rôle dans l’équipe (propriétaire, administrateur ou membre) et votre rôle dans Stock (gérant, manager, contrôleur ou magasinier), avec les dépôts qui vous sont attribués.",
             "Les invitations : l’adresse e-mail de la personne invitée, le nom de la personne qui invite et l’état de l’invitation. Le lien d’invitation n’est jamais conservé : nous n’en gardons qu’une empreinte irréversible.",
-            "Les bons de réception et de sortie : votre nom y figure quand vous les validez, avec le fournisseur ou le client que vous indiquez. Un bon validé n’est jamais modifié : c’est le registre de votre stock.",
+            "Les bons (réception, sortie, transfert, casse, ajustement) : votre nom y figure quand vous les validez, avec le fournisseur ou le client que vous indiquez. Un bon validé n’est jamais modifié : c’est le registre de votre stock.",
             "Les coordonnées de vos fournisseurs (nom, téléphone, e-mail, adresse) : votre entreprise en est responsable, Kreskala les conserve pour elle.",
             "Les photos d’articles que vous déposez. Choisissez des photos de produits : évitez qu’on y reconnaisse une personne.",
+            "Les photos de casse jointes à un bon, comme preuve de l’état de la marchandise. Même conseil : photographiez la marchandise, pas les personnes.",
             "Les données techniques de connexion : date et heure, adresse IP, type de navigateur, et un code de suivi associé à chaque erreur pour pouvoir la corriger.",
           ],
         },
@@ -109,7 +110,7 @@ export const privacyPolicyFr: PrivacyPolicyContent = {
           items: [
             "Les membres de votre entreprise voient les données de cette entreprise, selon leur rôle. Ils ne voient jamais celles d’une autre entreprise.",
             "Les équipes de Kreskala n’y accèdent que lorsque c’est nécessaire : assistance que vous avez demandée, correction d’une erreur, sécurité.",
-            "Nos prestataires techniques n’agissent que sur nos instructions et sont tenus à la confidentialité. Les photos d’articles sont conservées chez Cloudflare (service R2), dans un espace privé : elles ne s’affichent que par des liens temporaires, donnés aux seuls membres de votre entreprise. La liste complète (hébergement, envoi des e-mails) sera publiée ici avant l’ouverture du service.",
+            "Nos prestataires techniques n’agissent que sur nos instructions et sont tenus à la confidentialité. Les photos d’articles et de casse sont conservées chez Cloudflare (service R2), dans un espace privé : elles ne s’affichent que par des liens temporaires, donnés aux seuls membres de votre entreprise. La liste complète (hébergement, envoi des e-mails) sera publiée ici avant l’ouverture du service.",
           ],
         },
         {
@@ -142,6 +143,7 @@ export const privacyPolicyFr: PrivacyPolicyContent = {
             "Les notifications : quatre-vingt-dix jours, puis elles sont supprimées.",
             "Les invitations : le lien est valable sept jours. L’invitation reste ensuite dans l’historique de l’équipe tant que le compte de l’entreprise est ouvert.",
             "Les photos d’articles : tant que l’article a cette photo. Remplacée ou retirée, l’ancienne photo est effacée aussitôt.",
+            "Les photos de casse : aussi longtemps que le bon qu’elles prouvent, c’est-à-dire tant que le compte de l’entreprise est ouvert. Elles ne peuvent pas être retirées une à une.",
           ],
         },
       ],

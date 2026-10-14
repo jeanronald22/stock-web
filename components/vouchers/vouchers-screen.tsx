@@ -4,6 +4,9 @@ import {
   ArrowDownToLineIcon,
   ArrowRightLeftIcon,
   ArrowUpFromLineIcon,
+  ChevronDownIcon,
+  ClipboardCheckIcon,
+  PackageXIcon,
   DownloadIcon,
   EllipsisVerticalIcon,
   FileTextIcon,
@@ -28,6 +31,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -72,22 +76,27 @@ const TYPE_ICONS: Record<VoucherType, LucideIcon> = {
   [VoucherType.issue]: ArrowUpFromLineIcon,
   [VoucherType.transferOut]: ArrowRightLeftIcon,
   [VoucherType.transferIn]: ArrowRightLeftIcon,
+  [VoucherType.damage]: PackageXIcon,
+  [VoucherType.adjustment]: ClipboardCheckIcon,
+}
+
+const TYPE_BADGES: Record<
+  VoucherType,
+  "success" | "secondary" | "info" | "danger" | "warning"
+> = {
+  [VoucherType.receipt]: "success",
+  [VoucherType.issue]: "secondary",
+  [VoucherType.transferOut]: "info",
+  [VoucherType.transferIn]: "info",
+  [VoucherType.damage]: "danger",
+  [VoucherType.adjustment]: "warning",
 }
 
 export function VoucherTypeBadge({ type }: { type: VoucherType }) {
   const t = useTranslations("vouchers.types")
   const Icon = TYPE_ICONS[type]
   return (
-    <Badge
-      variant={
-        type === VoucherType.receipt
-          ? "success"
-          : type === VoucherType.issue
-            ? "secondary"
-            : "info"
-      }
-      className="gap-1"
-    >
+    <Badge variant={TYPE_BADGES[type]} className="gap-1">
       <Icon className="size-3" aria-hidden />
       {t(type)}
     </Badge>
@@ -101,6 +110,12 @@ function warehouseLabel(voucher: VoucherSummary): string {
     : voucher.warehouse.name
 }
 
+/** Reçu autrement qu'attendu : à vérifier, voire à réclamer au fournisseur (D28). */
+export function DiscrepancyBadge() {
+  const t = useTranslations("vouchers")
+  return <Badge variant="warning">{t("discrepancy")}</Badge>
+}
+
 /** « En transit » tant que l'envoi n'est pas réceptionné, puis « Reçu ». */
 export function TransferStateBadge({ state }: { state: TransferState }) {
   const t = useTranslations("vouchers.transferState")
@@ -111,10 +126,16 @@ export function TransferStateBadge({ state }: { state: TransferState }) {
   )
 }
 
-/** Actions de création, communes à la liste et à l'écran vide. */
+/**
+ * Actions de création, communes à la liste et à l'écran vide : réception et sortie, les plus
+ * fréquentes, en boutons ; transfert, casse et ajustement dans « Autre opération ».
+ */
 export function NewVoucherButtons({ className }: { className?: string }) {
   const t = useTranslations("vouchers")
-  if (!useStockAccess().can(StockPermission.recordMovements)) return null
+  const router = useRouter()
+  const { can } = useStockAccess()
+  if (!can(StockPermission.recordMovements)) return null
+  const corrects = can(StockPermission.correctStock)
   return (
     <div
       className={cn("flex flex-wrap gap-2", className)}
@@ -131,14 +152,52 @@ export function NewVoucherButtons({ className }: { className?: string }) {
         <ArrowUpFromLineIcon />
         {t("newIssue")}
       </Link>
-      <Link
-        href={Routes.newTransfer}
-        className={buttonVariants({ size: "lg", variant: "outline" })}
-      >
-        <ArrowRightLeftIcon />
-        {t("newTransfer")}
-      </Link>
+      <DropdownMenu>
+        <DropdownMenuTrigger render={<Button size="lg" variant="outline" />}>
+          {t("otherOperation")}
+          <ChevronDownIcon />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-64">
+          <DropdownMenuItem onClick={() => router.push(Routes.newTransfer)}>
+            <ArrowRightLeftIcon />
+            <OperationLabel
+              title={t("newTransfer")}
+              hint={t("operations.transfer")}
+            />
+          </DropdownMenuItem>
+          {corrects && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => router.push(Routes.newDamage)}>
+                <PackageXIcon />
+                <OperationLabel
+                  title={t("newDamage")}
+                  hint={t("operations.damage")}
+                />
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => router.push(Routes.newAdjustment)}
+              >
+                <ClipboardCheckIcon />
+                <OperationLabel
+                  title={t("newAdjustment")}
+                  hint={t("operations.adjustment")}
+                />
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
+  )
+}
+
+function OperationLabel({ title, hint }: { title: string; hint: string }) {
+  return (
+    <span className="grid">
+      <span>{title}</span>
+      <span className="text-xs font-normal text-muted-foreground">{hint}</span>
+    </span>
   )
 }
 
@@ -284,6 +343,7 @@ export function VouchersScreen() {
                                 state={voucher.transferState}
                               />
                             )}
+                            {voucher.hasDiscrepancy && <DiscrepancyBadge />}
                           </div>
                           <p className="text-xs text-muted-foreground md:hidden">
                             {format.dateTime(new Date(voucher.occurredAt), {

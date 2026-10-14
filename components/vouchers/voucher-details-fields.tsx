@@ -2,7 +2,7 @@
 
 import { CalendarIcon, FileTextIcon, UserRoundIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
-import type { UseFormReturn } from "react-hook-form"
+import { useWatch, type UseFormReturn } from "react-hook-form"
 
 import {
   Field,
@@ -16,13 +16,19 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group"
 import { Textarea } from "@/components/ui/textarea"
-import { VoucherType, type EntryType } from "@/lib/api/vouchers"
+import {
+  correctionTypes,
+  OTHER_REASON,
+  VoucherType,
+  type EntryType,
+} from "@/lib/api/vouchers"
 
 import type { VoucherFormValues } from "./voucher-form-schema"
 
 /**
- * Fournisseur ou client, document, date et note : tout est facultatif sauf la date. Un transfert
- * n'a ni fournisseur ni client : son autre bout est le dépôt d'arrivée.
+ * Fournisseur ou client, document, date et note : tout est facultatif sauf la date (et la note
+ * d'une correction au motif « autre »). Un transfert n'a ni fournisseur ni client : son autre
+ * bout est le dépôt d'arrivée.
  */
 export function VoucherDetailsFields({
   form,
@@ -36,6 +42,9 @@ export function VoucherDetailsFields({
   const t = useTranslations()
   const errors = form.formState.errors
   const receipt = type === VoucherType.receipt
+  const reason = useWatch({ control: form.control, name: "reason" })
+  // Casse ou ajustement « autre » : la note dit ce qui s'est passé.
+  const noteRequired = correctionTypes.has(type) && reason === OTHER_REASON
   const optional = (
     <span className="font-normal text-muted-foreground">
       ({t("common.optional")})
@@ -77,7 +86,11 @@ export function VoucherDetailsFields({
         <InputGroup>
           <InputGroupInput
             id="documentReference"
-            placeholder={t("vouchers.form.referencePlaceholder")}
+            placeholder={
+              correctionTypes.has(type)
+                ? t("vouchers.form.correctionReferencePlaceholder")
+                : t("vouchers.form.referencePlaceholder")
+            }
             {...form.register("documentReference")}
           />
           <InputGroupAddon>
@@ -103,12 +116,17 @@ export function VoucherDetailsFields({
       </Field>
       <Field data-invalid={!!errors.note}>
         <FieldLabel htmlFor="note">
-          {t("vouchers.form.note")} {optional}
+          {t("vouchers.form.note")} {!noteRequired && optional}
         </FieldLabel>
         <Textarea
           id="note"
           rows={2}
-          placeholder={t("vouchers.form.notePlaceholder")}
+          aria-invalid={!!errors.note}
+          placeholder={
+            noteRequired
+              ? t("vouchers.form.noteRequiredPlaceholder")
+              : t("vouchers.form.notePlaceholder")
+          }
           {...form.register("note")}
         />
         <FieldError errors={[errors.note]} />

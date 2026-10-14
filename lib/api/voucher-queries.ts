@@ -112,6 +112,21 @@ export function useReceiveTransfer() {
   })
 }
 
+export function useAddVoucherPhoto() {
+  const { vouchers } = useApi()
+  const queryClient = useQueryClient()
+  const organizationId = useOrganizationId()
+  return useMutation({
+    mutationFn: ({ id, file }: { id: string; file: File }) =>
+      vouchers.addPhoto(id, file),
+    onSuccess: (voucher) =>
+      queryClient.setQueryData(
+        voucherKeys.voucher(organizationId, voucher.id),
+        voucher
+      ),
+  })
+}
+
 export function useRecordVoucher() {
   const { vouchers } = useApi()
   const queryClient = useQueryClient()

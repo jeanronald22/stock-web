@@ -14,6 +14,8 @@ export const Routes = {
   newReceipt: "/bons/reception",
   newIssue: "/bons/sortie",
   newTransfer: "/bons/transfert",
+  newDamage: "/bons/casse",
+  newAdjustment: "/bons/ajustement",
   stock: "/stock",
   suppliers: "/fournisseurs",
   newSupplier: "/fournisseurs/nouveau",

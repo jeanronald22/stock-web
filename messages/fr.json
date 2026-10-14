@@ -20,7 +20,9 @@
     "member": "Membre",
     "notifications": "Notifications",
     "newTransfer": "Nouveau transfert",
-    "transferReceipt": "Réception de transfert"
+    "transferReceipt": "Réception de transfert",
+    "newDamage": "Nouvelle casse",
+    "newAdjustment": "Ajustement de stock"
   },
   "common": {
     "retry": "Réessayer",
@@ -187,7 +189,13 @@
     "vouchers": "Bons",
     "stock": "Stock",
     "suppliers": "Fournisseurs",
-    "team": "Équipe"
+    "team": "Équipe",
+    "sections": {
+      "overview": "Vue d’ensemble",
+      "operations": "Opérations",
+      "catalog": "Catalogue",
+      "administration": "Administration"
+    }
   },
   "workspace": {
     "toggleSidebar": "Afficher ou masquer le menu",
@@ -529,7 +537,9 @@
       "RECEIPT": "Réception",
       "ISSUE": "Sortie",
       "TRANSFER_OUT": "Transfert",
-      "TRANSFER_IN": "Réception de transfert"
+      "TRANSFER_IN": "Réception de transfert",
+      "DAMAGE": "Casse",
+      "ADJUSTMENT": "Ajustement"
     },
     "allTypes": "Tous les bons",
     "empty": {
@@ -564,7 +574,11 @@
       "to": "Arrivée",
       "receivedBy": "Réceptionné le {date} :",
       "concludes": "Réception du transfert envoyé le {date} :",
-      "expected": "{quantity} envoyés"
+      "expected": "{quantity} envoyés",
+      "reason": "Motif",
+      "announced": "Annoncé : {quantity}",
+      "counted": "Théorique {book}, compté {counted}",
+      "unchanged": "Inchangé"
     },
     "form": {
       "noWarehouse": "Aucun dépôt actif. Déclarez d’abord un dépôt.",
@@ -606,7 +620,17 @@
       "noSupplierItem": "Pas encore d’article chez ce fournisseur : il s’ajoutera de lui-même à la réception.",
       "fromWarehouse": "Dépôt de départ",
       "toWarehouse": "Dépôt d’arrivée",
-      "chooseDestination": "Choisissez le dépôt d’arrivée"
+      "chooseDestination": "Choisissez le dépôt d’arrivée",
+      "counted": "Compté",
+      "bookQuantity": "Théorique : {quantity}",
+      "announced": "Annoncé (BL)",
+      "compare": "Comparer au bon de livraison",
+      "compareHint": "Saisissez aussi la quantité annoncée par le fournisseur : l’écart s’affiche et les responsables sont prévenus.",
+      "gap": "Écart : {quantity}",
+      "noGap": "Conforme",
+      "noteRequired": "Expliquez ce qui s’est passé.",
+      "noteRequiredPlaceholder": "Ce qui s’est passé, en quelques mots",
+      "correctionReferencePlaceholder": "N° de la fiche de comptage ou du constat"
     },
     "entry": {
       "see": "Voir le bon",
@@ -628,6 +652,18 @@
         "description": "La marchandise quitte ce dépôt pour un autre : le stock du départ diminue à la validation, celui de l’arrivée augmentera à la réception.",
         "submit": "{count, plural, =0 {Envoyer le transfert} one {Envoyer le transfert · # article} other {Envoyer le transfert · # articles}}",
         "done": "Transfert {number} envoyé."
+      },
+      "DAMAGE": {
+        "title": "Nouvelle casse",
+        "description": "Marchandise abîmée, périmée ou perdue : elle sort du stock à la validation. Le motif et les photos servent de preuve.",
+        "submit": "{count, plural, =0 {Enregistrer la casse} one {Enregistrer la casse · # article} other {Enregistrer la casse · # articles}}",
+        "done": "Casse {number} enregistrée."
+      },
+      "ADJUSTMENT": {
+        "title": "Ajustement de stock",
+        "description": "Indiquez ce que vous avez compté : le stock prend cette valeur à la validation, l’écart avec le théorique est gardé.",
+        "submit": "{count, plural, =0 {Valider le comptage} one {Valider le comptage · # article} other {Valider le comptage · # articles}}",
+        "done": "Ajustement {number} validé."
       }
     },
     "print": {
@@ -641,9 +677,13 @@
         "RECEIPT": "Bon de réception",
         "ISSUE": "Bon de sortie",
         "TRANSFER_OUT": "Bon de transfert",
-        "TRANSFER_IN": "Réception de transfert"
+        "TRANSFER_IN": "Réception de transfert",
+        "DAMAGE": "Bon de casse",
+        "ADJUSTMENT": "Bon d’ajustement"
       },
-      "receivedOf": "{received} reçus sur {expected}"
+      "receivedOf": "{received} reçus sur {expected}",
+      "countedOf": "{counted} comptés (théorique {book})",
+      "witnessedBy": "Témoin (nom et signature)"
     },
     "menu": {
       "open": "Actions du bon {number}",
@@ -666,7 +706,10 @@
       "receipts": "Réceptions",
       "issues": "Sorties",
       "transfers": "Transferts",
-      "inTransit": "Transferts en route"
+      "inTransit": "Transferts en route",
+      "damages": "Casses",
+      "adjustments": "Ajustements",
+      "discrepancies": "Réceptions avec écart"
     },
     "transferState": {
       "IN_TRANSIT": "En route",
@@ -689,6 +732,61 @@
         "title": "Réception impossible",
         "description": "Ce transfert est déjà réceptionné, ou il n’arrive pas dans un de vos dépôts."
       }
+    },
+    "otherOperation": "Autre opération",
+    "operations": {
+      "transfer": "Vers un autre dépôt",
+      "damage": "Marchandise abîmée, périmée ou perdue",
+      "adjustment": "Mettre le stock au compté"
+    },
+    "newDamage": "Casse",
+    "newAdjustment": "Ajustement de stock",
+    "discrepancy": "Écart",
+    "reasons": {
+      "label": "Motif",
+      "required": "Choisissez un motif.",
+      "BROKEN": {
+        "label": "Cassé",
+        "hint": "Brisé à la manutention ou au transport."
+      },
+      "DAMAGED": {
+        "label": "Abîmé",
+        "hint": "Mouillé, taché, déformé : invendable."
+      },
+      "EXPIRED": {
+        "label": "Périmé",
+        "hint": "Date limite dépassée."
+      },
+      "LOST": {
+        "label": "Perdu ou volé",
+        "hint": "Introuvable dans le dépôt."
+      },
+      "COUNT": {
+        "label": "Comptage",
+        "hint": "Inventaire ou contrôle sur place."
+      },
+      "ENTRY_ERROR": {
+        "label": "Erreur de saisie",
+        "hint": "Un bon passé a été mal saisi."
+      },
+      "OTHER": {
+        "label": "Autre",
+        "hint": "Expliquez dans la note."
+      }
+    },
+    "photos": {
+      "label": "Photos",
+      "title": "Photos de la casse",
+      "count": "{count} sur {max}",
+      "preview": "Photo {index}",
+      "remove": "Retirer la photo {index}",
+      "add": "Ajouter",
+      "hint": "Facultatif. Une photo ajoutée reste attachée au bon.",
+      "kept": "Une photo est une preuve : elle ne se retire pas.",
+      "unsupported": "Format non pris en charge : JPEG, PNG ou WebP.",
+      "tooLarge": "Photo trop lourde : {max} Mo au plus.",
+      "partial": "Casse {number} enregistrée, mais des photos n’ont pas pu être envoyées : ajoutez-les depuis le bon.",
+      "addLabel": "Ajouter une photo"
     }
   },
   "stock": {
@@ -1042,6 +1140,12 @@
         "title": "Transfert {number} reçu à {destination}",
         "complete": "Tout est arrivé.",
         "gap": "{name} : {received} reçus sur {expected}"
+      },
+      "RECEIPT_DISCREPANCY": {
+        "name": "Écart à la réception",
+        "when": "Quand une réception dans un de vos dépôts ne correspond pas au bon de livraison.",
+        "title": "Réception {number} : écart avec le bon de livraison",
+        "gap": "{name} : {received} reçus sur {expected} annoncés"
       }
     }
   }

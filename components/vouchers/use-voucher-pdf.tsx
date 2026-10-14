@@ -48,8 +48,15 @@ export function useVoucherPdf() {
               { label: t("detail.to"), value: to.name },
             ]
           : [{ label: t("detail.warehouse"), value: voucher.warehouse.name }]
-      const party =
-        from && to
+      // Casse et ajustement : pas de tiers, mais un motif.
+      const party = voucher.reason
+        ? [
+            {
+              label: t("detail.reason"),
+              value: t(`reasons.${voucher.reason}.label`),
+            },
+          ]
+        : from && to
           ? []
           : [
               {
@@ -90,13 +97,24 @@ export function useVoucherPdf() {
             ? `${format.number(line.enteredQuantity)} ${line.packagingName}`
             : EMPTY,
           quantity:
-            line.expectedQuantity !== null &&
-            line.expectedQuantity !== line.quantity
-              ? t("print.receivedOf", {
-                  received: quantityLabel(line.baseUnit, line.quantity),
-                  expected: quantityLabel(line.baseUnit, line.expectedQuantity),
+            voucher.type === VoucherType.adjustment
+              ? t("print.countedOf", {
+                  counted: quantityLabel(line.baseUnit, line.quantity),
+                  book: quantityLabel(
+                    line.baseUnit,
+                    line.expectedQuantity ?? 0
+                  ),
                 })
-              : quantityLabel(line.baseUnit, line.quantity),
+              : line.expectedQuantity !== null &&
+                  line.expectedQuantity !== line.quantity
+                ? t("print.receivedOf", {
+                    received: quantityLabel(line.baseUnit, line.quantity),
+                    expected: quantityLabel(
+                      line.baseUnit,
+                      line.expectedQuantity
+                    ),
+                  })
+                : quantityLabel(line.baseUnit, line.quantity),
         })),
         lineCount: t("lineCount", { count: voucher.lines.length }),
         note: voucher.note
@@ -105,7 +123,11 @@ export function useVoucherPdf() {
         signatures: [
           { label: t("print.validatedBy"), name: voucher.createdByName },
           {
-            label: receipt ? t("print.deliveredBy") : t("print.receivedBy"),
+            label: voucher.reason
+              ? t("print.witnessedBy")
+              : receipt
+                ? t("print.deliveredBy")
+                : t("print.receivedBy"),
             name: "",
           },
         ],

@@ -32,7 +32,7 @@ import { useWorkspace } from "@/components/workspace/workspace-context"
 import { CatalogStatus, type Warehouse } from "@/lib/api/stock"
 import { useTransferDestinations, useWarehouses } from "@/lib/api/stock-queries"
 import { useErrorMessage } from "@/lib/api/use-error-message"
-import { useRecordVoucher } from "@/lib/api/voucher-queries"
+import { useAddVoucherPhoto, useRecordVoucher } from "@/lib/api/voucher-queries"
 import { shortagesOf, VoucherType, type EntryType } from "@/lib/api/vouchers"
 import { RecordRoutes, Routes } from "@/lib/routes"
 import {
@@ -40,6 +40,8 @@ import {
   rememberLastWarehouse,
 } from "@/lib/vouchers/last-warehouse"
 
+import { DamagePhotosField } from "./damage-photos-field"
+import { ReasonField } from "./reason-field"
 import { SupplierField } from "./supplier-field"
 import { VoucherDetailsFields } from "./voucher-details-fields"
 import {
@@ -60,9 +62,9 @@ export function VoucherEntry({ type }: { type: EntryType }) {
 }
 
 /**
- * Réception ou sortie sur un seul écran, pensé pour aller vite : dépôt déjà choisi, recherche
- * d'article au clavier, détails facultatifs à côté. Après validation, l'écran se vide pour le bon
- * suivant (même dépôt, même date).
+ * Réception, sortie, transfert, casse ou ajustement sur un seul écran, pensé pour aller vite :
+ * dépôt déjà choisi, recherche d'article au clavier, détails à côté. Après validation, l'écran se
+ * vide pour le bon suivant (même dépôt, même date).
  */
 function VoucherEntryForm({
   type,
@@ -83,6 +85,9 @@ function VoucherEntryForm({
   // Un identifiant par bon : renvoyé après une coupure réseau, le même bon n'est pas compté deux fois.
   const [voucherId, setVoucherId] = useState(() => crypto.randomUUID())
   const [today] = useState(todayOn)
+  // Casse : photos choisies avant la validation, envoyées juste après (le bon doit exister).
+  const [photos, setPhotos] = useState<File[]>([])
+  const addPhoto = useAddVoucherPhoto()
 
   const [defaultWarehouseId] = useState(() => {
     const last = readLastWarehouse(subject, organization.id)
@@ -103,14 +108,17 @@ function VoucherEntryForm({
           batchRequired: t("vouchers.form.batchRequired"),
           linesRequired: t("vouchers.form.linesRequired"),
           futureDate: t("vouchers.form.futureDate"),
+          reasonRequired: t("vouchers.reasons.required"),
+          noteRequired: t("vouchers.form.noteRequired"),
         },
         today,
-        transfer
+        type
       )
     ),
     defaultValues: {
       warehouseId: defaultWarehouseId,
       destinationWarehouseId: "",
+      reason: "",
       supplier: null,
       lines: [],
       counterparty: "",
@@ -143,6 +151,18 @@ function VoucherEntryForm({
     return shortages.length > 0
   }
 
+  /** Le bon est déjà enregistré : une photo refusée se rajoute depuis sa fiche. */
+  const sendPhotos = async (id: string): Promise<boolean> => {
+    for (const file of photos) {
+      try {
+        await addPhoto.mutateAsync({ id, file })
+      } catch {
+        return false
+      }
+    }
+    return true
+  }
+
   const submit = async (values: VoucherFormValues) => {
     try {
       const voucher = await record.mutateAsync({
@@ -150,8 +170,11 @@ function VoucherEntryForm({
         input: toVoucherInput(type, values, today),
       })
       rememberLastWarehouse(subject, organization.id, values.warehouseId)
-      toast.success(
-        t(`vouchers.entry.${type}.done`, { number: voucher.number }),
+      const photosSent = await sendPhotos(voucher.id)
+      toast[photosSent ? "success" : "warning"](
+        photosSent
+          ? t(`vouchers.entry.${type}.done`, { number: voucher.number })
+          : t("vouchers.photos.partial", { number: voucher.number }),
         {
           action: {
             label: t("vouchers.entry.see"),
@@ -167,6 +190,7 @@ function VoucherEntryForm({
         documentReference: "",
         note: "",
       })
+      setPhotos([])
       setVoucherId(crypto.randomUUID())
       searchRef.current?.focus()
     } catch (error) {
@@ -180,9 +204,11 @@ function VoucherEntryForm({
       type="submit"
       size="xl"
       className="w-full"
-      disabled={record.isPending}
+      disabled={record.isPending || addPhoto.isPending}
     >
-      {record.isPending && <Spinner data-icon="inline-start" />}
+      {(record.isPending || addPhoto.isPending) && (
+        <Spinner data-icon="inline-start" />
+      )}
       {t(`vouchers.entry.${type}.submit`, { count: lineCount })}
     </Button>
   )
@@ -296,6 +322,12 @@ function VoucherEntryForm({
         </div>
 
         <aside className="space-y-6 rounded-2xl border p-5 lg:sticky lg:top-20">
+          {(type === VoucherType.damage || type === VoucherType.adjustment) && (
+            <ReasonField form={form} type={type} />
+          )}
+          {type === VoucherType.damage && (
+            <DamagePhotosField files={photos} onChange={setPhotos} />
+          )}
           <VoucherDetailsFields form={form} type={type} today={today} />
           <div className="hidden lg:block">{submitButton}</div>
         </aside>

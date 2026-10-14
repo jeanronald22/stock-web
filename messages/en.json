@@ -20,7 +20,9 @@
     "member": "Member",
     "notifications": "Notifications",
     "newTransfer": "New transfer",
-    "transferReceipt": "Transfer receipt"
+    "transferReceipt": "Transfer receipt",
+    "newDamage": "New damage",
+    "newAdjustment": "Stock adjustment"
   },
   "common": {
     "retry": "Try again",
@@ -187,7 +189,13 @@
     "vouchers": "Vouchers",
     "stock": "Stock",
     "suppliers": "Suppliers",
-    "team": "Team"
+    "team": "Team",
+    "sections": {
+      "overview": "Overview",
+      "operations": "Operations",
+      "catalog": "Catalogue",
+      "administration": "Administration"
+    }
   },
   "workspace": {
     "toggleSidebar": "Show or hide the menu",
@@ -529,7 +537,9 @@
       "RECEIPT": "Receipt",
       "ISSUE": "Issue",
       "TRANSFER_OUT": "Transfer",
-      "TRANSFER_IN": "Transfer receipt"
+      "TRANSFER_IN": "Transfer receipt",
+      "DAMAGE": "Damage",
+      "ADJUSTMENT": "Adjustment"
     },
     "allTypes": "All vouchers",
     "empty": {
@@ -564,7 +574,11 @@
       "to": "To",
       "receivedBy": "Received on {date}:",
       "concludes": "Receipt of the transfer sent on {date}:",
-      "expected": "{quantity} sent"
+      "expected": "{quantity} sent",
+      "reason": "Reason",
+      "announced": "Announced: {quantity}",
+      "counted": "Book {book}, counted {counted}",
+      "unchanged": "Unchanged"
     },
     "form": {
       "noWarehouse": "No active depot. Declare a depot first.",
@@ -606,7 +620,17 @@
       "noSupplierItem": "No items from this supplier yet: they are added automatically on receipt.",
       "fromWarehouse": "From warehouse",
       "toWarehouse": "To warehouse",
-      "chooseDestination": "Choose the destination warehouse"
+      "chooseDestination": "Choose the destination warehouse",
+      "counted": "Counted",
+      "bookQuantity": "Book: {quantity}",
+      "announced": "Announced (DN)",
+      "compare": "Compare with the delivery note",
+      "compareHint": "Also enter the quantity announced by the supplier: the gap shows and managers are notified.",
+      "gap": "Gap: {quantity}",
+      "noGap": "Matches",
+      "noteRequired": "Explain what happened.",
+      "noteRequiredPlaceholder": "What happened, in a few words",
+      "correctionReferencePlaceholder": "Count sheet or report number"
     },
     "entry": {
       "see": "See voucher",
@@ -628,6 +652,18 @@
         "description": "Goods leave this warehouse for another: stock here decreases on validation, the destination’s increases when received.",
         "submit": "{count, plural, =0 {Send the transfer} one {Send the transfer · # item} other {Send the transfer · # items}}",
         "done": "Transfer {number} sent."
+      },
+      "DAMAGE": {
+        "title": "New damage",
+        "description": "Broken, expired or lost goods leave the stock on validation. The reason and photos serve as proof.",
+        "submit": "{count, plural, =0 {Record the damage} one {Record the damage · # item} other {Record the damage · # items}}",
+        "done": "Damage {number} recorded."
+      },
+      "ADJUSTMENT": {
+        "title": "Stock adjustment",
+        "description": "Enter what you counted: stock takes this value on validation, and the gap with the book quantity is kept.",
+        "submit": "{count, plural, =0 {Validate the count} one {Validate the count · # item} other {Validate the count · # items}}",
+        "done": "Adjustment {number} validated."
       }
     },
     "print": {
@@ -641,9 +677,13 @@
         "RECEIPT": "Receipt voucher",
         "ISSUE": "Issue voucher",
         "TRANSFER_OUT": "Transfer voucher",
-        "TRANSFER_IN": "Transfer receipt"
+        "TRANSFER_IN": "Transfer receipt",
+        "DAMAGE": "Damage voucher",
+        "ADJUSTMENT": "Adjustment voucher"
       },
-      "receivedOf": "{received} received of {expected}"
+      "receivedOf": "{received} received of {expected}",
+      "countedOf": "{counted} counted (book {book})",
+      "witnessedBy": "Witness (name and signature)"
     },
     "menu": {
       "open": "Actions for voucher {number}",
@@ -666,7 +706,10 @@
       "receipts": "Receipts",
       "issues": "Issues",
       "transfers": "Transfers",
-      "inTransit": "Transfers on the way"
+      "inTransit": "Transfers on the way",
+      "damages": "Damage",
+      "adjustments": "Adjustments",
+      "discrepancies": "Receipts with discrepancy"
     },
     "transferState": {
       "IN_TRANSIT": "On the way",
@@ -689,6 +732,61 @@
         "title": "Receipt not possible",
         "description": "This transfer is already received, or it is not heading to one of your warehouses."
       }
+    },
+    "otherOperation": "Other operation",
+    "operations": {
+      "transfer": "To another warehouse",
+      "damage": "Broken, expired or lost goods",
+      "adjustment": "Set stock to what you counted"
+    },
+    "newDamage": "Damage",
+    "newAdjustment": "Stock adjustment",
+    "discrepancy": "Discrepancy",
+    "reasons": {
+      "label": "Reason",
+      "required": "Choose a reason.",
+      "BROKEN": {
+        "label": "Broken",
+        "hint": "Broken in handling or transport."
+      },
+      "DAMAGED": {
+        "label": "Damaged",
+        "hint": "Wet, stained, deformed: unsellable."
+      },
+      "EXPIRED": {
+        "label": "Expired",
+        "hint": "Past its expiry date."
+      },
+      "LOST": {
+        "label": "Lost or stolen",
+        "hint": "Cannot be found in the warehouse."
+      },
+      "COUNT": {
+        "label": "Count",
+        "hint": "Stocktake or on-site check."
+      },
+      "ENTRY_ERROR": {
+        "label": "Entry error",
+        "hint": "A past voucher was entered wrongly."
+      },
+      "OTHER": {
+        "label": "Other",
+        "hint": "Explain in the note."
+      }
+    },
+    "photos": {
+      "label": "Photos",
+      "title": "Damage photos",
+      "count": "{count} of {max}",
+      "preview": "Photo {index}",
+      "remove": "Remove photo {index}",
+      "add": "Add",
+      "hint": "Optional. An added photo stays attached to the voucher.",
+      "kept": "A photo is proof: it cannot be removed.",
+      "unsupported": "Unsupported format: JPEG, PNG or WebP.",
+      "tooLarge": "Photo too large: {max} MB at most.",
+      "partial": "Damage {number} recorded, but some photos could not be sent: add them from the voucher.",
+      "addLabel": "Add a photo"
     }
   },
   "stock": {
@@ -1042,6 +1140,12 @@
         "title": "Transfer {number} received at {destination}",
         "complete": "Everything arrived.",
         "gap": "{name}: {received} received of {expected}"
+      },
+      "RECEIPT_DISCREPANCY": {
+        "name": "Receipt discrepancy",
+        "when": "When a receipt in one of your warehouses does not match the delivery note.",
+        "title": "Receipt {number}: discrepancy with the delivery note",
+        "gap": "{name}: {received} received of {expected} announced"
       }
     }
   }

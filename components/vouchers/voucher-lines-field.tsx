@@ -2,6 +2,7 @@
 
 import { XIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { useState } from "react"
 import {
   Controller,
   useFieldArray,
@@ -12,7 +13,13 @@ import {
 import { useQuantityLabel } from "@/components/items/describe"
 import { ItemThumb } from "@/components/items/item-thumb"
 import { Button } from "@/components/ui/button"
-import { FieldError } from "@/components/ui/field"
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field"
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
 import {
   Select,
@@ -21,7 +28,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { incomingTypes, type EntryType } from "@/lib/api/vouchers"
+import { Switch } from "@/components/ui/switch"
+import { incomingTypes, VoucherType, type EntryType } from "@/lib/api/vouchers"
 import { useItemStock } from "@/lib/api/voucher-queries"
 import { parseQuantity } from "@/lib/forms/quantity"
 
@@ -65,9 +73,33 @@ export function VoucherLinesField({
   )
   const rootError =
     form.formState.errors.lines?.root ?? form.formState.errors.lines
+  // Réception : la quantité annoncée par le bon de livraison, ligne par ligne, pour voir l'écart.
+  const [compare, setCompare] = useState(false)
+  const toggleCompare = (on: boolean) => {
+    setCompare(on)
+    if (!on)
+      form
+        .getValues("lines")
+        .forEach((_, index) => form.setValue(`lines.${index}.expected`, ""))
+  }
 
   return (
     <div className="space-y-4">
+      {type === VoucherType.receipt && (
+        <Field orientation="horizontal" className="rounded-xl border p-3">
+          <FieldContent>
+            <FieldLabel htmlFor="compare-delivery-note">
+              {t("compare")}
+            </FieldLabel>
+            <FieldDescription>{t("compareHint")}</FieldDescription>
+          </FieldContent>
+          <Switch
+            id="compare-delivery-note"
+            checked={compare}
+            onCheckedChange={toggleCompare}
+          />
+        </Field>
+      )}
       <ItemPicker
         inputRef={searchRef}
         autoFocus
@@ -94,6 +126,7 @@ export function VoucherLinesField({
             type={type}
             index={index}
             searchRef={searchRef}
+            compare={compare}
             onRemove={() => remove(index)}
           />
         ))}
@@ -110,21 +143,26 @@ function VoucherLineRow({
   type,
   index,
   searchRef,
+  compare,
   onRemove,
-}: FieldProps & LineNavigation & { index: number; onRemove: () => void }) {
+}: FieldProps &
+  LineNavigation & { index: number; compare: boolean; onRemove: () => void }) {
   const t = useTranslations()
   const quantityLabel = useQuantityLabel()
   const line = useWatch({ control: form.control, name: `lines.${index}` })
   const warehouseId = useWatch({ control: form.control, name: "warehouseId" })
   const errors = form.formState.errors.lines?.[index]
-  // Sortie ou envoi de transfert : le stock part du dépôt, le disponible s'affiche.
+  // Le stock part du dépôt (sortie, transfert, casse) ou y est compté : le disponible s'affiche.
   const issue = !incomingTypes.has(type)
   const stock = useItemStock(issue ? line.itemId : undefined)
   const inWarehouse = stock.data?.warehouses.find(
     (entry) => entry.warehouse.id === warehouseId
   )
 
+  const adjustment = type === VoucherType.adjustment
   const entered = parseQuantity(line.quantity)
+  const inBase = (value: number) => baseQuantity(line.item, value, line.unit)
+  const expected = compare ? parseQuantity(line.expected) : null
   const converted =
     entered !== null && entered > 0 && line.unit !== BASE_UNIT_CHOICE
       ? baseQuantity(line.item, entered, line.unit)
@@ -146,11 +184,24 @@ function VoucherLineRow({
     value: batch.batch ?? "",
     label: `${batch.batch} · ${quantityLabel(line.item.baseUnit, batch.quantity)}`,
   }))
+  // Écart affiché avant validation : compté − théorique (ajustement), reçu − annoncé (réception).
   const available = line.item.batchTracking
     ? inWarehouse?.batches.find((batch) => batch.batch === line.batch)?.quantity
     : inWarehouse?.quantity
+  const reference = adjustment
+    ? stock.isSuccess
+      ? (available ?? 0)
+      : null
+    : expected !== null
+      ? inBase(expected)
+      : null
+  const gap =
+    entered !== null && reference !== null ? inBase(entered) - reference : null
 
   const quantityField = form.register(`lines.${index}.quantity`)
+  const quantityText = adjustment
+    ? t("vouchers.form.counted")
+    : t("vouchers.form.quantity")
   const batchInput = line.item.batchTracking && !issue
 
   return (
@@ -179,8 +230,8 @@ function VoucherLineRow({
           <InputGroupInputBox>
             <InputGroupInput
               inputMode="decimal"
-              placeholder={t("vouchers.form.quantity")}
-              aria-label={`${t("vouchers.form.quantity")} · ${line.item.name}`}
+              placeholder={quantityText}
+              aria-label={`${quantityText} · ${line.item.name}`}
               aria-invalid={!!errors?.quantity}
               {...quantityField}
               onKeyDown={(event) => {
@@ -278,9 +329,30 @@ function VoucherLineRow({
           <XIcon />
         </Button>
       </div>
+      {compare && (
+        <div className="mt-2 flex items-center gap-3 md:max-w-xs">
+          <label
+            htmlFor={`expected-${index}`}
+            className="shrink-0 text-sm text-muted-foreground"
+          >
+            {t("vouchers.form.announced")}
+          </label>
+          <InputGroupInputBox>
+            <InputGroupInput
+              id={`expected-${index}`}
+              inputMode="decimal"
+              aria-label={`${t("vouchers.form.announced")} · ${line.item.name}`}
+              aria-invalid={!!errors?.expected}
+              {...form.register(`lines.${index}.expected`)}
+            />
+          </InputGroupInputBox>
+        </div>
+      )}
       <div className="mt-1 flex flex-wrap gap-x-4 text-sm">
         <FieldError errors={[errors?.quantity]} />
         <FieldError errors={[errors?.batch]} />
+        <FieldError errors={[errors?.expected]} />
+
         {converted !== null && (
           <span className="text-muted-foreground">
             {t("vouchers.form.converted", {
@@ -290,11 +362,30 @@ function VoucherLineRow({
         )}
         {issue && stock.isSuccess && (
           <span className="text-muted-foreground">
-            {available
-              ? t("vouchers.form.available", {
-                  quantity: quantityLabel(line.item.baseUnit, available),
+            {adjustment
+              ? t("vouchers.form.bookQuantity", {
+                  quantity: quantityLabel(line.item.baseUnit, available ?? 0),
                 })
-              : t("vouchers.form.nothingAvailable")}
+              : available
+                ? t("vouchers.form.available", {
+                    quantity: quantityLabel(line.item.baseUnit, available),
+                  })
+                : t("vouchers.form.nothingAvailable")}
+          </span>
+        )}
+        {gap !== null && (
+          <span
+            className={
+              gap === 0
+                ? "text-success-muted-foreground"
+                : "font-medium text-warning-muted-foreground"
+            }
+          >
+            {gap === 0
+              ? t("vouchers.form.noGap")
+              : t("vouchers.form.gap", {
+                  quantity: `${gap > 0 ? "+" : "−"}${quantityLabel(line.item.baseUnit, Math.abs(gap))}`,
+                })}
           </span>
         )}
       </div>

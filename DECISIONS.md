@@ -231,7 +231,7 @@ Les articles, dépôts, fournisseurs et bons (D19 à D22) ont été construits s
 
 **Plan de réalignement**, par lots livrables :
 - **Lot A** (livré, voir D24) : catégories ; seuils par dépôt et alertes (stock bas, rupture) ; filtres combinables des articles et du stock ; filtres des bons (période, type, dépôt, fournisseur) et tri par date.
-- **Lot B** (en cours : transferts, D27) : tiers clients et chantiers ; bons de retour, de casse (motif, photo) et d'ajustement ; quantité annoncée sur le BL et écart à la réception ; transferts entre dépôts (en transit, quantité reçue à l'arrivée).
+- **Lot B** (en cours : transferts D27 ; casse, ajustements, écarts à la réception D28) : tiers clients et chantiers ; bons de retour, de casse (motif, photo) et d'ajustement ; quantité annoncée sur le BL et écart à la réception ; transferts entre dépôts (en transit, quantité reçue à l'arrivée).
 - **Lot C** : inventaires (complet, tournant, double comptage, ajustement à la clôture) ; emplacements.
 - **Lot D** : produit et variantes, table des unités, lot avec nuance et calibre ; rôles Stock par dépôt ; synchronisation hors ligne ; IA (D5).
 
@@ -300,6 +300,21 @@ Modèle D10 : `stock_document` de type TRANSFER, `dest_warehouse_id`, statuts IN
 - **Droits (D25)** : envoyer exige le droit de mouvement sur le dépôt de départ ; réceptionner, sur le dépôt d'arrivée. Chacun voit les transferts qui partent de ses dépôts ou y arrivent.
 - **Notifications (D26)** : « transfert en route » pour ceux qui travaillent au dépôt d'arrivée (magasiniers compris) et le propriétaire ; « transfert reçu », avec l'écart s'il y en a un, pour la personne qui l'a envoyé et le propriétaire. Une sortie par transfert peut déclencher l'alerte de stock du dépôt de départ.
 - **Écran** : pas de nouvel onglet ; les transferts vivent dans « Bons » (nouveau bouton, type « Transferts » dans le filtre, « à réceptionner »), et l'accueil signale les transferts à réceptionner.
+
+## D28. Lot B : casse, ajustement de stock, écart à la réception (2026-10-14)
+
+Modèle D10 : `stock_document` DAMAGE et ADJUSTMENT, `stock_document_line.reason`, `photo`, `qty_expected_base`. Questionnaire : « enregistrer la casse avec photo » (Q44), réception selon le reçu puis recours auprès du fournisseur (Q11-Q12).
+
+- **Casse** (CAS-2026-0001) : sortie de stock avec un motif (cassé, abîmé, périmé, perdu ou volé, autre) et jusqu'à 5 photos. Les photos s'ajoutent au bon après son enregistrement (le bon reste valable si l'envoi d'une photo échoue) et ne se retirent pas : ce sont des preuves. Écart avec D10 : motif et photos portés par le bon, pas par chaque ligne (un sinistre a une cause et des photos d'ensemble).
+- **Ajustement** (AJU-2026-0001) : on saisit la quantité comptée ; le stock théorique est relu au moment de valider, et l'écart (en plus ou en moins) est inscrit au registre. Chaque ligne garde le théorique (`expected_quantity`) et le compté. Motif : comptage, erreur de saisie, autre. Une ligne sans écart confirme le stock sans le bouger.
+- **Droits (D25)** : casse et ajustement exigent le droit de correction (gérant, manager, contrôleur) sur le dépôt ; le magasinier ne peut pas.
+- **Écart à la réception** : sur une réception, chaque ligne peut porter la quantité annoncée par le bon de livraison du fournisseur. L'écart s'affiche sur le bon et dans son PDF ; la liste des bons se filtre « avec écart » pour préparer le recours ; le propriétaire et les responsables du dépôt sont prévenus (notification « écart à la réception »).
+- **Alertes (D26)** : casse et ajustement à la baisse peuvent déclencher l'alerte de stock, comme une sortie.
+- **Motif « autre »** : une note est alors obligatoire.
+
+## D29. Menu latéral par compartiments (2026-10-14)
+
+- Jusqu'à 5 entrées, le menu reste à plat. Au-delà, il se range par compartiments : l'accueil en tête (sans titre), puis Opérations (stock, bons), Catalogue (articles, fournisseurs, dépôts), Administration (équipe). Une entrée nouvelle va dans un compartiment existant ; un compartiment nouveau seulement pour un domaine nouveau (voir aussi : pas d'onglet inutile).
 
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
