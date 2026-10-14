@@ -25,7 +25,7 @@ test("un nouveau client crée son compte, confirme son e-mail, choisit son mot d
   const email = `awa.${Date.now()}.${testInfo.project.name}@exemple.cm`
 
   await page.goto("/connexion")
-  await expect(page.getByRole("heading", { name: "Bon retour" })).toBeVisible()
+  await expect(page.getByRole("heading", { name: "Ravis de vous revoir" })).toBeVisible()
   await shot(page, testInfo, "01-connexion")
   await page.getByRole("link", { name: "Créer un compte" }).click()
 
@@ -36,7 +36,7 @@ test("un nouveau client crée son compte, confirme son e-mail, choisit son mot d
   await page.getByLabel("Adresse e-mail").fill(email)
   await page.getByRole("button", { name: "Continuer" }).click()
 
-  await expect(page.getByRole("heading", { name: "Vérifiez votre e-mail" })).toBeVisible()
+  await expect(page.getByRole("heading", { name: "Consultez vos e-mails" })).toBeVisible()
   await shot(page, testInfo, "03-verification")
   await page.goto(await waitForActionLink(email))
 
@@ -58,20 +58,20 @@ test("un nouveau client crée son compte, confirme son e-mail, choisit son mot d
   await page.getByLabel("Nom", { exact: true }).fill("Bello")
   await page.getByRole("button", { name: "Continuer" }).click()
 
-  await expect(page.getByRole("heading", { name: "Parlez-nous de votre entreprise" })).toBeVisible()
+  await expect(page.getByRole("heading", { name: "Quelle entreprise gérez-vous ?" })).toBeVisible()
   // Le passage d'étape est animé vers l'avant, le retour vers l'arrière.
   await expect.poll(transitions).toEqual(["step-forward"])
   await page.getByRole("button", { name: "Retour" }).click()
   await expect(page.getByLabel("Prénom")).toHaveValue("Awa")
   await expect.poll(transitions).toEqual(["step-forward", "step-back"])
   await page.getByRole("button", { name: "Continuer" }).click()
-  await expect(page.getByRole("heading", { name: "Parlez-nous de votre entreprise" })).toBeVisible()
+  await expect(page.getByRole("heading", { name: "Quelle entreprise gérez-vous ?" })).toBeVisible()
   await page.getByLabel("Nom de l’entreprise").fill("Quincaillerie Bello")
   await page.getByLabel("Ville").fill("Douala")
-  await page.getByLabel("Secteur d’activité").click()
+  await page.getByLabel("Activité").click()
   await page.getByRole("option", { name: "Quincaillerie" }).click()
   await page.getByRole("button", { name: "Créer mon espace" }).click()
-  await page.getByRole("button", { name: "Accéder à mon espace" }).click()
+  await page.getByRole("button", { name: "Ouvrir mon espace" }).click()
 
   await expect(page.getByRole("heading", { name: "Bonjour Awa" })).toBeVisible()
   await shot(page, testInfo, "05-accueil")
@@ -80,7 +80,7 @@ test("un nouveau client crée son compte, confirme son e-mail, choisit son mot d
   await page.getByRole("button", { name: "Ouvrir le menu du compte" }).click()
   await page.getByRole("menuitem", { name: "Se déconnecter" }).click()
   await page.goto("/connexion")
-  await expect(page.getByRole("heading", { name: "Bon retour" })).toBeVisible()
+  await expect(page.getByRole("heading", { name: "Ravis de vous revoir" })).toBeVisible()
   await page.getByLabel("Adresse e-mail").fill(email)
   await page.getByLabel("Mot de passe", { exact: true }).fill(PASSWORD)
   await page.getByLabel("Mot de passe", { exact: true }).press("Enter")

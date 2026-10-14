@@ -19,28 +19,28 @@
     "en": "English"
   },
   "configError": {
-    "title": "Unable to start",
-    "description": "The app cannot reach the server. Check your connection, then try again."
+    "title": "Kreskala is not responding",
+    "description": "Kreskala cannot be reached right now. Check your internet connection, then try again."
   },
   "signIn": {
-    "title": "Secure sign-in",
-    "description": "Taking you to the sign-in page…",
-    "manual": "Continue to sign in"
+    "title": "One moment",
+    "description": "Opening the secure sign-in page…",
+    "manual": "Open the sign-in page"
   },
   "callback": {
-    "label": "Signing you in…",
+    "label": "Opening your workspace…",
     "failedTitle": "Sign-in did not complete",
-    "failedDescription": "The sign-in link has expired or was already used. Start again, it only takes a moment.",
+    "failedDescription": "The link has expired or was already used. Sign in again, it only takes a moment.",
     "restart": "Sign in again"
   },
   "errors": {
-    "network": "No internet connection. Nothing is lost: try again as soon as the network is back.",
-    "generic": "Something went wrong. Try again.",
-    "trace": "Trace code: {traceId}",
-    "loadTitle": "Unable to load your workspace"
+    "network": "No network. Nothing is lost: try again as soon as the connection is back.",
+    "generic": "That did not go through. Try again in a moment.",
+    "trace": "Code for support: {traceId}",
+    "loadTitle": "Your workspace did not load"
   },
   "validation": {
-    "required": "This field is required.",
+    "required": "Fill this in to continue.",
     "tooLong": "{max} characters at most."
   },
   "welcome": {
@@ -49,7 +49,7 @@
     "profile": {
       "eyebrow": "Welcome",
       "title": "What is your name?",
-      "description": "Your name appears on the vouchers you approve, so the whole team knows who did what.",
+      "description": "Your name appears on every voucher you approve, so the whole team knows who received and who issued.",
       "firstName": "First name",
       "firstNamePlaceholder": "Awa",
       "lastName": "Last name",
@@ -57,16 +57,16 @@
     },
     "business": {
       "eyebrow": "Your business",
-      "title": "Tell us about your business",
-      "description": "This sets up your workspace. You can change it later.",
+      "title": "Which business do you run?",
+      "description": "This sets up your workspace. You can change it at any time.",
       "name": "Business name",
       "namePlaceholder": "Ngono Hardware",
       "city": "City",
       "cityPlaceholder": "Douala",
       "sector": "Line of business",
-      "sectorPlaceholder": "Choose a line of business",
+      "sectorPlaceholder": "What do you sell?",
       "country": "Country",
-      "countryHint": "Kreskala is available in Cameroon to begin with."
+      "countryHint": "Kreskala starts in Cameroon. More countries will follow."
     },
     "sectors": {
       "HARDWARE": "Hardware store",
@@ -84,13 +84,13 @@
     "submit": "Create my workspace",
     "done": {
       "title": "Your workspace is ready",
-      "description": "{name} has been created. You can start tracking your stock.",
-      "cta": "Go to my workspace"
+      "description": "{name} now has its Kreskala workspace. Next step: your items and depots.",
+      "cta": "Open my workspace"
     }
   },
   "organizations": {
-    "title": "Choose a business",
-    "description": "You are a member of several businesses. You can switch at any time.",
+    "title": "Which business are you opening?",
+    "description": "You work for several businesses. Switch between them at any time from the menu.",
     "create": "Create another business",
     "roles": {
       "OWNER": "Owner",
@@ -100,20 +100,20 @@
   },
   "dashboard": {
     "greeting": "Hello {name}",
-    "readyTitle": "Your workspace is ready",
-    "readyDescription": "The first stock management tools are coming very soon. Here is what is ahead.",
+    "readyTitle": "Everything is in place",
+    "readyDescription": "The first stock tools are coming very soon. Here is what you will be able to do, in order.",
     "steps": {
       "products": {
-        "title": "Add your items",
-        "description": "Tiles, plumbing, sanitary ware… with their boxes, pieces and m²."
+        "title": "Create your items",
+        "description": "Tiles, cement, plumbing… each counted in its own unit: box, piece or m²."
       },
       "warehouses": {
-        "title": "Set up your depots",
-        "description": "Shop, depot, warehouse: each place has its own stock."
+        "title": "Declare your depots",
+        "description": "Shop, depot, building site: each place has its own stock."
       },
       "team": {
         "title": "Invite your team",
-        "description": "Your storekeepers receive an invitation on WhatsApp."
+        "description": "Your storekeepers receive their invitation on WhatsApp."
       }
     }
   },

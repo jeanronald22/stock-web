@@ -2,7 +2,7 @@ import { Illustration, Sparks } from "./illustration"
 
 const AWNING_STRIPES = [96, 120, 144, 168, 192, 216] as const
 
-/** « Parlez-nous de votre entreprise » : une boutique faite de blocs, des cartons devant la porte. */
+/** Étape « votre entreprise » : une boutique faite de blocs, des cartons devant la porte. */
 export function StorefrontScene({ className }: { className?: string }) {
   return (
     <Illustration className={className}>
