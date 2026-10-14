@@ -44,6 +44,7 @@ export const privacyPolicyFr: PrivacyPolicyContent = {
           items: [
             "Votre compte : adresse e-mail, mot de passe, prénom, nom et langue préférée. Votre mot de passe n’est jamais conservé en clair : nous n’en gardons qu’une empreinte irréversible.",
             "Votre entreprise : nom, ville, pays, activité, et votre rôle dans l’entreprise (propriétaire, administrateur ou membre).",
+            "Les photos d’articles que vous déposez. Choisissez des photos de produits : évitez qu’on y reconnaisse une personne.",
             "Les données techniques de connexion : date et heure, adresse IP, type de navigateur, et un code de suivi associé à chaque erreur pour pouvoir la corriger.",
           ],
         },
@@ -103,7 +104,7 @@ export const privacyPolicyFr: PrivacyPolicyContent = {
           items: [
             "Les membres de votre entreprise voient les données de cette entreprise, selon leur rôle. Ils ne voient jamais celles d’une autre entreprise.",
             "Les équipes de Kreskala n’y accèdent que lorsque c’est nécessaire : assistance que vous avez demandée, correction d’une erreur, sécurité.",
-            "Nos prestataires techniques (hébergement, envoi des e-mails) n’agissent que sur nos instructions et sont tenus à la confidentialité. Leur liste sera publiée ici avant l’ouverture du service.",
+            "Nos prestataires techniques n’agissent que sur nos instructions et sont tenus à la confidentialité. Les photos d’articles sont conservées chez Cloudflare (service R2), dans un espace privé : elles ne s’affichent que par des liens temporaires, donnés aux seuls membres de votre entreprise. La liste complète (hébergement, envoi des e-mails) sera publiée ici avant l’ouverture du service.",
           ],
         },
         {
@@ -133,6 +134,7 @@ export const privacyPolicyFr: PrivacyPolicyContent = {
             "Votre session : elle se ferme après une journée sans activité, et au plus tard après sept jours.",
             "L’accès sans réseau : il reste valable trente jours sans connexion, et au plus quatre-vingt-dix jours. Il faut ensuite se reconnecter.",
             "Les liens envoyés par e-mail : trente minutes.",
+            "Les photos d’articles : tant que l’article a cette photo. Remplacée ou retirée, l’ancienne photo est effacée aussitôt.",
           ],
         },
       ],

@@ -37,6 +37,7 @@ export const privacyPolicyEn: PrivacyPolicyContent = {
           items: [
             "Your account: email address, password, first name, last name and preferred language. Your password is never stored in clear text: we only keep an irreversible fingerprint of it.",
             "Your business: name, city, country, line of business, and your role in it (owner, administrator or member).",
+            "The item photos you upload. Choose photos of products: avoid photos in which a person can be recognised.",
             "Technical sign-in data: date and time, IP address, browser type, and a trace code attached to each error so we can fix it.",
           ],
         },
@@ -96,7 +97,7 @@ export const privacyPolicyEn: PrivacyPolicyContent = {
           items: [
             "Members of your business see that business’s data, according to their role. They never see another business’s data.",
             "Kreskala’s teams only access it when needed: support you asked for, fixing an error, security.",
-            "Our technical providers (hosting, email delivery) act only on our instructions and are bound by confidentiality. Their list will be published here before the service opens.",
+            "Our technical providers act only on our instructions and are bound by confidentiality. Item photos are kept at Cloudflare (R2 service), in a private space: they are only shown through temporary links, given only to members of your business. The full list (hosting, email delivery) will be published here before the service opens.",
           ],
         },
         {
@@ -126,6 +127,7 @@ export const privacyPolicyEn: PrivacyPolicyContent = {
             "Your session: it closes after one day of inactivity, and after seven days at most.",
             "Offline access: it stays valid for thirty days without a connection, and ninety days at most. You then need to sign in again.",
             "Links sent by email: thirty minutes.",
+            "Item photos: as long as the item has that photo. Once replaced or removed, the previous photo is erased straight away.",
           ],
         },
       ],

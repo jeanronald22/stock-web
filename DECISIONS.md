@@ -167,6 +167,25 @@ Côté utilisateur, ce sont les écrans de « Mon compte » : créer son entrepr
 - Mention sous les formulaires de connexion et d'inscription : « En continuant, vous confirmez avoir lu notre politique de confidentialité ». Pas « vous acceptez » : la loi exige un consentement spécifique ; un accord global à une politique n'en est pas un. Les données du compte reposent sur l'exécution du service, pas sur ce clic.
 - À compléter avant l'ouverture : identité juridique de l'éditeur (forme, siège, RCCM), adresse `confidentialite@kreskala.com` à créer et relever, pays d'hébergement et liste des prestataires (hébergeur, envoi d'e-mails), durée de conservation des journaux, fermeture de compte dans l'application, conditions d'utilisation (même composant `LegalDocument`).
 
+## D19. Articles et dépôts (2026-10-14)
+
+- **Dépôt** : boutique, dépôt ou chantier, chacun avec son propre stock. **Article** : nom, référence facultative (unique dans l'entreprise), unité de base (pièce, kg, L, m, m², m³), suivi par lot (lot, nuance, calibre), conditionnements exprimés en unité de base (carton de 12 pièces, carton de 1,44 m² ; nombre entier pour un article compté à la pièce).
+- **Référencement** : un article est proposé dans les dépôts cochés, et seulement ceux-là. La liste des articles se filtre par dépôt ; la fiche d'un dépôt montre ses articles.
+- Archiver remplace supprimer : la fiche disparaît des listes sans perdre son historique. Un dépôt archivé garde ses articles mais n'en reçoit plus.
+- L'unité de base reste modifiable tant qu'aucun mouvement n'existe ; elle sera verrouillée avec l'arrivée des bons.
+- Création idempotente (identifiant créé par l'application) ; verrou optimiste (version) : une fiche modifiée entre-temps n'est pas écrasée (409 `edit-conflict`, bouton « Recharger »).
+- Tous les membres peuvent gérer le catalogue pour l'instant ; les droits par rôle arrivent avec l'invitation de l'équipe.
+- Interface : barre latérale (panneau sur téléphone), illustrations animées pour les écrans vides, visite guidée driver.js à la première visite de chaque écran (relançable par « Guide »), textes limités à l'essentiel.
+
+## D20. Photos d'articles et stockage de fichiers (2026-10-14)
+
+- Une photo par article (JPEG, PNG ou WebP, 5 Mo au plus, format reconnu au contenu), ajoutée dans l'assistant de création ou depuis la fiche.
+- **Stockage derrière une interface** (`FileStorage`) : Cloudflare R2 en production (API compatible S3, compartiment privé), disque en local. Choix par configuration (`STORAGE_PROVIDER`) ; démarrage refusé si R2 est incomplet.
+- **Accès** : les photos sont servies par l'API sur un lien signé (HMAC, `STORAGE_SIGNING_SECRET`), stable pendant une heure pour le cache du navigateur, valable deux heures au plus. Même comportement quel que soit le stockage ; un CDN pourra être ajouté plus tard sans changer l'application.
+- Clé de fichier unique à chaque dépôt (jamais réécrite) ; ancienne photo effacée après validation ; table `item_image` séparée de l'article, pour qu'une photo ne crée pas de conflit de version avec une modification en cours.
+- Politique de confidentialité passée en version 0.2 (photos, Cloudflare R2).
+- Listes : filtre « Actifs / Archivés » à côté des autres filtres, conservé dans l'adresse (`statut=archives`).
+
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
 - [ ] Nom de la marque et nom du produit de stock (voir D7). Pistes : Kreskala, Kreskio, Tissero, NarvalWorks, FourmiLabs.

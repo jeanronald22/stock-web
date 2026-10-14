@@ -18,7 +18,8 @@ export function HomeRedirect() {
   const t = useTranslations()
   const router = useRouter()
   const me = useMe()
-  const { activeOrganizationId, setActiveOrganizationId } = useActiveOrganization()
+  const { activeOrganizationId, setActiveOrganizationId } =
+    useActiveOrganization()
 
   useEffect(() => {
     if (!me.data) return
@@ -28,14 +29,20 @@ export function HomeRedirect() {
   }, [me.data, activeOrganizationId, setActiveOrganizationId, router])
 
   if (me.error) {
-    const offline = me.error instanceof ApiError && me.error.code === ProblemCode.networkUnavailable
+    const offline =
+      me.error instanceof ApiError &&
+      me.error.code === ProblemCode.networkUnavailable
     return (
       <FullPageMessage
         icon={CloudOffIcon}
         title={t("errors.loadTitle")}
         description={offline ? t("errors.network") : t("errors.generic")}
         action={{ label: t("common.retry"), onClick: () => void me.refetch() }}
-        footnote={me.error instanceof ApiError && me.error.traceId ? t("errors.trace", { traceId: me.error.traceId }) : undefined}
+        footnote={
+          me.error instanceof ApiError && me.error.traceId
+            ? t("errors.trace", { traceId: me.error.traceId })
+            : undefined
+        }
       />
     )
   }

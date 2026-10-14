@@ -10,7 +10,8 @@ import { Splash } from "./splash"
 export function SessionGate({ children }: { children: React.ReactNode }) {
   const auth = useAuth()
   const t = useTranslations("common")
-  const mustSignIn = !auth.isLoading && !auth.isAuthenticated && !auth.activeNavigator
+  const mustSignIn =
+    !auth.isLoading && !auth.isAuthenticated && !auth.activeNavigator
 
   useEffect(() => {
     if (mustSignIn) void auth.signinRedirect()

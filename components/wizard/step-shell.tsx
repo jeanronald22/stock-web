@@ -21,11 +21,13 @@ type StepShellProps = {
   submitting: boolean
   onBack?: () => void
   onExit: () => void
+  /** « Quitter » par défaut ; « Annuler » pour une création qu'on abandonne. */
+  exitLabel?: string
   children: React.ReactNode
 }
 
 /**
- * Une question par écran, l'action principale toujours visible en bas : sur téléphone, elle
+ * Cadre des assistants (inscription, création d'un dépôt, d'un article). Une question par écran, l'action principale toujours visible en bas : sur téléphone, elle
  * reste accessible même quand le clavier est ouvert.
  */
 export function StepShell({
@@ -40,6 +42,7 @@ export function StepShell({
   submitting,
   onBack,
   onExit,
+  exitLabel,
   children,
 }: StepShellProps) {
   const t = useTranslations()
@@ -53,7 +56,7 @@ export function StepShell({
       >
         <KreskalaLogo className="h-8" />
         <Button variant="ghost" onClick={onExit}>
-          {t("welcome.exit")}
+          {exitLabel ?? t("welcome.exit")}
         </Button>
       </header>
 

@@ -24,7 +24,7 @@ import { FieldLimits, type User } from "@/lib/api/platform"
 import { useUpdateProfile } from "@/lib/api/platform-queries"
 import { applyServerErrors } from "@/lib/forms/apply-server-errors"
 
-import { StepShell } from "./step-shell"
+import { StepShell } from "@/components/wizard/step-shell"
 import { useErrorMessage } from "@/lib/api/use-error-message"
 
 const FORM_ID = "welcome-profile"

@@ -16,6 +16,18 @@ export const ProblemCode = {
   organizationIdConflict: "organization-id-conflict",
   organizationLimitReached: "organization-limit-reached",
   organizationNotFound: "organization-not-found",
+  editConflict: "edit-conflict",
+  resourceIdConflict: "resource-id-conflict",
+  warehouseNotFound: "warehouse-not-found",
+  warehouseNameTaken: "warehouse-name-taken",
+  warehouseUnavailable: "warehouse-unavailable",
+  itemNotFound: "item-not-found",
+  itemReferenceTaken: "item-reference-taken",
+  packagingNameDuplicate: "packaging-name-duplicate",
+  packagingQuantityNotWhole: "packaging-quantity-not-whole",
+  fileLinkInvalid: "file-link-invalid",
+  imageUnsupported: "image-unsupported",
+  imageTooLarge: "image-too-large",
   serviceBusy: "service-busy",
   internalError: "internal-error",
   networkUnavailable: "network-unavailable",
@@ -54,4 +66,12 @@ export class ApiError extends Error {
       this.code === ProblemCode.networkUnavailable
     )
   }
+}
+
+/** Vrai si [error] est une réponse de l'API portant ce code. */
+export function isProblem(
+  error: unknown,
+  code: ProblemCodeValue
+): error is ApiError {
+  return error instanceof ApiError && error.code === code
 }

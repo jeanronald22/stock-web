@@ -3,7 +3,11 @@
     "signIn": "Sign in",
     "welcome": "Welcome",
     "organizations": "Your businesses",
-    "dashboard": "Home"
+    "dashboard": "Home",
+    "items": "Items",
+    "newItem": "New item",
+    "warehouses": "Depots",
+    "newWarehouse": "New depot"
   },
   "common": {
     "retry": "Try again",
@@ -11,7 +15,11 @@
     "continue": "Continue",
     "signOut": "Sign out",
     "loading": "Loading…",
-    "soon": "Soon"
+    "soon": "Soon",
+    "cancel": "Cancel",
+    "save": "Save",
+    "optional": "optional",
+    "reload": "Reload"
   },
   "languages": {
     "label": "Language",
@@ -41,7 +49,11 @@
   },
   "validation": {
     "required": "Fill this in to continue.",
-    "tooLong": "{max} characters at most."
+    "tooLong": "{max} characters at most.",
+    "positive": "Enter a quantity above zero.",
+    "wholeNumber": "A whole number of pieces.",
+    "invalidNumber": "Enter a number, for example 12 or 1.44.",
+    "duplicateName": "Two packagings have this name."
   },
   "welcome": {
     "exit": "Exit",
@@ -101,19 +113,23 @@
   "dashboard": {
     "greeting": "Hello {name}",
     "readyTitle": "Everything is in place",
-    "readyDescription": "The first stock tools are coming very soon. Here is what you will be able to do, in order.",
+    "readyDescription": "Two steps to get started: your stock locations, then your items.",
     "steps": {
       "products": {
         "title": "Create your items",
-        "description": "Tiles, cement, plumbing… each counted in its own unit: box, piece or m²."
+        "description": "Tiles, cement, plumbing… each counted in its own unit: box, piece or m².",
+        "action": "Create an item",
+        "done": "{count, plural, one {# item} other {# items}}"
       },
       "warehouses": {
         "title": "Declare your depots",
-        "description": "Shop, depot, building site: each place has its own stock."
+        "description": "Shop, depot, building site: each place has its own stock.",
+        "action": "Declare a depot",
+        "done": "{count, plural, one {# depot} other {# depots}}"
       },
       "team": {
         "title": "Invite your team",
-        "description": "Your storekeepers receive their invitation on WhatsApp."
+        "description": "Your storekeepers will receive their invitation by email."
       }
     }
   },
@@ -121,5 +137,293 @@
     "open": "Open account menu",
     "switchOrganization": "Switch business",
     "currentOrganization": "Active business"
+  },
+  "nav": {
+    "home": "Home",
+    "items": "Items",
+    "warehouses": "Depots"
+  },
+  "workspace": {
+    "toggleSidebar": "Show or hide the menu",
+    "guide": "Guide"
+  },
+  "tours": {
+    "progress": "{current} of {total}",
+    "next": "Next",
+    "previous": "Back",
+    "done": "Got it",
+    "workspace": {
+      "navigation": {
+        "title": "Everything is here",
+        "description": "Your depots and items are in this menu."
+      },
+      "nextSteps": {
+        "title": "Where to start",
+        "description": "Declare your depots first, then create your items."
+      },
+      "help": {
+        "title": "Need a reminder?",
+        "description": "This button replays the guide for the screen you are on."
+      }
+    },
+    "warehouses": {
+      "create": {
+        "title": "Your stock locations",
+        "description": "Shop, depot or building site: each place has its own stock."
+      }
+    },
+    "warehouseForm": {
+      "kind": {
+        "title": "Type of place",
+        "description": "It only helps you find your way. You can change it later."
+      }
+    },
+    "items": {
+      "create": {
+        "title": "Your catalogue",
+        "description": "An item is what you stock: tiles, cement, taps…"
+      },
+      "search": {
+        "title": "Find it fast",
+        "description": "Type part of the name or reference."
+      },
+      "filter": {
+        "title": "By depot",
+        "description": "Show only the items offered in one depot."
+      }
+    },
+    "itemForm": {
+      "baseUnit": {
+        "title": "Counting unit",
+        "description": "All the item’s stock is counted in this unit. Pick the smallest one you sell."
+      },
+      "packagings": {
+        "title": "Packagings",
+        "description": "Box, bag, pallet: say how many units each one holds."
+      },
+      "warehouses": {
+        "title": "Depots",
+        "description": "Tick only those where the item is offered. It can be in one depot and not in another."
+      }
+    }
+  },
+  "units": {
+    "PIECE": {
+      "label": "Piece",
+      "hint": "Taps, bags of cement, paint tins…",
+      "quantity": "{count, plural, one {# piece} other {# pieces}}"
+    },
+    "KILOGRAM": {
+      "label": "Kilogram",
+      "hint": "Nails, iron sold by weight",
+      "quantity": "{count, number} kg"
+    },
+    "LITRE": {
+      "label": "Litre",
+      "hint": "Paint, oil, solvent sold loose",
+      "quantity": "{count, number} L"
+    },
+    "METRE": {
+      "label": "Metre",
+      "hint": "Cable, pipe, rebar",
+      "quantity": "{count, number} m"
+    },
+    "SQUARE_METRE": {
+      "label": "Square metre",
+      "hint": "Tiles, roofing sheets, plywood",
+      "quantity": "{count, number} m²"
+    },
+    "CUBIC_METRE": {
+      "label": "Cubic metre",
+      "hint": "Sand, gravel",
+      "quantity": "{count, number} m³"
+    }
+  },
+  "warehouses": {
+    "title": "Depots",
+    "description": "The places where you keep stock.",
+    "new": "New depot",
+    "kinds": {
+      "SHOP": {
+        "label": "Shop",
+        "hint": "Where you sell"
+      },
+      "WAREHOUSE": {
+        "label": "Depot",
+        "hint": "Where you store"
+      },
+      "SITE": {
+        "label": "Building site",
+        "hint": "Stock on site, for a while"
+      }
+    },
+    "itemCount": "{count, plural, =0 {No items} one {# item} other {# items}}",
+    "empty": {
+      "title": "Declare your first depot",
+      "description": "Shop, depot or building site: each place will have its own stock."
+    },
+    "archivedEmpty": "No archived depots.",
+    "form": {
+      "newTitle": "New depot",
+      "editTitle": "Edit depot",
+      "name": "Name",
+      "namePlaceholder": "Bonaberi depot",
+      "kind": "Type of place",
+      "city": "City",
+      "cityPlaceholder": "Douala",
+      "address": "Address or landmark",
+      "addressPlaceholder": "Opposite the petrol station, Bonaberi",
+      "create": "Create depot",
+      "details": "The place"
+    },
+    "created": "Depot created.",
+    "saved": "Depot saved.",
+    "items": {
+      "title": "Items offered here",
+      "seeAll": "See the items",
+      "none": "No items are offered in this depot yet."
+    },
+    "archive": {
+      "action": "Archive",
+      "title": "Archive this depot?",
+      "description": "It disappears from lists and receives no new items. Items already offered stay, and you can restore it.",
+      "done": "Depot archived."
+    },
+    "restore": {
+      "action": "Restore",
+      "done": "Depot restored.",
+      "badge": "Archived"
+    },
+    "notFound": "This depot does not exist or was removed.",
+    "wizard": {
+      "eyebrow": "New depot",
+      "kind": {
+        "title": "What type of place?",
+        "description": "It only helps you find your way. You can change it later."
+      },
+      "details": {
+        "title": "What is it called?",
+        "description": "A name the whole team recognises, and how to find it."
+      }
+    }
+  },
+  "items": {
+    "title": "Items",
+    "description": "Everything you stock, with its units and depots.",
+    "new": "New item",
+    "searchPlaceholder": "Search a name or reference",
+    "allWarehouses": "All depots",
+    "empty": {
+      "title": "Create your first item",
+      "description": "Tiles, cement, taps… with their unit and packagings."
+    },
+    "noResult": {
+      "title": "No items found",
+      "description": "Try another word or another depot.",
+      "reset": "Show everything"
+    },
+    "warehouseCount": "{count, plural, =0 {No depots} one {# depot} other {# depots}}",
+    "form": {
+      "newTitle": "New item",
+      "editTitle": "Edit item",
+      "identity": "The item",
+      "counting": "Counting",
+      "packagings": "Packagings",
+      "warehouses": "Depots",
+      "name": "Name",
+      "namePlaceholder": "Beige tile 60x60",
+      "reference": "Reference",
+      "referencePlaceholder": "TIL-6060",
+      "description": "Description",
+      "descriptionPlaceholder": "Brand, colour, use…",
+      "baseUnit": "Counting unit",
+      "batchTracking": "Track batches",
+      "batchTrackingHint": "Batch, shade or caliber noted at each receipt: useful for tiles and paint.",
+      "packagingsHint": "Optional. For example: a box holds 12 pieces.",
+      "packagingName": "Name",
+      "packagingNamePlaceholder": "Box",
+      "packagingQuantity": "Holds",
+      "addPackaging": "Add a packaging",
+      "removePackaging": "Remove this packaging",
+      "packagingPreview": "1 {name} = {quantity}",
+      "warehousesHint": "Tick the depots where this item is offered.",
+      "selectAll": "Tick all",
+      "selectNone": "Untick all",
+      "noWarehouse": "No depots yet: the item will be added to the catalogue without a depot.",
+      "createWarehouse": "Create a depot",
+      "create": "Create item",
+      "photo": "Photo",
+      "photoHint": "Optional. It helps the team recognise the item at the depot."
+    },
+    "created": "Item created.",
+    "saved": "Item saved.",
+    "archive": {
+      "action": "Archive",
+      "title": "Archive this item?",
+      "description": "It disappears from lists and future vouchers. You can restore it.",
+      "done": "Item archived."
+    },
+    "restore": {
+      "action": "Restore",
+      "done": "Item restored.",
+      "badge": "Archived"
+    },
+    "notFound": "This item does not exist or was removed.",
+    "wizard": {
+      "eyebrow": "New item",
+      "identity": {
+        "title": "Which item are you adding?",
+        "description": "Its name as your team says it at the depot."
+      },
+      "counting": {
+        "title": "How do you count it?",
+        "description": "All its stock will be counted in this unit. Pick the smallest one you sell."
+      },
+      "packagings": {
+        "title": "How does it arrive?",
+        "description": "Box, bag, pallet: how many units each one holds. Nothing to add? Continue."
+      },
+      "warehouses": {
+        "title": "Where do you offer it?",
+        "description": "Tick only the depots concerned."
+      },
+      "photo": {
+        "title": "A photo of the item?",
+        "description": "Optional. It helps the team recognise it at a glance."
+      }
+    },
+    "table": {
+      "item": "Item",
+      "unit": "Unit",
+      "packagings": "Packagings",
+      "warehouses": "Depots"
+    },
+    "moreWarehouses": "+{count}"
+  },
+  "pagination": {
+    "range": "{from}–{to} of {total}",
+    "page": "Page {page} of {pages}",
+    "perPage": "Rows per page",
+    "previous": "Previous page",
+    "next": "Next page"
+  },
+  "images": {
+    "choose": "Add a photo",
+    "hint": "Drop it here or tap to choose. JPEG, PNG or WebP, 5 MB at most.",
+    "preview": "Item photo",
+    "replace": "Change",
+    "remove": "Remove",
+    "unsupported": "Choose a JPEG, PNG or WebP photo.",
+    "tooLarge": "The photo is larger than {max} MB. Choose a lighter one.",
+    "saved": "Photo saved.",
+    "removed": "Photo removed.",
+    "uploadFailed": "The item is created, but its photo could not be sent. Add it from the item page."
+  },
+  "catalog": {
+    "status": {
+      "label": "Status",
+      "ACTIVE": "Active",
+      "ARCHIVED": "Archived"
+    }
   }
 }

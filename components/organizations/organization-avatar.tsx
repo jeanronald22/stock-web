@@ -2,7 +2,13 @@ import { cn } from "@/lib/utils"
 import { initials } from "@/lib/format"
 
 /** Carré aux initiales de l'entreprise, rayon de la charte. */
-export function OrganizationAvatar({ name, className }: { name: string; className?: string }) {
+export function OrganizationAvatar({
+  name,
+  className,
+}: {
+  name: string
+  className?: string
+}) {
   return (
     <span
       aria-hidden

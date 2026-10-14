@@ -59,7 +59,9 @@ export function createApiClient(deps: ApiClientDependencies): ApiClient {
     if (organizationId) headers.set(ApiHeaders.organizationId, organizationId)
     if (request.idempotencyKey)
       headers.set(ApiHeaders.idempotencyKey, request.idempotencyKey)
-    if (request.body !== undefined)
+    // Un fichier part en multipart : le navigateur fixe lui-même l'en-tête et sa frontière.
+    const multipart = request.body instanceof FormData
+    if (request.body !== undefined && !multipart)
       headers.set(StandardHeaders.contentType, JSON_TYPE)
 
     let response: Response
@@ -68,7 +70,11 @@ export function createApiClient(deps: ApiClientDependencies): ApiClient {
         method: request.method,
         headers,
         body:
-          request.body === undefined ? undefined : JSON.stringify(request.body),
+          request.body === undefined
+            ? undefined
+            : multipart
+              ? (request.body as FormData)
+              : JSON.stringify(request.body),
       })
     } catch {
       throw new ApiError(0, ProblemCode.networkUnavailable, "", "")

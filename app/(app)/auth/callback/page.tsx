@@ -19,7 +19,10 @@ export default function SignInCallbackPage() {
         icon={KeyRoundIcon}
         title={t("failedTitle")}
         description={t("failedDescription")}
-        action={{ label: t("restart"), onClick: () => void auth.signinRedirect() }}
+        action={{
+          label: t("restart"),
+          onClick: () => void auth.signinRedirect(),
+        }}
       />
     )
   }
