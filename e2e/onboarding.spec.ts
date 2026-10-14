@@ -5,9 +5,19 @@ import { recordViewTransitions } from "./view-transitions"
 
 const PASSWORD = "un carton bien rangé"
 
-/** Les écrans s'animent à l'apparition : la capture attend leur état final. */
+/**
+ * Les écrans s'animent à l'apparition : la capture attend leur état final. Les animations en boucle
+ * des illustrations (carton qui flotte) ne finissent jamais et sont ignorées.
+ */
 async function shot(page: Page, testInfo: TestInfo, name: string) {
-  await page.evaluate(() => Promise.all(document.getAnimations().map((animation) => animation.finished)))
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((animation) => animation.effect?.getTiming().iterations !== Infinity)
+        .map((animation) => animation.finished)
+    )
+  )
   await page.screenshot({ path: testInfo.outputPath(`${name}.png`), fullPage: true })
 }
 
@@ -35,7 +45,7 @@ test("un nouveau client crée son compte, confirme son e-mail, choisit son mot d
   await page.getByLabel("Mot de passe", { exact: true }).fill("court")
   await page.getByLabel("Confirmez le mot de passe").fill("court")
   await page.getByRole("button", { name: "Enregistrer et continuer" }).click()
-  await expect(page.locator(".kk-field-error").first()).toBeVisible()
+  await expect(page.getByRole("alert")).toBeVisible()
   await shot(page, testInfo, "04-mot-de-passe-erreur")
   await page.getByLabel("Mot de passe", { exact: true }).fill(PASSWORD)
   await page.getByLabel("Confirmez le mot de passe").fill(PASSWORD)
