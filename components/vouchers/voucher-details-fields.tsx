@@ -16,18 +16,21 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group"
 import { Textarea } from "@/components/ui/textarea"
-import { VoucherType } from "@/lib/api/vouchers"
+import { VoucherType, type EntryType } from "@/lib/api/vouchers"
 
 import type { VoucherFormValues } from "./voucher-form-schema"
 
-/** Fournisseur ou client, document, date et note : tout est facultatif sauf la date. */
+/**
+ * Fournisseur ou client, document, date et note : tout est facultatif sauf la date. Un transfert
+ * n'a ni fournisseur ni client : son autre bout est le dépôt d'arrivée.
+ */
 export function VoucherDetailsFields({
   form,
   type,
   today,
 }: {
   form: UseFormReturn<VoucherFormValues>
-  type: VoucherType
+  type: EntryType
   today: string
 }) {
   const t = useTranslations()
@@ -42,7 +45,7 @@ export function VoucherDetailsFields({
   return (
     <FieldGroup>
       {/* Réception : le fournisseur se choisit dans l'annuaire, à côté du dépôt. */}
-      {!receipt && (
+      {type === VoucherType.issue && (
         <Field data-invalid={!!errors.counterparty}>
           <FieldLabel htmlFor="counterparty">
             {receipt

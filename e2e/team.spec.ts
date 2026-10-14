@@ -168,6 +168,8 @@ test("une personne invitée rejoint l'équipe comme magasinière d'un seul dép�
   await openNavigation(page)
   await page.getByRole("button", { name: "Ouvrir le menu du compte" }).click()
   await shot(page, testInfo, "05b-menu-clair")
+  // Ferme le menu, puis le panneau latéral sur téléphone (sans effet ailleurs).
+  await page.keyboard.press("Escape")
   await page.keyboard.press("Escape")
   await page.getByRole("button", { name: "Notifications, 2 non lues" }).click()
   await panel.getByRole("button", { name: "Tout marquer comme lu" }).click()

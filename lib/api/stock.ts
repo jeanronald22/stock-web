@@ -6,6 +6,7 @@ export const StockPaths = {
   warehouse: (id: string) => `/v1/warehouses/${id}`,
   warehouseArchive: (id: string) => `/v1/warehouses/${id}/archive`,
   warehouseRestore: (id: string) => `/v1/warehouses/${id}/restore`,
+  transferDestinations: "/v1/warehouses/destinations",
   items: "/v1/items",
   item: (id: string) => `/v1/items/${id}`,
   itemArchive: (id: string) => `/v1/items/${id}/archive`,
@@ -245,6 +246,13 @@ export const stockApi = (send: ApiClient) => {
         method: "GET",
         path:
           StockPaths.warehouses + query({ [StockQueryParams.status]: status }),
+      }),
+    /** Dépôts actifs vers lesquels envoyer un transfert, même hors des siens (D27). */
+    transferDestinations: () =>
+      send<{ id: string; name: string }[]>({
+        ...scoped,
+        method: "GET",
+        path: StockPaths.transferDestinations,
       }),
     warehouse: (id: string) =>
       send<Warehouse>({

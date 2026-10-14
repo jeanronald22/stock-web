@@ -1,12 +1,17 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { PlusIcon, WarehouseIcon } from "lucide-react"
+import { ArrowRightLeftIcon, PlusIcon, WarehouseIcon } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useRef, useState } from "react"
-import { Controller, useForm, useWatch } from "react-hook-form"
+import {
+  Controller,
+  useForm,
+  useWatch,
+  type UseFormReturn,
+} from "react-hook-form"
 import { useAuth } from "react-oidc-context"
 import { toast } from "sonner"
 
@@ -25,10 +30,10 @@ import { Spinner } from "@/components/ui/spinner"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import { useWorkspace } from "@/components/workspace/workspace-context"
 import { CatalogStatus, type Warehouse } from "@/lib/api/stock"
-import { useWarehouses } from "@/lib/api/stock-queries"
+import { useTransferDestinations, useWarehouses } from "@/lib/api/stock-queries"
 import { useErrorMessage } from "@/lib/api/use-error-message"
 import { useRecordVoucher } from "@/lib/api/voucher-queries"
-import { shortagesOf, VoucherType } from "@/lib/api/vouchers"
+import { shortagesOf, VoucherType, type EntryType } from "@/lib/api/vouchers"
 import { RecordRoutes, Routes } from "@/lib/routes"
 import {
   readLastWarehouse,
@@ -45,7 +50,7 @@ import {
 } from "./voucher-form-schema"
 import { VoucherLinesField } from "./voucher-lines-field"
 
-export function VoucherEntry({ type }: { type: VoucherType }) {
+export function VoucherEntry({ type }: { type: EntryType }) {
   const t = useTranslations("common")
   const warehouses = useWarehouses(CatalogStatus.active, { fresh: true })
   // Liste à jour avant de proposer un dépôt : un collègue vient peut-être d'en déclarer un.
@@ -63,7 +68,7 @@ function VoucherEntryForm({
   type,
   warehouses,
 }: {
-  type: VoucherType
+  type: EntryType
   warehouses: Warehouse[]
 }) {
   const t = useTranslations()
@@ -74,6 +79,7 @@ function VoucherEntryForm({
   const { organization } = useWorkspace()
   const record = useRecordVoucher()
   const searchRef = useRef<HTMLInputElement>(null)
+  const transfer = type === VoucherType.transferOut
   // Un identifiant par bon : renvoyé après une coupure réseau, le même bon n'est pas compté deux fois.
   const [voucherId, setVoucherId] = useState(() => crypto.randomUUID())
   const [today] = useState(todayOn)
@@ -98,11 +104,13 @@ function VoucherEntryForm({
           linesRequired: t("vouchers.form.linesRequired"),
           futureDate: t("vouchers.form.futureDate"),
         },
-        today
+        today,
+        transfer
       )
     ),
     defaultValues: {
       warehouseId: defaultWarehouseId,
+      destinationWarehouseId: "",
       supplier: null,
       lines: [],
       counterparty: "",
@@ -219,7 +227,9 @@ function VoucherEntryForm({
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor="warehouseId">
-                      {t("vouchers.form.warehouse")}
+                      {transfer
+                        ? t("vouchers.form.fromWarehouse")
+                        : t("vouchers.form.warehouse")}
                     </FieldLabel>
                     <Select
                       items={warehouses.map((warehouse) => ({
@@ -255,6 +265,7 @@ function VoucherEntryForm({
                 )}
               />
             )}
+            {transfer && <DestinationField form={form} />}
             {type === VoucherType.receipt && (
               <Controller
                 control={form.control}
@@ -295,5 +306,57 @@ function VoucherEntryForm({
         </div>
       </form>
     </PageBody>
+  )
+}
+
+/** Dépôt d'arrivée d'un transfert : tous les dépôts actifs sauf celui de départ (D27). */
+function DestinationField({
+  form,
+}: {
+  form: UseFormReturn<VoucherFormValues>
+}) {
+  const t = useTranslations("vouchers.form")
+  const destinations = useTransferDestinations().data ?? []
+  const source = useWatch({ control: form.control, name: "warehouseId" })
+  const options = destinations
+    .filter((warehouse) => warehouse.id !== source)
+    .map((warehouse) => ({ value: warehouse.id, label: warehouse.name }))
+  return (
+    <Controller
+      control={form.control}
+      name="destinationWarehouseId"
+      render={({ field, fieldState }) => (
+        <Field data-invalid={fieldState.invalid}>
+          <FieldLabel htmlFor="destinationWarehouseId">
+            {t("toWarehouse")}
+          </FieldLabel>
+          <Select
+            items={options}
+            value={field.value || null}
+            onValueChange={(value) => field.onChange(value ?? "")}
+          >
+            <SelectTrigger
+              id="destinationWarehouseId"
+              className="w-full"
+              aria-invalid={fieldState.invalid}
+            >
+              <ArrowRightLeftIcon
+                className="size-5 text-muted-foreground"
+                aria-hidden
+              />
+              <SelectValue placeholder={t("chooseDestination")} />
+            </SelectTrigger>
+            <SelectContent>
+              {options.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FieldError errors={[fieldState.error]} />
+        </Field>
+      )}
+    />
   )
 }

@@ -28,6 +28,7 @@ import { ReceivedInvitations } from "@/components/organizations/received-invitat
 import { useMe } from "@/lib/api/platform-queries"
 
 import { StockAlertsCard } from "./stock-alerts-card"
+import { TransfersToReceiveCard } from "./transfers-to-receive-card"
 
 /** Tous les bons : seul le total sert, pour cocher l'étape « réception ». */
 const ALL_VOUCHERS = {}
@@ -135,6 +136,8 @@ export function Dashboard() {
           <ReceivedInvitations invitations={invitations} user={me.data.user} />
         </div>
       )}
+
+      <TransfersToReceiveCard />
 
       <StockAlertsCard />
 

@@ -18,7 +18,9 @@
     "invitation": "Invitation",
     "newInvitation": "Inviter une personne",
     "member": "Membre",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "newTransfer": "Nouveau transfert",
+    "transferReceipt": "Réception de transfert"
   },
   "common": {
     "retry": "Réessayer",
@@ -165,6 +167,12 @@
       "title": "{count, plural, one {# article à commander} other {# articles à commander}}",
       "seeAll": "Voir tout",
       "where": "{warehouse} : {quantity}"
+    },
+    "transfers": {
+      "title": "{count, plural, one {# transfert à réceptionner} other {# transferts à réceptionner}}",
+      "seeAll": "Voir tout",
+      "route": "{source} → {destination} · envoyé le {date}",
+      "receive": "Réceptionner"
     }
   },
   "menu": {
@@ -519,11 +527,11 @@
     "newIssue": "Nouvelle sortie",
     "types": {
       "RECEIPT": "Réception",
-      "ISSUE": "Sortie"
+      "ISSUE": "Sortie",
+      "TRANSFER_OUT": "Transfert",
+      "TRANSFER_IN": "Réception de transfert"
     },
     "allTypes": "Tous les bons",
-    "receipts": "Réceptions",
-    "issues": "Sorties",
     "empty": {
       "title": "Aucun bon pour l’instant",
       "description": "Enregistrez votre première réception : le stock de vos dépôts se mettra à jour aussitôt."
@@ -551,7 +559,12 @@
       "batch": "Lot",
       "entered": "Saisie",
       "quantity": "Quantité",
-      "immutable": "Un bon validé ne se modifie pas : pour corriger, enregistrez un nouveau bon."
+      "immutable": "Un bon validé ne se modifie pas : pour corriger, enregistrez un nouveau bon.",
+      "from": "Départ",
+      "to": "Arrivée",
+      "receivedBy": "Réceptionné le {date} :",
+      "concludes": "Réception du transfert envoyé le {date} :",
+      "expected": "{quantity} envoyés"
     },
     "form": {
       "noWarehouse": "Aucun dépôt actif. Déclarez d’abord un dépôt.",
@@ -590,7 +603,10 @@
       "changeSupplier": "Changer de fournisseur",
       "supplierItems": "Articles de {name}",
       "allItems": "Tout le catalogue",
-      "noSupplierItem": "Pas encore d’article chez ce fournisseur : il s’ajoutera de lui-même à la réception."
+      "noSupplierItem": "Pas encore d’article chez ce fournisseur : il s’ajoutera de lui-même à la réception.",
+      "fromWarehouse": "Dépôt de départ",
+      "toWarehouse": "Dépôt d’arrivée",
+      "chooseDestination": "Choisissez le dépôt d’arrivée"
     },
     "entry": {
       "see": "Voir le bon",
@@ -606,17 +622,28 @@
         "description": "La marchandise part : le stock du dépôt diminue à la validation.",
         "submit": "{count, plural, =0 {Valider la sortie} one {Valider la sortie · # article} other {Valider la sortie · # articles}}",
         "done": "Sortie {number} validée."
+      },
+      "TRANSFER_OUT": {
+        "title": "Nouveau transfert",
+        "description": "La marchandise quitte ce dépôt pour un autre : le stock du départ diminue à la validation, celui de l’arrivée augmentera à la réception.",
+        "submit": "{count, plural, =0 {Envoyer le transfert} one {Envoyer le transfert · # article} other {Envoyer le transfert · # articles}}",
+        "done": "Transfert {number} envoyé."
       }
     },
     "print": {
       "action": "Imprimer",
-      "receiptTitle": "Bon de réception",
-      "issueTitle": "Bon de sortie",
       "validatedBy": "Validé par",
       "deliveredBy": "Livré par (nom et signature)",
       "receivedBy": "Reçu par (nom et signature)",
       "footer": "Enregistré le {date}.",
-      "download": "Télécharger le PDF"
+      "download": "Télécharger le PDF",
+      "titles": {
+        "RECEIPT": "Bon de réception",
+        "ISSUE": "Bon de sortie",
+        "TRANSFER_OUT": "Bon de transfert",
+        "TRANSFER_IN": "Réception de transfert"
+      },
+      "receivedOf": "{received} reçus sur {expected}"
     },
     "menu": {
       "open": "Actions du bon {number}",
@@ -633,7 +660,36 @@
       "oldestFirst": "Plus anciens d’abord"
     },
     "noResult": "Aucun bon ne correspond à ces filtres.",
-    "clearFilters": "Effacer les filtres"
+    "clearFilters": "Effacer les filtres",
+    "newTransfer": "Transfert",
+    "kinds": {
+      "receipts": "Réceptions",
+      "issues": "Sorties",
+      "transfers": "Transferts",
+      "inTransit": "Transferts en route"
+    },
+    "transferState": {
+      "IN_TRANSIT": "En route",
+      "RECEIVED": "Reçu"
+    },
+    "receive": {
+      "action": "Réceptionner",
+      "title": "Réceptionner {number}",
+      "crumb": "Réception",
+      "description": "De {source} vers {destination}. Indiquez ce qui est réellement arrivé : un écart reste visible sur les deux bons.",
+      "sent": "Envoyé : {quantity}",
+      "received": "Quantité reçue",
+      "gap": "{direction, select, missing {{quantity} manquants} other {{quantity} en trop}}",
+      "date": "Date de réception",
+      "notePlaceholder": "Carton abîmé, colis manquant…",
+      "beforeSent": "La réception ne peut pas précéder l’envoi.",
+      "submit": "Valider la réception",
+      "done": "Réception {number} validée.",
+      "unavailable": {
+        "title": "Réception impossible",
+        "description": "Ce transfert est déjà réceptionné, ou il n’arrive pas dans un de vos dépôts."
+      }
+    }
   },
   "stock": {
     "title": "Stock",
@@ -973,6 +1029,19 @@
         "title": "Votre accès Stock a changé",
         "detail": "Vous êtes {role} : {warehouses}.",
         "revoked": "Vous n’avez plus accès au stock de cette entreprise."
+      },
+      "TRANSFER_SENT": {
+        "name": "Transfert en route",
+        "when": "Quand un transfert part vers un de vos dépôts.",
+        "title": "Transfert {number} en route vers {destination}",
+        "detail": "Depuis {source} · {count, plural, one {# article} other {# articles}}. À réceptionner à l’arrivée."
+      },
+      "TRANSFER_RECEIVED": {
+        "name": "Transfert reçu",
+        "when": "Quand un transfert que vous avez envoyé est réceptionné.",
+        "title": "Transfert {number} reçu à {destination}",
+        "complete": "Tout est arrivé.",
+        "gap": "{name} : {received} reçus sur {expected}"
       }
     }
   }

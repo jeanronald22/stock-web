@@ -9,6 +9,7 @@ import {
 import {
   VoucherLimits,
   VoucherType,
+  type EntryType,
   type VoucherInput,
 } from "@/lib/api/vouchers"
 import { parseQuantity } from "@/lib/forms/quantity"
@@ -38,13 +39,16 @@ const itemSnapshot = z.object({
 
 export function voucherFormSchema(
   messages: VoucherFormMessages,
-  today: string
+  today: string,
+  transfer = false
 ) {
   const text = (max: number) =>
     z.string().trim().max(max, messages.tooLong(max))
   return z
     .object({
       warehouseId: z.string().min(1, messages.required),
+      // Envoi de transfert : le dépôt d'arrivée, autre que celui de départ.
+      destinationWarehouseId: z.string(),
       // Réception : fournisseur de l'annuaire (son nom remplace le champ libre).
       supplier: z.custom<{ id: string; name: string } | null>(),
       lines: z
@@ -69,6 +73,12 @@ export function voucherFormSchema(
         .refine((date) => date <= today, messages.futureDate),
     })
     .superRefine((values, context) => {
+      if (transfer && !values.destinationWarehouseId)
+        context.addIssue({
+          code: "custom",
+          path: ["destinationWarehouseId"],
+          message: messages.required,
+        })
       values.lines.forEach((line, index) => {
         const issue = (field: "quantity" | "batch", message: string) =>
           context.addIssue({
@@ -133,7 +143,7 @@ export function todayOn(): string {
 }
 
 export function toVoucherInput(
-  type: VoucherType,
+  type: EntryType,
   values: VoucherFormValues,
   today: string
 ): VoucherInput {
@@ -149,6 +159,10 @@ export function toVoucherInput(
     counterparty: values.counterparty || undefined,
     documentReference: values.documentReference || undefined,
     note: values.note || undefined,
+    destinationWarehouseId:
+      type === VoucherType.transferOut
+        ? values.destinationWarehouseId
+        : undefined,
     lines: values.lines.map((line) => ({
       itemId: line.itemId,
       quantity: parseQuantity(line.quantity) ?? 0,

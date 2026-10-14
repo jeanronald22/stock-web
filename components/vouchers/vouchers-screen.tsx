@@ -2,11 +2,13 @@
 
 import {
   ArrowDownToLineIcon,
+  ArrowRightLeftIcon,
   ArrowUpFromLineIcon,
   DownloadIcon,
   EllipsisVerticalIcon,
   FileTextIcon,
   PrinterIcon,
+  type LucideIcon,
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -47,7 +49,12 @@ import {
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import { useVouchersPage } from "@/lib/api/voucher-queries"
 import { StockPermission } from "@/lib/api/stock"
-import { VoucherType, voucherTypes } from "@/lib/api/vouchers"
+import {
+  TransferState,
+  VoucherType,
+  type VoucherSummary,
+} from "@/lib/api/vouchers"
+import { VOUCHER_KIND_SEARCH, VoucherKind } from "@/lib/vouchers/voucher-kinds"
 import { useListParams } from "@/lib/list/use-list-params"
 import { RecordRoutes, Routes } from "@/lib/routes"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
@@ -60,17 +67,46 @@ import { useVoucherPdf } from "./use-voucher-pdf"
 const ALL_TYPES = "all"
 const SKELETON_ROWS = 8
 
+const TYPE_ICONS: Record<VoucherType, LucideIcon> = {
+  [VoucherType.receipt]: ArrowDownToLineIcon,
+  [VoucherType.issue]: ArrowUpFromLineIcon,
+  [VoucherType.transferOut]: ArrowRightLeftIcon,
+  [VoucherType.transferIn]: ArrowRightLeftIcon,
+}
+
 export function VoucherTypeBadge({ type }: { type: VoucherType }) {
   const t = useTranslations("vouchers.types")
-  const Icon =
-    type === VoucherType.receipt ? ArrowDownToLineIcon : ArrowUpFromLineIcon
+  const Icon = TYPE_ICONS[type]
   return (
     <Badge
-      variant={type === VoucherType.receipt ? "success" : "secondary"}
+      variant={
+        type === VoucherType.receipt
+          ? "success"
+          : type === VoucherType.issue
+            ? "secondary"
+            : "info"
+      }
       className="gap-1"
     >
       <Icon className="size-3" aria-hidden />
       {t(type)}
+    </Badge>
+  )
+}
+
+/** « Dépôt Bonabéri → Boutique Akwa » pour un envoi de transfert. */
+function warehouseLabel(voucher: VoucherSummary): string {
+  return voucher.destination
+    ? `${voucher.warehouse.name} → ${voucher.destination.name}`
+    : voucher.warehouse.name
+}
+
+/** « En transit » tant que l'envoi n'est pas réceptionné, puis « Reçu ». */
+export function TransferStateBadge({ state }: { state: TransferState }) {
+  const t = useTranslations("vouchers.transferState")
+  return (
+    <Badge variant={state === TransferState.inTransit ? "warning" : "success"}>
+      {t(state)}
     </Badge>
   )
 }
@@ -95,6 +131,13 @@ export function NewVoucherButtons({ className }: { className?: string }) {
         <ArrowUpFromLineIcon />
         {t("newIssue")}
       </Link>
+      <Link
+        href={Routes.newTransfer}
+        className={buttonVariants({ size: "lg", variant: "outline" })}
+      >
+        <ArrowRightLeftIcon />
+        {t("newTransfer")}
+      </Link>
     </div>
   )
 }
@@ -103,11 +146,18 @@ export function VouchersScreen() {
   const t = useTranslations("vouchers")
   const format = useFormatter()
   const list = useListParams()
-  const { warehouseIds, voucherType, supplierId, from, to, order, page, size } =
+  const { warehouseIds, voucherKind, supplierId, from, to, order, page, size } =
     list.params
   const search = useMemo(
-    () => ({ type: voucherType, warehouseIds, supplierId, from, to, order }),
-    [voucherType, warehouseIds, supplierId, from, to, order]
+    () => ({
+      ...(voucherKind && VOUCHER_KIND_SEARCH[voucherKind]),
+      warehouseIds,
+      supplierId,
+      from,
+      to,
+      order,
+    }),
+    [voucherKind, warehouseIds, supplierId, from, to, order]
   )
   const vouchers = useVouchersPage(search, page, size)
   const total = vouchers.data?.total ?? 0
@@ -116,9 +166,9 @@ export function VouchersScreen() {
 
   const typeOptions = [
     { value: ALL_TYPES, label: t("allTypes") },
-    ...voucherTypes.map((type) => ({
-      value: type,
-      label: type === VoucherType.receipt ? t("receipts") : t("issues"),
+    ...Object.entries(VoucherKind).map(([key, kind]) => ({
+      value: kind,
+      label: t(`kinds.${key as keyof typeof VoucherKind}`),
     })),
   ]
 
@@ -141,9 +191,11 @@ export function VouchersScreen() {
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Select
               items={typeOptions}
-              value={voucherType ?? ALL_TYPES}
+              value={voucherKind ?? ALL_TYPES}
               onValueChange={(value) =>
-                list.setVoucherType(voucherTypes.find((type) => type === value))
+                list.setVoucherKind(
+                  Object.values(VoucherKind).find((kind) => kind === value)
+                )
               }
             >
               <SelectTrigger
@@ -227,12 +279,17 @@ export function VouchersScreen() {
                               {voucher.number}
                             </Link>
                             <VoucherTypeBadge type={voucher.type} />
+                            {voucher.transferState && (
+                              <TransferStateBadge
+                                state={voucher.transferState}
+                              />
+                            )}
                           </div>
                           <p className="text-xs text-muted-foreground md:hidden">
                             {format.dateTime(new Date(voucher.occurredAt), {
                               dateStyle: "medium",
                             })}{" "}
-                            · {voucher.warehouse.name}
+                            · {warehouseLabel(voucher)}
                           </p>
                         </TableCell>
                         <TableCell className="hidden md:table-cell">
@@ -241,7 +298,7 @@ export function VouchersScreen() {
                           })}
                         </TableCell>
                         <TableCell className="hidden md:table-cell">
-                          {voucher.warehouse.name}
+                          {warehouseLabel(voucher)}
                         </TableCell>
                         <TableCell className="hidden lg:table-cell">
                           {voucher.counterparty ?? (

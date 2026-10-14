@@ -27,6 +27,8 @@ export const stockKeys = {
   all: (organizationId: string | null) => ["stock", organizationId] as const,
   warehouses: (organizationId: string | null, status: CatalogStatus) =>
     [...stockKeys.all(organizationId), "warehouses", status] as const,
+  transferDestinations: (organizationId: string | null) =>
+    [...stockKeys.all(organizationId), "transfer-destinations"] as const,
   warehouse: (organizationId: string | null, id: string) =>
     [...stockKeys.all(organizationId), "warehouse", id] as const,
   items: (
@@ -64,6 +66,17 @@ export function useWarehouses(
     queryFn: () => stock.warehouses(status),
     enabled: !!organizationId,
     refetchOnMount: fresh ? "always" : true,
+  })
+}
+
+export function useTransferDestinations() {
+  const { stock } = useApi()
+  const organizationId = useOrganizationId()
+  return useQuery({
+    queryKey: stockKeys.transferDestinations(organizationId),
+    queryFn: stock.transferDestinations,
+    enabled: !!organizationId,
+    refetchOnMount: "always",
   })
 }
 

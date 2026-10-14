@@ -18,7 +18,9 @@
     "invitation": "Invitation",
     "newInvitation": "Invite someone",
     "member": "Member",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "newTransfer": "New transfer",
+    "transferReceipt": "Transfer receipt"
   },
   "common": {
     "retry": "Try again",
@@ -165,6 +167,12 @@
       "title": "{count, plural, one {# item to reorder} other {# items to reorder}}",
       "seeAll": "See all",
       "where": "{warehouse}: {quantity}"
+    },
+    "transfers": {
+      "title": "{count, plural, one {# transfer to receive} other {# transfers to receive}}",
+      "seeAll": "See all",
+      "route": "{source} → {destination} · sent on {date}",
+      "receive": "Receive"
     }
   },
   "menu": {
@@ -519,11 +527,11 @@
     "newIssue": "New issue",
     "types": {
       "RECEIPT": "Receipt",
-      "ISSUE": "Issue"
+      "ISSUE": "Issue",
+      "TRANSFER_OUT": "Transfer",
+      "TRANSFER_IN": "Transfer receipt"
     },
     "allTypes": "All vouchers",
-    "receipts": "Receipts",
-    "issues": "Issues",
     "empty": {
       "title": "No vouchers yet",
       "description": "Record your first receipt: your depots’ stock updates straight away."
@@ -551,7 +559,12 @@
       "batch": "Batch",
       "entered": "Entered",
       "quantity": "Quantity",
-      "immutable": "An approved voucher cannot be changed: to correct it, record a new voucher."
+      "immutable": "An approved voucher cannot be changed: to correct it, record a new voucher.",
+      "from": "From",
+      "to": "To",
+      "receivedBy": "Received on {date}:",
+      "concludes": "Receipt of the transfer sent on {date}:",
+      "expected": "{quantity} sent"
     },
     "form": {
       "noWarehouse": "No active depot. Declare a depot first.",
@@ -590,7 +603,10 @@
       "changeSupplier": "Change supplier",
       "supplierItems": "{name}’s items",
       "allItems": "Whole catalogue",
-      "noSupplierItem": "No items from this supplier yet: they are added automatically on receipt."
+      "noSupplierItem": "No items from this supplier yet: they are added automatically on receipt.",
+      "fromWarehouse": "From warehouse",
+      "toWarehouse": "To warehouse",
+      "chooseDestination": "Choose the destination warehouse"
     },
     "entry": {
       "see": "See voucher",
@@ -606,17 +622,28 @@
         "description": "Goods leave: the depot’s stock decreases on approval.",
         "submit": "{count, plural, =0 {Approve issue} one {Approve issue · # item} other {Approve issue · # items}}",
         "done": "Issue {number} approved."
+      },
+      "TRANSFER_OUT": {
+        "title": "New transfer",
+        "description": "Goods leave this warehouse for another: stock here decreases on validation, the destination’s increases when received.",
+        "submit": "{count, plural, =0 {Send the transfer} one {Send the transfer · # item} other {Send the transfer · # items}}",
+        "done": "Transfer {number} sent."
       }
     },
     "print": {
       "action": "Print",
-      "receiptTitle": "Goods receipt",
-      "issueTitle": "Goods issue",
       "validatedBy": "Approved by",
       "deliveredBy": "Delivered by (name and signature)",
       "receivedBy": "Received by (name and signature)",
       "footer": "Recorded on {date}.",
-      "download": "Download PDF"
+      "download": "Download PDF",
+      "titles": {
+        "RECEIPT": "Receipt voucher",
+        "ISSUE": "Issue voucher",
+        "TRANSFER_OUT": "Transfer voucher",
+        "TRANSFER_IN": "Transfer receipt"
+      },
+      "receivedOf": "{received} received of {expected}"
     },
     "menu": {
       "open": "Actions for voucher {number}",
@@ -633,7 +660,36 @@
       "oldestFirst": "Oldest first"
     },
     "noResult": "No voucher matches these filters.",
-    "clearFilters": "Clear filters"
+    "clearFilters": "Clear filters",
+    "newTransfer": "Transfer",
+    "kinds": {
+      "receipts": "Receipts",
+      "issues": "Issues",
+      "transfers": "Transfers",
+      "inTransit": "Transfers on the way"
+    },
+    "transferState": {
+      "IN_TRANSIT": "On the way",
+      "RECEIVED": "Received"
+    },
+    "receive": {
+      "action": "Receive",
+      "title": "Receive {number}",
+      "crumb": "Receipt",
+      "description": "From {source} to {destination}. Enter what actually arrived: any discrepancy stays visible on both vouchers.",
+      "sent": "Sent: {quantity}",
+      "received": "Quantity received",
+      "gap": "{direction, select, missing {{quantity} missing} other {{quantity} extra}}",
+      "date": "Receipt date",
+      "notePlaceholder": "Damaged box, missing parcel…",
+      "beforeSent": "The receipt cannot come before the transfer was sent.",
+      "submit": "Validate the receipt",
+      "done": "Receipt {number} validated.",
+      "unavailable": {
+        "title": "Receipt not possible",
+        "description": "This transfer is already received, or it is not heading to one of your warehouses."
+      }
+    }
   },
   "stock": {
     "title": "Stock",
@@ -973,6 +1029,19 @@
         "title": "Your Stock access has changed",
         "detail": "You are {role}: {warehouses}.",
         "revoked": "You no longer have access to this business’s stock."
+      },
+      "TRANSFER_SENT": {
+        "name": "Transfer on the way",
+        "when": "When a transfer leaves for one of your warehouses.",
+        "title": "Transfer {number} on its way to {destination}",
+        "detail": "From {source} · {count, plural, one {# item} other {# items}}. To receive on arrival."
+      },
+      "TRANSFER_RECEIVED": {
+        "name": "Transfer received",
+        "when": "When a transfer you sent is received.",
+        "title": "Transfer {number} received at {destination}",
+        "complete": "Everything arrived.",
+        "gap": "{name}: {received} received of {expected}"
       }
     }
   }

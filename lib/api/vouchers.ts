@@ -12,6 +12,7 @@ import {
 export const VoucherPaths = {
   vouchers: "/v1/vouchers",
   voucher: (id: string) => `/v1/vouchers/${id}`,
+  transferReceipt: (id: string) => `/v1/vouchers/${id}/receipt`,
   stock: "/v1/stock",
   itemStock: (itemId: string) => `/v1/stock/items/${itemId}`,
 } as const
@@ -25,6 +26,7 @@ export const VoucherQueryParams = {
   from: "from",
   to: "to",
   order: "order",
+  transferState: "transferState",
   search: "q",
   page: "page",
   size: "size",
@@ -39,12 +41,39 @@ export const VoucherLimits = {
   lines: 200,
 } as const
 
-export const voucherTypes = ["RECEIPT", "ISSUE"] as const
+/** Transfert (D27) : l'envoi sort le stock du départ, sa réception l'entre à l'arrivée. */
+export const voucherTypes = [
+  "RECEIPT",
+  "ISSUE",
+  "TRANSFER_OUT",
+  "TRANSFER_IN",
+] as const
 export type VoucherType = (typeof voucherTypes)[number]
 export const VoucherType = {
   receipt: "RECEIPT",
   issue: "ISSUE",
+  transferOut: "TRANSFER_OUT",
+  transferIn: "TRANSFER_IN",
 } as const satisfies Record<string, VoucherType>
+
+/** Bons qui font entrer du stock dans leur dépôt ; les autres le font sortir. */
+export const incomingTypes: ReadonlySet<VoucherType> = new Set([
+  VoucherType.receipt,
+  VoucherType.transferIn,
+])
+
+/** Bons saisis dans l'écran de saisie ; la réception d'un transfert part de l'envoi. */
+export type EntryType = Exclude<VoucherType, typeof VoucherType.transferIn>
+
+/** État d'un envoi de transfert, déduit de sa réception (stock-api, TransferState). */
+export type TransferState = "IN_TRANSIT" | "RECEIVED"
+export const TransferState = {
+  inTransit: "IN_TRANSIT",
+  received: "RECEIVED",
+} as const satisfies Record<string, TransferState>
+
+/** Autre bon d'un transfert : la réception d'un envoi, ou l'envoi d'une réception. */
+export type VoucherRef = { id: string; number: string; occurredAt: string }
 
 export type WarehouseRef = { id: string; name: string }
 
@@ -66,6 +95,9 @@ export type VoucherSummary = {
   counterparty: string | null
   lineCount: number
   createdByName: string
+  /** Envoi de transfert : dépôt d'arrivée et état. */
+  destination: WarehouseRef | null
+  transferState: TransferState | null
 }
 
 export type VoucherLine = {
@@ -80,6 +112,8 @@ export type VoucherLine = {
   enteredQuantity: number
   packagingName: string | null
   batch: string | null
+  /** Réception de transfert : quantité envoyée ; [quantity] est la quantité reçue. */
+  expectedQuantity: number | null
 }
 
 export type Voucher = Omit<VoucherSummary, "lineCount"> & {
@@ -87,6 +121,11 @@ export type Voucher = Omit<VoucherSummary, "lineCount"> & {
   note: string | null
   lines: VoucherLine[]
   recordedAt: string
+  /** Réception de transfert : le dépôt de départ. */
+  source: WarehouseRef | null
+  /** Envoi : sa réception (null en transit). Réception : l'envoi qu'elle conclut. */
+  receipt: VoucherRef | null
+  transfer: VoucherRef | null
 }
 
 export type VoucherLineInput = {
@@ -106,7 +145,16 @@ export type VoucherInput = {
   counterparty?: string
   documentReference?: string
   note?: string
+  /** Envoi de transfert : le dépôt d'arrivée. */
+  destinationWarehouseId?: string
   lines: VoucherLineInput[]
+}
+
+/** Réception d'un transfert : quantité reçue de chaque ligne de l'envoi, dans l'ordre. */
+export type TransferReceiptInput = {
+  occurredAt?: string
+  note?: string
+  lines: { quantity: number }[]
 }
 
 /** Manque renvoyé par l'API quand une sortie dépasse le stock (champ « shortages »). */
@@ -152,7 +200,8 @@ export type ItemStock = { itemId: string; warehouses: WarehouseStock[] }
 
 /** [from] et [to] : jours inclus (AAAA-MM-JJ), comptés dans le fuseau des dépôts par l'API. */
 export type VoucherSearch = {
-  type?: VoucherType
+  types?: VoucherType[]
+  transferState?: TransferState
   warehouseIds?: string[]
   supplierId?: string
   from?: string
@@ -176,7 +225,8 @@ export const voucherApi = (send: ApiClient) => {
         path:
           VoucherPaths.vouchers +
           query({
-            [VoucherQueryParams.type]: search.type,
+            [VoucherQueryParams.type]: search.types,
+            [VoucherQueryParams.transferState]: search.transferState,
             [VoucherQueryParams.warehouseId]: search.warehouseIds,
             [VoucherQueryParams.supplierId]: search.supplierId,
             [VoucherQueryParams.from]: search.from,
@@ -185,6 +235,17 @@ export const voucherApi = (send: ApiClient) => {
             [VoucherQueryParams.page]: page,
             [VoucherQueryParams.size]: size,
           }),
+      }),
+    receiveTransfer: (
+      transferId: string,
+      id: string,
+      input: TransferReceiptInput
+    ) =>
+      send<Voucher>({
+        ...scoped,
+        method: "POST",
+        path: VoucherPaths.transferReceipt(transferId),
+        body: { id, ...input },
       }),
     voucher: (id: string) =>
       send<Voucher>({

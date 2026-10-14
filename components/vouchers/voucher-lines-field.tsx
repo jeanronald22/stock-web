@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { VoucherType } from "@/lib/api/vouchers"
+import { incomingTypes, type EntryType } from "@/lib/api/vouchers"
 import { useItemStock } from "@/lib/api/voucher-queries"
 import { parseQuantity } from "@/lib/forms/quantity"
 
@@ -33,7 +33,7 @@ import {
   type VoucherFormValues,
 } from "./voucher-form-schema"
 
-type FieldProps = { form: UseFormReturn<VoucherFormValues>; type: VoucherType }
+type FieldProps = { form: UseFormReturn<VoucherFormValues>; type: EntryType }
 
 /** Entrée dans une quantité : retour à la recherche, pour enchaîner l'article suivant. */
 type LineNavigation = { searchRef: React.RefObject<HTMLInputElement | null> }
@@ -72,7 +72,7 @@ export function VoucherLinesField({
         inputRef={searchRef}
         autoFocus
         supplier={supplier}
-        warehouseId={type === VoucherType.issue ? warehouseId : undefined}
+        warehouseId={incomingTypes.has(type) ? undefined : warehouseId}
         excludedIds={excluded}
         onPick={(item) =>
           append(newLine(item), {
@@ -117,7 +117,8 @@ function VoucherLineRow({
   const line = useWatch({ control: form.control, name: `lines.${index}` })
   const warehouseId = useWatch({ control: form.control, name: "warehouseId" })
   const errors = form.formState.errors.lines?.[index]
-  const issue = type === VoucherType.issue
+  // Sortie ou envoi de transfert : le stock part du dépôt, le disponible s'affiche.
+  const issue = !incomingTypes.has(type)
   const stock = useItemStock(issue ? line.itemId : undefined)
   const inWarehouse = stock.data?.warehouses.find(
     (entry) => entry.warehouse.id === warehouseId
