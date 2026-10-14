@@ -492,50 +492,6 @@
       "quantity": "Quantité",
       "immutable": "Un bon validé ne se modifie pas : pour corriger, enregistrez un nouveau bon."
     },
-    "wizard": {
-      "RECEIPT": {
-        "eyebrow": "Nouvelle réception",
-        "warehouse": {
-          "title": "Dans quel dépôt arrive la marchandise ?",
-          "description": "Le stock de ce dépôt augmentera à la validation."
-        },
-        "lines": {
-          "title": "Qu’est-ce qui arrive ?",
-          "description": "Ajoutez chaque article et sa quantité, en unités ou en conditionnements."
-        },
-        "details": {
-          "title": "D’où vient-elle ?",
-          "description": "Facultatif, mais utile en cas d’écart avec le bon de livraison."
-        },
-        "summary": {
-          "title": "Tout est juste ?",
-          "description": "Une fois validée, la réception ne se modifie plus."
-        },
-        "submit": "Valider la réception",
-        "done": "Réception {number} validée."
-      },
-      "ISSUE": {
-        "eyebrow": "Nouvelle sortie",
-        "warehouse": {
-          "title": "De quel dépôt sort la marchandise ?",
-          "description": "Le stock de ce dépôt diminuera à la validation."
-        },
-        "lines": {
-          "title": "Qu’est-ce qui sort ?",
-          "description": "Le disponible du dépôt est indiqué sous chaque article."
-        },
-        "details": {
-          "title": "Pour qui ?",
-          "description": "Facultatif : client, chantier ou motif de la sortie."
-        },
-        "summary": {
-          "title": "Tout est juste ?",
-          "description": "Une fois validée, la sortie ne se modifie plus."
-        },
-        "submit": "Valider la sortie",
-        "done": "Sortie {number} validée."
-      }
-    },
     "form": {
       "noWarehouse": "Aucun dépôt actif. Déclarez d’abord un dépôt.",
       "createWarehouse": "Déclarer un dépôt",
@@ -564,7 +520,25 @@
       "date": "Date de l’opération",
       "note": "Note",
       "notePlaceholder": "Un carton abîmé, un écart constaté…",
-      "futureDate": "La date ne peut pas être dans le futur."
+      "futureDate": "La date ne peut pas être dans le futur.",
+      "warehouse": "Dépôt",
+      "chooseWarehouse": "Choisissez le dépôt"
+    },
+    "entry": {
+      "see": "Voir le bon",
+      "shortages": "Stock insuffisant : corrigez les lignes signalées.",
+      "RECEIPT": {
+        "title": "Nouvelle réception",
+        "description": "La marchandise arrive : le stock du dépôt augmente à la validation.",
+        "submit": "{count, plural, =0 {Valider la réception} one {Valider la réception · # article} other {Valider la réception · # articles}}",
+        "done": "Réception {number} validée."
+      },
+      "ISSUE": {
+        "title": "Nouvelle sortie",
+        "description": "La marchandise part : le stock du dépôt diminue à la validation.",
+        "submit": "{count, plural, =0 {Valider la sortie} one {Valider la sortie · # article} other {Valider la sortie · # articles}}",
+        "done": "Sortie {number} validée."
+      }
     }
   },
   "stock": {

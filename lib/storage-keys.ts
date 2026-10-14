@@ -5,4 +5,6 @@ export const StorageKeys = {
   oidcPrefix: "kreskala.oidc.",
   /** Visites guidées déjà vues, par personne : chacune ne s'ouvre seule qu'une fois. */
   toursSeenPrefix: "kreskala.tours-seen.",
+  /** Dernier dépôt d'une saisie de bon, par personne et par entreprise : déjà choisi la fois suivante. */
+  lastWarehousePrefix: "kreskala.last-warehouse.",
 } as const

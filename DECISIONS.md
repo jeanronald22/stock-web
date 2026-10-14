@@ -193,7 +193,8 @@ Côté utilisateur, ce sont les écrans de « Mon compte » : créer son entrepr
 - **Pas de stock négatif** : une sortie est tout ou rien ; le décompte est atomique (deux sorties simultanées ne consomment pas le même stock) ; le refus détaille le disponible, affiché sous chaque ligne en cause.
 - Saisie en unité de base ou en conditionnement (converti) ; lot obligatoire pour un article suivi par lot (choisi parmi les lots en stock pour une sortie) ; pièces entières.
 - Une réception référence l'article dans le dépôt. L'unité de base d'un article se verrouille à son premier mouvement.
-- Écrans : assistant en quatre étapes (dépôt, articles, détails, récapitulatif), liste des bons paginée et filtrée, fiche de bon en lecture seule, stock par dépôt avec lots et ruptures, stock sur la fiche de l'article.
+- **Saisie rapide sur un seul écran**, sans assistant : la réception et la sortie se font plusieurs fois par jour, l'écran doit faire gagner du temps. Dernier dépôt déjà choisi ; recherche d'article au clavier, curseur sur la quantité à l'ajout, Entrée pour revenir à la recherche ; détails facultatifs à côté ; après validation, l'écran se vide pour le bon suivant (même dépôt, même date). Les assistants restent pour les créations occasionnelles (article, dépôt).
+- Autres écrans : liste des bons paginée et filtrée, fiche de bon en lecture seule, stock par dépôt avec lots et ruptures, stock sur la fiche de l'article.
 - Politique de confidentialité passée en version 0.3 (nom sur les bons, fournisseurs et clients).
 
 ## Questions ouvertes

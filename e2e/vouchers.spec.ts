@@ -12,8 +12,6 @@ import {
 test.beforeEach(async ({ context }) => redirectApi(context))
 
 const year = new Date().getFullYear()
-const next = (page: Page) =>
-  page.getByRole("button", { name: "Continuer" }).click()
 
 async function addItem(page: Page, name: string) {
   await page
@@ -56,22 +54,27 @@ test("réception puis sortie : le stock suit, une sortie trop forte est refusée
   ).toBeVisible()
   await dismissTour(page, "Entrées et sorties")
 
-  // Réception : 2 palettes de ciment (80 sacs) et 10 cartons de carreaux, lot N12 (14,4 m²).
+  // Réception, au clavier : la recherche a le focus, l'article ajouté passe à sa quantité,
+  // Entrée revient à la recherche. Dépôt unique : déjà choisi.
   await page.getByRole("link", { name: "Nouvelle réception" }).first().click()
   await expect(
-    page.getByRole("heading", {
-      name: "Dans quel dépôt arrive la marchandise ?",
-    })
+    page.getByRole("heading", { name: "Nouvelle réception" })
   ).toBeVisible()
-  // Dépôt unique : déjà choisi.
-  await expect(
-    page.getByRole("radio", { name: /Dépôt Bonabéri/ })
-  ).toHaveAttribute("aria-checked", "true")
-  await next(page)
+  await expect(page.getByRole("combobox", { name: "Dépôt" })).toContainText(
+    "Dépôt Bonabéri"
+  )
+  const search = page.getByRole("searchbox", {
+    name: "Rechercher un article à ajouter",
+  })
+  await expect(search).toBeFocused()
   await addItem(page, "Ciment CPJ 42,5")
-  await page
-    .getByRole("textbox", { name: "Quantité · Ciment CPJ 42,5" })
-    .fill("2")
+  const cementQuantity = page.getByRole("textbox", {
+    name: "Quantité · Ciment CPJ 42,5",
+  })
+  await expect(cementQuantity).toBeFocused()
+  await cementQuantity.fill("2")
+  await cementQuantity.press("Enter")
+  await expect(search).toBeFocused()
   await page.getByRole("combobox", { name: "Unité · Ciment CPJ 42,5" }).click()
   await page.getByRole("option", { name: "Palette (40 pièces)" }).click()
   await expect(page.getByText("= 80 pièces")).toBeVisible()
@@ -83,50 +86,56 @@ test("réception puis sortie : le stock suit, une sortie trop forte est refusée
     .getByRole("combobox", { name: "Unité · Carreau 60x60 beige" })
     .click()
   await page.getByRole("option", { name: /Carton/ }).click()
-  await next(page)
+  await page.getByLabel(/Fournisseur/).fill("Cimencam")
+  await page
+    .getByRole("button", { name: "Valider la réception · 2 articles" })
+    .click()
   await expect(page.getByText("Indiquez le lot.")).toBeVisible()
   await page
     .getByRole("textbox", { name: "Lot · Carreau 60x60 beige" })
     .fill("N12")
-  await shot(page, testInfo, "01-reception-articles")
-  await next(page)
-  await page.getByLabel(/Fournisseur/).fill("Cimencam")
-  await next(page)
-  await expect(page.getByText("+ 80 pièces")).toBeVisible()
-  await expect(page.getByText("+ 14,4 m²")).toBeVisible()
-  await shot(page, testInfo, "02-reception-recapitulatif")
-  await page.getByRole("button", { name: "Valider la réception" }).click()
+  await expect(page.getByText("Indiquez le lot.")).toBeHidden()
+  await shot(page, testInfo, "01-reception")
+  await page
+    .getByRole("button", { name: "Valider la réception · 2 articles" })
+    .click()
+  await expect(
+    page.getByText(`Réception REC-${year}-0001 validée.`)
+  ).toBeVisible()
+  // Écran vidé pour le bon suivant, même dépôt.
+  await expect(page.getByText("Aucun article ajouté")).toBeVisible()
+  await expect(page.getByRole("combobox", { name: "Dépôt" })).toContainText(
+    "Dépôt Bonabéri"
+  )
+  await page.getByRole("button", { name: "Voir le bon" }).click()
   await expect(
     page.getByRole("heading", { name: `REC-${year}-0001` })
   ).toBeVisible()
   await expect(page.locator("dl").getByText("Awa Bello")).toBeVisible()
-  await shot(page, testInfo, "03-bon-reception")
+  await shot(page, testInfo, "02-bon-reception")
 
-  // Sortie de 100 sacs : il n'y en a que 80, l'assistant revient sur la ligne.
+  // Sortie de 100 sacs : il n'y en a que 80, la ligne l'indique.
   await navigateTo(page, "Bons")
   await page.getByRole("link", { name: "Nouvelle sortie" }).click()
-  await next(page)
   await addItem(page, "Ciment CPJ 42,5")
   await expect(page.getByText("Disponible : 80 pièces")).toBeVisible()
   await page
     .getByRole("textbox", { name: "Quantité · Ciment CPJ 42,5" })
     .fill("100")
-  await next(page)
-  await next(page)
-  await page.getByRole("button", { name: "Valider la sortie" }).click()
+  await page
+    .getByRole("button", { name: "Valider la sortie · 1 article" })
+    .click()
   await expect(
     page.getByText("Il n’y a que 80 pièces dans ce dépôt.")
   ).toBeVisible()
-  await shot(page, testInfo, "04-sortie-refusee")
+  await shot(page, testInfo, "03-sortie-refusee")
   await page
     .getByRole("textbox", { name: "Quantité · Ciment CPJ 42,5" })
     .fill("30")
-  await next(page)
-  await next(page)
-  await page.getByRole("button", { name: "Valider la sortie" }).click()
-  await expect(
-    page.getByRole("heading", { name: `SOR-${year}-0001` })
-  ).toBeVisible()
+  await page
+    .getByRole("button", { name: "Valider la sortie · 1 article" })
+    .click()
+  await expect(page.getByText(`Sortie SOR-${year}-0001 validée.`)).toBeVisible()
 
   // Stock : 50 sacs de ciment, 14,4 m² de carreaux du lot N12.
   await navigateTo(page, "Stock")
@@ -137,9 +146,9 @@ test("réception puis sortie : le stock suit, une sortie trop forte est refusée
   await expect(
     page.getByRole("row", { name: /Carreau 60x60 beige.*14,4 m²/ })
   ).toBeVisible()
-  await shot(page, testInfo, "05-stock")
+  await shot(page, testInfo, "04-stock")
 
   await navigateTo(page, "Bons")
   await expect(page.getByText("1–2 sur 2")).toBeVisible()
-  await shot(page, testInfo, "06-bons")
+  await shot(page, testInfo, "05-bons")
 })

@@ -492,50 +492,6 @@
       "quantity": "Quantity",
       "immutable": "An approved voucher cannot be changed: to correct it, record a new voucher."
     },
-    "wizard": {
-      "RECEIPT": {
-        "eyebrow": "New receipt",
-        "warehouse": {
-          "title": "Which depot are the goods arriving at?",
-          "description": "This depot’s stock will increase on approval."
-        },
-        "lines": {
-          "title": "What is arriving?",
-          "description": "Add each item and its quantity, in units or packagings."
-        },
-        "details": {
-          "title": "Where is it from?",
-          "description": "Optional, but useful if it differs from the delivery note."
-        },
-        "summary": {
-          "title": "Is everything right?",
-          "description": "Once approved, the receipt can no longer be changed."
-        },
-        "submit": "Approve receipt",
-        "done": "Receipt {number} approved."
-      },
-      "ISSUE": {
-        "eyebrow": "New issue",
-        "warehouse": {
-          "title": "Which depot are the goods leaving?",
-          "description": "This depot’s stock will decrease on approval."
-        },
-        "lines": {
-          "title": "What is leaving?",
-          "description": "The depot’s available stock is shown under each item."
-        },
-        "details": {
-          "title": "Who is it for?",
-          "description": "Optional: customer, building site or reason for the issue."
-        },
-        "summary": {
-          "title": "Is everything right?",
-          "description": "Once approved, the issue can no longer be changed."
-        },
-        "submit": "Approve issue",
-        "done": "Issue {number} approved."
-      }
-    },
     "form": {
       "noWarehouse": "No active depot. Declare a depot first.",
       "createWarehouse": "Declare a depot",
@@ -564,7 +520,25 @@
       "date": "Operation date",
       "note": "Note",
       "notePlaceholder": "A damaged box, a discrepancy…",
-      "futureDate": "The date cannot be in the future."
+      "futureDate": "The date cannot be in the future.",
+      "warehouse": "Depot",
+      "chooseWarehouse": "Choose the depot"
+    },
+    "entry": {
+      "see": "See voucher",
+      "shortages": "Insufficient stock: correct the flagged lines.",
+      "RECEIPT": {
+        "title": "New receipt",
+        "description": "Goods arrive: the depot’s stock increases on approval.",
+        "submit": "{count, plural, =0 {Approve receipt} one {Approve receipt · # item} other {Approve receipt · # items}}",
+        "done": "Receipt {number} approved."
+      },
+      "ISSUE": {
+        "title": "New issue",
+        "description": "Goods leave: the depot’s stock decreases on approval.",
+        "submit": "{count, plural, =0 {Approve issue} one {Approve issue · # item} other {Approve issue · # items}}",
+        "done": "Issue {number} approved."
+      }
     }
   },
   "stock": {

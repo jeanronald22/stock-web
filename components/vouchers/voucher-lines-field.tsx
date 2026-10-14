@@ -12,12 +12,7 @@ import {
 import { useQuantityLabel } from "@/components/items/describe"
 import { Button } from "@/components/ui/button"
 import { FieldError } from "@/components/ui/field"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-  InputGroupText,
-} from "@/components/ui/input-group"
+import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
 import {
   Select,
   SelectContent,
@@ -39,8 +34,18 @@ import {
 
 type FieldProps = { form: UseFormReturn<VoucherFormValues>; type: VoucherType }
 
-/** Articles du bon : recherche, puis une ligne par article (quantité, unité, lot). */
-export function VoucherLinesField({ form, type }: FieldProps) {
+/** Entrée dans une quantité : retour à la recherche, pour enchaîner l'article suivant. */
+type LineNavigation = { searchRef: React.RefObject<HTMLInputElement | null> }
+
+/**
+ * Articles du bon, au clavier : chercher, ajouter (le curseur passe à la quantité), Entrée pour
+ * revenir à la recherche. Une ligne par article : quantité, unité ou conditionnement, lot.
+ */
+export function VoucherLinesField({
+  form,
+  type,
+  searchRef,
+}: FieldProps & LineNavigation) {
   const t = useTranslations("vouchers.form")
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -61,9 +66,15 @@ export function VoucherLinesField({ form, type }: FieldProps) {
   return (
     <div className="space-y-4">
       <ItemPicker
+        inputRef={searchRef}
+        autoFocus
         warehouseId={type === VoucherType.issue ? warehouseId : undefined}
         excludedIds={excluded}
-        onPick={(item) => append(newLine(item))}
+        onPick={(item) =>
+          append(newLine(item), {
+            focusName: `lines.${fields.length}.quantity`,
+          })
+        }
       />
       <p
         className="text-sm font-medium text-muted-foreground"
@@ -78,6 +89,7 @@ export function VoucherLinesField({ form, type }: FieldProps) {
             form={form}
             type={type}
             index={index}
+            searchRef={searchRef}
             onRemove={() => remove(index)}
           />
         ))}
@@ -93,8 +105,9 @@ function VoucherLineRow({
   form,
   type,
   index,
+  searchRef,
   onRemove,
-}: FieldProps & { index: number; onRemove: () => void }) {
+}: FieldProps & LineNavigation & { index: number; onRemove: () => void }) {
   const t = useTranslations()
   const quantityLabel = useQuantityLabel()
   const line = useWatch({ control: form.control, name: `lines.${index}` })
@@ -111,11 +124,13 @@ function VoucherLineRow({
     entered !== null && entered > 0 && line.unit !== BASE_UNIT_CHOICE
       ? baseQuantity(line.item, entered, line.unit)
       : null
+  // Champ fermé : le nom seul (la conversion s'affiche sous la ligne) ; liste : avec le contenu.
   const unitItems = [
-    { value: BASE_UNIT_CHOICE, label: t(`units.${line.item.baseUnit}.label`) },
+    { value: BASE_UNIT_CHOICE, label: t(`units.${line.item.baseUnit}.label`), detail: "" },
     ...line.item.packagings.map((packaging) => ({
       value: packaging.name,
-      label: `${packaging.name} (${quantityLabel(line.item.baseUnit, packaging.quantity)})`,
+      label: packaging.name,
+      detail: ` (${quantityLabel(line.item.baseUnit, packaging.quantity)})`,
     })),
   ]
   const batchItems = (inWarehouse?.batches ?? []).map((batch) => ({
@@ -126,34 +141,43 @@ function VoucherLineRow({
     ? inWarehouse?.batches.find((batch) => batch.batch === line.batch)?.quantity
     : inWarehouse?.quantity
 
+  const quantityField = form.register(`lines.${index}.quantity`)
+  const batchInput = line.item.batchTracking && !issue
+
   return (
-    <li className="animate-rise-in rounded-xl border p-4">
-      <div className="flex items-start justify-between gap-3">
-        <p className="min-w-0 font-semibold">{line.item.name}</p>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          aria-label={t("vouchers.form.remove")}
-          onClick={onRemove}
-        >
-          <XIcon />
-        </Button>
-      </div>
-      <div className="mt-3 grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+    <li className="animate-rise-in rounded-xl border p-3">
+      <div className="grid gap-2 md:grid-cols-[minmax(0,1.2fr)_6.5rem_minmax(11rem,1.2fr)_minmax(0,1fr)_auto] md:items-start">
+        <div className="flex min-h-11 items-center justify-between gap-2 md:pr-2">
+          <span className="min-w-0 truncate font-semibold">
+            {line.item.name}
+          </span>
+          {/* Téléphone : le retrait à côté du nom, sans ligne à lui seul. */}
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            aria-label={`${t("vouchers.form.remove")} · ${line.item.name}`}
+            onClick={onRemove}
+          >
+            <XIcon />
+          </Button>
+        </div>
         <div>
-          <InputGroup>
-            <InputGroupAddon>
-              <InputGroupText>{t("vouchers.form.quantity")}</InputGroupText>
-            </InputGroupAddon>
+          <InputGroupInputBox>
             <InputGroupInput
               inputMode="decimal"
+              placeholder={t("vouchers.form.quantity")}
               aria-label={`${t("vouchers.form.quantity")} · ${line.item.name}`}
               aria-invalid={!!errors?.quantity}
-              {...form.register(`lines.${index}.quantity`)}
+              {...quantityField}
+              onKeyDown={(event) => {
+                if (event.key !== ENTER) return
+                event.preventDefault()
+                searchRef.current?.focus()
+              }}
             />
-          </InputGroup>
-          <FieldError errors={[errors?.quantity]} />
+          </InputGroupInputBox>
         </div>
         {unitItems.length > 1 ? (
           <Controller
@@ -177,6 +201,7 @@ function VoucherLineRow({
                   {unitItems.map((item) => (
                     <SelectItem key={item.value} value={item.value}>
                       {item.label}
+                      {item.detail}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -188,64 +213,71 @@ function VoucherLineRow({
             {unitItems[0].label}
           </div>
         )}
-      </div>
-
-      {line.item.batchTracking && (
-        <div className="mt-3">
-          {issue ? (
-            <Controller
-              control={form.control}
-              name={`lines.${index}.batch`}
-              render={({ field }) => (
-                <Select
-                  items={batchItems}
-                  value={field.value || null}
-                  onValueChange={(value) => field.onChange(value ?? "")}
-                >
-                  <SelectTrigger
-                    className="w-full"
-                    aria-label={`${t("vouchers.form.batch")} · ${line.item.name}`}
-                    aria-invalid={!!errors?.batch}
+        <div>
+          {line.item.batchTracking &&
+            (batchInput ? (
+              <InputGroupInputBox>
+                <InputGroupInput
+                  placeholder={`${t("vouchers.form.batch")} : ${t("vouchers.form.batchPlaceholder")}`}
+                  aria-label={`${t("vouchers.form.batch")} · ${line.item.name}`}
+                  aria-invalid={!!errors?.batch}
+                  {...form.register(`lines.${index}.batch`)}
+                />
+              </InputGroupInputBox>
+            ) : (
+              <Controller
+                control={form.control}
+                name={`lines.${index}.batch`}
+                render={({ field }) => (
+                  <Select
+                    items={batchItems}
+                    value={field.value || null}
+                    onValueChange={(value) => field.onChange(value ?? "")}
                   >
-                    <SelectValue placeholder={t("vouchers.form.chooseBatch")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {batchItems.map((item) => (
-                      <SelectItem key={item.value} value={item.value}>
-                        {item.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          ) : (
-            <InputGroup>
-              <InputGroupAddon>
-                <InputGroupText>{t("vouchers.form.batch")}</InputGroupText>
-              </InputGroupAddon>
-              <InputGroupInput
-                aria-label={`${t("vouchers.form.batch")} · ${line.item.name}`}
-                placeholder={t("vouchers.form.batchPlaceholder")}
-                aria-invalid={!!errors?.batch}
-                {...form.register(`lines.${index}.batch`)}
+                    <SelectTrigger
+                      className="w-full"
+                      aria-label={`${t("vouchers.form.batch")} · ${line.item.name}`}
+                      aria-invalid={!!errors?.batch}
+                    >
+                      <SelectValue
+                        placeholder={t("vouchers.form.chooseBatch")}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {batchItems.map((item) => (
+                        <SelectItem key={item.value} value={item.value}>
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               />
-            </InputGroup>
-          )}
-          <FieldError errors={[errors?.batch]} />
+            ))}
         </div>
-      )}
-
-      <div className="mt-2 flex flex-wrap gap-x-4 text-sm text-muted-foreground">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="hidden justify-self-end md:inline-flex"
+          aria-label={`${t("vouchers.form.remove")} · ${line.item.name}`}
+          onClick={onRemove}
+        >
+          <XIcon />
+        </Button>
+      </div>
+      <div className="mt-1 flex flex-wrap gap-x-4 text-sm">
+        <FieldError errors={[errors?.quantity]} />
+        <FieldError errors={[errors?.batch]} />
         {converted !== null && (
-          <span>
+          <span className="text-muted-foreground">
             {t("vouchers.form.converted", {
               quantity: quantityLabel(line.item.baseUnit, converted),
             })}
           </span>
         )}
         {issue && stock.isSuccess && (
-          <span>
+          <span className="text-muted-foreground">
             {available
               ? t("vouchers.form.available", {
                   quantity: quantityLabel(line.item.baseUnit, available),
@@ -256,4 +288,11 @@ function VoucherLineRow({
       </div>
     </li>
   )
+}
+
+const ENTER = "Enter"
+
+/** Champ seul, au même gabarit que les autres champs du formulaire. */
+function InputGroupInputBox({ children }: { children: React.ReactNode }) {
+  return <InputGroup>{children}</InputGroup>
 }

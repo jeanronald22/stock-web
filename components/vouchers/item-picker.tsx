@@ -24,7 +24,12 @@ export function ItemPicker({
   warehouseId,
   excludedIds,
   onPick,
+  inputRef,
+  autoFocus,
 }: {
+  /** Champ de recherche : la saisie y revient après chaque quantité (touche Entrée). */
+  inputRef?: React.Ref<HTMLInputElement>
+  autoFocus?: boolean
   warehouseId?: string
   /** Déjà sur le bon (un article suivi par lot peut revenir, pour un autre lot). */
   excludedIds: ReadonlySet<string>
@@ -51,6 +56,8 @@ export function ItemPicker({
     <div className="rounded-xl border">
       <InputGroup className="rounded-b-none border-0 border-b">
         <InputGroupInput
+          ref={inputRef}
+          autoFocus={autoFocus}
           type="search"
           value={text}
           onChange={(event) => setText(event.target.value)}
