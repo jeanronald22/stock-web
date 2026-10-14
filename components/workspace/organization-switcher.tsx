@@ -4,8 +4,8 @@ import { CheckIcon, ChevronsUpDownIcon, PlusIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 
-import { KreskalaLogo } from "@/components/brand/kreskala-logo"
 import { OrganizationAvatar } from "@/components/organizations/organization-avatar"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,19 +15,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar"
 import { useActiveOrganization } from "@/lib/organization/active-organization"
 import { Routes } from "@/lib/routes"
 
 import { useWorkspace } from "./workspace-context"
 
 /**
- * En tête de la barre latérale, à la place du logo (modèle « team switcher » de shadcn) : la marque,
- * l'entreprise active, et le changement d'entreprise au même endroit.
+ * Entreprise active, dans la barre du haut à côté du bouton du menu : son nom toujours visible,
+ * le changement d'entreprise et la création d'une nouvelle au même endroit.
  */
 export function OrganizationSwitcher() {
   const t = useTranslations()
@@ -36,75 +31,63 @@ export function OrganizationSwitcher() {
   const { setActiveOrganizationId } = useActiveOrganization()
 
   return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <SidebarMenuButton
-                size="lg"
-                tooltip={active.name}
-                className="data-open:bg-sidebar-accent"
-              />
-            }
-          >
-            <span
-              className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary"
-              aria-hidden
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="ghost"
+            className="h-10 max-w-64 min-w-0 gap-2 px-2"
+            aria-label={t("menu.switchOrganization")}
+          />
+        }
+      >
+        <OrganizationAvatar name={active.name} className="size-7 text-xs" />
+        <span className="grid min-w-0 text-left leading-tight">
+          <span className="truncate text-sm font-semibold">{active.name}</span>
+          <span className="truncate text-xs font-normal text-muted-foreground">
+            {active.city}
+          </span>
+        </span>
+        <ChevronsUpDownIcon
+          className="size-4 shrink-0 text-muted-foreground"
+          aria-hidden
+        />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-72">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>{t("menu.switchOrganization")}</DropdownMenuLabel>
+          {organizations.map((organization) => (
+            <DropdownMenuItem
+              key={organization.id}
+              onClick={() => setActiveOrganizationId(organization.id)}
             >
-              <KreskalaLogo
-                variant="symbol"
-                tone="on-brand"
-                className="size-5"
+              <OrganizationAvatar
+                name={organization.name}
+                className="size-7 text-xs"
               />
-            </span>
-            <span className="grid min-w-0 flex-1 text-left leading-tight">
-              <span className="truncate text-sm font-semibold">
-                {active.name}
+              <span className="min-w-0 flex-1 truncate">
+                {organization.name}
               </span>
-              <span className="truncate text-xs text-muted-foreground">
-                {active.city}
-              </span>
-            </span>
-            <ChevronsUpDownIcon
-              className="ml-auto text-muted-foreground"
-              aria-hidden
-            />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-72">
-            <DropdownMenuGroup>
-              <DropdownMenuLabel>
-                {t("menu.switchOrganization")}
-              </DropdownMenuLabel>
-              {organizations.map((organization) => (
-                <DropdownMenuItem
-                  key={organization.id}
-                  onClick={() => setActiveOrganizationId(organization.id)}
-                >
-                  <OrganizationAvatar
-                    name={organization.name}
-                    className="size-7 text-xs"
-                  />
-                  <span className="min-w-0 flex-1 truncate">
-                    {organization.name}
-                  </span>
-                  {organization.id === active.id && (
-                    <CheckIcon
-                      className="size-4 text-primary"
-                      aria-label={t("menu.currentOrganization")}
-                    />
-                  )}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => router.push(Routes.welcome)}>
-              <PlusIcon />
-              {t("organizations.create")}
+              {organization.id === active.id && (
+                <CheckIcon
+                  className="size-4 text-primary"
+                  aria-label={t("menu.currentOrganization")}
+                />
+              )}
             </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
-    </SidebarMenu>
+          ))}
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <div className="p-1.5">
+          <Button
+            className="w-full"
+            onClick={() => router.push(Routes.welcome)}
+          >
+            <PlusIcon />
+            {t("organizations.create")}
+          </Button>
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

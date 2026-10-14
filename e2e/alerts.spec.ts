@@ -122,6 +122,14 @@ test("catégories, seuils d'alerte et filtres combinables", async ({
   await expect(page.getByRole("row", { name: /Ciment/ })).toBeHidden()
   await shot(page, testInfo, "02-stock-alertes")
 
+  // Entreprise active dans la barre du haut ; la création d'une autre est l'action principale.
+  await page.getByRole("button", { name: "Changer d’entreprise" }).click()
+  await expect(
+    page.getByRole("button", { name: "Créer une autre entreprise" })
+  ).toBeVisible()
+  await shot(page, testInfo, "02b-entreprises")
+  await page.keyboard.press("Escape")
+
   // L'accueil annonce les articles à commander.
   await navigateTo(page, "Accueil")
   await expect(page.getByTestId("stock-alerts")).toContainText(

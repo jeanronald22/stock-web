@@ -17,11 +17,12 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { KreskalaLogo } from "@/components/brand/kreskala-logo"
 import { MembershipRole } from "@/lib/api/platform"
+import { Routes } from "@/lib/routes"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
 
 import { isActiveEntry, workspaceNavigation } from "./navigation"
-import { OrganizationSwitcher } from "./organization-switcher"
 import { UserMenu } from "./user-menu"
 import { useWorkspace } from "./workspace-context"
 
@@ -38,7 +39,18 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" variant="inset">
       <SidebarHeader>
-        <OrganizationSwitcher />
+        <Link
+          href={Routes.dashboard}
+          aria-label="Kreskala"
+          onClick={() => setOpenMobile(false)}
+          className="flex h-10 items-center px-2 group-data-[collapsible=icon]:px-0"
+        >
+          <KreskalaLogo className="h-7 group-data-[collapsible=icon]:hidden" />
+          <KreskalaLogo
+            variant="symbol"
+            className="hidden size-8 group-data-[collapsible=icon]:block"
+          />
+        </Link>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup {...tourAnchor(TourAnchors.navigation)}>

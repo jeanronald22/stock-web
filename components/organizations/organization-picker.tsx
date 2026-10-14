@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 
 import { KreskalaLogo } from "@/components/brand/kreskala-logo"
+import { Button } from "@/components/ui/button"
 import { Splash } from "@/components/app/splash"
 import { useMe } from "@/lib/api/platform-queries"
 import { useActiveOrganization } from "@/lib/organization/active-organization"
@@ -83,21 +84,16 @@ export function OrganizationPicker() {
               </li>
             ))}
             <li>
-              <button
-                type="button"
+              <Button
+                size="xl"
+                className="w-full"
                 onClick={() => router.push(Routes.welcome)}
-                className="flex w-full items-center gap-4 rounded-2xl border border-dashed p-4 text-left font-semibold transition-colors hover:bg-muted/50"
               >
-                <span
-                  className="flex size-12 items-center justify-center rounded-lg bg-muted"
-                  aria-hidden
-                >
-                  <PlusIcon className="size-5" />
-                </span>
+                <PlusIcon />
                 {invitedOnly
                   ? t("organizations.createOwn")
                   : t("organizations.create")}
-              </button>
+              </Button>
             </li>
           </ul>
         </div>
