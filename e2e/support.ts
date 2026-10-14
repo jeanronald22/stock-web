@@ -66,7 +66,10 @@ export async function openNavigation(page: Page) {
 export async function navigateTo(page: Page, entry: string) {
   await openNavigation(page)
   // Le menu latéral seulement : un fil d'Ariane peut porter le même nom.
-  await page.locator('[data-sidebar="sidebar"]').getByRole("link", { name: entry, exact: true }).click()
+  await page
+    .locator('[data-sidebar="sidebar"]')
+    .getByRole("link", { name: entry, exact: true })
+    .click()
 }
 
 /** Inscription complète d'un nouveau client, jusqu'à l'accueil de son espace. */

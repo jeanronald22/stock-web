@@ -569,6 +569,11 @@
       "receivedBy": "Reçu par (nom et signature)",
       "signature": "Signature",
       "footer": "Enregistré le {date}."
+    },
+    "menu": {
+      "open": "Actions du bon {number}",
+      "detail": "Ouvrir le détail",
+      "print": "Imprimer"
     }
   },
   "stock": {

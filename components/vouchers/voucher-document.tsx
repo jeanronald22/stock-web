@@ -2,17 +2,19 @@
 
 import { ArrowLeftIcon, PrinterIcon } from "lucide-react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { useFormatter, useTranslations } from "next-intl"
+import { useEffect } from "react"
 
 import { Splash } from "@/components/app/splash"
 import { KreskalaLogo } from "@/components/brand/kreskala-logo"
 import { useQuantityLabel } from "@/components/items/describe"
-import { ItemThumb } from "@/components/items/item-thumb"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { useWorkspace } from "@/components/workspace/workspace-context"
 import { useVoucher } from "@/lib/api/voucher-queries"
 import { VoucherType, type Voucher } from "@/lib/api/vouchers"
-import { RecordRoutes } from "@/lib/routes"
+import { PrintParams, RecordRoutes } from "@/lib/routes"
+import { PRINT_DONE_MESSAGE } from "@/lib/vouchers/direct-print"
 
 /**
  * Bon imprimable (A4) : à remettre au livreur ou au client, à signer, à classer. L'impression ou
@@ -21,6 +23,20 @@ import { RecordRoutes } from "@/lib/routes"
 export function VoucherDocument({ id }: { id: string }) {
   const t = useTranslations("common")
   const voucher = useVoucher(id)
+  const direct = useSearchParams().has(PrintParams.direct)
+  const ready = !!voucher.data
+
+  // Ouvert par « Imprimer » depuis la liste (cadre invisible) : impression dès que le bon est là,
+  // puis la liste est prévenue pour retirer le cadre. window.print() rend la main à la fermeture.
+  useEffect(() => {
+    if (!direct || !ready) return
+    window.print()
+    window.parent.postMessage(
+      { type: PRINT_DONE_MESSAGE, id },
+      window.location.origin
+    )
+  }, [direct, ready, id])
+
   if (!voucher.data) return <Splash label={t("loading")} />
   return <VoucherSheet voucher={voucher.data} />
 }
@@ -56,7 +72,7 @@ function VoucherSheet({ voucher }: { voucher: Voucher }) {
           <ArrowLeftIcon />
           {t("print.back")}
         </Link>
-        <Button size="lg" onClick={() => void printWhenImagesReady()}>
+        <Button size="lg" onClick={() => window.print()}>
           <PrinterIcon />
           {t("print.action")}
         </Button>
@@ -109,21 +125,12 @@ function VoucherSheet({ voucher }: { voucher: Voucher }) {
                   {index + 1}
                 </td>
                 <td className="py-2 pr-3">
-                  <div className="flex items-center gap-3">
-                    <ItemThumb
-                      imageUrl={line.itemImageUrl}
-                      eager
-                      className="bg-neutral-100 text-emerald-700"
-                    />
-                    <div>
-                      <p className="font-medium">{line.itemName}</p>
-                      {line.itemReference && (
-                        <p className="font-mono text-xs text-neutral-500">
-                          {line.itemReference}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+                  <p className="font-medium">{line.itemName}</p>
+                  {line.itemReference && (
+                    <p className="font-mono text-xs text-neutral-500">
+                      {line.itemReference}
+                    </p>
+                  )}
                 </td>
                 <td className="py-2 pr-3">{line.batch ?? "—"}</td>
                 <td className="py-2 pr-3">
@@ -188,15 +195,4 @@ function Signature({ label, name }: { label: string; name?: string }) {
       />
     </div>
   )
-}
-
-/** Imprime une fois toutes les photos chargées : sinon le PDF peut sortir sans elles. */
-async function printWhenImagesReady() {
-  const images = Array.from(
-    document.querySelectorAll<HTMLImageElement>(".voucher-sheet img")
-  )
-  await Promise.all(
-    images.map((image) => image.decode().catch(() => undefined))
-  )
-  window.print()
 }

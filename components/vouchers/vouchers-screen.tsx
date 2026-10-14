@@ -3,9 +3,12 @@
 import {
   ArrowDownToLineIcon,
   ArrowUpFromLineIcon,
-  ChevronRightIcon,
+  EllipsisVerticalIcon,
+  FileTextIcon,
+  PrinterIcon,
 } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useFormatter, useTranslations } from "next-intl"
 import { useMemo } from "react"
 
@@ -16,7 +19,13 @@ import { DocumentScene } from "@/components/illustrations/document-scene"
 import { ItemsTableSkeleton } from "@/components/items/items-table"
 import { usePageTour } from "@/components/tour/tour-provider"
 import { Badge } from "@/components/ui/badge"
-import { buttonVariants } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   Select,
   SelectContent,
@@ -38,6 +47,7 @@ import { VoucherType, voucherTypes } from "@/lib/api/vouchers"
 import { useListParams } from "@/lib/list/use-list-params"
 import { RecordRoutes, Routes } from "@/lib/routes"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
+import { printVoucher } from "@/lib/vouchers/direct-print"
 import { cn } from "@/lib/utils"
 
 const ALL_TYPES = "all"
@@ -221,8 +231,11 @@ export function VouchersScreen() {
                         <TableCell className="hidden lg:table-cell">
                           {voucher.createdByName}
                         </TableCell>
-                        <TableCell className="pr-4 text-muted-foreground">
-                          <ChevronRightIcon className="size-4" aria-hidden />
+                        <TableCell className="pr-2">
+                          <VoucherRowMenu
+                            id={voucher.id}
+                            number={voucher.number}
+                          />
                         </TableCell>
                       </TableRow>
                     ))}
@@ -241,5 +254,40 @@ export function VouchersScreen() {
         </>
       )}
     </PageBody>
+  )
+}
+
+/**
+ * Actions d'une ligne de bon. Le bouton passe au-dessus du lien qui couvre la ligne : l'ouvrir ne
+ * déclenche pas la navigation vers la fiche.
+ */
+function VoucherRowMenu({ id, number }: { id: string; number: string }) {
+  const t = useTranslations("vouchers.menu")
+  const router = useRouter()
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="relative z-10"
+            aria-label={t("open", { number })}
+          />
+        }
+      >
+        <EllipsisVerticalIcon />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-52">
+        <DropdownMenuItem onClick={() => router.push(RecordRoutes.voucher(id))}>
+          <FileTextIcon />
+          {t("detail")}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => printVoucher(id)}>
+          <PrinterIcon />
+          {t("print")}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

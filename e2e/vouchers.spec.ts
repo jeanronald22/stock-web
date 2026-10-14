@@ -142,17 +142,10 @@ test("réception puis sortie : le stock suit, une sortie trop forte est refusée
   await page.getByRole("link", { name: "Imprimer" }).click()
   await expect(page.getByText("Bon de réception")).toBeVisible()
   await expect(page.getByText("Livré par (nom et signature)")).toBeVisible()
-  const printedPhoto = page.locator(".voucher-sheet img").first()
-  await expect
-    .poll(() =>
-      printedPhoto.evaluate((image: HTMLImageElement) => image.naturalWidth)
-    )
-    .toBeGreaterThan(0)
+  // Document sans photo, ni mention sur l'immuabilité (réservée à l'écran).
+  await expect(page.locator(".voucher-sheet img")).toHaveCount(0)
   await expect(page.getByText("Un bon validé ne se modifie pas")).toBeHidden()
   await shot(page, testInfo, "02b-bon-imprimable")
-  // Le PDF, tel que l'imprime le navigateur, contient bien la photo.
-  const pdf = await page.pdf({ format: "A4", printBackground: true })
-  expect(pdf.toString("latin1")).toContain("/Subtype /Image")
   await page.getByRole("link", { name: "Retour au bon" }).click()
   await page
     .getByRole("navigation", { name: "Fil d’Ariane" })
@@ -210,4 +203,20 @@ test("réception puis sortie : le stock suit, une sortie trop forte est refusée
   await navigateTo(page, "Bons")
   await expect(page.getByText("1–2 sur 2")).toBeVisible()
   await shot(page, testInfo, "05-bons")
+
+  // Menu d'une ligne : impression directe (cadre invisible, retiré après impression), puis détail.
+  await page
+    .getByRole("button", { name: `Actions du bon REC-${year}-0001` })
+    .click()
+  await page.getByRole("menuitem", { name: "Imprimer" }).click()
+  const frame = page.locator(`iframe[src*="/imprimer?direct"]`)
+  await expect(frame).toHaveCount(1)
+  await expect(frame).toHaveCount(0)
+  await page
+    .getByRole("button", { name: `Actions du bon REC-${year}-0001` })
+    .click()
+  await page.getByRole("menuitem", { name: "Ouvrir le détail" }).click()
+  await expect(
+    page.getByRole("heading", { name: `REC-${year}-0001` })
+  ).toBeVisible()
 })

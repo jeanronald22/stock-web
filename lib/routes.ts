@@ -49,3 +49,8 @@ export const ARCHIVED_STATUS_PARAM = "archives"
 export const PublicQueryParams = {
   lang: "lang",
 } as const
+
+/** Paramètre de la page d'impression : ouverte depuis la liste, elle imprime d'elle-même. */
+export const PrintParams = {
+  direct: "direct",
+} as const

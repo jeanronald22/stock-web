@@ -569,6 +569,11 @@
       "receivedBy": "Received by (name and signature)",
       "signature": "Signature",
       "footer": "Recorded on {date}."
+    },
+    "menu": {
+      "open": "Actions for voucher {number}",
+      "detail": "Open details",
+      "print": "Print"
     }
   },
   "stock": {
