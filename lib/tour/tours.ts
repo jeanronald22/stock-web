@@ -20,6 +20,7 @@ export const TourAnchors = {
   itemWarehouses: "item-warehouses",
   newVoucher: "new-voucher",
   stockWarehouseFilter: "stock-warehouse-filter",
+  newSupplier: "new-supplier",
 } as const
 export type TourAnchor = (typeof TourAnchors)[keyof typeof TourAnchors]
 
@@ -53,6 +54,7 @@ export const tours = {
   ],
   vouchers: [{ anchor: TourAnchors.newVoucher, key: "create" }],
   stock: [{ anchor: TourAnchors.stockWarehouseFilter, key: "filter" }],
+  suppliers: [{ anchor: TourAnchors.newSupplier, key: "create" }],
   itemForm: [
     { anchor: TourAnchors.itemBaseUnit, key: "baseUnit" },
     { anchor: TourAnchors.itemPackagings, key: "packagings" },

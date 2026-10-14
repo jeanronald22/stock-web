@@ -13,6 +13,7 @@ export const VoucherPaths = {
 export const VoucherQueryParams = {
   type: "type",
   warehouseId: "warehouseId",
+  supplierId: "supplierId",
   search: "q",
   page: "page",
   size: "size",
@@ -42,6 +43,7 @@ export type VoucherSummary = {
   type: VoucherType
   warehouse: WarehouseRef
   occurredAt: string
+  supplierId: string | null
   counterparty: string | null
   lineCount: number
   createdByName: string
@@ -51,6 +53,8 @@ export type VoucherLine = {
   itemId: string
   itemName: string
   itemReference: string | null
+  /** Lien signé vers la photo, relatif à l'API (voir useFileUrl) ; null sans photo. */
+  itemImageUrl: string | null
   baseUnit: BaseUnit
   /** En unité de base. */
   quantity: number
@@ -77,6 +81,8 @@ export type VoucherLineInput = {
 export type VoucherInput = {
   type: VoucherType
   warehouseId: string
+  /** Réception : fournisseur de l'annuaire ; son nom remplace counterparty. */
+  supplierId?: string
   occurredAt?: string
   counterparty?: string
   documentReference?: string
@@ -114,7 +120,11 @@ export type WarehouseStock = {
 }
 export type ItemStock = { itemId: string; warehouses: WarehouseStock[] }
 
-export type VoucherSearch = { type?: VoucherType; warehouseId?: string }
+export type VoucherSearch = {
+  type?: VoucherType
+  warehouseId?: string
+  supplierId?: string
+}
 export type StockSearch = { text?: string; warehouseId?: string }
 
 function query(params: Record<string, string | number | undefined>): string {
@@ -138,6 +148,7 @@ export const voucherApi = (send: ApiClient) => {
           query({
             [VoucherQueryParams.type]: search.type,
             [VoucherQueryParams.warehouseId]: search.warehouseId,
+            [VoucherQueryParams.supplierId]: search.supplierId,
             [VoucherQueryParams.page]: page,
             [VoucherQueryParams.size]: size,
           }),

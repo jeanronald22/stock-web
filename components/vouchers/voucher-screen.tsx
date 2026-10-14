@@ -1,12 +1,13 @@
 "use client"
 
-import { LockIcon } from "lucide-react"
+import { LockIcon, PrinterIcon } from "lucide-react"
 import Link from "next/link"
 import { useFormatter, useTranslations } from "next-intl"
 
 import { EmptyState } from "@/components/catalog/empty-state"
 import { SearchScene } from "@/components/illustrations/search-scene"
 import { useQuantityLabel } from "@/components/items/describe"
+import { ItemThumb } from "@/components/items/item-thumb"
 import { buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -90,7 +91,18 @@ export function VoucherScreen({ id }: { id: string }) {
             timeStyle: "short",
           }),
         })}
-        actions={<VoucherTypeBadge type={data.type} />}
+        actions={
+          <>
+            <VoucherTypeBadge type={data.type} />
+            <Link
+              href={RecordRoutes.voucherPrint(data.id)}
+              className={buttonVariants({ variant: "outline" })}
+            >
+              <PrinterIcon />
+              {t("vouchers.print.action")}
+            </Link>
+          </>
+        }
       />
       <dl className="mt-8 grid gap-4 rounded-2xl border p-5 sm:grid-cols-2 lg:grid-cols-5">
         {facts.map((fact) => (
@@ -123,22 +135,27 @@ export function VoucherScreen({ id }: { id: string }) {
             {data.lines.map((line, index) => (
               <TableRow key={`${line.itemId}-${index}`}>
                 <TableCell className="py-3 pl-4">
-                  <Link
-                    href={RecordRoutes.item(line.itemId)}
-                    className="font-semibold hover:underline"
-                  >
-                    {line.itemName}
-                  </Link>
-                  {line.itemReference && (
-                    <p className="font-mono text-xs text-muted-foreground">
-                      {line.itemReference}
-                    </p>
-                  )}
-                  {line.batch && (
-                    <p className="text-xs text-muted-foreground sm:hidden">
-                      {t("vouchers.detail.batch")} {line.batch}
-                    </p>
-                  )}
+                  <div className="flex items-center gap-3">
+                    <ItemThumb imageUrl={line.itemImageUrl} />
+                    <div className="min-w-0">
+                      <Link
+                        href={RecordRoutes.item(line.itemId)}
+                        className="font-semibold hover:underline"
+                      >
+                        {line.itemName}
+                      </Link>
+                      {line.itemReference && (
+                        <p className="font-mono text-xs text-muted-foreground">
+                          {line.itemReference}
+                        </p>
+                      )}
+                      {line.batch && (
+                        <p className="text-xs text-muted-foreground sm:hidden">
+                          {t("vouchers.detail.batch")} {line.batch}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">
                   {line.batch ?? (

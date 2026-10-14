@@ -1,6 +1,6 @@
 "use client"
 
-import { BoxIcon, PlusIcon, SearchIcon } from "lucide-react"
+import { PlusIcon, SearchIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useDeferredValue, useMemo, useState } from "react"
 
@@ -9,10 +9,11 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group"
+import { ItemThumb } from "@/components/items/item-thumb"
 import { Spinner } from "@/components/ui/spinner"
 import { CatalogStatus, type Item } from "@/lib/api/stock"
 import { useItemsPage } from "@/lib/api/stock-queries"
-import { useFileUrl } from "@/lib/api/use-file-url"
+import { cn } from "@/lib/utils"
 
 const RESULTS = 8
 
@@ -26,7 +27,10 @@ export function ItemPicker({
   onPick,
   inputRef,
   autoFocus,
+  supplier,
 }: {
+  /** Réception : ses articles d'abord, tout le catalogue d'un clic. */
+  supplier?: { id: string; name: string } | null
   /** Champ de recherche : la saisie y revient après chaque quantité (touche Entrée). */
   inputRef?: React.Ref<HTMLInputElement>
   autoFocus?: boolean
@@ -36,16 +40,20 @@ export function ItemPicker({
   onPick: (item: Item) => void
 }) {
   const t = useTranslations("vouchers.form")
-  const fileUrl = useFileUrl()
   const [text, setText] = useState("")
+  // « Tout le catalogue », retenu par fournisseur : changer de fournisseur revient à ses articles.
+  const [allFor, setAllFor] = useState<string | null>(null)
+  const onlySupplier = !!supplier && allFor !== supplier.id
+  const supplierId = onlySupplier ? supplier?.id : undefined
   const deferred = useDeferredValue(text.trim())
   const search = useMemo(
     () => ({
       text: deferred || undefined,
       warehouseId,
+      supplierId,
       status: CatalogStatus.active,
     }),
-    [deferred, warehouseId]
+    [deferred, warehouseId, supplierId]
   )
   const results = useItemsPage(search, 0, RESULTS)
   const items = (results.data?.items ?? []).filter(
@@ -68,6 +76,33 @@ export function ItemPicker({
           {results.isFetching ? <Spinner /> : <SearchIcon />}
         </InputGroupAddon>
       </InputGroup>
+      {supplier && (
+        <div
+          className="flex flex-wrap gap-2 border-b px-3 py-2"
+          role="radiogroup"
+        >
+          {[
+            { only: true, label: t("supplierItems", { name: supplier.name }) },
+            { only: false, label: t("allItems") },
+          ].map((choice) => (
+            <button
+              key={String(choice.only)}
+              type="button"
+              role="radio"
+              aria-checked={onlySupplier === choice.only}
+              onClick={() => setAllFor(choice.only ? null : supplier.id)}
+              className={cn(
+                "rounded-full border px-3 py-1 text-sm transition-colors",
+                onlySupplier === choice.only
+                  ? "border-primary bg-primary/10 font-medium text-primary"
+                  : "hover:bg-muted"
+              )}
+            >
+              {choice.label}
+            </button>
+          ))}
+        </div>
+      )}
       <ul className="max-h-64 overflow-y-auto p-1">
         {items.map((item) => (
           <li key={item.id}>
@@ -79,21 +114,7 @@ export function ItemPicker({
               }}
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-muted focus-visible:bg-muted focus-visible:outline-none"
             >
-              <span
-                className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-primary/10 text-primary"
-                aria-hidden
-              >
-                {item.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- lien signé de l'API, hors optimisation Next
-                  <img
-                    src={fileUrl(item.imageUrl) ?? undefined}
-                    alt=""
-                    className="size-full object-cover"
-                  />
-                ) : (
-                  <BoxIcon className="size-4" />
-                )}
-              </span>
+              <ItemThumb imageUrl={item.imageUrl} size="sm" />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-medium">
                   {item.name}
@@ -110,7 +131,11 @@ export function ItemPicker({
         ))}
         {results.isSuccess && items.length === 0 && (
           <li className="px-3 py-4 text-center text-sm text-muted-foreground">
-            {warehouseId ? t("noItemInWarehouse") : t("noItem")}
+            {onlySupplier
+              ? t("noSupplierItem")
+              : warehouseId
+                ? t("noItemInWarehouse")
+                : t("noItem")}
           </li>
         )}
       </ul>

@@ -1,6 +1,6 @@
 "use client"
 
-import { BoxIcon, ChevronRightIcon } from "lucide-react"
+import { ChevronRightIcon } from "lucide-react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 
@@ -18,9 +18,8 @@ import { CatalogStatus, type Item } from "@/lib/api/stock"
 import { RecordRoutes } from "@/lib/routes"
 import { cn } from "@/lib/utils"
 
-import { useFileUrl } from "@/lib/api/use-file-url"
-
 import { useQuantityLabel } from "./describe"
+import { ItemThumb } from "./item-thumb"
 
 /** Noms de dépôts montrés dans une ligne ; au-delà, « +2 ». */
 const VISIBLE_WAREHOUSES = 2
@@ -42,7 +41,6 @@ export function ItemsTable({
 }) {
   const t = useTranslations()
   const quantity = useQuantityLabel()
-  const fileUrl = useFileUrl()
 
   return (
     <Table className={cn("transition-opacity", stale && "opacity-60")}>
@@ -70,22 +68,7 @@ export function ItemsTable({
             <TableRow key={item.id} className="relative cursor-pointer">
               <TableCell className="py-3 pl-4">
                 <div className="flex items-center gap-3">
-                  <span
-                    className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary/10 text-primary"
-                    aria-hidden
-                  >
-                    {item.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element -- lien signé de l'API, hors optimisation Next
-                      <img
-                        src={fileUrl(item.imageUrl) ?? undefined}
-                        alt=""
-                        loading="lazy"
-                        className="size-full object-cover"
-                      />
-                    ) : (
-                      <BoxIcon className="size-4" />
-                    )}
-                  </span>
+                  <ItemThumb imageUrl={item.imageUrl} />
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <Link

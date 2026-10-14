@@ -10,6 +10,7 @@ import {
 } from "react-hook-form"
 
 import { useQuantityLabel } from "@/components/items/describe"
+import { ItemThumb } from "@/components/items/item-thumb"
 import { Button } from "@/components/ui/button"
 import { FieldError } from "@/components/ui/field"
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
@@ -45,7 +46,9 @@ export function VoucherLinesField({
   form,
   type,
   searchRef,
-}: FieldProps & LineNavigation) {
+  supplier,
+}: FieldProps &
+  LineNavigation & { supplier?: { id: string; name: string } | null }) {
   const t = useTranslations("vouchers.form")
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -68,6 +71,7 @@ export function VoucherLinesField({
       <ItemPicker
         inputRef={searchRef}
         autoFocus
+        supplier={supplier}
         warehouseId={type === VoucherType.issue ? warehouseId : undefined}
         excludedIds={excluded}
         onPick={(item) =>
@@ -126,7 +130,11 @@ function VoucherLineRow({
       : null
   // Champ fermé : le nom seul (la conversion s'affiche sous la ligne) ; liste : avec le contenu.
   const unitItems = [
-    { value: BASE_UNIT_CHOICE, label: t(`units.${line.item.baseUnit}.label`), detail: "" },
+    {
+      value: BASE_UNIT_CHOICE,
+      label: t(`units.${line.item.baseUnit}.label`),
+      detail: "",
+    },
     ...line.item.packagings.map((packaging) => ({
       value: packaging.name,
       label: packaging.name,
@@ -148,8 +156,11 @@ function VoucherLineRow({
     <li className="animate-rise-in rounded-xl border p-3">
       <div className="grid gap-2 md:grid-cols-[minmax(0,1.2fr)_6.5rem_minmax(11rem,1.2fr)_minmax(0,1fr)_auto] md:items-start">
         <div className="flex min-h-11 items-center justify-between gap-2 md:pr-2">
-          <span className="min-w-0 truncate font-semibold">
-            {line.item.name}
+          <span className="flex min-w-0 items-center gap-3">
+            <ItemThumb imageUrl={line.item.imageUrl} size="sm" />
+            <span className="min-w-0 truncate font-semibold">
+              {line.item.name}
+            </span>
           </span>
           {/* Téléphone : le retrait à côté du nom, sans ligne à lui seul. */}
           <Button

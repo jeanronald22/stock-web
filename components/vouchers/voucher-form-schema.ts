@@ -8,8 +8,8 @@ import {
 } from "@/lib/api/stock"
 import {
   VoucherLimits,
+  VoucherType,
   type VoucherInput,
-  type VoucherType,
 } from "@/lib/api/vouchers"
 import { parseQuantity } from "@/lib/forms/quantity"
 
@@ -30,6 +30,7 @@ export type VoucherFormMessages = {
 /** Copie de l'article choisi, pour convertir et vérifier la saisie sans relire l'API. */
 const itemSnapshot = z.object({
   name: z.string(),
+  imageUrl: z.string().nullable(),
   baseUnit: z.custom<BaseUnit>(),
   batchTracking: z.boolean(),
   packagings: z.custom<Packaging[]>(),
@@ -44,6 +45,8 @@ export function voucherFormSchema(
   return z
     .object({
       warehouseId: z.string().min(1, messages.required),
+      // Réception : fournisseur de l'annuaire (son nom remplace le champ libre).
+      supplier: z.custom<{ id: string; name: string } | null>(),
       lines: z
         .array(
           z.object({
@@ -110,6 +113,7 @@ export function newLine(item: Item): VoucherFormLine {
     itemId: item.id,
     item: {
       name: item.name,
+      imageUrl: item.imageUrl,
       baseUnit: item.baseUnit,
       batchTracking: item.batchTracking,
       packagings: item.packagings,
@@ -136,6 +140,7 @@ export function toVoucherInput(
   return {
     type,
     warehouseId: values.warehouseId,
+    supplierId: type === VoucherType.receipt ? values.supplier?.id : undefined,
     // Aujourd'hui : l'API date l'opération de l'enregistrement. Un autre jour : midi, heure locale.
     occurredAt:
       values.occurredOn === today

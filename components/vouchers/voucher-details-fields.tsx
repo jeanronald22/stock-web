@@ -41,27 +41,32 @@ export function VoucherDetailsFields({
 
   return (
     <FieldGroup>
-      <Field data-invalid={!!errors.counterparty}>
-        <FieldLabel htmlFor="counterparty">
-          {receipt ? t("vouchers.form.supplier") : t("vouchers.form.customer")}{" "}
-          {optional}
-        </FieldLabel>
-        <InputGroup>
-          <InputGroupInput
-            id="counterparty"
-            placeholder={
-              receipt
-                ? t("vouchers.form.supplierPlaceholder")
-                : t("vouchers.form.customerPlaceholder")
-            }
-            {...form.register("counterparty")}
-          />
-          <InputGroupAddon>
-            <UserRoundIcon />
-          </InputGroupAddon>
-        </InputGroup>
-        <FieldError errors={[errors.counterparty]} />
-      </Field>
+      {/* Réception : le fournisseur se choisit dans l'annuaire, à côté du dépôt. */}
+      {!receipt && (
+        <Field data-invalid={!!errors.counterparty}>
+          <FieldLabel htmlFor="counterparty">
+            {receipt
+              ? t("vouchers.form.supplier")
+              : t("vouchers.form.customer")}{" "}
+            {optional}
+          </FieldLabel>
+          <InputGroup>
+            <InputGroupInput
+              id="counterparty"
+              placeholder={
+                receipt
+                  ? t("vouchers.form.supplierPlaceholder")
+                  : t("vouchers.form.customerPlaceholder")
+              }
+              {...form.register("counterparty")}
+            />
+            <InputGroupAddon>
+              <UserRoundIcon />
+            </InputGroupAddon>
+          </InputGroup>
+          <FieldError errors={[errors.counterparty]} />
+        </Field>
+      )}
       <Field data-invalid={!!errors.documentReference}>
         <FieldLabel htmlFor="documentReference">
           {t("vouchers.form.reference")} {optional}

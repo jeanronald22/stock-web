@@ -38,6 +38,7 @@ export const privacyPolicyEn: PrivacyPolicyContent = {
             "Your account: email address, password, first name, last name and preferred language. Your password is never stored in clear text: we only keep an irreversible fingerprint of it.",
             "Your business: name, city, country, line of business, and your role in it (owner, administrator or member).",
             "Receipt and issue vouchers: your name appears on them when you approve them, with the supplier or customer you enter. An approved voucher is never changed: it is your stock’s record.",
+            "Your suppliers’ contact details (name, phone, email, address): your business is responsible for them, Kreskala keeps them on its behalf.",
             "The item photos you upload. Choose photos of products: avoid photos in which a person can be recognised.",
             "Technical sign-in data: date and time, IP address, browser type, and a trace code attached to each error so we can fix it.",
           ],

@@ -67,6 +67,18 @@ test("réception puis sortie : le stock suit, une sortie trop forte est refusée
     name: "Rechercher un article à ajouter",
   })
   await expect(search).toBeFocused()
+  // Fournisseur créé sans quitter la réception ; son catalogue est encore vide.
+  await page.getByRole("searchbox", { name: "Fournisseur" }).fill("Cimencam")
+  await page
+    .getByRole("button", { name: "Ajouter « Cimencam » aux fournisseurs" })
+    .click()
+  await expect(
+    page.getByText("Cimencam ajouté aux fournisseurs.")
+  ).toBeVisible()
+  await expect(
+    page.getByText("Pas encore d’article chez ce fournisseur")
+  ).toBeVisible()
+  await page.getByRole("radio", { name: "Tout le catalogue" }).click()
   await addItem(page, "Ciment CPJ 42,5")
   const cementQuantity = page.getByRole("textbox", {
     name: "Quantité · Ciment CPJ 42,5",
@@ -86,7 +98,6 @@ test("réception puis sortie : le stock suit, une sortie trop forte est refusée
     .getByRole("combobox", { name: "Unité · Carreau 60x60 beige" })
     .click()
   await page.getByRole("option", { name: /Carton/ }).click()
-  await page.getByLabel(/Fournisseur/).fill("Cimencam")
   await page
     .getByRole("button", { name: "Valider la réception · 2 articles" })
     .click()
@@ -113,6 +124,23 @@ test("réception puis sortie : le stock suit, une sortie trop forte est refusée
   ).toBeVisible()
   await expect(page.locator("dl").getByText("Awa Bello")).toBeVisible()
   await shot(page, testInfo, "02-bon-reception")
+  await expect(page.locator("dl").getByText("Cimencam")).toBeVisible()
+  await page.getByRole("link", { name: "Imprimer" }).click()
+  await expect(page.getByText("Bon de réception")).toBeVisible()
+  await expect(page.getByText("Livré par (nom et signature)")).toBeVisible()
+  await shot(page, testInfo, "02b-bon-imprimable")
+  await page.getByRole("link", { name: "Retour au bon" }).click()
+
+  // La réception a rempli le catalogue du fournisseur.
+  await navigateTo(page, "Fournisseurs")
+  await dismissTour(page, "Vos fournisseurs")
+  await expect(
+    page.getByRole("row", { name: /Cimencam.*2 articles/ })
+  ).toBeVisible()
+  await page.getByRole("link", { name: "Cimencam" }).click()
+  await expect(page.getByText("Ciment CPJ 42,5")).toBeVisible()
+  await expect(page.getByText("Carreau 60x60 beige")).toBeVisible()
+  await shot(page, testInfo, "02c-fournisseur")
 
   // Sortie de 100 sacs : il n'y en a que 80, la ligne l'indique.
   await navigateTo(page, "Bons")

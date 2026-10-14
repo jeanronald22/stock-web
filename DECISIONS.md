@@ -197,6 +197,14 @@ Côté utilisateur, ce sont les écrans de « Mon compte » : créer son entrepr
 - Autres écrans : liste des bons paginée et filtrée, fiche de bon en lecture seule, stock par dépôt avec lots et ruptures, stock sur la fiche de l'article.
 - Politique de confidentialité passée en version 0.3 (nom sur les bons, fournisseurs et clients).
 
+## D22. Fournisseurs, photos partout, bons imprimables (2026-10-14)
+
+- **Annuaire des fournisseurs** (nom unique, coordonnées facultatives) et **catalogue** de chacun : les articles qu'il livre. Le catalogue se remplit de lui-même à chaque réception, et peut aussi se modifier sur la fiche.
+- **Réception** : le fournisseur se choisit à côté du dépôt, ou se crée à la volée en tapant son nom ; ses articles sont proposés d'abord (« Tout le catalogue » d'un clic). Son nom du jour est recopié sur le bon. Une sortie garde un champ libre (client, chantier).
+- **Photo de l'article** partout où il est listé : tableaux des articles et du stock, recherche, lignes de saisie, fiche de bon, aperçu du dépôt, catalogue fournisseur, bon imprimé.
+- **Bon imprimable** (A4) : entreprise, numéro, dépôt, fournisseur ou client, lignes avec photo, cases de signature (validé par, livré ou reçu par) ; impression ou PDF par le navigateur.
+- Politique de confidentialité passée en version 0.4 (coordonnées des fournisseurs).
+
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
 - [ ] Nom de la marque et nom du produit de stock (voir D7). Pistes : Kreskala, Kreskio, Tissero, NarvalWorks, FourmiLabs.

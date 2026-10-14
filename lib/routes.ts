@@ -14,6 +14,8 @@ export const Routes = {
   newReceipt: "/bons/reception",
   newIssue: "/bons/sortie",
   stock: "/stock",
+  suppliers: "/fournisseurs",
+  newSupplier: "/fournisseurs/nouveau",
   /** Publique : ouverte depuis les écrans de connexion (Keycloak), avant toute connexion. */
   privacy: "/confidentialite",
   runtimeConfig: "/runtime-config",
@@ -26,6 +28,8 @@ export const RecordRoutes = {
   item: (id: string) => `${Routes.items}/${id}`,
   warehouse: (id: string) => `${Routes.warehouses}/${id}`,
   voucher: (id: string) => `${Routes.vouchers}/${id}`,
+  voucherPrint: (id: string) => `${Routes.vouchers}/${id}/imprimer`,
+  supplier: (id: string) => `${Routes.suppliers}/${id}`,
 } as const
 
 /** Filtres des listes conservés dans l'adresse : un lien partagé ouvre la même vue. */

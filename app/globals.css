@@ -294,3 +294,11 @@
 .driver-popover.kk-tour .driver-popover-arrow-side-right.driver-popover-arrow { border-right-color: var(--popover); }
 .driver-popover.kk-tour .driver-popover-arrow-side-top.driver-popover-arrow { border-top-color: var(--popover); }
 .driver-popover.kk-tour .driver-popover-arrow-side-bottom.driver-popover-arrow { border-bottom-color: var(--popover); }
+
+/* Impression d'un bon : une page A4, marges du document, couleurs conservées (vignettes, filets). */
+@media print {
+    @page { size: A4; margin: 14mm; }
+    html, body { background: white !important; }
+    .voucher-sheet { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    [data-sonner-toaster] { display: none !important; }
+}

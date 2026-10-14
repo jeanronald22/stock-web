@@ -28,13 +28,14 @@ import { CatalogStatus, type Warehouse } from "@/lib/api/stock"
 import { useWarehouses } from "@/lib/api/stock-queries"
 import { useErrorMessage } from "@/lib/api/use-error-message"
 import { useRecordVoucher } from "@/lib/api/voucher-queries"
-import { shortagesOf, type VoucherType } from "@/lib/api/vouchers"
+import { shortagesOf, VoucherType } from "@/lib/api/vouchers"
 import { RecordRoutes, Routes } from "@/lib/routes"
 import {
   readLastWarehouse,
   rememberLastWarehouse,
 } from "@/lib/vouchers/last-warehouse"
 
+import { SupplierField } from "./supplier-field"
 import { VoucherDetailsFields } from "./voucher-details-fields"
 import {
   todayOn,
@@ -102,6 +103,7 @@ function VoucherEntryForm({
     ),
     defaultValues: {
       warehouseId: defaultWarehouseId,
+      supplier: null,
       lines: [],
       counterparty: "",
       documentReference: "",
@@ -110,6 +112,7 @@ function VoucherEntryForm({
     },
   })
   const lineCount = useWatch({ control: form.control, name: "lines" }).length
+  const supplier = useWatch({ control: form.control, name: "supplier" })
 
   /** Sortie refusée : le disponible réel s'affiche sous chaque ligne en manque. */
   const placeShortages = (error: unknown): boolean => {
@@ -150,6 +153,7 @@ function VoucherEntryForm({
       )
       form.reset({
         ...values,
+        supplier: null,
         lines: [],
         counterparty: "",
         documentReference: "",
@@ -187,66 +191,93 @@ function VoucherEntryForm({
         className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start"
       >
         <div className="space-y-6">
-          {warehouses.length === 0 ? (
-            <div className="rounded-xl border border-dashed p-5">
-              <p className="text-muted-foreground">
-                {t("vouchers.form.noWarehouse")}
-              </p>
-              <Link
-                href={Routes.newWarehouse}
-                className={buttonVariants({
-                  variant: "outline",
-                  className: "mt-4",
-                })}
-              >
-                <PlusIcon />
-                {t("vouchers.form.createWarehouse")}
-              </Link>
-            </div>
-          ) : (
-            <Controller
-              control={form.control}
-              name="warehouseId"
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="warehouseId">
-                    {t("vouchers.form.warehouse")}
-                  </FieldLabel>
-                  <Select
-                    items={warehouses.map((warehouse) => ({
-                      value: warehouse.id,
-                      label: warehouse.name,
-                    }))}
-                    value={field.value || null}
-                    onValueChange={(value) => field.onChange(value ?? "")}
-                  >
-                    <SelectTrigger
-                      id="warehouseId"
-                      className="w-full sm:max-w-sm"
-                      aria-invalid={fieldState.invalid}
+          <div className="grid gap-4 sm:grid-cols-2">
+            {warehouses.length === 0 ? (
+              <div className="rounded-xl border border-dashed p-5">
+                <p className="text-muted-foreground">
+                  {t("vouchers.form.noWarehouse")}
+                </p>
+                <Link
+                  href={Routes.newWarehouse}
+                  className={buttonVariants({
+                    variant: "outline",
+                    className: "mt-4",
+                  })}
+                >
+                  <PlusIcon />
+                  {t("vouchers.form.createWarehouse")}
+                </Link>
+              </div>
+            ) : (
+              <Controller
+                control={form.control}
+                name="warehouseId"
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="warehouseId">
+                      {t("vouchers.form.warehouse")}
+                    </FieldLabel>
+                    <Select
+                      items={warehouses.map((warehouse) => ({
+                        value: warehouse.id,
+                        label: warehouse.name,
+                      }))}
+                      value={field.value || null}
+                      onValueChange={(value) => field.onChange(value ?? "")}
                     >
-                      <WarehouseIcon
-                        className="size-5 text-muted-foreground"
-                        aria-hidden
-                      />
-                      <SelectValue
-                        placeholder={t("vouchers.form.chooseWarehouse")}
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {warehouses.map((warehouse) => (
-                        <SelectItem key={warehouse.id} value={warehouse.id}>
-                          {warehouse.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FieldError errors={[fieldState.error]} />
-                </Field>
-              )}
-            />
-          )}
-          <VoucherLinesField form={form} type={type} searchRef={searchRef} />
+                      <SelectTrigger
+                        id="warehouseId"
+                        className="w-full"
+                        aria-invalid={fieldState.invalid}
+                      >
+                        <WarehouseIcon
+                          className="size-5 text-muted-foreground"
+                          aria-hidden
+                        />
+                        <SelectValue
+                          placeholder={t("vouchers.form.chooseWarehouse")}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {warehouses.map((warehouse) => (
+                          <SelectItem key={warehouse.id} value={warehouse.id}>
+                            {warehouse.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
+            )}
+            {type === VoucherType.receipt && (
+              <Controller
+                control={form.control}
+                name="supplier"
+                render={({ field }) => (
+                  <Field>
+                    <FieldLabel htmlFor="supplier">
+                      {t("vouchers.form.supplier")}{" "}
+                      <span className="font-normal text-muted-foreground">
+                        ({t("common.optional")})
+                      </span>
+                    </FieldLabel>
+                    <SupplierField
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </Field>
+                )}
+              />
+            )}
+          </div>
+          <VoucherLinesField
+            form={form}
+            type={type}
+            searchRef={searchRef}
+            supplier={supplier}
+          />
         </div>
 
         <aside className="space-y-6 rounded-2xl border p-5 lg:sticky lg:top-20">

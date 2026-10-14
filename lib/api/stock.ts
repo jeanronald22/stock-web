@@ -18,6 +18,7 @@ export const StockQueryParams = {
   search: "q",
   status: "status",
   warehouseId: "warehouseId",
+  supplierId: "supplierId",
   page: "page",
   size: "size",
 } as const
@@ -109,6 +110,8 @@ export type ItemSearch = {
   text?: string
   warehouseId?: string
   status?: CatalogStatus
+  /** Catalogue d'un fournisseur : seulement les articles qu'il livre. */
+  supplierId?: string
 }
 
 /** Photos acceptées par l'API (stock-api, ImageFormat et ItemImageService). */
@@ -188,6 +191,7 @@ export const stockApi = (send: ApiClient) => {
             [StockQueryParams.search]: search.text,
             [StockQueryParams.warehouseId]: search.warehouseId,
             [StockQueryParams.status]: search.status,
+            [StockQueryParams.supplierId]: search.supplierId,
             [StockQueryParams.page]: page,
             [StockQueryParams.size]: size,
           }),

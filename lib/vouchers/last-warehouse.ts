@@ -8,7 +8,10 @@ function key(subject: string, organizationId: string) {
   return `${StorageKeys.lastWarehousePrefix}${subject}.${organizationId}`
 }
 
-export function readLastWarehouse(subject: string | undefined, organizationId: string): string | null {
+export function readLastWarehouse(
+  subject: string | undefined,
+  organizationId: string
+): string | null {
   if (!subject) return null
   try {
     return window.localStorage.getItem(key(subject, organizationId))
@@ -17,7 +20,11 @@ export function readLastWarehouse(subject: string | undefined, organizationId: s
   }
 }
 
-export function rememberLastWarehouse(subject: string | undefined, organizationId: string, warehouseId: string) {
+export function rememberLastWarehouse(
+  subject: string | undefined,
+  organizationId: string,
+  warehouseId: string
+) {
   if (!subject) return
   try {
     window.localStorage.setItem(key(subject, organizationId), warehouseId)

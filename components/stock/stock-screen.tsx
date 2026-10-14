@@ -1,6 +1,6 @@
 "use client"
 
-import { BoxIcon, SearchIcon } from "lucide-react"
+import { SearchIcon } from "lucide-react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { useEffect, useMemo, useState } from "react"
@@ -10,6 +10,7 @@ import { TablePagination } from "@/components/catalog/table-pagination"
 import { WarehouseFilter } from "@/components/catalog/warehouse-filter"
 import { ShelfScene } from "@/components/illustrations/shelf-scene"
 import { SearchScene } from "@/components/illustrations/search-scene"
+import { ItemThumb } from "@/components/items/item-thumb"
 import { useQuantityLabel } from "@/components/items/describe"
 import { ItemsTableSkeleton } from "@/components/items/items-table"
 import { usePageTour } from "@/components/tour/tour-provider"
@@ -31,7 +32,6 @@ import {
 } from "@/components/ui/table"
 import { NewVoucherButtons } from "@/components/vouchers/vouchers-screen"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
-import { useFileUrl } from "@/lib/api/use-file-url"
 import { useStockPage } from "@/lib/api/voucher-queries"
 import { useListParams } from "@/lib/list/use-list-params"
 import { RecordRoutes } from "@/lib/routes"
@@ -45,7 +45,6 @@ const SKELETON_ROWS = 8
 export function StockScreen() {
   const t = useTranslations("stock")
   const quantityLabel = useQuantityLabel()
-  const fileUrl = useFileUrl()
   const list = useListParams()
   const { text, warehouseId, page, size } = list.params
   const [typed, setTyped] = useState(text)
@@ -144,22 +143,7 @@ export function StockScreen() {
                       <TableRow key={row.item.id} className="relative">
                         <TableCell className="py-3 pl-4">
                           <div className="flex items-center gap-3">
-                            <span
-                              className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary/10 text-primary"
-                              aria-hidden
-                            >
-                              {row.item.imageUrl ? (
-                                // eslint-disable-next-line @next/next/no-img-element -- lien signé de l'API, hors optimisation Next
-                                <img
-                                  src={fileUrl(row.item.imageUrl) ?? undefined}
-                                  alt=""
-                                  loading="lazy"
-                                  className="size-full object-cover"
-                                />
-                              ) : (
-                                <BoxIcon className="size-4" />
-                              )}
-                            </span>
+                            <ItemThumb imageUrl={row.item.imageUrl} />
                             <div className="min-w-0">
                               <Link
                                 href={RecordRoutes.item(row.item.id)}

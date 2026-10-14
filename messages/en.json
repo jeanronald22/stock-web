@@ -11,7 +11,10 @@
     "vouchers": "Vouchers",
     "newReceipt": "New receipt",
     "newIssue": "New issue",
-    "stock": "Stock"
+    "stock": "Stock",
+    "printVoucher": "Printable voucher",
+    "suppliers": "Suppliers",
+    "newSupplier": "New supplier"
   },
   "common": {
     "retry": "Try again",
@@ -57,7 +60,8 @@
     "positive": "Enter a quantity above zero.",
     "wholeNumber": "A whole number of pieces.",
     "invalidNumber": "Enter a number, for example 12 or 1.44.",
-    "duplicateName": "Two packagings have this name."
+    "duplicateName": "Two packagings have this name.",
+    "email": "This email address does not look complete."
   },
   "welcome": {
     "exit": "Exit",
@@ -153,7 +157,8 @@
     "items": "Items",
     "warehouses": "Depots",
     "vouchers": "Vouchers",
-    "stock": "Stock"
+    "stock": "Stock",
+    "suppliers": "Suppliers"
   },
   "workspace": {
     "toggleSidebar": "Show or hide the menu",
@@ -228,6 +233,12 @@
       "filter": {
         "title": "Depot by depot",
         "description": "Choose a depot to see its stock; “Out of stock” flags what is missing."
+      }
+    },
+    "suppliers": {
+      "create": {
+        "title": "Your suppliers",
+        "description": "Pick one on a receipt: their items are offered first, and their catalogue fills itself."
       }
     }
   },
@@ -522,7 +533,14 @@
       "notePlaceholder": "A damaged box, a discrepancy…",
       "futureDate": "The date cannot be in the future.",
       "warehouse": "Depot",
-      "chooseWarehouse": "Choose the depot"
+      "chooseWarehouse": "Choose the depot",
+      "supplierSearch": "Search or add a supplier",
+      "addSupplier": "Add “{name}” to suppliers",
+      "supplierCreated": "{name} added to suppliers.",
+      "changeSupplier": "Change supplier",
+      "supplierItems": "{name}’s items",
+      "allItems": "Whole catalogue",
+      "noSupplierItem": "No items from this supplier yet: they are added automatically on receipt."
     },
     "entry": {
       "see": "See voucher",
@@ -539,6 +557,17 @@
         "submit": "{count, plural, =0 {Approve issue} one {Approve issue · # item} other {Approve issue · # items}}",
         "done": "Issue {number} approved."
       }
+    },
+    "print": {
+      "action": "Print",
+      "back": "Back to voucher",
+      "receiptTitle": "Goods receipt",
+      "issueTitle": "Goods issue",
+      "validatedBy": "Approved by",
+      "deliveredBy": "Delivered by (name and signature)",
+      "receivedBy": "Received by (name and signature)",
+      "signature": "Signature",
+      "footer": "Recorded on {date}. An approved voucher cannot be changed."
     }
   },
   "stock": {
@@ -563,5 +592,78 @@
     },
     "byWarehouse": "Stock by depot",
     "noStock": "No stock yet."
+  },
+  "suppliers": {
+    "title": "Suppliers",
+    "description": "Who delivers what: every receipt enriches their catalogue.",
+    "new": "New supplier",
+    "searchPlaceholder": "Search a supplier",
+    "empty": {
+      "title": "Add your suppliers",
+      "description": "Their catalogue fills itself with every receipt: the next one is faster to enter."
+    },
+    "noResult": {
+      "title": "No supplier found",
+      "description": "Try another name.",
+      "reset": "Show everything"
+    },
+    "table": {
+      "name": "Supplier",
+      "contact": "Contact",
+      "items": "Catalogue"
+    },
+    "itemCount": "{count, plural, =0 {No items} one {# item} other {# items}}",
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "Cimencam, Mboppi market wholesaler…",
+      "phone": "Phone",
+      "phonePlaceholder": "+237 6 99 00 00 00",
+      "email": "Email",
+      "emailPlaceholder": "orders@supplier.cm",
+      "address": "Address",
+      "addressPlaceholder": "Bassa industrial zone, Douala",
+      "note": "Note",
+      "notePlaceholder": "Delivers on Tuesdays, 30-day payment terms…",
+      "contact": "Contact details",
+      "create": "Add supplier"
+    },
+    "wizard": {
+      "eyebrow": "New supplier",
+      "identity": {
+        "title": "Who is this supplier?",
+        "description": "The name is enough; contact details help you reach them."
+      },
+      "catalog": {
+        "title": "What do they deliver?",
+        "description": "Optional: their items are also added automatically on every receipt."
+      }
+    },
+    "catalog": {
+      "title": "Catalogue",
+      "description": "The items they deliver, offered first on their receipts.",
+      "add": "Add an item to their catalogue",
+      "remove": "Remove from catalogue",
+      "empty": "No items yet: they are added on every receipt.",
+      "added": "Item added to the catalogue.",
+      "removed": "Item removed from the catalogue."
+    },
+    "receipts": {
+      "title": "Latest receipts",
+      "none": "No receipts from this supplier yet."
+    },
+    "created": "Supplier added.",
+    "saved": "Supplier saved.",
+    "archive": {
+      "action": "Archive",
+      "title": "Archive this supplier?",
+      "description": "They are no longer offered on receipts. Their vouchers remain, and you can restore them.",
+      "done": "Supplier archived."
+    },
+    "restore": {
+      "action": "Restore",
+      "done": "Supplier restored.",
+      "badge": "Archived"
+    },
+    "notFound": "This supplier does not exist or was removed."
   }
 }

@@ -11,7 +11,10 @@
     "vouchers": "Bons",
     "newReceipt": "Nouvelle réception",
     "newIssue": "Nouvelle sortie",
-    "stock": "Stock"
+    "stock": "Stock",
+    "printVoucher": "Bon à imprimer",
+    "suppliers": "Fournisseurs",
+    "newSupplier": "Nouveau fournisseur"
   },
   "common": {
     "retry": "Réessayer",
@@ -57,7 +60,8 @@
     "positive": "Indiquez une quantité supérieure à zéro.",
     "wholeNumber": "Un nombre entier de pièces.",
     "invalidNumber": "Indiquez un nombre, par exemple 12 ou 1,44.",
-    "duplicateName": "Deux conditionnements portent ce nom."
+    "duplicateName": "Deux conditionnements portent ce nom.",
+    "email": "Cette adresse e-mail ne semble pas complète."
   },
   "welcome": {
     "exit": "Quitter",
@@ -153,7 +157,8 @@
     "items": "Articles",
     "warehouses": "Dépôts",
     "vouchers": "Bons",
-    "stock": "Stock"
+    "stock": "Stock",
+    "suppliers": "Fournisseurs"
   },
   "workspace": {
     "toggleSidebar": "Afficher ou masquer le menu",
@@ -228,6 +233,12 @@
       "filter": {
         "title": "Dépôt par dépôt",
         "description": "Choisissez un dépôt pour voir son stock ; « Rupture » signale ce qui manque."
+      }
+    },
+    "suppliers": {
+      "create": {
+        "title": "Vos fournisseurs",
+        "description": "Choisissez-en un sur une réception : ses articles sont proposés d’abord, et son catalogue se remplit seul."
       }
     }
   },
@@ -522,7 +533,14 @@
       "notePlaceholder": "Un carton abîmé, un écart constaté…",
       "futureDate": "La date ne peut pas être dans le futur.",
       "warehouse": "Dépôt",
-      "chooseWarehouse": "Choisissez le dépôt"
+      "chooseWarehouse": "Choisissez le dépôt",
+      "supplierSearch": "Rechercher ou ajouter un fournisseur",
+      "addSupplier": "Ajouter « {name} » aux fournisseurs",
+      "supplierCreated": "{name} ajouté aux fournisseurs.",
+      "changeSupplier": "Changer de fournisseur",
+      "supplierItems": "Articles de {name}",
+      "allItems": "Tout le catalogue",
+      "noSupplierItem": "Pas encore d’article chez ce fournisseur : il s’ajoutera de lui-même à la réception."
     },
     "entry": {
       "see": "Voir le bon",
@@ -539,6 +557,17 @@
         "submit": "{count, plural, =0 {Valider la sortie} one {Valider la sortie · # article} other {Valider la sortie · # articles}}",
         "done": "Sortie {number} validée."
       }
+    },
+    "print": {
+      "action": "Imprimer",
+      "back": "Retour au bon",
+      "receiptTitle": "Bon de réception",
+      "issueTitle": "Bon de sortie",
+      "validatedBy": "Validé par",
+      "deliveredBy": "Livré par (nom et signature)",
+      "receivedBy": "Reçu par (nom et signature)",
+      "signature": "Signature",
+      "footer": "Enregistré le {date}. Un bon validé ne se modifie pas."
     }
   },
   "stock": {
@@ -563,5 +592,78 @@
     },
     "byWarehouse": "Stock par dépôt",
     "noStock": "Aucun stock pour l’instant."
+  },
+  "suppliers": {
+    "title": "Fournisseurs",
+    "description": "Qui vous livre quoi : chaque réception enrichit leur catalogue.",
+    "new": "Nouveau fournisseur",
+    "searchPlaceholder": "Rechercher un fournisseur",
+    "empty": {
+      "title": "Ajoutez vos fournisseurs",
+      "description": "Leur catalogue se remplit de lui-même à chaque réception : la suivante se saisit plus vite."
+    },
+    "noResult": {
+      "title": "Aucun fournisseur trouvé",
+      "description": "Essayez un autre nom.",
+      "reset": "Tout afficher"
+    },
+    "table": {
+      "name": "Fournisseur",
+      "contact": "Contact",
+      "items": "Catalogue"
+    },
+    "itemCount": "{count, plural, =0 {Aucun article} one {# article} other {# articles}}",
+    "form": {
+      "name": "Nom",
+      "namePlaceholder": "Cimencam, grossiste du marché Mboppi…",
+      "phone": "Téléphone",
+      "phonePlaceholder": "+237 6 99 00 00 00",
+      "email": "E-mail",
+      "emailPlaceholder": "commandes@fournisseur.cm",
+      "address": "Adresse",
+      "addressPlaceholder": "Zone industrielle de Bassa, Douala",
+      "note": "Note",
+      "notePlaceholder": "Livre le mardi, délai de paiement 30 jours…",
+      "contact": "Coordonnées",
+      "create": "Ajouter le fournisseur"
+    },
+    "wizard": {
+      "eyebrow": "Nouveau fournisseur",
+      "identity": {
+        "title": "Qui est ce fournisseur ?",
+        "description": "Son nom suffit ; ses coordonnées aident à le joindre."
+      },
+      "catalog": {
+        "title": "Que vous livre-t-il ?",
+        "description": "Facultatif : ses articles s’ajouteront aussi d’eux-mêmes à chaque réception."
+      }
+    },
+    "catalog": {
+      "title": "Catalogue",
+      "description": "Les articles qu’il vous livre, proposés d’abord sur ses réceptions.",
+      "add": "Ajouter un article à son catalogue",
+      "remove": "Retirer du catalogue",
+      "empty": "Aucun article pour l’instant : ils s’ajouteront à chaque réception.",
+      "added": "Article ajouté au catalogue.",
+      "removed": "Article retiré du catalogue."
+    },
+    "receipts": {
+      "title": "Dernières réceptions",
+      "none": "Aucune réception de ce fournisseur pour l’instant."
+    },
+    "created": "Fournisseur ajouté.",
+    "saved": "Fournisseur enregistré.",
+    "archive": {
+      "action": "Archiver",
+      "title": "Archiver ce fournisseur ?",
+      "description": "Il n’est plus proposé sur les réceptions. Ses bons restent, et vous pourrez le restaurer.",
+      "done": "Fournisseur archivé."
+    },
+    "restore": {
+      "action": "Restaurer",
+      "done": "Fournisseur restauré.",
+      "badge": "Archivé"
+    },
+    "notFound": "Ce fournisseur n’existe pas ou a été retiré."
   }
 }
