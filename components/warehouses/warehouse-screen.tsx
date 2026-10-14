@@ -3,6 +3,7 @@
 import { ArrowRightIcon, BoxesIcon } from "lucide-react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
+import { useMemo } from "react"
 import { toast } from "sonner"
 
 import { ArchiveControl } from "@/components/catalog/archive-control"
@@ -14,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import { CatalogStatus, type Warehouse } from "@/lib/api/stock"
 import {
-  useItems,
+  useItemsPage,
   useWarehouse,
   useWarehouseStatus,
 } from "@/lib/api/stock-queries"
@@ -25,23 +26,13 @@ import { WarehouseForm } from "./warehouse-form"
 
 const PREVIEW_ITEMS = 5
 
-export function NewWarehouseScreen() {
-  const t = useTranslations("warehouses")
-  return (
-    <PageBody className="max-w-4xl">
-      <PageHeader title={t("form.newTitle")} className="mb-8" />
-      <WarehouseForm />
-    </PageBody>
-  )
-}
-
 export function WarehouseScreen({ id }: { id: string }) {
   const t = useTranslations("warehouses")
   const warehouse = useWarehouse(id)
 
   if (warehouse.isPending) {
     return (
-      <PageBody className="max-w-4xl">
+      <PageBody>
         <Skeleton className="h-9 w-64" />
         <Skeleton className="mt-8 h-64 rounded-2xl" />
       </PageBody>
@@ -103,7 +94,7 @@ function WarehouseDetails({
     )
 
   return (
-    <PageBody className="max-w-4xl">
+    <PageBody>
       <PageHeader
         title={warehouse.name}
         description={t(`kinds.${warehouse.kind}.label`)}
@@ -137,8 +128,9 @@ function WarehouseDetails({
 /** Aperçu des articles proposés dans ce dépôt, avec un lien vers la liste filtrée. */
 function WarehouseItems({ warehouse }: { warehouse: Warehouse }) {
   const t = useTranslations("warehouses")
-  const items = useItems({ warehouseId: warehouse.id })
-  const preview = items.data?.pages[0]?.items.slice(0, PREVIEW_ITEMS) ?? []
+  const search = useMemo(() => ({ warehouseId: warehouse.id }), [warehouse.id])
+  const items = useItemsPage(search, 0, PREVIEW_ITEMS)
+  const preview = items.data?.items ?? []
   const listHref = `${Routes.items}?${ListQueryParams.warehouse}=${warehouse.id}`
 
   return (

@@ -4,7 +4,6 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
 
-import { KreskalaLogo } from "@/components/brand/kreskala-logo"
 import {
   Sidebar,
   SidebarContent,
@@ -18,7 +17,6 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { Routes } from "@/lib/routes"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
 
 import { isActiveEntry, workspaceNavigation } from "./navigation"
@@ -32,18 +30,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" variant="inset">
-      <SidebarHeader className="gap-3">
-        <Link
-          href={Routes.dashboard}
-          aria-label="Kreskala"
-          className="flex h-10 items-center px-2 group-data-[collapsible=icon]:px-0"
-        >
-          <KreskalaLogo className="h-7 group-data-[collapsible=icon]:hidden" />
-          <KreskalaLogo
-            variant="symbol"
-            className="hidden size-8 group-data-[collapsible=icon]:block"
-          />
-        </Link>
+      <SidebarHeader>
         <OrganizationSwitcher />
       </SidebarHeader>
       <SidebarContent>
@@ -55,6 +42,8 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     isActive={isActiveEntry(entry, pathname)}
                     tooltip={t(entry.label)}
+                    // L'écran courant se repère d'un coup d'œil : couleur de la marque, texte appuyé.
+                    className="data-active:bg-primary/10 data-active:font-semibold data-active:text-primary data-active:hover:bg-primary/15 data-active:hover:text-primary"
                     render={
                       <Link
                         href={entry.href}

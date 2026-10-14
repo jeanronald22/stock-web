@@ -37,7 +37,7 @@ import {
   sectorCodes,
 } from "@/lib/onboarding/catalog"
 
-import { StepShell } from "./step-shell"
+import { StepShell } from "@/components/wizard/step-shell"
 import { useErrorMessage } from "@/lib/api/use-error-message"
 
 const FORM_ID = "welcome-business"

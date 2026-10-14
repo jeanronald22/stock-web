@@ -1,8 +1,8 @@
 "use client"
 
+import { useEffect } from "react"
 import {
   keepPreviousData,
-  useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
@@ -28,8 +28,12 @@ export const stockKeys = {
     [...stockKeys.all(organizationId), "warehouses", status] as const,
   warehouse: (organizationId: string | null, id: string) =>
     [...stockKeys.all(organizationId), "warehouse", id] as const,
-  items: (organizationId: string | null, search: ItemSearch) =>
-    [...stockKeys.all(organizationId), "items", search] as const,
+  items: (
+    organizationId: string | null,
+    search: ItemSearch,
+    page: number,
+    size: number
+  ) => [...stockKeys.all(organizationId), "items", search, page, size] as const,
   itemCount: (organizationId: string | null) =>
     [...stockKeys.all(organizationId), "item-count"] as const,
   item: (organizationId: string | null, id: string) =>
@@ -60,19 +64,31 @@ export function useWarehouse(id: string) {
   })
 }
 
-/** Liste paginée : « Voir plus » charge la page suivante, la précédente reste affichée pendant une recherche. */
-export function useItems(search: ItemSearch) {
+/**
+ * Une page d'articles. La page affichée reste visible pendant le chargement de la suivante, et la
+ * page d'après est préchargée : « Suivant » s'affiche sans attente.
+ */
+export function useItemsPage(search: ItemSearch, page: number, size: number) {
   const { stock } = useApi()
+  const queryClient = useQueryClient()
   const organizationId = useOrganizationId()
-  return useInfiniteQuery({
-    queryKey: stockKeys.items(organizationId, search),
-    queryFn: ({ pageParam }) => stock.items(search, pageParam),
-    initialPageParam: 0,
-    getNextPageParam: (last) =>
-      (last.page + 1) * last.size < last.total ? last.page + 1 : undefined,
+  const query = useQuery({
+    queryKey: stockKeys.items(organizationId, search, page, size),
+    queryFn: () => stock.items(search, page, size),
     placeholderData: keepPreviousData,
     enabled: !!organizationId,
   })
+
+  const hasNext = !!query.data && (page + 1) * size < query.data.total
+  useEffect(() => {
+    if (!hasNext || !organizationId) return
+    void queryClient.prefetchQuery({
+      queryKey: stockKeys.items(organizationId, search, page + 1, size),
+      queryFn: () => stock.items(search, page + 1, size),
+    })
+  }, [hasNext, organizationId, queryClient, stock, search, page, size])
+
+  return query
 }
 
 /** Nombre d'articles actifs, pour l'accueil : une seule ligne demandée. */

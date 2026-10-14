@@ -26,6 +26,9 @@ export const RecordRoutes = {
 /** Filtres des listes conservés dans l'adresse : un lien partagé ouvre la même vue. */
 export const ListQueryParams = {
   warehouse: "depot",
+  search: "q",
+  page: "page",
+  size: "lignes",
 } as const
 
 /** Paramètre d'adresse des pages publiques : langue imposée par le lien (écrans de connexion). */

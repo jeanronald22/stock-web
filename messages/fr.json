@@ -296,7 +296,18 @@
       "done": "Dépôt restauré.",
       "badge": "Archivé"
     },
-    "notFound": "Ce dépôt n’existe pas ou a été retiré."
+    "notFound": "Ce dépôt n’existe pas ou a été retiré.",
+    "wizard": {
+      "eyebrow": "Nouveau dépôt",
+      "kind": {
+        "title": "Quel type de lieu ?",
+        "description": "Il sert seulement à vous repérer. Vous pourrez le changer."
+      },
+      "details": {
+        "title": "Comment s’appelle-t-il ?",
+        "description": "Un nom que toute l’équipe reconnaît, et de quoi le trouver."
+      }
+    }
   },
   "items": {
     "title": "Articles",
@@ -304,8 +315,6 @@
     "new": "Nouvel article",
     "searchPlaceholder": "Rechercher un nom ou une référence",
     "allWarehouses": "Tous les dépôts",
-    "total": "{count, plural, one {# article} other {# articles}}",
-    "loadMore": "Voir plus",
     "empty": {
       "title": "Créez votre premier article",
       "description": "Carreau, ciment, robinet… avec son unité et ses conditionnements."
@@ -361,6 +370,39 @@
       "done": "Article restauré.",
       "badge": "Archivé"
     },
-    "notFound": "Cet article n’existe pas ou a été retiré."
+    "notFound": "Cet article n’existe pas ou a été retiré.",
+    "wizard": {
+      "eyebrow": "Nouvel article",
+      "identity": {
+        "title": "Quel article ajoutez-vous ?",
+        "description": "Son nom tel que votre équipe le dit au dépôt."
+      },
+      "counting": {
+        "title": "Comment le comptez-vous ?",
+        "description": "Tout son stock sera compté dans cette unité. Prenez la plus petite que vous vendez."
+      },
+      "packagings": {
+        "title": "Comment arrive-t-il ?",
+        "description": "Carton, sac, palette : combien d’unités chacun contient. Rien à ajouter ? Continuez."
+      },
+      "warehouses": {
+        "title": "Où le proposez-vous ?",
+        "description": "Cochez seulement les dépôts concernés."
+      }
+    },
+    "table": {
+      "item": "Article",
+      "unit": "Unité",
+      "packagings": "Conditionnements",
+      "warehouses": "Dépôts"
+    },
+    "moreWarehouses": "+{count}"
+  },
+  "pagination": {
+    "range": "{from}–{to} sur {total}",
+    "page": "Page {page} sur {pages}",
+    "perPage": "Lignes par page",
+    "previous": "Page précédente",
+    "next": "Page suivante"
   }
 }

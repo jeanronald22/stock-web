@@ -20,22 +20,10 @@ import { ItemForm } from "./item-form"
 
 function FormSkeleton() {
   return (
-    <PageBody className="max-w-4xl">
+    <PageBody>
       <Skeleton className="h-9 w-64" />
       <Skeleton className="mt-8 h-48 rounded-2xl" />
       <Skeleton className="mt-6 h-48 rounded-2xl" />
-    </PageBody>
-  )
-}
-
-export function NewItemScreen() {
-  const t = useTranslations("items")
-  const warehouses = useWarehouses()
-  if (warehouses.isPending) return <FormSkeleton />
-  return (
-    <PageBody className="max-w-4xl">
-      <PageHeader title={t("form.newTitle")} className="mb-8" />
-      <ItemForm warehouses={warehouses.data ?? []} />
     </PageBody>
   )
 }
@@ -105,7 +93,7 @@ function ItemDetails({
     )
 
   return (
-    <PageBody className="max-w-4xl">
+    <PageBody>
       <PageHeader
         title={item.name}
         description={t(`units.${item.baseUnit}.label`)}

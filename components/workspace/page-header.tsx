@@ -32,7 +32,7 @@ export function PageHeader({
   )
 }
 
-/** Largeur et marges communes des écrans de travail. */
+/** Marges communes des écrans de travail : toute la largeur disponible, à côté de la barre latérale. */
 export function PageBody({
   children,
   className,
@@ -43,7 +43,7 @@ export function PageBody({
   return (
     <div
       className={cn(
-        "mx-auto w-full max-w-5xl px-4 pt-6 pb-24 sm:px-8 sm:pt-10",
+        "w-full px-4 pt-6 pb-24 sm:px-6 sm:pt-8 lg:px-10",
         className
       )}
     >

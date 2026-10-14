@@ -2,8 +2,7 @@ import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 import { Suspense } from "react"
 
-import { NewItemScreen } from "@/components/items/item-screen"
-import { PageTransition } from "@/components/motion/page-transition"
+import { ItemWizard } from "@/components/items/item-wizard"
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("meta")
@@ -12,11 +11,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function NewItemPage() {
   return (
-    <PageTransition>
-      {/* Le dépôt proposé d'office est lu dans l'adresse. */}
-      <Suspense>
-        <NewItemScreen />
-      </Suspense>
-    </PageTransition>
+    // Le dépôt proposé d'office est lu dans l'adresse.
+    <Suspense>
+      <ItemWizard />
+    </Suspense>
   )
 }

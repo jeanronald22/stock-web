@@ -296,7 +296,18 @@
       "done": "Depot restored.",
       "badge": "Archived"
     },
-    "notFound": "This depot does not exist or was removed."
+    "notFound": "This depot does not exist or was removed.",
+    "wizard": {
+      "eyebrow": "New depot",
+      "kind": {
+        "title": "What type of place?",
+        "description": "It only helps you find your way. You can change it later."
+      },
+      "details": {
+        "title": "What is it called?",
+        "description": "A name the whole team recognises, and how to find it."
+      }
+    }
   },
   "items": {
     "title": "Items",
@@ -304,8 +315,6 @@
     "new": "New item",
     "searchPlaceholder": "Search a name or reference",
     "allWarehouses": "All depots",
-    "total": "{count, plural, one {# item} other {# items}}",
-    "loadMore": "Show more",
     "empty": {
       "title": "Create your first item",
       "description": "Tiles, cement, taps… with their unit and packagings."
@@ -361,6 +370,39 @@
       "done": "Item restored.",
       "badge": "Archived"
     },
-    "notFound": "This item does not exist or was removed."
+    "notFound": "This item does not exist or was removed.",
+    "wizard": {
+      "eyebrow": "New item",
+      "identity": {
+        "title": "Which item are you adding?",
+        "description": "Its name as your team says it at the depot."
+      },
+      "counting": {
+        "title": "How do you count it?",
+        "description": "All its stock will be counted in this unit. Pick the smallest one you sell."
+      },
+      "packagings": {
+        "title": "How does it arrive?",
+        "description": "Box, bag, pallet: how many units each one holds. Nothing to add? Continue."
+      },
+      "warehouses": {
+        "title": "Where do you offer it?",
+        "description": "Tick only the depots concerned."
+      }
+    },
+    "table": {
+      "item": "Item",
+      "unit": "Unit",
+      "packagings": "Packagings",
+      "warehouses": "Depots"
+    },
+    "moreWarehouses": "+{count}"
+  },
+  "pagination": {
+    "range": "{from}–{to} of {total}",
+    "page": "Page {page} of {pages}",
+    "perPage": "Rows per page",
+    "previous": "Previous page",
+    "next": "Next page"
   }
 }
