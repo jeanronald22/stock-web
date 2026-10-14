@@ -3,6 +3,7 @@ import path from "node:path"
 import { expect, test, type Page } from "@playwright/test"
 
 import {
+  callApi,
   dismissTour,
   navigateTo,
   redirectApi,
@@ -158,30 +159,13 @@ test("articles et dépôts : un article proposé dans un dépôt et pas dans l'a
 
   // Pagination : 26 articles de plus, créés directement par l'API avec la session de la page.
   await page.getByRole("searchbox").fill("")
-  await page.evaluate(async (count) => {
-    const token = Object.entries(localStorage).find(([key]) =>
-      key.startsWith("kreskala.oidc.user")
-    )?.[1]
-    const organizationId = Object.entries(localStorage).find(([key]) =>
-      key.startsWith("kreskala.active-organization.")
-    )?.[1]
-    const { access_token: accessToken } = JSON.parse(token ?? "{}")
-    for (let index = 1; index <= count; index++) {
-      await fetch("http://localhost:8081/v1/items", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "X-Organization-Id": organizationId ?? "",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: crypto.randomUUID(),
-          name: `Vis ${String(index).padStart(2, "0")}`,
-          baseUnit: "PIECE",
-        }),
-      })
-    }
-  }, 26)
+  for (let index = 1; index <= 26; index++) {
+    await callApi(page, "POST", "/v1/items", {
+      id: crypto.randomUUID(),
+      name: `Vis ${String(index).padStart(2, "0")}`,
+      baseUnit: "PIECE",
+    })
+  }
   await page.goto("/articles?lignes=25")
   await expect(page.getByText("1–25 sur 28")).toBeVisible()
   await page.getByRole("button", { name: "Page suivante" }).click()

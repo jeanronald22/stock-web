@@ -44,13 +44,21 @@ function useOrganizationId() {
   return useActiveOrganization().activeOrganizationId
 }
 
-export function useWarehouses(status: CatalogStatus = CatalogStatus.active) {
+/**
+ * Dépôts de l'entreprise. [fresh] : relus à chaque ouverture de l'écran, pour les assistants qui
+ * choisissent un dépôt par défaut (un collègue vient peut-être d'en déclarer un).
+ */
+export function useWarehouses(
+  status: CatalogStatus = CatalogStatus.active,
+  { fresh = false }: { fresh?: boolean } = {}
+) {
   const { stock } = useApi()
   const organizationId = useOrganizationId()
   return useQuery({
     queryKey: stockKeys.warehouses(organizationId, status),
     queryFn: () => stock.warehouses(status),
     enabled: !!organizationId,
+    refetchOnMount: fresh ? "always" : true,
   })
 }
 

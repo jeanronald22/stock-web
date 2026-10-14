@@ -98,3 +98,44 @@ export async function signUpWithBusiness(
   await expect(page.getByRole("heading", { name: "Bonjour Awa" })).toBeVisible()
   return email
 }
+
+/**
+ * Appel à l'API avec la session de la page (jeton et entreprise active) : prépare des données
+ * sans repasser par les écrans. Passe par l'adresse de l'application, donc par redirectApi.
+ */
+export async function callApi<T>(
+  page: Page,
+  method: string,
+  path: string,
+  body?: unknown
+): Promise<T> {
+  const source = process.env.E2E_APP_API_URL ?? "http://localhost:8081"
+  return page.evaluate(
+    async ({ method, url, body }) => {
+      const entries = Object.entries(localStorage)
+      const user = entries.find(([key]) =>
+        key.startsWith("kreskala.oidc.user")
+      )?.[1]
+      const organizationId =
+        entries.find(([key]) =>
+          key.startsWith("kreskala.active-organization.")
+        )?.[1] ?? ""
+      const { access_token: accessToken } = JSON.parse(user ?? "{}")
+      const response = await fetch(url, {
+        method,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "X-Organization-Id": organizationId,
+          "Content-Type": "application/json",
+        },
+        body: body === undefined ? undefined : JSON.stringify(body),
+      })
+      if (!response.ok)
+        throw new Error(
+          `${method} ${url} : ${response.status} ${await response.text()}`
+        )
+      return response.json()
+    },
+    { method, url: source + path, body }
+  ) as Promise<T>
+}

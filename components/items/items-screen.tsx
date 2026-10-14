@@ -1,12 +1,13 @@
 "use client"
 
-import { PlusIcon, SearchIcon, WarehouseIcon } from "lucide-react"
+import { PlusIcon, SearchIcon } from "lucide-react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { useEffect, useMemo, useState } from "react"
 
 import { EmptyState } from "@/components/catalog/empty-state"
 import { StatusFilter } from "@/components/catalog/status-filter"
+import { WarehouseFilter } from "@/components/catalog/warehouse-filter"
 import { TablePagination } from "@/components/catalog/table-pagination"
 import { CatalogScene } from "@/components/illustrations/catalog-scene"
 import { SearchScene } from "@/components/illustrations/search-scene"
@@ -17,13 +18,6 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Spinner } from "@/components/ui/spinner"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import { CatalogStatus } from "@/lib/api/stock"
@@ -34,8 +28,6 @@ import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
 
 import { ItemsTable, ItemsTableSkeleton } from "./items-table"
 
-/** Valeur du filtre « Tous les dépôts » (aucun identifiant de dépôt ne peut la prendre). */
-const ALL_WAREHOUSES = "all"
 /** La recherche part quand la frappe se pose, pas à chaque lettre. */
 const SEARCH_DELAY_MS = 300
 const SKELETON_ROWS = 8
@@ -83,13 +75,6 @@ export function ItemsScreen() {
       ),
     [warehouses.data]
   )
-  const warehouseOptions = [
-    { value: ALL_WAREHOUSES, label: t("allWarehouses") },
-    ...(warehouses.data ?? []).map((warehouse) => ({
-      value: warehouse.id,
-      label: warehouse.name,
-    })),
-  ]
   const newHref = warehouseId
     ? `${Routes.newItem}?${ListQueryParams.warehouse}=${warehouseId}`
     : Routes.newItem
@@ -138,34 +123,11 @@ export function ItemsScreen() {
                 {items.isFetching ? <Spinner /> : <SearchIcon />}
               </InputGroupAddon>
             </InputGroup>
-            <Select
-              items={warehouseOptions}
-              value={warehouseId ?? ALL_WAREHOUSES}
-              onValueChange={(value) =>
-                list.setWarehouse(
-                  !value || value === ALL_WAREHOUSES ? undefined : value
-                )
-              }
-            >
-              <SelectTrigger
-                className="w-full sm:w-64"
-                aria-label={t("allWarehouses")}
-                {...tourAnchor(TourAnchors.itemWarehouseFilter)}
-              >
-                <WarehouseIcon
-                  className="size-5 text-muted-foreground"
-                  aria-hidden
-                />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {warehouseOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <WarehouseFilter
+              value={warehouseId}
+              onChange={list.setWarehouse}
+              {...tourAnchor(TourAnchors.itemWarehouseFilter)}
+            />
             <StatusFilter value={status} onChange={list.setStatus} />
           </div>
 

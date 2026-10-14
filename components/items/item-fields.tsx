@@ -134,6 +134,7 @@ export function ItemCountingFields({ form }: ItemFormProps) {
           </div>
         )}
       />
+      <FieldError errors={[form.formState.errors.baseUnit]} />
       <Controller
         control={form.control}
         name="batchTracking"

@@ -75,6 +75,7 @@ export function useItemForm(
         {
           [ProblemCode.itemReferenceTaken]: "reference",
           [ProblemCode.warehouseUnavailable]: "warehouseIds",
+          [ProblemCode.baseUnitLocked]: "baseUnit",
         },
         form.setError
       )

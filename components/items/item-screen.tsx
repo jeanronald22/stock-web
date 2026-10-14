@@ -17,6 +17,7 @@ import { useErrorMessage } from "@/lib/api/use-error-message"
 import { Routes } from "@/lib/routes"
 
 import { ItemForm } from "./item-form"
+import { ItemStockPanel } from "./item-stock-panel"
 
 function FormSkeleton() {
   return (
@@ -118,6 +119,7 @@ function ItemDetails({
           </>
         }
       />
+      <ItemStockPanel item={item} />
       <ItemForm item={item} warehouses={warehouses} onConflict={onReload} />
     </PageBody>
   )

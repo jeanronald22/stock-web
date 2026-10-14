@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form"
 
 import { StepTransition } from "@/components/motion/step-transition"
@@ -52,6 +52,15 @@ export function FormWizard<T extends FieldValues>({
   const navigate = useStepNavigation<number>(setIndex)
   const step = steps[index]
   const last = index === steps.length - 1
+
+  // Un champ en erreur se revérifie à la frappe : le message disparaît dès que la saisie est juste,
+  // sans attendre le prochain « Continuer » (l'assistant valide par étape, pas par envoi).
+  useEffect(() => {
+    const subscription = form.watch((_, { name }) => {
+      if (name && form.getFieldState(name).invalid) void form.trigger(name)
+    })
+    return () => subscription.unsubscribe()
+  }, [form])
 
   const returnToFirstInvalidStep = () => {
     const invalid = steps.findIndex((candidate) =>

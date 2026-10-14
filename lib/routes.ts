@@ -10,6 +10,10 @@ export const Routes = {
   newItem: "/articles/nouveau",
   warehouses: "/depots",
   newWarehouse: "/depots/nouveau",
+  vouchers: "/bons",
+  newReceipt: "/bons/reception",
+  newIssue: "/bons/sortie",
+  stock: "/stock",
   /** Publique : ouverte depuis les écrans de connexion (Keycloak), avant toute connexion. */
   privacy: "/confidentialite",
   runtimeConfig: "/runtime-config",
@@ -21,6 +25,7 @@ export type AppRoute = (typeof Routes)[keyof typeof Routes]
 export const RecordRoutes = {
   item: (id: string) => `${Routes.items}/${id}`,
   warehouse: (id: string) => `${Routes.warehouses}/${id}`,
+  voucher: (id: string) => `${Routes.vouchers}/${id}`,
 } as const
 
 /** Filtres des listes conservés dans l'adresse : un lien partagé ouvre la même vue. */
@@ -30,6 +35,7 @@ export const ListQueryParams = {
   page: "page",
   size: "lignes",
   status: "statut",
+  voucherType: "type",
 } as const
 
 /** Valeur de « statut » pour les fiches archivées ; absente, la liste montre les fiches actives. */

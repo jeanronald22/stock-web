@@ -44,6 +44,7 @@ export const privacyPolicyFr: PrivacyPolicyContent = {
           items: [
             "Votre compte : adresse e-mail, mot de passe, prénom, nom et langue préférée. Votre mot de passe n’est jamais conservé en clair : nous n’en gardons qu’une empreinte irréversible.",
             "Votre entreprise : nom, ville, pays, activité, et votre rôle dans l’entreprise (propriétaire, administrateur ou membre).",
+            "Les bons de réception et de sortie : votre nom y figure quand vous les validez, avec le fournisseur ou le client que vous indiquez. Un bon validé n’est jamais modifié : c’est le registre de votre stock.",
             "Les photos d’articles que vous déposez. Choisissez des photos de produits : évitez qu’on y reconnaisse une personne.",
             "Les données techniques de connexion : date et heure, adresse IP, type de navigateur, et un code de suivi associé à chaque erreur pour pouvoir la corriger.",
           ],

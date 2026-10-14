@@ -1,6 +1,7 @@
 "use client"
 
 import {
+  ArrowDownToLineIcon,
   ArrowRightIcon,
   BoxesIcon,
   CheckIcon,
@@ -17,12 +18,16 @@ import { Badge } from "@/components/ui/badge"
 import { PageBody } from "@/components/workspace/page-header"
 import { useWorkspace } from "@/components/workspace/workspace-context"
 import { useItemCount, useWarehouses } from "@/lib/api/stock-queries"
+import { useVouchersPage } from "@/lib/api/voucher-queries"
 import { Routes } from "@/lib/routes"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
 import { cn } from "@/lib/utils"
 
+/** Tous les bons : seul le total sert, pour cocher l'étape « réception ». */
+const ALL_VOUCHERS = {}
+
 type Step = {
-  key: "warehouses" | "products"
+  key: "warehouses" | "products" | "receipt"
   icon: LucideIcon
   /** Avant : créer le premier ; après : retrouver la liste. */
   createHref: string
@@ -37,6 +42,7 @@ export function Dashboard() {
   const { user } = useWorkspace()
   const warehouses = useWarehouses()
   const itemCount = useItemCount()
+  const vouchers = useVouchersPage(ALL_VOUCHERS, 0, 1)
   usePageTour("workspace", {
     ready: warehouses.isSuccess && itemCount.isSuccess,
   })
@@ -56,6 +62,13 @@ export function Dashboard() {
       createHref: Routes.newItem,
       listHref: Routes.items,
       count: itemCount.data,
+    },
+    {
+      key: "receipt",
+      icon: ArrowDownToLineIcon,
+      createHref: Routes.newReceipt,
+      listHref: Routes.vouchers,
+      count: vouchers.data?.total,
     },
   ]
 

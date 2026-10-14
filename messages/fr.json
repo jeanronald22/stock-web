@@ -7,7 +7,11 @@
     "items": "Articles",
     "newItem": "Nouvel article",
     "warehouses": "Dépôts",
-    "newWarehouse": "Nouveau dépôt"
+    "newWarehouse": "Nouveau dépôt",
+    "vouchers": "Bons",
+    "newReceipt": "Nouvelle réception",
+    "newIssue": "Nouvelle sortie",
+    "stock": "Stock"
   },
   "common": {
     "retry": "Réessayer",
@@ -130,6 +134,12 @@
       "team": {
         "title": "Inviter votre équipe",
         "description": "Vos magasiniers recevront leur invitation par e-mail."
+      },
+      "receipt": {
+        "title": "Enregistrer une réception",
+        "description": "La marchandise arrive : le stock du dépôt se met à jour aussitôt.",
+        "action": "Nouvelle réception",
+        "done": "{count, plural, one {# bon} other {# bons}}"
       }
     }
   },
@@ -141,7 +151,9 @@
   "nav": {
     "home": "Accueil",
     "items": "Articles",
-    "warehouses": "Dépôts"
+    "warehouses": "Dépôts",
+    "vouchers": "Bons",
+    "stock": "Stock"
   },
   "workspace": {
     "toggleSidebar": "Afficher ou masquer le menu",
@@ -204,6 +216,18 @@
       "warehouses": {
         "title": "Les dépôts",
         "description": "Cochez seulement ceux où l’article est proposé. Il peut être dans un dépôt et pas dans un autre."
+      }
+    },
+    "vouchers": {
+      "create": {
+        "title": "Entrées et sorties",
+        "description": "Une réception augmente le stock du dépôt, une sortie le diminue. Chaque bon est signé et ne se modifie plus."
+      }
+    },
+    "stock": {
+      "filter": {
+        "title": "Dépôt par dépôt",
+        "description": "Choisissez un dépôt pour voir son stock ; « Rupture » signale ce qui manque."
       }
     }
   },
@@ -424,6 +448,146 @@
       "label": "Statut",
       "ACTIVE": "Actifs",
       "ARCHIVED": "Archivés"
+    },
+    "allWarehouses": "Tous les dépôts"
+  },
+  "vouchers": {
+    "title": "Bons",
+    "description": "Chaque entrée et chaque sortie de stock, validée et signée.",
+    "newReceipt": "Nouvelle réception",
+    "newIssue": "Nouvelle sortie",
+    "types": {
+      "RECEIPT": "Réception",
+      "ISSUE": "Sortie"
+    },
+    "allTypes": "Tous les bons",
+    "receipts": "Réceptions",
+    "issues": "Sorties",
+    "empty": {
+      "title": "Aucun bon pour l’instant",
+      "description": "Enregistrez votre première réception : le stock de vos dépôts se mettra à jour aussitôt."
+    },
+    "table": {
+      "number": "Numéro",
+      "date": "Date",
+      "warehouse": "Dépôt",
+      "counterparty": "Fournisseur ou client",
+      "lines": "Lignes",
+      "createdBy": "Validé par"
+    },
+    "lineCount": "{count, plural, one {# article} other {# articles}}",
+    "notFound": "Ce bon n’existe pas ou a été retiré.",
+    "detail": {
+      "warehouse": "Dépôt",
+      "date": "Date de l’opération",
+      "supplier": "Fournisseur",
+      "customer": "Client ou destination",
+      "reference": "Référence du document",
+      "createdBy": "Validé par",
+      "recordedAt": "Enregistré le {date}",
+      "note": "Note",
+      "item": "Article",
+      "batch": "Lot",
+      "entered": "Saisie",
+      "quantity": "Quantité",
+      "immutable": "Un bon validé ne se modifie pas : pour corriger, enregistrez un nouveau bon."
+    },
+    "wizard": {
+      "RECEIPT": {
+        "eyebrow": "Nouvelle réception",
+        "warehouse": {
+          "title": "Dans quel dépôt arrive la marchandise ?",
+          "description": "Le stock de ce dépôt augmentera à la validation."
+        },
+        "lines": {
+          "title": "Qu’est-ce qui arrive ?",
+          "description": "Ajoutez chaque article et sa quantité, en unités ou en conditionnements."
+        },
+        "details": {
+          "title": "D’où vient-elle ?",
+          "description": "Facultatif, mais utile en cas d’écart avec le bon de livraison."
+        },
+        "summary": {
+          "title": "Tout est juste ?",
+          "description": "Une fois validée, la réception ne se modifie plus."
+        },
+        "submit": "Valider la réception",
+        "done": "Réception {number} validée."
+      },
+      "ISSUE": {
+        "eyebrow": "Nouvelle sortie",
+        "warehouse": {
+          "title": "De quel dépôt sort la marchandise ?",
+          "description": "Le stock de ce dépôt diminuera à la validation."
+        },
+        "lines": {
+          "title": "Qu’est-ce qui sort ?",
+          "description": "Le disponible du dépôt est indiqué sous chaque article."
+        },
+        "details": {
+          "title": "Pour qui ?",
+          "description": "Facultatif : client, chantier ou motif de la sortie."
+        },
+        "summary": {
+          "title": "Tout est juste ?",
+          "description": "Une fois validée, la sortie ne se modifie plus."
+        },
+        "submit": "Valider la sortie",
+        "done": "Sortie {number} validée."
+      }
+    },
+    "form": {
+      "noWarehouse": "Aucun dépôt actif. Déclarez d’abord un dépôt.",
+      "createWarehouse": "Déclarer un dépôt",
+      "searchItem": "Rechercher un article à ajouter",
+      "noItem": "Aucun article trouvé.",
+      "noItemInWarehouse": "Aucun article trouvé dans ce dépôt.",
+      "addedLines": "{count, plural, =0 {Aucun article ajouté} one {# article ajouté} other {# articles ajoutés}}",
+      "quantity": "Quantité",
+      "unit": "Unité",
+      "batch": "Lot",
+      "batchPlaceholder": "N12, calibre 2…",
+      "chooseBatch": "Choisissez un lot",
+      "remove": "Retirer cet article",
+      "available": "Disponible : {quantity}",
+      "nothingAvailable": "Rien en stock dans ce dépôt",
+      "converted": "= {quantity}",
+      "linesRequired": "Ajoutez au moins un article.",
+      "batchRequired": "Indiquez le lot.",
+      "shortage": "Il n’y a que {available} dans ce dépôt.",
+      "supplier": "Fournisseur",
+      "supplierPlaceholder": "Cimencam, grossiste du marché…",
+      "customer": "Client ou destination",
+      "customerPlaceholder": "Chantier Bonamoussadi, client…",
+      "reference": "Référence du document",
+      "referencePlaceholder": "N° du bon de livraison ou de la facture",
+      "date": "Date de l’opération",
+      "note": "Note",
+      "notePlaceholder": "Un carton abîmé, un écart constaté…",
+      "futureDate": "La date ne peut pas être dans le futur."
     }
+  },
+  "stock": {
+    "title": "Stock",
+    "description": "Ce que vous avez, dépôt par dépôt, en temps réel.",
+    "searchPlaceholder": "Rechercher un article",
+    "allWarehouses": "Tous les dépôts",
+    "table": {
+      "item": "Article",
+      "batches": "Lots",
+      "quantity": "En stock"
+    },
+    "outOfStock": "Rupture",
+    "empty": {
+      "title": "Rien à compter pour l’instant",
+      "description": "Le stock apparaît ici dès votre première réception."
+    },
+    "noResult": {
+      "title": "Aucun article trouvé",
+      "description": "Essayez un autre mot ou un autre dépôt.",
+      "reset": "Tout afficher"
+    },
+    "byWarehouse": "Stock par dépôt",
+    "noStock": "Aucun stock pour l’instant."
   }
 }

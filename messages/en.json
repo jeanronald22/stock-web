@@ -7,7 +7,11 @@
     "items": "Items",
     "newItem": "New item",
     "warehouses": "Depots",
-    "newWarehouse": "New depot"
+    "newWarehouse": "New depot",
+    "vouchers": "Vouchers",
+    "newReceipt": "New receipt",
+    "newIssue": "New issue",
+    "stock": "Stock"
   },
   "common": {
     "retry": "Try again",
@@ -130,6 +134,12 @@
       "team": {
         "title": "Invite your team",
         "description": "Your storekeepers will receive their invitation by email."
+      },
+      "receipt": {
+        "title": "Record a receipt",
+        "description": "Goods arrive: the depot’s stock updates straight away.",
+        "action": "New receipt",
+        "done": "{count, plural, one {# voucher} other {# vouchers}}"
       }
     }
   },
@@ -141,7 +151,9 @@
   "nav": {
     "home": "Home",
     "items": "Items",
-    "warehouses": "Depots"
+    "warehouses": "Depots",
+    "vouchers": "Vouchers",
+    "stock": "Stock"
   },
   "workspace": {
     "toggleSidebar": "Show or hide the menu",
@@ -204,6 +216,18 @@
       "warehouses": {
         "title": "Depots",
         "description": "Tick only those where the item is offered. It can be in one depot and not in another."
+      }
+    },
+    "vouchers": {
+      "create": {
+        "title": "Receipts and issues",
+        "description": "A receipt increases the depot’s stock, an issue decreases it. Each voucher is signed and can no longer change."
+      }
+    },
+    "stock": {
+      "filter": {
+        "title": "Depot by depot",
+        "description": "Choose a depot to see its stock; “Out of stock” flags what is missing."
       }
     }
   },
@@ -424,6 +448,146 @@
       "label": "Status",
       "ACTIVE": "Active",
       "ARCHIVED": "Archived"
+    },
+    "allWarehouses": "All depots"
+  },
+  "vouchers": {
+    "title": "Vouchers",
+    "description": "Every stock receipt and issue, approved and signed.",
+    "newReceipt": "New receipt",
+    "newIssue": "New issue",
+    "types": {
+      "RECEIPT": "Receipt",
+      "ISSUE": "Issue"
+    },
+    "allTypes": "All vouchers",
+    "receipts": "Receipts",
+    "issues": "Issues",
+    "empty": {
+      "title": "No vouchers yet",
+      "description": "Record your first receipt: your depots’ stock updates straight away."
+    },
+    "table": {
+      "number": "Number",
+      "date": "Date",
+      "warehouse": "Depot",
+      "counterparty": "Supplier or customer",
+      "lines": "Lines",
+      "createdBy": "Approved by"
+    },
+    "lineCount": "{count, plural, one {# item} other {# items}}",
+    "notFound": "This voucher does not exist or was removed.",
+    "detail": {
+      "warehouse": "Depot",
+      "date": "Operation date",
+      "supplier": "Supplier",
+      "customer": "Customer or destination",
+      "reference": "Document reference",
+      "createdBy": "Approved by",
+      "recordedAt": "Recorded on {date}",
+      "note": "Note",
+      "item": "Item",
+      "batch": "Batch",
+      "entered": "Entered",
+      "quantity": "Quantity",
+      "immutable": "An approved voucher cannot be changed: to correct it, record a new voucher."
+    },
+    "wizard": {
+      "RECEIPT": {
+        "eyebrow": "New receipt",
+        "warehouse": {
+          "title": "Which depot are the goods arriving at?",
+          "description": "This depot’s stock will increase on approval."
+        },
+        "lines": {
+          "title": "What is arriving?",
+          "description": "Add each item and its quantity, in units or packagings."
+        },
+        "details": {
+          "title": "Where is it from?",
+          "description": "Optional, but useful if it differs from the delivery note."
+        },
+        "summary": {
+          "title": "Is everything right?",
+          "description": "Once approved, the receipt can no longer be changed."
+        },
+        "submit": "Approve receipt",
+        "done": "Receipt {number} approved."
+      },
+      "ISSUE": {
+        "eyebrow": "New issue",
+        "warehouse": {
+          "title": "Which depot are the goods leaving?",
+          "description": "This depot’s stock will decrease on approval."
+        },
+        "lines": {
+          "title": "What is leaving?",
+          "description": "The depot’s available stock is shown under each item."
+        },
+        "details": {
+          "title": "Who is it for?",
+          "description": "Optional: customer, building site or reason for the issue."
+        },
+        "summary": {
+          "title": "Is everything right?",
+          "description": "Once approved, the issue can no longer be changed."
+        },
+        "submit": "Approve issue",
+        "done": "Issue {number} approved."
+      }
+    },
+    "form": {
+      "noWarehouse": "No active depot. Declare a depot first.",
+      "createWarehouse": "Declare a depot",
+      "searchItem": "Search an item to add",
+      "noItem": "No items found.",
+      "noItemInWarehouse": "No items found in this depot.",
+      "addedLines": "{count, plural, =0 {No items added} one {# item added} other {# items added}}",
+      "quantity": "Quantity",
+      "unit": "Unit",
+      "batch": "Batch",
+      "batchPlaceholder": "N12, caliber 2…",
+      "chooseBatch": "Choose a batch",
+      "remove": "Remove this item",
+      "available": "Available: {quantity}",
+      "nothingAvailable": "Nothing in stock in this depot",
+      "converted": "= {quantity}",
+      "linesRequired": "Add at least one item.",
+      "batchRequired": "Enter the batch.",
+      "shortage": "There is only {available} in this depot.",
+      "supplier": "Supplier",
+      "supplierPlaceholder": "Cimencam, market wholesaler…",
+      "customer": "Customer or destination",
+      "customerPlaceholder": "Bonamoussadi site, customer…",
+      "reference": "Document reference",
+      "referencePlaceholder": "Delivery note or invoice number",
+      "date": "Operation date",
+      "note": "Note",
+      "notePlaceholder": "A damaged box, a discrepancy…",
+      "futureDate": "The date cannot be in the future."
     }
+  },
+  "stock": {
+    "title": "Stock",
+    "description": "What you have, depot by depot, in real time.",
+    "searchPlaceholder": "Search an item",
+    "allWarehouses": "All depots",
+    "table": {
+      "item": "Item",
+      "batches": "Batches",
+      "quantity": "In stock"
+    },
+    "outOfStock": "Out of stock",
+    "empty": {
+      "title": "Nothing to count yet",
+      "description": "Stock appears here after your first receipt."
+    },
+    "noResult": {
+      "title": "No items found",
+      "description": "Try another word or another depot.",
+      "reset": "Show everything"
+    },
+    "byWarehouse": "Stock by depot",
+    "noStock": "No stock yet."
   }
 }

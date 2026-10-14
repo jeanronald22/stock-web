@@ -186,6 +186,16 @@ Côté utilisateur, ce sont les écrans de « Mon compte » : créer son entrepr
 - Politique de confidentialité passée en version 0.2 (photos, Cloudflare R2).
 - Listes : filtre « Actifs / Archivés » à côté des autres filtres, conservé dans l'adresse (`statut=archives`).
 
+## D21. Bons de réception et de sortie, registre du stock (2026-10-14)
+
+- Un bon est validé dès son enregistrement (pas de brouillon pour l'instant) et signé du nom de la personne. Numéro par type et par année : REC-2026-0001, SOR-2026-0001, sans trou (un bon refusé rend son numéro).
+- **Registre immuable** : bons, lignes et mouvements ne se modifient ni ne se suppriment ; la base l'impose (droits retirés au rôle applicatif, déclencheur pour tous). Une erreur se corrige par un nouveau bon.
+- **Pas de stock négatif** : une sortie est tout ou rien ; le décompte est atomique (deux sorties simultanées ne consomment pas le même stock) ; le refus détaille le disponible, affiché sous chaque ligne en cause.
+- Saisie en unité de base ou en conditionnement (converti) ; lot obligatoire pour un article suivi par lot (choisi parmi les lots en stock pour une sortie) ; pièces entières.
+- Une réception référence l'article dans le dépôt. L'unité de base d'un article se verrouille à son premier mouvement.
+- Écrans : assistant en quatre étapes (dépôt, articles, détails, récapitulatif), liste des bons paginée et filtrée, fiche de bon en lecture seule, stock par dépôt avec lots et ruptures, stock sur la fiche de l'article.
+- Politique de confidentialité passée en version 0.3 (nom sur les bons, fournisseurs et clients).
+
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
 - [ ] Nom de la marque et nom du produit de stock (voir D7). Pistes : Kreskala, Kreskio, Tissero, NarvalWorks, FourmiLabs.

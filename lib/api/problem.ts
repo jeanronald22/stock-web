@@ -28,6 +28,14 @@ export const ProblemCode = {
   fileLinkInvalid: "file-link-invalid",
   imageUnsupported: "image-unsupported",
   imageTooLarge: "image-too-large",
+  voucherLineUnavailable: "voucher-line-unavailable",
+  packagingNotFound: "packaging-not-found",
+  batchRequired: "batch-required",
+  insufficientStock: "insufficient-stock",
+  quantityNotWhole: "quantity-not-whole",
+  occurredInFuture: "occurred-in-future",
+  baseUnitLocked: "base-unit-locked",
+  voucherNotFound: "voucher-not-found",
   serviceBusy: "service-busy",
   internalError: "internal-error",
   networkUnavailable: "network-unavailable",
@@ -48,7 +56,9 @@ export class ApiError extends Error {
     readonly detail: string,
     readonly fieldErrors: FieldError[] = [],
     readonly retryAfterSeconds?: number,
-    readonly traceId?: string
+    readonly traceId?: string,
+    /** Réponse complète : champs propres à certaines erreurs (« shortages »…). */
+    readonly body: Record<string, unknown> = {}
   ) {
     super(detail || title)
     this.name = "ApiError"

@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback } from "react"
 
 import { CatalogStatus } from "@/lib/api/stock"
+import { voucherTypes, type VoucherType } from "@/lib/api/vouchers"
 import { ARCHIVED_STATUS_PARAM, ListQueryParams } from "@/lib/routes"
 
 /** Nombres de lignes proposés ; le premier de la liste n'est pas le défaut (voir DEFAULT_PAGE_SIZE). */
@@ -17,6 +18,7 @@ export type ListParams = {
   page: number
   size: number
   status: CatalogStatus
+  voucherType: VoucherType | undefined
 }
 
 function positiveInteger(value: string | null): number | null {
@@ -44,6 +46,9 @@ export function useListParams() {
       searchParams.get(ListQueryParams.status) === ARCHIVED_STATUS_PARAM
         ? CatalogStatus.archived
         : CatalogStatus.active,
+    voucherType: voucherTypes.find(
+      (type) => type === searchParams.get(ListQueryParams.voucherType)
+    ),
   }
 
   const update = useCallback(
@@ -81,6 +86,13 @@ export function useListParams() {
         status:
           status === CatalogStatus.archived ? ARCHIVED_STATUS_PARAM : undefined,
       }),
-    reset: () => update({ search: undefined, warehouse: undefined }),
+    setVoucherType: (type: VoucherType | undefined) =>
+      update({ voucherType: type }),
+    reset: () =>
+      update({
+        search: undefined,
+        warehouse: undefined,
+        voucherType: undefined,
+      }),
   }
 }
