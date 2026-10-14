@@ -12,11 +12,12 @@ import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
-import { CatalogStatus, type Warehouse } from "@/lib/api/stock"
+import { CatalogStatus, type Warehouse, StockPermission } from "@/lib/api/stock"
 import { useWarehouses } from "@/lib/api/stock-queries"
 import { useListParams } from "@/lib/list/use-list-params"
 import { RecordRoutes, Routes } from "@/lib/routes"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
+import { useStockAccess } from "@/components/workspace/stock-access"
 
 import { warehouseKindIcons } from "./warehouse-kind"
 
@@ -35,7 +36,8 @@ export function WarehousesScreen() {
     warehouses.isSuccess && warehouses.data.length === 0 && !archived
   usePageTour("warehouses", { ready: warehouses.isSuccess })
 
-  const newButton = (
+  const allowed = useStockAccess().can(StockPermission.manageWarehouses)
+  const newButton = allowed && (
     <Link
       href={Routes.newWarehouse}
       className={buttonVariants({ size: "lg" })}
@@ -51,7 +53,7 @@ export function WarehousesScreen() {
       <PageHeader
         title={t("title")}
         description={t("description")}
-        actions={empty ? undefined : newButton}
+        actions={empty || !newButton ? undefined : newButton}
       />
 
       {/* Filtre visible dès qu'il y a de quoi filtrer : sinon, l'écran vide suffit. */}
@@ -87,7 +89,7 @@ export function WarehousesScreen() {
             illustration={<DepotScene />}
             title={t("empty.title")}
             description={t("empty.description")}
-            action={newButton}
+            action={newButton || undefined}
           />
         )}
       </div>

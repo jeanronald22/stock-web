@@ -26,11 +26,12 @@ import {
 } from "@/components/ui/input-group"
 import { Spinner } from "@/components/ui/spinner"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
-import { CatalogStatus } from "@/lib/api/stock"
+import { CatalogStatus, StockPermission } from "@/lib/api/stock"
 import { useItemsPage, useWarehouses } from "@/lib/api/stock-queries"
 import { STOCK_ALERT_STATES, useListParams } from "@/lib/list/use-list-params"
 import { ListQueryParams, Routes } from "@/lib/routes"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
+import { useStockAccess } from "@/components/workspace/stock-access"
 
 import { ItemsTable, ItemsTableSkeleton } from "./items-table"
 
@@ -103,7 +104,8 @@ export function ItemsScreen() {
     warehouseIds.length === 1
       ? `${Routes.newItem}?${ListQueryParams.warehouse}=${warehouseIds[0]}`
       : Routes.newItem
-  const newButton = (
+  const manages = useStockAccess().can(StockPermission.manageCatalog)
+  const newButton = manages && (
     <Link
       href={newHref}
       className={buttonVariants({ size: "lg" })}
@@ -121,7 +123,7 @@ export function ItemsScreen() {
         title={t("title")}
         description={t("description")}
         actions={
-          catalogEmpty ? undefined : (
+          catalogEmpty || !manages ? undefined : (
             <div className="flex flex-wrap gap-2">
               <CategoriesSheet />
               {newButton}
@@ -135,7 +137,7 @@ export function ItemsScreen() {
           illustration={<CatalogScene />}
           title={t("empty.title")}
           description={t("empty.description")}
-          action={newButton}
+          action={newButton || undefined}
         />
       ) : (
         <>

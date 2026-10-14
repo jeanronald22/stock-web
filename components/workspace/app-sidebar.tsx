@@ -17,16 +17,23 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { MembershipRole } from "@/lib/api/platform"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
 
 import { isActiveEntry, workspaceNavigation } from "./navigation"
 import { OrganizationSwitcher } from "./organization-switcher"
 import { UserMenu } from "./user-menu"
+import { useWorkspace } from "./workspace-context"
 
 export function AppSidebar() {
   const t = useTranslations("nav")
   const pathname = usePathname()
   const { setOpenMobile } = useSidebar()
+  const { organization } = useWorkspace()
+  const managesTeam = organization.role !== MembershipRole.member
+  const entries = workspaceNavigation.filter(
+    (entry) => !entry.teamManagersOnly || managesTeam
+  )
 
   return (
     <Sidebar collapsible="icon" variant="inset">
@@ -37,7 +44,7 @@ export function AppSidebar() {
         <SidebarGroup {...tourAnchor(TourAnchors.navigation)}>
           <SidebarGroupContent>
             <SidebarMenu>
-              {workspaceNavigation.map((entry) => (
+              {entries.map((entry) => (
                 <SidebarMenuItem key={entry.href}>
                   <SidebarMenuButton
                     isActive={isActiveEntry(entry, pathname)}

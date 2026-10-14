@@ -13,7 +13,12 @@
     "newIssue": "Nouvelle sortie",
     "stock": "Stock",
     "suppliers": "Fournisseurs",
-    "newSupplier": "Nouveau fournisseur"
+    "newSupplier": "Nouveau fournisseur",
+    "team": "Équipe",
+    "invitation": "Invitation",
+    "newInvitation": "Inviter une personne",
+    "member": "Membre",
+    "notifications": "Notifications"
   },
   "common": {
     "retry": "Réessayer",
@@ -25,7 +30,8 @@
     "cancel": "Annuler",
     "save": "Enregistrer",
     "optional": "facultatif",
-    "reload": "Recharger"
+    "reload": "Recharger",
+    "close": "Fermer"
   },
   "languages": {
     "label": "Langue",
@@ -115,6 +121,14 @@
       "OWNER": "Propriétaire",
       "ADMIN": "Administrateur",
       "MEMBER": "Membre"
+    },
+    "invitedTitle": "Vous êtes invité dans une équipe",
+    "invitedDescription": "Rejoignez l’entreprise qui vous invite, ou créez la vôtre.",
+    "createOwn": "Créer ma propre entreprise",
+    "invitations": {
+      "title": "{count, plural, one {Invitation reçue} other {Invitations reçues}}",
+      "from": "{inviter} vous invite · {role}",
+      "join": "Rejoindre"
     }
   },
   "dashboard": {
@@ -136,7 +150,9 @@
       },
       "team": {
         "title": "Inviter votre équipe",
-        "description": "Vos magasiniers recevront leur invitation par e-mail."
+        "description": "Magasiniers, contrôleurs, managers : chacun reçoit un lien par e-mail.",
+        "action": "Inviter une personne",
+        "done": "{count, plural, one {# personne invitée} other {# personnes invitées}}"
       },
       "receipt": {
         "title": "Enregistrer une réception",
@@ -162,7 +178,8 @@
     "warehouses": "Dépôts",
     "vouchers": "Bons",
     "stock": "Stock",
-    "suppliers": "Fournisseurs"
+    "suppliers": "Fournisseurs",
+    "team": "Équipe"
   },
   "workspace": {
     "toggleSidebar": "Afficher ou masquer le menu",
@@ -450,7 +467,9 @@
       "packagings": "Conditionnements",
       "warehouses": "Dépôts"
     },
-    "moreWarehouses": "+{count}"
+    "moreWarehouses": "+{count}",
+    "thresholdSaved": "Seuil enregistré pour {warehouse}.",
+    "saveThreshold": "Enregistrer le seuil de {warehouse}"
   },
   "pagination": {
     "range": "{from}–{to} sur {total}",
@@ -736,5 +755,225 @@
     "deleted": "Catégorie « {name} » supprimée.",
     "save": "Enregistrer",
     "cancel": "Annuler"
+  },
+  "access": {
+    "readOnly": "Consultation seule : votre rôle ne permet pas de modifier cette fiche.",
+    "none": {
+      "title": "Pas encore d’accès à Stock",
+      "description": "Votre rôle ne donne pas accès au stock de cette entreprise. Demandez au propriétaire ou à un administrateur de vous attribuer un rôle et des dépôts."
+    }
+  },
+  "team": {
+    "title": "Équipe",
+    "description": "Invitez vos collègues et choisissez ce que chacun peut faire, dépôt par dépôt.",
+    "invitations": "Invitations en attente",
+    "you": "vous",
+    "disabled": "Désactivé",
+    "pending": "En attente",
+    "expired": "Expirée",
+    "expiresOn": "valable jusqu’au {date}",
+    "invitationActions": "Actions pour l’invitation de {email}",
+    "disable": "Désactiver",
+    "enable": "Réactiver",
+    "disabledDone": "{name} n’a plus accès à l’entreprise.",
+    "enabled": "{name} a de nouveau accès à l’entreprise.",
+    "resend": "Renvoyer l’invitation",
+    "revoke": "Annuler l’invitation",
+    "revoked": "Invitation de {email} annulée.",
+    "role": {
+      "label": "Rôle dans l’équipe",
+      "OWNER": {
+        "label": "Propriétaire",
+        "hint": "A créé l’entreprise ; gère tout."
+      },
+      "ADMIN": {
+        "label": "Administrateur",
+        "hint": "Invite et gère les membres de l’équipe."
+      },
+      "MEMBER": {
+        "label": "Membre",
+        "hint": "Travaille selon son rôle Stock, sans gérer l’équipe."
+      },
+      "description": "Un administrateur invite et gère les membres de l’équipe.",
+      "ownerOnly": "Seul le propriétaire nomme ou retire un administrateur."
+    },
+    "stockRoles": {
+      "label": "Rôle dans Stock",
+      "title": "Accès à Stock",
+      "warehouses": "Dépôts attribués",
+      "noWarehouse": "Aucun dépôt actif : créez d’abord un dépôt.",
+      "allWarehouses": "tous les dépôts",
+      "ownerFixed": "d’office",
+      "GENERAL_MANAGER": {
+        "label": "Gérant",
+        "hint": "Tous les dépôts, tout le stock : catalogue, dépôts, seuils, bons."
+      },
+      "MANAGER": {
+        "label": "Manager",
+        "hint": "Responsable de ses dépôts : catalogue, seuils, bons, corrections."
+      },
+      "CONTROLLER": {
+        "label": "Contrôleur",
+        "hint": "Ses dépôts : réceptions, sorties, corrections et seuils d’alerte."
+      },
+      "STOREKEEPER": {
+        "label": "Magasinier",
+        "hint": "Ses dépôts : réceptions et sorties."
+      },
+      "NONE": {
+        "label": "Aucun accès Stock",
+        "hint": "Gère seulement l’équipe, ou n’utilise pas encore Stock."
+      }
+    },
+    "access": {
+      "description": "Le rôle décide de ce que la personne peut faire ; les dépôts, où elle peut le faire.",
+      "saved": "Accès Stock de {name} enregistré."
+    },
+    "invite": {
+      "open": "Inviter",
+      "email": "Adresse e-mail",
+      "emailPlaceholder": "awa@exemple.cm",
+      "submit": "Envoyer l’invitation",
+      "sent": "Invitation envoyée à {email}. Vous pouvez aussi lui transmettre le lien.",
+      "notSent": "L’e-mail n’a pas pu partir : transmettez le lien à {email}, par WhatsApp par exemple."
+    },
+    "link": {
+      "title": "Lien d’invitation",
+      "label": "Lien d’invitation",
+      "copy": "Copier le lien",
+      "copyFailed": "Copie impossible : sélectionnez le lien et copiez-le.",
+      "whatsapp": "Envoyer par WhatsApp",
+      "message": "Bonjour, je vous invite à rejoindre {organization} sur Kreskala : {link}",
+      "hint": "Ce lien n’est affiché qu’une fois. Pour en obtenir un nouveau, renvoyez l’invitation."
+    },
+    "membersOnly": {
+      "title": "Réservé aux responsables",
+      "description": "Seuls le propriétaire et les administrateurs gèrent l’équipe."
+    },
+    "empty": {
+      "title": "Invitez votre équipe",
+      "description": "Magasiniers, contrôleurs, managers : chacun reçoit un lien et travaille dans ses dépôts, selon son rôle."
+    },
+    "table": {
+      "person": "Personne",
+      "role": "Rôle",
+      "stock": "Accès Stock",
+      "email": "Adresse",
+      "expiry": "Valable jusqu’au"
+    },
+    "memberNotFound": {
+      "title": "Membre introuvable",
+      "description": "Cette personne ne fait pas partie de l’équipe."
+    },
+    "disableConfirm": {
+      "title": "Désactiver {name} ?",
+      "description": "Cette personne n’aura plus accès à l’entreprise. Ses bons restent dans l’historique ; vous pourrez la réactiver."
+    },
+    "ownerDescription": "Le propriétaire a créé l’entreprise : il gère l’équipe et il est gérant dans Stock, d’office.",
+    "wizard": {
+      "eyebrow": "Nouvelle invitation",
+      "email": {
+        "title": "Qui invitez-vous ?",
+        "description": "La personne reçoit un lien par e-mail, valable 7 jours. Elle se connectera avec cette adresse."
+      },
+      "role": {
+        "title": "Quel rôle dans l’équipe ?",
+        "description": "Un administrateur peut à son tour inviter et gérer les membres."
+      },
+      "stockRole": {
+        "title": "Que fera-t-elle dans Stock ?",
+        "description": "Le rôle décide de ce qu’elle peut faire. Vous pourrez le changer à tout moment."
+      },
+      "warehouses": {
+        "title": "Dans quels dépôts ?",
+        "description": "Elle ne verra et ne mouvementera que le stock de ces dépôts.",
+        "required": "Choisissez au moins un dépôt."
+      }
+    },
+    "sent": {
+      "title": "Invitation prête",
+      "backToTeam": "Retour à l’équipe",
+      "inviteAnother": "Inviter une autre personne"
+    }
+  },
+  "invitation": {
+    "loading": "Ouverture de l’invitation…",
+    "title": "{inviter} vous invite à rejoindre {organization}",
+    "titleAnonymous": "Vous êtes invité à rejoindre {organization}",
+    "sentTo": "Invitation adressée à {email}.",
+    "createAccount": "Créer mon compte",
+    "signIn": "J’ai déjà un compte",
+    "sameEmail": "Utilisez l’adresse {email} : l’invitation lui est réservée.",
+    "otherAccount": "Vous êtes connecté avec {current}, mais l’invitation est destinée à {email}.",
+    "switchAccount": "Changer de compte",
+    "join": "Rejoindre {organization}",
+    "joined": "Bienvenue dans l’équipe de {organization}.",
+    "goHome": "Aller à l’accueil",
+    "invalid": {
+      "title": "Lien non valable",
+      "description": "Ce lien d’invitation n’existe pas ou plus. Demandez une nouvelle invitation."
+    },
+    "state": {
+      "EXPIRED": {
+        "title": "Invitation expirée",
+        "description": "Ce lien a expiré. Demandez à la personne qui vous a invité de le renvoyer."
+      },
+      "ACCEPTED": {
+        "title": "Invitation déjà acceptée",
+        "description": "Cette invitation à rejoindre {organization} a déjà été utilisée."
+      },
+      "REVOKED": {
+        "title": "Invitation annulée",
+        "description": "Cette invitation à rejoindre {organization} a été annulée."
+      }
+    },
+    "eyebrow": "Invitation"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "open": "{count, plural, =0 {Notifications} one {Notifications, # non lue} other {Notifications, # non lues}}",
+    "unread": "{count, plural, one {# non lue} other {# non lues}}",
+    "allRead": "Tout est lu.",
+    "markAllRead": "Tout marquer comme lu",
+    "settings": "Réglages",
+    "empty": {
+      "title": "Rien de nouveau",
+      "description": "Les alertes de stock et les nouvelles de l’équipe s’afficheront ici."
+    },
+    "settingsTitle": "Notifications",
+    "settingsDescription": "Chaque avis s’affiche toujours dans l’application. Choisissez ceux que vous recevez aussi par e-mail.",
+    "email": "Recevoir aussi par e-mail",
+    "emailHint": "À l’adresse de votre compte.",
+    "emailOn": "E-mail activé.",
+    "emailOff": "E-mail coupé.",
+    "types": {
+      "STOCK_ALERT": {
+        "name": "Stock à commander",
+        "when": "Après une sortie, quand des articles passent au seuil d’alerte ou en rupture dans un de vos dépôts.",
+        "title": "{count, plural, one {# article à commander} other {# articles à commander}} · {warehouse}",
+        "line": "{name} : {quantity} (seuil {threshold})",
+        "others": "{count, plural, one {et # autre} other {et # autres}}"
+      },
+      "MEMBER_JOINED": {
+        "name": "Nouveau membre",
+        "when": "Quand une personne que vous avez invitée rejoint l’équipe.",
+        "title": "{name} a rejoint l’équipe",
+        "detail": "Invitation acceptée."
+      },
+      "INVITATION_RECEIVED": {
+        "name": "Invitation reçue",
+        "when": "Quand une entreprise vous invite.",
+        "title": "{inviter} vous invite à rejoindre {organization}",
+        "titleAnonymous": "Invitation à rejoindre {organization}",
+        "detail": "Ouvrez-la pour rejoindre l’équipe."
+      },
+      "ACCESS_CHANGED": {
+        "name": "Accès Stock",
+        "when": "Quand votre rôle ou vos dépôts changent.",
+        "title": "Votre accès Stock a changé",
+        "detail": "Vous êtes {role} : {warehouses}.",
+        "revoked": "Vous n’avez plus accès au stock de cette entreprise."
+      }
+    }
   }
 }

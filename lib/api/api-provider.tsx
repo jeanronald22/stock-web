@@ -8,6 +8,7 @@ import { useRuntimeConfig } from "@/components/providers/runtime-config-provider
 import { useActiveOrganization } from "@/lib/organization/active-organization"
 
 import { createApiClient, type ApiClient } from "./http"
+import { notificationApi } from "./notifications"
 import { platformApi } from "./platform"
 import { stockApi } from "./stock"
 import { supplierApi } from "./suppliers"
@@ -18,6 +19,7 @@ type Api = {
   stock: ReturnType<typeof stockApi>
   vouchers: ReturnType<typeof voucherApi>
   suppliers: ReturnType<typeof supplierApi>
+  notifications: ReturnType<typeof notificationApi>
 }
 
 const ApiContext = createContext<Api | null>(null)
@@ -41,6 +43,7 @@ export function ApiProvider({ children }: { children: React.ReactNode }) {
       stock: stockApi(send),
       vouchers: voucherApi(send),
       suppliers: supplierApi(send),
+      notifications: notificationApi(send),
     }
   }, [apiUrl, token, locale, activeOrganizationId])
 

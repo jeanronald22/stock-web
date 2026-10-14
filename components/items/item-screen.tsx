@@ -11,12 +11,19 @@ import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
-import { CatalogStatus, type Item, type Warehouse } from "@/lib/api/stock"
+import { useStockAccess } from "@/components/workspace/stock-access"
+import {
+  CatalogStatus,
+  type Item,
+  type Warehouse,
+  StockPermission,
+} from "@/lib/api/stock"
 import { useItem, useItemStatus, useWarehouses } from "@/lib/api/stock-queries"
 import { useErrorMessage } from "@/lib/api/use-error-message"
 import { Routes } from "@/lib/routes"
 
 import { ItemForm } from "./item-form"
+import { ItemThresholds } from "./item-thresholds"
 import { ItemStockPanel } from "./item-stock-panel"
 
 function FormSkeleton() {
@@ -77,6 +84,8 @@ function ItemDetails({
   const t = useTranslations()
   const errorMessage = useErrorMessage()
   const status = useItemStatus()
+  const { can } = useStockAccess()
+  const manages = can(StockPermission.manageCatalog)
   const archived = item.status === CatalogStatus.archived
 
   const changeStatus = (target: CatalogStatus) =>
@@ -108,23 +117,33 @@ function ItemDetails({
             {archived && (
               <Badge variant="secondary">{t("items.restore.badge")}</Badge>
             )}
-            <ArchiveControl
-              archived={archived}
-              pending={status.isPending}
-              archiveLabels={{
-                action: t("items.archive.action"),
-                title: t("items.archive.title"),
-                description: t("items.archive.description"),
-              }}
-              restoreLabel={t("items.restore.action")}
-              onArchive={() => changeStatus(CatalogStatus.archived)}
-              onRestore={() => changeStatus(CatalogStatus.active)}
-            />
+            {manages && (
+              <ArchiveControl
+                archived={archived}
+                pending={status.isPending}
+                archiveLabels={{
+                  action: t("items.archive.action"),
+                  title: t("items.archive.title"),
+                  description: t("items.archive.description"),
+                }}
+                restoreLabel={t("items.restore.action")}
+                onArchive={() => changeStatus(CatalogStatus.archived)}
+                onRestore={() => changeStatus(CatalogStatus.active)}
+              />
+            )}
           </>
         }
       />
       <ItemStockPanel item={item} />
-      <ItemForm item={item} warehouses={warehouses} onConflict={onReload} />
+      {!manages && can(StockPermission.setThresholds) && (
+        <ItemThresholds item={item} warehouses={warehouses} />
+      )}
+      <ItemForm
+        item={item}
+        warehouses={warehouses}
+        onConflict={onReload}
+        readOnly={!manages}
+      />
     </PageBody>
   )
 }

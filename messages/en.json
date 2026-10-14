@@ -13,7 +13,12 @@
     "newIssue": "New issue",
     "stock": "Stock",
     "suppliers": "Suppliers",
-    "newSupplier": "New supplier"
+    "newSupplier": "New supplier",
+    "team": "Team",
+    "invitation": "Invitation",
+    "newInvitation": "Invite someone",
+    "member": "Member",
+    "notifications": "Notifications"
   },
   "common": {
     "retry": "Try again",
@@ -25,7 +30,8 @@
     "cancel": "Cancel",
     "save": "Save",
     "optional": "optional",
-    "reload": "Reload"
+    "reload": "Reload",
+    "close": "Close"
   },
   "languages": {
     "label": "Language",
@@ -115,6 +121,14 @@
       "OWNER": "Owner",
       "ADMIN": "Administrator",
       "MEMBER": "Member"
+    },
+    "invitedTitle": "You are invited to a team",
+    "invitedDescription": "Join the business that invites you, or create your own.",
+    "createOwn": "Create my own business",
+    "invitations": {
+      "title": "{count, plural, one {Invitation received} other {Invitations received}}",
+      "from": "{inviter} invites you · {role}",
+      "join": "Join"
     }
   },
   "dashboard": {
@@ -136,7 +150,9 @@
       },
       "team": {
         "title": "Invite your team",
-        "description": "Your storekeepers will receive their invitation by email."
+        "description": "Storekeepers, controllers, managers: each one receives a link by email.",
+        "action": "Invite someone",
+        "done": "{count, plural, one {# person invited} other {# people invited}}"
       },
       "receipt": {
         "title": "Record a receipt",
@@ -162,7 +178,8 @@
     "warehouses": "Depots",
     "vouchers": "Vouchers",
     "stock": "Stock",
-    "suppliers": "Suppliers"
+    "suppliers": "Suppliers",
+    "team": "Team"
   },
   "workspace": {
     "toggleSidebar": "Show or hide the menu",
@@ -450,7 +467,9 @@
       "packagings": "Packagings",
       "warehouses": "Depots"
     },
-    "moreWarehouses": "+{count}"
+    "moreWarehouses": "+{count}",
+    "thresholdSaved": "Threshold saved for {warehouse}.",
+    "saveThreshold": "Save the threshold for {warehouse}"
   },
   "pagination": {
     "range": "{from}–{to} of {total}",
@@ -736,5 +755,225 @@
     "deleted": "Category “{name}” deleted.",
     "save": "Save",
     "cancel": "Cancel"
+  },
+  "access": {
+    "readOnly": "Read only: your role does not allow editing this record.",
+    "none": {
+      "title": "No Stock access yet",
+      "description": "Your role does not give access to this business’s stock. Ask the owner or an administrator to assign you a role and warehouses."
+    }
+  },
+  "team": {
+    "title": "Team",
+    "description": "Invite your colleagues and choose what each one can do, warehouse by warehouse.",
+    "invitations": "Pending invitations",
+    "you": "you",
+    "disabled": "Disabled",
+    "pending": "Pending",
+    "expired": "Expired",
+    "expiresOn": "valid until {date}",
+    "invitationActions": "Actions for the invitation of {email}",
+    "disable": "Disable",
+    "enable": "Enable",
+    "disabledDone": "{name} no longer has access to the business.",
+    "enabled": "{name} has access to the business again.",
+    "resend": "Resend the invitation",
+    "revoke": "Cancel the invitation",
+    "revoked": "Invitation for {email} cancelled.",
+    "role": {
+      "label": "Team role",
+      "OWNER": {
+        "label": "Owner",
+        "hint": "Created the business; manages everything."
+      },
+      "ADMIN": {
+        "label": "Administrator",
+        "hint": "Invites and manages team members."
+      },
+      "MEMBER": {
+        "label": "Member",
+        "hint": "Works according to their Stock role, without managing the team."
+      },
+      "description": "An administrator invites and manages team members.",
+      "ownerOnly": "Only the owner appoints or removes an administrator."
+    },
+    "stockRoles": {
+      "label": "Stock role",
+      "title": "Stock access",
+      "warehouses": "Assigned warehouses",
+      "noWarehouse": "No active warehouse: create a warehouse first.",
+      "allWarehouses": "all warehouses",
+      "ownerFixed": "by default",
+      "GENERAL_MANAGER": {
+        "label": "General manager",
+        "hint": "All warehouses, all stock: catalogue, warehouses, thresholds, vouchers."
+      },
+      "MANAGER": {
+        "label": "Manager",
+        "hint": "In charge of their warehouses: catalogue, thresholds, vouchers, corrections."
+      },
+      "CONTROLLER": {
+        "label": "Controller",
+        "hint": "Their warehouses: receipts, issues, corrections and alert thresholds."
+      },
+      "STOREKEEPER": {
+        "label": "Storekeeper",
+        "hint": "Their warehouses: receipts and issues."
+      },
+      "NONE": {
+        "label": "No Stock access",
+        "hint": "Only manages the team, or does not use Stock yet."
+      }
+    },
+    "access": {
+      "description": "The role decides what the person can do; the warehouses, where they can do it.",
+      "saved": "Stock access for {name} saved."
+    },
+    "invite": {
+      "open": "Invite",
+      "email": "Email address",
+      "emailPlaceholder": "awa@example.com",
+      "submit": "Send the invitation",
+      "sent": "Invitation sent to {email}. You can also share the link with them.",
+      "notSent": "The email could not be sent: share the link with {email}, on WhatsApp for example."
+    },
+    "link": {
+      "title": "Invitation link",
+      "label": "Invitation link",
+      "copy": "Copy the link",
+      "copyFailed": "Copy failed: select the link and copy it.",
+      "whatsapp": "Send on WhatsApp",
+      "message": "Hello, I invite you to join {organization} on Kreskala: {link}",
+      "hint": "This link is shown only once. To get a new one, resend the invitation."
+    },
+    "membersOnly": {
+      "title": "For team managers",
+      "description": "Only the owner and administrators manage the team."
+    },
+    "empty": {
+      "title": "Invite your team",
+      "description": "Storekeepers, controllers, managers: each one receives a link and works in their warehouses, according to their role."
+    },
+    "table": {
+      "person": "Person",
+      "role": "Role",
+      "stock": "Stock access",
+      "email": "Address",
+      "expiry": "Valid until"
+    },
+    "memberNotFound": {
+      "title": "Member not found",
+      "description": "This person is not part of the team."
+    },
+    "disableConfirm": {
+      "title": "Disable {name}?",
+      "description": "This person will no longer have access to the business. Their vouchers stay in the history; you can enable them again."
+    },
+    "ownerDescription": "The owner created the business: they manage the team and are general manager in Stock, by default.",
+    "wizard": {
+      "eyebrow": "New invitation",
+      "email": {
+        "title": "Who are you inviting?",
+        "description": "They receive a link by email, valid for 7 days, and will sign in with this address."
+      },
+      "role": {
+        "title": "What team role?",
+        "description": "An administrator can in turn invite and manage members."
+      },
+      "stockRole": {
+        "title": "What will they do in Stock?",
+        "description": "The role decides what they can do. You can change it at any time."
+      },
+      "warehouses": {
+        "title": "In which warehouses?",
+        "description": "They will only see and move the stock of these warehouses.",
+        "required": "Choose at least one warehouse."
+      }
+    },
+    "sent": {
+      "title": "Invitation ready",
+      "backToTeam": "Back to the team",
+      "inviteAnother": "Invite someone else"
+    }
+  },
+  "invitation": {
+    "loading": "Opening the invitation…",
+    "title": "{inviter} invites you to join {organization}",
+    "titleAnonymous": "You are invited to join {organization}",
+    "sentTo": "Invitation addressed to {email}.",
+    "createAccount": "Create my account",
+    "signIn": "I already have an account",
+    "sameEmail": "Use the address {email}: the invitation is reserved for it.",
+    "otherAccount": "You are signed in as {current}, but the invitation is for {email}.",
+    "switchAccount": "Switch account",
+    "join": "Join {organization}",
+    "joined": "Welcome to the {organization} team.",
+    "goHome": "Go to home",
+    "invalid": {
+      "title": "Invalid link",
+      "description": "This invitation link does not exist or no longer exists. Ask for a new invitation."
+    },
+    "state": {
+      "EXPIRED": {
+        "title": "Invitation expired",
+        "description": "This link has expired. Ask the person who invited you to resend it."
+      },
+      "ACCEPTED": {
+        "title": "Invitation already accepted",
+        "description": "This invitation to join {organization} has already been used."
+      },
+      "REVOKED": {
+        "title": "Invitation cancelled",
+        "description": "This invitation to join {organization} has been cancelled."
+      }
+    },
+    "eyebrow": "Invitation"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "open": "{count, plural, =0 {Notifications} one {Notifications, # unread} other {Notifications, # unread}}",
+    "unread": "{count, plural, one {# unread} other {# unread}}",
+    "allRead": "All caught up.",
+    "markAllRead": "Mark all as read",
+    "settings": "Settings",
+    "empty": {
+      "title": "Nothing new",
+      "description": "Stock alerts and team news will show up here."
+    },
+    "settingsTitle": "Notifications",
+    "settingsDescription": "Every notice always shows in the app. Choose which ones you also receive by email.",
+    "email": "Also receive by email",
+    "emailHint": "At your account address.",
+    "emailOn": "Email on.",
+    "emailOff": "Email off.",
+    "types": {
+      "STOCK_ALERT": {
+        "name": "Stock to reorder",
+        "when": "After an issue, when items reach the alert threshold or run out in one of your warehouses.",
+        "title": "{count, plural, one {# item to reorder} other {# items to reorder}} · {warehouse}",
+        "line": "{name}: {quantity} (threshold {threshold})",
+        "others": "{count, plural, one {and # other} other {and # others}}"
+      },
+      "MEMBER_JOINED": {
+        "name": "New member",
+        "when": "When someone you invited joins the team.",
+        "title": "{name} joined the team",
+        "detail": "Invitation accepted."
+      },
+      "INVITATION_RECEIVED": {
+        "name": "Invitation received",
+        "when": "When a business invites you.",
+        "title": "{inviter} invites you to join {organization}",
+        "titleAnonymous": "Invitation to join {organization}",
+        "detail": "Open it to join the team."
+      },
+      "ACCESS_CHANGED": {
+        "name": "Stock access",
+        "when": "When your role or warehouses change.",
+        "title": "Your Stock access has changed",
+        "detail": "You are {role}: {warehouses}.",
+        "revoked": "You no longer have access to this business’s stock."
+      }
+    }
   }
 }

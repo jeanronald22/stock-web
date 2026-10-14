@@ -29,12 +29,13 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
-import { CatalogStatus } from "@/lib/api/stock"
+import { CatalogStatus, StockPermission } from "@/lib/api/stock"
 import { useSuppliersPage } from "@/lib/api/supplier-queries"
 import { useListParams } from "@/lib/list/use-list-params"
 import { RecordRoutes, Routes } from "@/lib/routes"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
 import { cn } from "@/lib/utils"
+import { useStockAccess } from "@/components/workspace/stock-access"
 
 const SEARCH_DELAY_MS = 300
 const SKELETON_ROWS = 6
@@ -61,7 +62,8 @@ export function SuppliersScreen() {
   const empty = suppliers.isSuccess && total === 0 && !text && !archived
   usePageTour("suppliers", { ready: suppliers.isSuccess })
 
-  const newButton = (
+  const allowed = useStockAccess().can(StockPermission.manageCatalog)
+  const newButton = allowed && (
     <Link
       href={Routes.newSupplier}
       className={buttonVariants({ size: "lg" })}
@@ -77,14 +79,14 @@ export function SuppliersScreen() {
       <PageHeader
         title={t("title")}
         description={t("description")}
-        actions={empty ? undefined : newButton}
+        actions={empty || !newButton ? undefined : newButton}
       />
       {empty ? (
         <EmptyState
           illustration={<TruckScene />}
           title={t("empty.title")}
           description={t("empty.description")}
-          action={newButton}
+          action={newButton || undefined}
         />
       ) : (
         <>

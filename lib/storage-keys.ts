@@ -7,4 +7,6 @@ export const StorageKeys = {
   toursSeenPrefix: "kreskala.tours-seen.",
   /** Dernier dépôt d'une saisie de bon, par personne et par entreprise : déjà choisi la fois suivante. */
   lastWarehousePrefix: "kreskala.last-warehouse.",
+  /** Lien d'invitation ouvert avant la connexion : on y revient après (création de compte comprise). */
+  pendingInvitation: "kreskala.pending-invitation",
 } as const

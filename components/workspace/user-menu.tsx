@@ -1,6 +1,11 @@
 "use client"
 
-import { ChevronsUpDownIcon, LanguagesIcon, LogOutIcon } from "lucide-react"
+import {
+  BellIcon,
+  ChevronsUpDownIcon,
+  LanguagesIcon,
+  LogOutIcon,
+} from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
 import { useAuth } from "react-oidc-context"
@@ -28,6 +33,7 @@ import {
 import { isAppLocale, locales } from "@/i18n/locales"
 import { initials } from "@/lib/format"
 import { rememberLocale } from "@/lib/locale-preference"
+import { Routes } from "@/lib/routes"
 
 import { useWorkspace } from "./workspace-context"
 
@@ -74,6 +80,12 @@ export function UserMenu() {
               </DropdownMenuLabel>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => router.push(Routes.notificationSettings)}
+            >
+              <BellIcon />
+              {t("notifications.settingsTitle")}
+            </DropdownMenuItem>
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
                 <LanguagesIcon />
