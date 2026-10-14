@@ -28,6 +28,12 @@ export type ApiRequest = {
   body?: unknown
   /** Clé stable entre deux essais de la même action, pour que l'API ne la traite qu'une fois. */
   idempotencyKey?: string
+  /**
+   * Route métier, propre à l'entreprise active : l'en-tête X-Organization-Id est envoyé. Les routes
+   * du compte (/v1/me, /v1/organizations) ne l'envoient pas : une entreprise oubliée ou retirée ne
+   * doit pas empêcher la personne de retrouver son compte.
+   */
+  organizationScoped?: boolean
 }
 
 export type ApiClientDependencies = {
@@ -47,33 +53,50 @@ export function createApiClient(deps: ApiClientDependencies): ApiClient {
     })
     const token = deps.getAccessToken()
     if (token) headers.set(StandardHeaders.authorization, `${BEARER} ${token}`)
-    const organizationId = deps.getOrganizationId()
+    const organizationId = request.organizationScoped
+      ? deps.getOrganizationId()
+      : null
     if (organizationId) headers.set(ApiHeaders.organizationId, organizationId)
-    if (request.idempotencyKey) headers.set(ApiHeaders.idempotencyKey, request.idempotencyKey)
-    if (request.body !== undefined) headers.set(StandardHeaders.contentType, JSON_TYPE)
+    if (request.idempotencyKey)
+      headers.set(ApiHeaders.idempotencyKey, request.idempotencyKey)
+    if (request.body !== undefined)
+      headers.set(StandardHeaders.contentType, JSON_TYPE)
 
     let response: Response
     try {
       response = await fetch(new URL(request.path, deps.baseUrl), {
         method: request.method,
         headers,
-        body: request.body === undefined ? undefined : JSON.stringify(request.body),
+        body:
+          request.body === undefined ? undefined : JSON.stringify(request.body),
       })
     } catch {
       throw new ApiError(0, ProblemCode.networkUnavailable, "", "")
     }
 
     if (response.ok) {
-      return (response.status === NO_CONTENT ? undefined : await response.json()) as T
+      return (
+        response.status === NO_CONTENT ? undefined : await response.json()
+      ) as T
     }
     throw await toApiError(response)
   }
 }
 
 async function toApiError(response: Response): Promise<ApiError> {
-  const retryAfter = Number(response.headers.get(ApiHeaders.retryAfter)) || undefined
-  if (!response.headers.get(StandardHeaders.contentType)?.includes(PROBLEM_JSON)) {
-    return new ApiError(response.status, ProblemCode.internalError, response.statusText, "", [], retryAfter)
+  const retryAfter =
+    Number(response.headers.get(ApiHeaders.retryAfter)) || undefined
+  if (
+    !response.headers.get(StandardHeaders.contentType)?.includes(PROBLEM_JSON)
+  ) {
+    return new ApiError(
+      response.status,
+      ProblemCode.internalError,
+      response.statusText,
+      "",
+      [],
+      retryAfter
+    )
   }
   const problem = (await response.json()) as {
     code?: string

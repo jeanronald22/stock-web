@@ -21,5 +21,22 @@ export const defaultCountry: CountryCode = countryCodes[0]
 
 /** Suggestions de saisie, sans limiter le choix : toute ville reste acceptée. */
 export const citySuggestions: Record<CountryCode, readonly string[]> = {
-  CM: ["Douala", "Yaoundé", "Bafoussam", "Bamenda", "Garoua", "Maroua", "Ngaoundéré", "Bertoua", "Limbé", "Kribi", "Ebolowa", "Buea", "Kumba", "Edéa", "Dschang", "Nkongsamba"],
+  CM: [
+    "Douala",
+    "Yaoundé",
+    "Bafoussam",
+    "Bamenda",
+    "Garoua",
+    "Maroua",
+    "Ngaoundéré",
+    "Bertoua",
+    "Limbé",
+    "Kribi",
+    "Ebolowa",
+    "Buea",
+    "Kumba",
+    "Edéa",
+    "Dschang",
+    "Nkongsamba",
+  ],
 }

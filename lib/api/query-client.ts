@@ -13,11 +13,14 @@ const STALE_TIME_MS = 30_000
  * délai Retry-After de l'API. Une erreur métier (4xx) est affichée tout de suite.
  */
 function shouldRetry(failureCount: number, error: unknown): boolean {
-  return error instanceof ApiError && error.isRetryable && failureCount < MAX_RETRIES
+  return (
+    error instanceof ApiError && error.isRetryable && failureCount < MAX_RETRIES
+  )
 }
 
 function retryDelay(attempt: number, error: unknown): number {
-  if (error instanceof ApiError && error.retryAfterSeconds) return error.retryAfterSeconds * SECOND_MS
+  if (error instanceof ApiError && error.retryAfterSeconds)
+    return error.retryAfterSeconds * SECOND_MS
   return Math.min(BASE_DELAY_MS * 2 ** attempt, MAX_DELAY_MS)
 }
 
@@ -25,7 +28,12 @@ function retryDelay(attempt: number, error: unknown): number {
 export function createQueryClient(): QueryClient {
   return new QueryClient({
     defaultOptions: {
-      queries: { retry: shouldRetry, retryDelay, staleTime: STALE_TIME_MS, refetchOnWindowFocus: true },
+      queries: {
+        retry: shouldRetry,
+        retryDelay,
+        staleTime: STALE_TIME_MS,
+        refetchOnWindowFocus: true,
+      },
       mutations: { retry: shouldRetry, retryDelay },
     },
   })

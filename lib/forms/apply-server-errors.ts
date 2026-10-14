@@ -11,10 +11,19 @@ export function applyServerErrors<T extends FieldValues>(
   fields: readonly Path<T>[],
   setError: UseFormSetError<T>
 ): boolean {
-  if (!(error instanceof ApiError) || error.code !== ProblemCode.validationFailed) return false
-  const known = error.fieldErrors.filter((fieldError) => fields.includes(fieldError.field as Path<T>))
+  if (
+    !(error instanceof ApiError) ||
+    error.code !== ProblemCode.validationFailed
+  )
+    return false
+  const known = error.fieldErrors.filter((fieldError) =>
+    fields.includes(fieldError.field as Path<T>)
+  )
   known.forEach((fieldError) =>
-    setError(fieldError.field as Path<T>, { type: "server", message: fieldError.message })
+    setError(fieldError.field as Path<T>, {
+      type: "server",
+      message: fieldError.message,
+    })
   )
   return known.length > 0
 }
