@@ -1,7 +1,7 @@
 # Journal des décisions
 
 Projet : SaaS de gestion de stock pour PME (premier produit d'une famille de logiciels).
-Dernière mise à jour : 2026-10-13
+Dernière mise à jour : 2026-10-14
 
 ---
 
@@ -152,8 +152,16 @@ Côté utilisateur, ce sont les écrans de « Mon compte » : créer son entrepr
 - **Parcours** : connexion → inscription en deux écrans (nom, puis structure) → accueil ; choix d'entreprise si plusieurs ; entreprise active retenue sur l'appareil.
 - **Tests de bout en bout** : Playwright contre la pile réelle, sur téléphone et ordinateur.
 
+## D17. Connexion par e-mail et mot de passe au lancement (2026-10-14)
+- **Décision** : au lancement, connexion par adresse e-mail et mot de passe. La connexion par code SMS/WhatsApp (D8, extension Keycloak) coûte trop cher à ce stade ; elle reste dans le code et se réactive en liant le flux « kreskala browser » au realm.
+- **Adresse confirmée obligatoire** (lien reçu par e-mail) : évite les faux comptes et rend sûr le mot de passe oublié. Le KYB de niveau 0 (D6) repose donc sur un e-mail vérifié au lieu d'un téléphone vérifié.
+- **Mot de passe** : 10 caractères au moins, sans règles de composition (recommandation NIST 800-63B) ; protection contre la force brute conservée.
+- **E-mails** : SMTP configurable (variables `SMTP_*`), Mailpit en local. Le fournisseur de production reste à choisir.
+- **Téléphone** : facultatif sur le profil ; il servira aux invitations WhatsApp et au retour de la connexion par code.
+
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
 - [ ] Nom de la marque et nom du produit de stock (voir D7). Pistes : Kreskala, Kreskio, Tissero, NarvalWorks, FourmiLabs.
 - [ ] Texte exact de la loi camerounaise sur les données personnelles et obligations associées.
 - [ ] Agrégateur de paiement mobile money.
+- [ ] Fournisseur d'envoi d'e-mails en production (D17).
