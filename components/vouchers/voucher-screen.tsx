@@ -85,6 +85,10 @@ export function VoucherScreen({ id }: { id: string }) {
     <PageBody>
       <PageHeader
         title={data.number}
+        breadcrumbs={[
+          { label: t("vouchers.title"), href: Routes.vouchers },
+          { label: data.number },
+        ]}
         description={t("vouchers.detail.recordedAt", {
           date: format.dateTime(new Date(data.recordedAt), {
             dateStyle: "long",

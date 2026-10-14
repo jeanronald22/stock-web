@@ -183,6 +183,10 @@ function VoucherEntryForm({
     <PageBody>
       <PageHeader
         title={t(`vouchers.entry.${type}.title`)}
+        breadcrumbs={[
+          { label: t("vouchers.title"), href: Routes.vouchers },
+          { label: t(`vouchers.entry.${type}.title`) },
+        ]}
         description={t(`vouchers.entry.${type}.description`)}
       />
       <form

@@ -162,7 +162,8 @@
   },
   "workspace": {
     "toggleSidebar": "Afficher ou masquer le menu",
-    "guide": "Guide"
+    "guide": "Guide",
+    "breadcrumbs": "Fil d’Ariane"
   },
   "tours": {
     "progress": "{current} sur {total}",
@@ -567,7 +568,7 @@
       "deliveredBy": "Livré par (nom et signature)",
       "receivedBy": "Reçu par (nom et signature)",
       "signature": "Signature",
-      "footer": "Enregistré le {date}. Un bon validé ne se modifie pas."
+      "footer": "Enregistré le {date}."
     }
   },
   "stock": {

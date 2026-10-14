@@ -162,7 +162,8 @@
   },
   "workspace": {
     "toggleSidebar": "Show or hide the menu",
-    "guide": "Guide"
+    "guide": "Guide",
+    "breadcrumbs": "Breadcrumb"
   },
   "tours": {
     "progress": "{current} of {total}",
@@ -567,7 +568,7 @@
       "deliveredBy": "Delivered by (name and signature)",
       "receivedBy": "Received by (name and signature)",
       "signature": "Signature",
-      "footer": "Recorded on {date}. An approved voucher cannot be changed."
+      "footer": "Recorded on {date}."
     }
   },
   "stock": {

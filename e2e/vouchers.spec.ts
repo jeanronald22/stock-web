@@ -1,7 +1,10 @@
+import path from "node:path"
+
 import { expect, test, type Page } from "@playwright/test"
 
 import {
   callApi,
+  uploadItemPhoto,
   dismissTour,
   navigateTo,
   redirectApi,
@@ -32,8 +35,9 @@ test("réception puis sortie : le stock suit, une sortie trop forte est refusée
     name: "Dépôt Bonabéri",
     kind: "WAREHOUSE",
   })
+  const cementId = crypto.randomUUID()
   await callApi(page, "POST", "/v1/items", {
-    id: crypto.randomUUID(),
+    id: cementId,
     name: "Ciment CPJ 42,5",
     baseUnit: "PIECE",
     packagings: [{ name: "Palette", quantity: 40 }],
@@ -47,6 +51,12 @@ test("réception puis sortie : le stock suit, une sortie trop forte est refusée
     packagings: [{ name: "Carton", quantity: 1.44 }],
     warehouseIds: [warehouseId],
   })
+
+  await uploadItemPhoto(
+    page,
+    cementId,
+    path.join(import.meta.dirname, "fixtures", "carreau.png")
+  )
 
   await navigateTo(page, "Bons")
   await expect(
@@ -125,11 +135,32 @@ test("réception puis sortie : le stock suit, une sortie trop forte est refusée
   await expect(page.locator("dl").getByText("Awa Bello")).toBeVisible()
   await shot(page, testInfo, "02-bon-reception")
   await expect(page.locator("dl").getByText("Cimencam")).toBeVisible()
+  // Mode sombre : fiche et barre latérale (bandeau vert de l'onglet actif).
+  await page.emulateMedia({ colorScheme: "dark" })
+  await shot(page, testInfo, "02a-bon-sombre")
+  await page.emulateMedia({ colorScheme: "light" })
   await page.getByRole("link", { name: "Imprimer" }).click()
   await expect(page.getByText("Bon de réception")).toBeVisible()
   await expect(page.getByText("Livré par (nom et signature)")).toBeVisible()
+  const printedPhoto = page.locator(".voucher-sheet img").first()
+  await expect
+    .poll(() =>
+      printedPhoto.evaluate((image: HTMLImageElement) => image.naturalWidth)
+    )
+    .toBeGreaterThan(0)
+  await expect(page.getByText("Un bon validé ne se modifie pas")).toBeHidden()
   await shot(page, testInfo, "02b-bon-imprimable")
+  // Le PDF, tel que l'imprime le navigateur, contient bien la photo.
+  const pdf = await page.pdf({ format: "A4", printBackground: true })
+  expect(pdf.toString("latin1")).toContain("/Subtype /Image")
   await page.getByRole("link", { name: "Retour au bon" }).click()
+  await page
+    .getByRole("navigation", { name: "Fil d’Ariane" })
+    .getByRole("link", { name: "Bons" })
+    .click()
+  await expect(
+    page.getByRole("heading", { name: "Bons", exact: true })
+  ).toBeVisible()
 
   // La réception a rempli le catalogue du fournisseur.
   await navigateTo(page, "Fournisseurs")

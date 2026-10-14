@@ -98,6 +98,10 @@ function WarehouseDetails({
     <PageBody>
       <PageHeader
         title={warehouse.name}
+        breadcrumbs={[
+          { label: t("title"), href: Routes.warehouses },
+          { label: warehouse.name },
+        ]}
         description={t(`kinds.${warehouse.kind}.label`)}
         className="mb-8"
         actions={

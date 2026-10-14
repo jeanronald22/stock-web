@@ -16,10 +16,13 @@ export function ItemThumb({
   imageUrl,
   size = "md",
   className,
+  eager = false,
 }: {
   imageUrl: string | null | undefined
   size?: keyof typeof SIZES
   className?: string
+  /** Chargée tout de suite : à l'impression, une image différée peut manquer au PDF. */
+  eager?: boolean
 }) {
   const fileUrl = useFileUrl()
   const src = fileUrl(imageUrl ?? null)
@@ -37,7 +40,7 @@ export function ItemThumb({
         <img
           src={src}
           alt=""
-          loading="lazy"
+          loading={eager ? "eager" : "lazy"}
           className="size-full object-cover"
         />
       ) : (

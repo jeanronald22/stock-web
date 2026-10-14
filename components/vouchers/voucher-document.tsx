@@ -56,7 +56,7 @@ function VoucherSheet({ voucher }: { voucher: Voucher }) {
           <ArrowLeftIcon />
           {t("print.back")}
         </Link>
-        <Button size="lg" onClick={() => window.print()}>
+        <Button size="lg" onClick={() => void printWhenImagesReady()}>
           <PrinterIcon />
           {t("print.action")}
         </Button>
@@ -112,8 +112,8 @@ function VoucherSheet({ voucher }: { voucher: Voucher }) {
                   <div className="flex items-center gap-3">
                     <ItemThumb
                       imageUrl={line.itemImageUrl}
-                      size="sm"
-                      className="print:bg-neutral-100"
+                      eager
+                      className="bg-neutral-100 text-emerald-700"
                     />
                     <div>
                       <p className="font-medium">{line.itemName}</p>
@@ -168,23 +168,35 @@ function VoucherSheet({ voucher }: { voucher: Voucher }) {
               }),
             })}
           </span>
-          <KreskalaLogo className="h-4" />
+          <KreskalaLogo tone="paper" className="h-4" />
         </footer>
       </article>
     </div>
   )
 }
 
+/** Les deux cases ont la même ligne de nom (vide pour l'autre partie) : elles restent alignées. */
 function Signature({ label, name }: { label: string; name?: string }) {
   const t = useTranslations("vouchers.print")
   return (
     <div>
       <p className="text-xs text-neutral-500">{label}</p>
-      {name && <p className="font-semibold">{name}</p>}
+      <p className="min-h-6 font-semibold">{name}</p>
       <div
         className="mt-2 h-20 rounded-lg border border-dashed border-neutral-400"
         aria-label={t("signature")}
       />
     </div>
   )
+}
+
+/** Imprime une fois toutes les photos chargées : sinon le PDF peut sortir sans elles. */
+async function printWhenImagesReady() {
+  const images = Array.from(
+    document.querySelectorAll<HTMLImageElement>(".voucher-sheet img")
+  )
+  await Promise.all(
+    images.map((image) => image.decode().catch(() => undefined))
+  )
+  window.print()
 }

@@ -14,6 +14,12 @@ const tones = {
     box: "fill-emerald-300",
     word: "fill-white",
   },
+  /** Documents imprimés : feuille blanche, même quand l'application est en mode sombre. */
+  paper: {
+    main: "fill-emerald-700",
+    box: "fill-emerald-500",
+    word: "fill-neutral-900",
+  },
 } as const
 
 /** Le symbole seul (le K) quand la place manque : charte, tailles minimales. */

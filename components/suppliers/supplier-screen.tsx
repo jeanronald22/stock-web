@@ -113,6 +113,10 @@ function SupplierDetails({
     <PageBody>
       <PageHeader
         title={supplier.name}
+        breadcrumbs={[
+          { label: t("suppliers.title"), href: Routes.suppliers },
+          { label: supplier.name },
+        ]}
         description={supplier.phone ?? supplier.email ?? undefined}
         className="mb-8"
         actions={
