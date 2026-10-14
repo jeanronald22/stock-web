@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl"
 import { useState } from "react"
 import { toast } from "sonner"
 
+import { ChoiceCard } from "@/components/catalog/choice-card"
 import { ArchiveControl } from "@/components/catalog/archive-control"
 import { EmptyState } from "@/components/catalog/empty-state"
 import { FormActions, FormSection } from "@/components/catalog/form-section"
@@ -37,7 +38,6 @@ import { Routes } from "@/lib/routes"
 
 import {
   AssignedWarehousesField,
-  ChoiceCard,
   needsWarehouses,
   NO_STOCK_ROLE,
   StockRoleField,

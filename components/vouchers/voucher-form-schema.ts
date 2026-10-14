@@ -6,9 +6,12 @@ import {
   type Item,
   type Packaging,
 } from "@/lib/api/stock"
+import type { CustomerKind } from "@/lib/api/customers"
 import {
   correctionTypes,
+  customerTypes,
   OTHER_REASON,
+  supplierTypes,
   VoucherLimits,
   VoucherType,
   type EntryType,
@@ -31,6 +34,7 @@ export type VoucherFormMessages = {
   futureDate: string
   reasonRequired: string
   noteRequired: string
+  exceedsOrigin: string
 }
 
 /** Copie de l'article choisi, pour convertir et vérifier la saisie sans relire l'API. */
@@ -60,6 +64,14 @@ export function voucherFormSchema(
       destinationWarehouseId: z.string(),
       // Réception : fournisseur de l'annuaire (son nom remplace le champ libre).
       supplier: z.custom<{ id: string; name: string } | null>(),
+      // Sortie, retour client : le client ou chantier de l'annuaire (D30).
+      customer: z.custom<{
+        id: string
+        name: string
+        kind: CustomerKind
+      } | null>(),
+      // Retour : le bon dont il part, vide pour un retour libre.
+      originId: z.string(),
       lines: z
         .array(
           z.object({
@@ -71,6 +83,8 @@ export function voucherFormSchema(
             batch: text(VoucherLimits.batch),
             // Réception : quantité annoncée par le bon de livraison, vide si non saisie.
             expected: z.string(),
+            // Retour depuis un bon : ce qui reste à retourner, en unité de base (D31).
+            limit: z.number().nullable(),
           })
         )
         .min(1, messages.linesRequired)
@@ -122,6 +136,11 @@ export function voucherFormSchema(
           !wholeQuantityUnits.has(line.item.baseUnit) ||
           Number.isInteger(baseQuantity(line.item, value, line.unit))
         if (!whole(entered)) issue("quantity", messages.wholeNumber)
+        if (
+          line.limit !== null &&
+          baseQuantity(line.item, entered, line.unit) > line.limit
+        )
+          issue("quantity", messages.exceedsOrigin)
         if (line.expected.trim()) {
           const expected = parseQuantity(line.expected)
           if (expected === null) issue("expected", messages.invalidNumber)
@@ -149,7 +168,10 @@ export function baseQuantity(
     : entered
 }
 
-export function newLine(item: Item): VoucherFormLine {
+/** Ligne proposée par un bon d'origine (retour) : lot imposé, plafond et quantité pré-remplie. */
+export type LinePreset = { batch: string; limit: number; quantity: string }
+
+export function newLine(item: Item, preset?: LinePreset): VoucherFormLine {
   return {
     key: crypto.randomUUID(),
     itemId: item.id,
@@ -160,10 +182,11 @@ export function newLine(item: Item): VoucherFormLine {
       batchTracking: item.batchTracking,
       packagings: item.packagings,
     },
-    quantity: "",
+    quantity: preset?.quantity ?? "",
     unit: BASE_UNIT_CHOICE,
-    batch: "",
+    batch: preset?.batch ?? "",
     expected: "",
+    limit: preset?.limit ?? null,
   }
 }
 
@@ -183,7 +206,16 @@ export function toVoucherInput(
   return {
     type,
     warehouseId: values.warehouseId,
-    supplierId: type === VoucherType.receipt ? values.supplier?.id : undefined,
+    // Depuis un bon, le tiers est repris de ce bon par l'API.
+    supplierId:
+      supplierTypes.has(type) && !values.originId
+        ? values.supplier?.id
+        : undefined,
+    customerId:
+      customerTypes.has(type) && !values.originId
+        ? values.customer?.id
+        : undefined,
+    originVoucherId: values.originId || undefined,
     // Aujourd'hui : l'API date l'opération de l'enregistrement. Un autre jour : midi, heure locale.
     occurredAt:
       values.occurredOn === today

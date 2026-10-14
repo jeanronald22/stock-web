@@ -7,6 +7,8 @@ import {
   ChevronDownIcon,
   ClipboardCheckIcon,
   PackageXIcon,
+  Redo2Icon,
+  Undo2Icon,
   DownloadIcon,
   EllipsisVerticalIcon,
   FileTextIcon,
@@ -78,6 +80,8 @@ const TYPE_ICONS: Record<VoucherType, LucideIcon> = {
   [VoucherType.transferIn]: ArrowRightLeftIcon,
   [VoucherType.damage]: PackageXIcon,
   [VoucherType.adjustment]: ClipboardCheckIcon,
+  [VoucherType.customerReturn]: Undo2Icon,
+  [VoucherType.supplierReturn]: Redo2Icon,
 }
 
 const TYPE_BADGES: Record<
@@ -90,6 +94,8 @@ const TYPE_BADGES: Record<
   [VoucherType.transferIn]: "info",
   [VoucherType.damage]: "danger",
   [VoucherType.adjustment]: "warning",
+  [VoucherType.customerReturn]: "success",
+  [VoucherType.supplierReturn]: "secondary",
 }
 
 export function VoucherTypeBadge({ type }: { type: VoucherType }) {
@@ -165,6 +171,24 @@ export function NewVoucherButtons({ className }: { className?: string }) {
               hint={t("operations.transfer")}
             />
           </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => router.push(Routes.newCustomerReturn)}
+          >
+            <Undo2Icon />
+            <OperationLabel
+              title={t("newCustomerReturn")}
+              hint={t("operations.customerReturn")}
+            />
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => router.push(Routes.newSupplierReturn)}
+          >
+            <Redo2Icon />
+            <OperationLabel
+              title={t("newSupplierReturn")}
+              hint={t("operations.supplierReturn")}
+            />
+          </DropdownMenuItem>
           {corrects && (
             <>
               <DropdownMenuSeparator />
@@ -205,18 +229,28 @@ export function VouchersScreen() {
   const t = useTranslations("vouchers")
   const format = useFormatter()
   const list = useListParams()
-  const { warehouseIds, voucherKind, supplierId, from, to, order, page, size } =
-    list.params
+  const {
+    warehouseIds,
+    voucherKind,
+    supplierId,
+    customerId,
+    from,
+    to,
+    order,
+    page,
+    size,
+  } = list.params
   const search = useMemo(
     () => ({
       ...(voucherKind && VOUCHER_KIND_SEARCH[voucherKind]),
       warehouseIds,
       supplierId,
+      customerId,
       from,
       to,
       order,
     }),
-    [voucherKind, warehouseIds, supplierId, from, to, order]
+    [voucherKind, warehouseIds, supplierId, customerId, from, to, order]
   )
   const vouchers = useVouchersPage(search, page, size)
   const total = vouchers.data?.total ?? 0

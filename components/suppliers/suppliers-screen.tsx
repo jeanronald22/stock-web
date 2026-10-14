@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl"
 import { useEffect, useMemo, useState } from "react"
 
 import { EmptyState } from "@/components/catalog/empty-state"
+import { ContactsTabs } from "@/components/customers/contacts-tabs"
 import { StatusFilter } from "@/components/catalog/status-filter"
 import { TablePagination } from "@/components/catalog/table-pagination"
 import { SearchScene } from "@/components/illustrations/search-scene"
@@ -81,6 +82,7 @@ export function SuppliersScreen() {
         description={t("description")}
         actions={empty || !newButton ? undefined : newButton}
       />
+      <ContactsTabs />
       {empty ? (
         <EmptyState
           illustration={<TruckScene />}
@@ -90,7 +92,7 @@ export function SuppliersScreen() {
         />
       ) : (
         <>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <InputGroup className="sm:max-w-md sm:flex-1">
               <InputGroupInput
                 type="search"

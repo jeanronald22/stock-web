@@ -1,6 +1,6 @@
 "use client"
 
-import { CalendarIcon, FileTextIcon, UserRoundIcon } from "lucide-react"
+import { CalendarIcon, FileTextIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useWatch, type UseFormReturn } from "react-hook-form"
 
@@ -19,16 +19,14 @@ import { Textarea } from "@/components/ui/textarea"
 import {
   correctionTypes,
   OTHER_REASON,
-  VoucherType,
   type EntryType,
 } from "@/lib/api/vouchers"
 
 import type { VoucherFormValues } from "./voucher-form-schema"
 
 /**
- * Fournisseur ou client, document, date et note : tout est facultatif sauf la date (et la note
- * d'une correction au motif « autre »). Un transfert n'a ni fournisseur ni client : son autre
- * bout est le dépôt d'arrivée.
+ * Document, date et note : tout est facultatif sauf la date (et la note d'une correction au motif
+ * « autre »). Le fournisseur ou le client se choisit dans l'annuaire, à côté du dépôt.
  */
 export function VoucherDetailsFields({
   form,
@@ -41,7 +39,6 @@ export function VoucherDetailsFields({
 }) {
   const t = useTranslations()
   const errors = form.formState.errors
-  const receipt = type === VoucherType.receipt
   const reason = useWatch({ control: form.control, name: "reason" })
   // Casse ou ajustement « autre » : la note dit ce qui s'est passé.
   const noteRequired = correctionTypes.has(type) && reason === OTHER_REASON
@@ -53,32 +50,6 @@ export function VoucherDetailsFields({
 
   return (
     <FieldGroup>
-      {/* Réception : le fournisseur se choisit dans l'annuaire, à côté du dépôt. */}
-      {type === VoucherType.issue && (
-        <Field data-invalid={!!errors.counterparty}>
-          <FieldLabel htmlFor="counterparty">
-            {receipt
-              ? t("vouchers.form.supplier")
-              : t("vouchers.form.customer")}{" "}
-            {optional}
-          </FieldLabel>
-          <InputGroup>
-            <InputGroupInput
-              id="counterparty"
-              placeholder={
-                receipt
-                  ? t("vouchers.form.supplierPlaceholder")
-                  : t("vouchers.form.customerPlaceholder")
-              }
-              {...form.register("counterparty")}
-            />
-            <InputGroupAddon>
-              <UserRoundIcon />
-            </InputGroupAddon>
-          </InputGroup>
-          <FieldError errors={[errors.counterparty]} />
-        </Field>
-      )}
       <Field data-invalid={!!errors.documentReference}>
         <FieldLabel htmlFor="documentReference">
           {t("vouchers.form.reference")} {optional}

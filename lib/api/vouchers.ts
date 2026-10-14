@@ -15,6 +15,7 @@ export const VoucherPaths = {
   voucher: (id: string) => `/v1/vouchers/${id}`,
   transferReceipt: (id: string) => `/v1/vouchers/${id}/receipt`,
   photos: (id: string) => `/v1/vouchers/${id}/photos`,
+  returnable: (id: string) => `/v1/vouchers/${id}/returnable`,
   stock: "/v1/stock",
   itemStock: (itemId: string) => `/v1/stock/items/${itemId}`,
 } as const
@@ -23,6 +24,7 @@ export const VoucherQueryParams = {
   type: "type",
   warehouseId: "warehouseId",
   supplierId: "supplierId",
+  customerId: "customerId",
   categoryId: "categoryId",
   stockState: "stockState",
   from: "from",
@@ -52,6 +54,8 @@ export const voucherTypes = [
   "TRANSFER_IN",
   "DAMAGE",
   "ADJUSTMENT",
+  "CUSTOMER_RETURN",
+  "SUPPLIER_RETURN",
 ] as const
 export type VoucherType = (typeof voucherTypes)[number]
 export const VoucherType = {
@@ -61,7 +65,33 @@ export const VoucherType = {
   transferIn: "TRANSFER_IN",
   damage: "DAMAGE",
   adjustment: "ADJUSTMENT",
+  customerReturn: "CUSTOMER_RETURN",
+  supplierReturn: "SUPPLIER_RETURN",
 } as const satisfies Record<string, VoucherType>
+
+/** Retour (D31) : le type du bon dont il peut partir (une sortie, une réception). */
+export const returnOrigins = {
+  [VoucherType.customerReturn]: VoucherType.issue,
+  [VoucherType.supplierReturn]: VoucherType.receipt,
+} as const satisfies Partial<Record<VoucherType, VoucherType>>
+export type ReturnVoucherType = keyof typeof returnOrigins
+
+/** Le retour qui part d'un bon de ce type, s'il y en a un. */
+export function returnTypeOf(type: VoucherType): ReturnVoucherType | undefined {
+  return (Object.keys(returnOrigins) as ReturnVoucherType[]).find(
+    (candidate) => returnOrigins[candidate] === type
+  )
+}
+
+/** Le tiers vient de l'annuaire des fournisseurs, ou de celui des clients (D30). */
+export const supplierTypes: ReadonlySet<VoucherType> = new Set([
+  VoucherType.receipt,
+  VoucherType.supplierReturn,
+])
+export const customerTypes: ReadonlySet<VoucherType> = new Set([
+  VoucherType.issue,
+  VoucherType.customerReturn,
+])
 
 /** Casse et ajustement corrigent le stock : droit de correction, motif obligatoire (D28). */
 export const correctionTypes: ReadonlySet<VoucherType> = new Set([
@@ -74,9 +104,12 @@ export const voucherReasons = {
   [VoucherType.damage]: ["BROKEN", "DAMAGED", "EXPIRED", "LOST", "OTHER"],
   [VoucherType.adjustment]: ["COUNT", "ENTRY_ERROR", "OTHER"],
 } as const
+/** Clôture d'un inventaire (D32) : posé par l'API, jamais proposé à la saisie. */
+export const INVENTORY_REASON = "INVENTORY"
 export type VoucherReason =
   | (typeof voucherReasons)[typeof VoucherType.damage][number]
   | (typeof voucherReasons)[typeof VoucherType.adjustment][number]
+  | typeof INVENTORY_REASON
 export const OTHER_REASON = "OTHER" satisfies VoucherReason
 
 /** Photos d'une casse (stock-api, StockLimits.PHOTOS_PER_VOUCHER). */
@@ -86,6 +119,7 @@ export const MAX_VOUCHER_PHOTOS = 5
 export const incomingTypes: ReadonlySet<VoucherType> = new Set([
   VoucherType.receipt,
   VoucherType.transferIn,
+  VoucherType.customerReturn,
 ])
 
 /** Mouvement signé d'une ligne, en unité de base : l'ajustement va du théorique au compté. */
@@ -108,7 +142,7 @@ export const TransferState = {
   received: "RECEIVED",
 } as const satisfies Record<string, TransferState>
 
-/** Autre bon d'un transfert : la réception d'un envoi, ou l'envoi d'une réception. */
+/** Bon lié : l'autre bon d'un transfert, le bon d'origine d'un retour, ou ses retours. */
 export type VoucherRef = { id: string; number: string; occurredAt: string }
 
 export type WarehouseRef = { id: string; name: string }
@@ -128,6 +162,7 @@ export type VoucherSummary = {
   warehouse: WarehouseRef
   occurredAt: string
   supplierId: string | null
+  customerId: string | null
   counterparty: string | null
   lineCount: number
   createdByName: string
@@ -167,6 +202,12 @@ export type Voucher = Omit<VoucherSummary, "lineCount"> & {
   transfer: VoucherRef | null
   /** Liens signés vers les photos (casse), relatifs à l'API (voir useFileUrl). */
   photoUrls: string[]
+  customerId: string | null
+  /** Retour : le bon dont il part. Sortie ou réception : les retours qui en partent (D31). */
+  origin: VoucherRef | null
+  returns: VoucherRef[]
+  /** Ajustement de clôture : l'inventaire dont il porte les écarts (D32). */
+  inventoryId: string | null
 }
 
 export type VoucherLineInput = {
@@ -182,8 +223,12 @@ export type VoucherLineInput = {
 export type VoucherInput = {
   type: VoucherType
   warehouseId: string
-  /** Réception : fournisseur de l'annuaire ; son nom remplace counterparty. */
+  /** Réception, retour fournisseur : fournisseur de l'annuaire ; son nom remplace counterparty. */
   supplierId?: string
+  /** Sortie, retour client : client ou chantier de l'annuaire (D30). */
+  customerId?: string
+  /** Retour : le bon dont il part ; tiers et référence en sont repris (D31). */
+  originVoucherId?: string
   occurredAt?: string
   counterparty?: string
   documentReference?: string
@@ -200,6 +245,23 @@ export type TransferReceiptInput = {
   occurredAt?: string
   note?: string
   lines: { quantity: number }[]
+}
+
+/** Ce qui peut encore revenir d'une ligne du bon d'origine, en unité de base. */
+export type ReturnableLine = {
+  item: Item
+  batch: string | null
+  quantity: number
+  returned: number
+  remaining: number
+}
+export type Returnable = {
+  origin: VoucherRef
+  type: VoucherType
+  /** Dépôt du bon d'origine, proposé pour le retour. */
+  warehouse: WarehouseRef
+  counterparty: string | null
+  lines: ReturnableLine[]
 }
 
 /** Manque renvoyé par l'API quand une sortie dépasse le stock (champ « shortages »). */
@@ -251,6 +313,7 @@ export type VoucherSearch = {
   discrepancy?: boolean
   warehouseIds?: string[]
   supplierId?: string
+  customerId?: string
   from?: string
   to?: string
   order?: VoucherOrder
@@ -279,6 +342,7 @@ export const voucherApi = (send: ApiClient) => {
               : undefined,
             [VoucherQueryParams.warehouseId]: search.warehouseIds,
             [VoucherQueryParams.supplierId]: search.supplierId,
+            [VoucherQueryParams.customerId]: search.customerId,
             [VoucherQueryParams.from]: search.from,
             [VoucherQueryParams.to]: search.to,
             [VoucherQueryParams.order]: search.order,
@@ -296,6 +360,12 @@ export const voucherApi = (send: ApiClient) => {
         method: "POST",
         path: VoucherPaths.transferReceipt(transferId),
         body: { id, ...input },
+      }),
+    returnable: (id: string) =>
+      send<Returnable>({
+        ...scoped,
+        method: "GET",
+        path: VoucherPaths.returnable(id),
       }),
     addPhoto: (id: string, file: File) => {
       const body = new FormData()

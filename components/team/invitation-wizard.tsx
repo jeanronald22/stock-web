@@ -9,6 +9,7 @@ import { Controller, useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
+import { ChoiceCard } from "@/components/catalog/choice-card"
 import { AccessScene } from "@/components/illustrations/access-scene"
 import { DepotsScene } from "@/components/illustrations/depots-scene"
 import { InvitationScene } from "@/components/illustrations/invitation-scene"
@@ -36,7 +37,6 @@ import { Routes } from "@/lib/routes"
 import { InvitationSentScreen } from "./invitation-sent-screen"
 import {
   AssignedWarehousesField,
-  ChoiceCard,
   needsWarehouses,
   NO_STOCK_ROLE,
   StockRoleField,

@@ -5,9 +5,11 @@ import {
   LockIcon,
   PackageCheckIcon,
   PrinterIcon,
+  Undo2Icon,
 } from "lucide-react"
 import Link from "next/link"
 import { useFormatter, useTranslations } from "next-intl"
+import type { ReactNode } from "react"
 
 import { EmptyState } from "@/components/catalog/empty-state"
 import { SearchScene } from "@/components/illustrations/search-scene"
@@ -28,8 +30,17 @@ import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import { useStockAccess } from "@/components/workspace/stock-access"
 import { StockPermission } from "@/lib/api/stock"
 import { useVoucher } from "@/lib/api/voucher-queries"
-import { movementOf, TransferState, VoucherType } from "@/lib/api/vouchers"
-import { RecordRoutes, Routes } from "@/lib/routes"
+import {
+  movementOf,
+  returnTypeOf,
+  supplierTypes,
+  TransferState,
+  VoucherType,
+  type ReturnVoucherType,
+  type Voucher,
+  type VoucherRef,
+} from "@/lib/api/vouchers"
+import { EntryQueryParams, RecordRoutes, Routes } from "@/lib/routes"
 
 import { useVoucherPdf } from "./use-voucher-pdf"
 import { VoucherPhotos } from "./voucher-photos"
@@ -82,7 +93,9 @@ export function VoucherScreen({ id }: { id: string }) {
   const from = data.destination ? data.warehouse : data.source
   const to = data.destination ?? (data.source ? data.warehouse : null)
   const linked = data.receipt ?? data.transfer
-  const facts = [
+  type Fact = { label: string; value: ReactNode }
+  // Un fait absent (pas de tiers, pas de motif) vaut null, "" ou false, puis est retiré.
+  const candidates: (Fact | null | false | "")[] = [
     ...(from && to
       ? [
           { label: t("vouchers.detail.from"), value: from.name },
@@ -96,10 +109,10 @@ export function VoucherScreen({ id }: { id: string }) {
       value: format.dateTime(new Date(data.occurredAt), { dateStyle: "long" }),
     },
     data.counterparty && {
-      label: receipt
+      label: supplierTypes.has(data.type)
         ? t("vouchers.detail.supplier")
         : t("vouchers.detail.customer"),
-      value: data.counterparty,
+      value: <PartyLink voucher={data} />,
     },
     data.reason && {
       label: t("vouchers.detail.reason"),
@@ -110,7 +123,13 @@ export function VoucherScreen({ id }: { id: string }) {
       value: data.documentReference,
     },
     { label: t("vouchers.detail.createdBy"), value: data.createdByName },
-  ].filter((fact): fact is { label: string; value: string } => !!fact)
+  ]
+  const facts = candidates.filter((fact): fact is Fact => !!fact)
+  const returnType = returnTypeOf(data.type)
+  const canReturn =
+    !!returnType &&
+    can(StockPermission.recordMovements) &&
+    covers(data.warehouse.id)
 
   return (
     <PageBody>
@@ -146,6 +165,15 @@ export function VoucherScreen({ id }: { id: string }) {
                   {t("vouchers.receive.action")}
                 </Link>
               )}
+            {canReturn && (
+              <Link
+                href={`${RETURN_ROUTES[returnType]}?${EntryQueryParams.origin}=${data.id}`}
+                className={buttonVariants({ variant: "outline" })}
+              >
+                <Undo2Icon />
+                {t(`vouchers.returns.action.${returnType}`)}
+              </Link>
+            )}
           </>
         }
       />
@@ -178,6 +206,8 @@ export function VoucherScreen({ id }: { id: string }) {
           </Link>
         </p>
       )}
+
+      <LinkedVouchers voucher={data} />
 
       <div className="mt-6 overflow-hidden rounded-2xl border">
         <Table>
@@ -299,6 +329,66 @@ export function VoucherScreen({ id }: { id: string }) {
         {t("vouchers.detail.immutable")}
       </p>
     </PageBody>
+  )
+}
+
+const RETURN_ROUTES = {
+  [VoucherType.customerReturn]: Routes.newCustomerReturn,
+  [VoucherType.supplierReturn]: Routes.newSupplierReturn,
+} as const satisfies Record<ReturnVoucherType, string>
+
+/** Le tiers, avec un lien vers sa fiche quand il vient de l'annuaire. */
+function PartyLink({ voucher }: { voucher: Voucher }) {
+  const href = voucher.customerId
+    ? RecordRoutes.customer(voucher.customerId)
+    : voucher.supplierId
+      ? RecordRoutes.supplier(voucher.supplierId)
+      : null
+  if (!href) return voucher.counterparty
+  return (
+    <Link href={href} className="hover:underline">
+      {voucher.counterparty}
+    </Link>
+  )
+}
+
+/** Retour : son bon d'origine ; sortie ou réception : ses retours ; ajustement : son inventaire. */
+function LinkedVouchers({ voucher }: { voucher: Voucher }) {
+  const t = useTranslations("vouchers.detail")
+  const link = (ref: VoucherRef) => (
+    <Link
+      key={ref.id}
+      href={RecordRoutes.voucher(ref.id)}
+      className="font-mono font-semibold text-foreground hover:underline"
+    >
+      {ref.number}
+    </Link>
+  )
+  return (
+    <>
+      {voucher.origin && (
+        <p className="mt-4 text-sm text-muted-foreground">
+          {t("returnOf")} {link(voucher.origin)}
+        </p>
+      )}
+      {voucher.returns.length > 0 && (
+        <p className="mt-4 flex flex-wrap gap-x-2 text-sm text-muted-foreground">
+          {t("returns", { count: voucher.returns.length })}
+          {voucher.returns.map(link)}
+        </p>
+      )}
+      {voucher.inventoryId && (
+        <p className="mt-4 text-sm text-muted-foreground">
+          {t("closesInventory")}{" "}
+          <Link
+            href={RecordRoutes.inventory(voucher.inventoryId)}
+            className="font-semibold text-foreground hover:underline"
+          >
+            {t("seeInventory")}
+          </Link>
+        </p>
+      )}
+    </>
   )
 }
 

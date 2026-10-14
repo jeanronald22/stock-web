@@ -27,6 +27,8 @@ export const voucherKeys = {
     size: number
   ) =>
     [...stockKeys.all(organizationId), "vouchers", search, page, size] as const,
+  returnable: (organizationId: string | null, id: string) =>
+    [...stockKeys.all(organizationId), "returnable", id] as const,
   voucher: (organizationId: string | null, id: string) =>
     [...stockKeys.all(organizationId), "voucher", id] as const,
   stock: (
@@ -66,6 +68,18 @@ export function useVoucher(id: string) {
     queryKey: voucherKeys.voucher(organizationId, id),
     queryFn: () => vouchers.voucher(id),
     enabled: !!organizationId,
+  })
+}
+
+/** Retour depuis un bon (D31) : ce qui peut encore revenir ; relu à chaque ouverture. */
+export function useReturnable(originId: string | undefined) {
+  const { vouchers } = useApi()
+  const organizationId = useOrganizationId()
+  return useQuery({
+    queryKey: voucherKeys.returnable(organizationId, originId ?? ""),
+    queryFn: () => vouchers.returnable(originId!),
+    enabled: !!organizationId && !!originId,
+    staleTime: 0,
   })
 }
 

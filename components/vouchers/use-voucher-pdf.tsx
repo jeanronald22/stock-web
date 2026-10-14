@@ -10,7 +10,12 @@ import { useWorkspace } from "@/components/workspace/workspace-context"
 import { useApi } from "@/lib/api/api-provider"
 import { useErrorMessage } from "@/lib/api/use-error-message"
 import { voucherKeys } from "@/lib/api/voucher-queries"
-import { VoucherType, type Voucher } from "@/lib/api/vouchers"
+import {
+  incomingTypes,
+  supplierTypes,
+  VoucherType,
+  type Voucher,
+} from "@/lib/api/vouchers"
 import { useActiveOrganization } from "@/lib/organization/active-organization"
 import type { VoucherPdfData } from "@/lib/vouchers/pdf/voucher-pdf-data"
 
@@ -36,7 +41,8 @@ export function useVoucherPdf() {
 
   const toData = useCallback(
     (voucher: Voucher): VoucherPdfData => {
-      const receipt = voucher.type === VoucherType.receipt
+      // La marchandise arrive (réception, retour client) : on signe qui l'a livrée.
+      const incoming = incomingTypes.has(voucher.type)
       // Transfert : départ et arrivée ; l'autre bout n'est ni un fournisseur ni un client.
       const from = voucher.destination ? voucher.warehouse : voucher.source
       const to =
@@ -60,7 +66,9 @@ export function useVoucherPdf() {
           ? []
           : [
               {
-                label: receipt ? t("detail.supplier") : t("detail.customer"),
+                label: supplierTypes.has(voucher.type)
+                  ? t("detail.supplier")
+                  : t("detail.customer"),
                 value: voucher.counterparty ?? EMPTY,
               },
             ]
@@ -125,7 +133,7 @@ export function useVoucherPdf() {
           {
             label: voucher.reason
               ? t("print.witnessedBy")
-              : receipt
+              : incoming
                 ? t("print.deliveredBy")
                 : t("print.receivedBy"),
             name: "",

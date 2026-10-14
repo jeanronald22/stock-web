@@ -50,13 +50,18 @@ type LineNavigation = { searchRef: React.RefObject<HTMLInputElement | null> }
  * Articles du bon, au clavier : chercher, ajouter (le curseur passe à la quantité), Entrée pour
  * revenir à la recherche. Une ligne par article : quantité, unité ou conditionnement, lot.
  */
+/** [fromOrigin] : retour depuis un bon ; ses lignes sont proposées, aucun autre article n'entre. */
 export function VoucherLinesField({
   form,
   type,
   searchRef,
   supplier,
+  fromOrigin = false,
 }: FieldProps &
-  LineNavigation & { supplier?: { id: string; name: string } | null }) {
+  LineNavigation & {
+    supplier?: { id: string; name: string } | null
+    fromOrigin?: boolean
+  }) {
   const t = useTranslations("vouchers.form")
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -100,18 +105,20 @@ export function VoucherLinesField({
           />
         </Field>
       )}
-      <ItemPicker
-        inputRef={searchRef}
-        autoFocus
-        supplier={supplier}
-        warehouseId={incomingTypes.has(type) ? undefined : warehouseId}
-        excludedIds={excluded}
-        onPick={(item) =>
-          append(newLine(item), {
-            focusName: `lines.${fields.length}.quantity`,
-          })
-        }
-      />
+      {!fromOrigin && (
+        <ItemPicker
+          inputRef={searchRef}
+          autoFocus
+          supplier={supplier}
+          warehouseId={incomingTypes.has(type) ? undefined : warehouseId}
+          excludedIds={excluded}
+          onPick={(item) =>
+            append(newLine(item), {
+              focusName: `lines.${fields.length}.quantity`,
+            })
+          }
+        />
+      )}
       <p
         className="text-sm font-medium text-muted-foreground"
         aria-live="polite"
@@ -202,7 +209,9 @@ function VoucherLineRow({
   const quantityText = adjustment
     ? t("vouchers.form.counted")
     : t("vouchers.form.quantity")
-  const batchInput = line.item.batchTracking && !issue
+  // Retour depuis un bon : le lot est celui du bon d'origine.
+  const fixedBatch = line.limit !== null
+  const batchInput = line.item.batchTracking && !issue && !fixedBatch
 
   return (
     <li className="animate-rise-in rounded-xl border p-3">
@@ -278,7 +287,11 @@ function VoucherLineRow({
         )}
         <div>
           {line.item.batchTracking &&
-            (batchInput ? (
+            (fixedBatch ? (
+              <div className="flex h-11 items-center rounded-lg border bg-muted/40 px-3.5 text-muted-foreground">
+                {t("vouchers.form.batch")} {line.batch}
+              </div>
+            ) : batchInput ? (
               <InputGroupInputBox>
                 <InputGroupInput
                   placeholder={`${t("vouchers.form.batch")} : ${t("vouchers.form.batchPlaceholder")}`}
@@ -357,6 +370,13 @@ function VoucherLineRow({
           <span className="text-muted-foreground">
             {t("vouchers.form.converted", {
               quantity: quantityLabel(line.item.baseUnit, converted),
+            })}
+          </span>
+        )}
+        {line.limit !== null && (
+          <span className="text-muted-foreground">
+            {t("vouchers.returns.remaining", {
+              quantity: quantityLabel(line.item.baseUnit, line.limit),
             })}
           </span>
         )}

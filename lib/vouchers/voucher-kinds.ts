@@ -17,6 +17,7 @@ export const VoucherKind = {
   damages: "casses",
   adjustments: "ajustements",
   discrepancies: "ecarts",
+  returns: "retours",
 } as const
 export type VoucherKind = (typeof VoucherKind)[keyof typeof VoucherKind]
 
@@ -33,4 +34,7 @@ export const VOUCHER_KIND_SEARCH: Record<
   [VoucherKind.damages]: { types: [VoucherType.damage] },
   [VoucherKind.adjustments]: { types: [VoucherType.adjustment] },
   [VoucherKind.discrepancies]: { discrepancy: true },
+  [VoucherKind.returns]: {
+    types: [VoucherType.customerReturn, VoucherType.supplierReturn],
+  },
 }

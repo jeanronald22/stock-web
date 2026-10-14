@@ -3,10 +3,12 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useMemo } from "react"
 
+import { CustomerKind } from "@/lib/api/customers"
 import { CatalogStatus, StockState } from "@/lib/api/stock"
 import { VoucherOrder } from "@/lib/api/vouchers"
 import {
   ARCHIVED_STATUS_PARAM,
+  CustomerKindParam,
   ListQueryParams,
   OLDEST_FIRST_PARAM,
   StockAlertParam,
@@ -24,6 +26,11 @@ export const STOCK_ALERT_STATES: Record<StockAlertParam, StockState[]> = {
   [StockAlertParam.out]: [StockState.out],
 }
 
+const CUSTOMER_KINDS: Record<CustomerKindParam, CustomerKind> = {
+  [CustomerKindParam.customers]: CustomerKind.customer,
+  [CustomerKindParam.sites]: CustomerKind.site,
+}
+
 const DAY = /^\d{4}-\d{2}-\d{2}$/
 
 export type ListParams = {
@@ -32,6 +39,8 @@ export type ListParams = {
   warehouseIds: string[]
   categoryId: string | undefined
   supplierId: string | undefined
+  customerId: string | undefined
+  customerKind: CustomerKind | undefined
   stockAlert: StockAlertParam | undefined
   /** Page affichée, à partir de 0 (l'adresse montre « page=1 » pour la première). */
   page: number
@@ -50,6 +59,8 @@ const FILTER_KEYS = [
   "warehouse",
   "category",
   "supplier",
+  "customer",
+  "customerKind",
   "stockAlert",
   "voucherType",
   "from",
@@ -90,6 +101,11 @@ export function useListParams() {
     warehouseIds,
     categoryId: searchParams.get(ListQueryParams.category) ?? undefined,
     supplierId: searchParams.get(ListQueryParams.supplier) ?? undefined,
+    customerId: searchParams.get(ListQueryParams.customer) ?? undefined,
+    customerKind:
+      CUSTOMER_KINDS[
+        searchParams.get(ListQueryParams.customerKind) as CustomerKindParam
+      ],
     stockAlert: Object.values(StockAlertParam).find(
       (value) => value === stockAlert
     ),
@@ -146,6 +162,12 @@ export function useListParams() {
       update({ category: categoryId }),
     setSupplier: (supplierId: string | undefined) =>
       update({ supplier: supplierId }),
+    setCustomerKind: (kind: CustomerKind | undefined) =>
+      update({
+        customerKind: (Object.keys(CUSTOMER_KINDS) as CustomerKindParam[]).find(
+          (param) => CUSTOMER_KINDS[param] === kind
+        ),
+      }),
     setStockAlert: (alert: StockAlertParam | undefined) =>
       update({ stockAlert: alert }),
     setPage: (page: number) =>
