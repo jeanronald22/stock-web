@@ -14,14 +14,18 @@ import { useFormatter, useNow, useTranslations } from "next-intl"
 
 import { ShelfScene } from "@/components/illustrations/shelf-scene"
 import { usePageTour } from "@/components/tour/tour-provider"
-import { Badge } from "@/components/ui/badge"
 import { PageBody } from "@/components/workspace/page-header"
 import { useWorkspace } from "@/components/workspace/workspace-context"
+import { MembershipRole } from "@/lib/api/platform"
 import { useItemCount, useWarehouses } from "@/lib/api/stock-queries"
+import { useTeam } from "@/lib/api/team-queries"
 import { useVouchersPage } from "@/lib/api/voucher-queries"
 import { Routes } from "@/lib/routes"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
 import { cn } from "@/lib/utils"
+
+import { ReceivedInvitations } from "@/components/organizations/received-invitations"
+import { useMe } from "@/lib/api/platform-queries"
 
 import { StockAlertsCard } from "./stock-alerts-card"
 
@@ -29,7 +33,7 @@ import { StockAlertsCard } from "./stock-alerts-card"
 const ALL_VOUCHERS = {}
 
 type Step = {
-  key: "warehouses" | "products" | "receipt"
+  key: "warehouses" | "products" | "receipt" | "team"
   icon: LucideIcon
   /** Avant : créer le premier ; après : retrouver la liste. */
   createHref: string
@@ -41,10 +45,15 @@ export function Dashboard() {
   const t = useTranslations()
   const format = useFormatter()
   const now = useNow()
-  const { user } = useWorkspace()
+  const { user, organization } = useWorkspace()
   const warehouses = useWarehouses()
   const itemCount = useItemCount()
   const vouchers = useVouchersPage(ALL_VOUCHERS, 0, 1)
+  const me = useMe()
+  const invitations = me.data?.invitations ?? []
+  // L'équipe se constitue par le propriétaire et les administrateurs (DECISIONS.md, D25).
+  const managesTeam = organization.role !== MembershipRole.member
+  const team = useTeam({ enabled: managesTeam })
   usePageTour("workspace", {
     ready: warehouses.isSuccess && itemCount.isSuccess,
   })
@@ -72,6 +81,20 @@ export function Dashboard() {
       listHref: Routes.vouchers,
       count: vouchers.data?.total,
     },
+    ...(managesTeam
+      ? [
+          {
+            key: "team",
+            icon: UsersIcon,
+            createHref: Routes.newInvitation,
+            listHref: Routes.team,
+            // Fait dès qu'une autre personne est membre ou invitée.
+            count: team.data
+              ? team.data.members.length - 1 + team.data.invitations.length
+              : undefined,
+          } satisfies Step,
+        ]
+      : []),
   ]
 
   return (
@@ -107,32 +130,21 @@ export function Dashboard() {
         </div>
       </section>
 
+      {invitations.length > 0 && me.data && (
+        <div className="mt-6">
+          <ReceivedInvitations invitations={invitations} user={me.data.user} />
+        </div>
+      )}
+
       <StockAlertsCard />
 
       <ol
-        className="mt-6 grid gap-4 sm:grid-cols-3"
+        className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
         {...tourAnchor(TourAnchors.nextSteps)}
       >
         {steps.map((step, index) => (
           <StepCard key={step.key} step={step} index={index + 1} />
         ))}
-        <li className="flex flex-col gap-4 rounded-2xl border border-dashed p-5">
-          <div className="flex items-start justify-between">
-            <span
-              className="flex size-11 items-center justify-center rounded-xl bg-muted"
-              aria-hidden
-            >
-              <UsersIcon className="size-5" />
-            </span>
-            <Badge variant="info">{t("common.soon")}</Badge>
-          </div>
-          <div>
-            <h3 className="font-semibold">{t("dashboard.steps.team.title")}</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {t("dashboard.steps.team.description")}
-            </p>
-          </div>
-        </li>
       </ol>
     </PageBody>
   )

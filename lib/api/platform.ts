@@ -4,6 +4,7 @@ import type { ApiClient } from "./http"
 export const PlatformPaths = {
   me: "/v1/me",
   meProfile: "/v1/me/profile",
+  receivedInvitationAccept: (id: string) => `/v1/me/invitations/${id}/accept`,
   organizations: "/v1/organizations",
   team: "/v1/team",
   teamInvitations: "/v1/team/invitations",
@@ -107,7 +108,20 @@ export type User = {
   profileComplete: boolean
 }
 
-export type Me = { user: User; organizations: Organization[] }
+/** Invitation à l'adresse de la personne connectée, visible sans le lien reçu par e-mail. */
+export type ReceivedInvitation = {
+  id: string
+  organizationName: string
+  inviterName: string | null
+  role: MembershipRole
+  expiresAt: string
+}
+
+export type Me = {
+  user: User
+  organizations: Organization[]
+  invitations: ReceivedInvitation[]
+}
 
 export type ProfileInput = { firstName: string; lastName: string }
 
@@ -175,6 +189,11 @@ export const platformApi = (send: ApiClient) => ({
     send<InvitationPreview>({
       method: "GET",
       path: PlatformPaths.invitation(token),
+    }),
+  acceptReceivedInvitation: (id: string) =>
+    send<Organization>({
+      method: "POST",
+      path: PlatformPaths.receivedInvitationAccept(id),
     }),
   acceptInvitation: (token: string) =>
     send<Organization>({

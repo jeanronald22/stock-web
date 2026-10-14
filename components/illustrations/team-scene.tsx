@@ -1,64 +1,56 @@
 import { Illustration, Sparks } from "./illustration"
 
-/** Équipe : trois silhouettes abstraites côte à côte, devant une pile de cartons. */
+/** Équipe : trois silhouettes abstraites côte à côte, un carton posé à leurs pieds. */
 export function TeamScene({ className }: { className?: string }) {
   return (
     <Illustration className={className}>
-      <rect
-        x="236"
-        y="150"
-        width="46"
-        height="46"
-        rx="5"
-        className="ill-light ill-rise"
-      />
-      <rect x="253" y="150" width="12" height="14" className="ill-tape" />
-      <rect
-        x="246"
-        y="112"
-        width="34"
-        height="38"
-        rx="5"
-        className="ill-pale ill-rise ill-delay-1"
-      />
       <g className="ill-rise">
-        <circle cx="88" cy="104" r="18" className="ill-mid" />
+        <circle cx="92" cy="110" r="17" className="ill-mid" />
         <rect
-          x="62"
-          y="128"
-          width="52"
-          height="68"
-          rx="22"
+          x="68"
+          y="134"
+          width="48"
+          height="62"
+          rx="20"
           className="ill-mid"
         />
       </g>
       <g className="ill-rise ill-delay-1">
-        <circle cx="150" cy="84" r="22" className="ill-main" />
+        <circle cx="160" cy="88" r="21" className="ill-main" />
         <rect
-          x="118"
-          y="112"
-          width="64"
-          height="84"
-          rx="26"
+          x="130"
+          y="116"
+          width="60"
+          height="80"
+          rx="24"
           className="ill-main"
         />
       </g>
       <g className="ill-rise ill-delay-2">
-        <circle cx="208" cy="110" r="16" className="ill-light" />
+        <circle cx="228" cy="110" r="17" className="ill-light" />
         <rect
-          x="186"
-          y="132"
-          width="44"
-          height="64"
+          x="204"
+          y="134"
+          width="48"
+          height="62"
           rx="20"
           className="ill-light"
         />
       </g>
+      <rect
+        x="262"
+        y="166"
+        width="30"
+        height="30"
+        rx="4"
+        className="ill-pale ill-rise ill-delay-3"
+      />
+      <rect x="272" y="166" width="10" height="9" className="ill-tape" />
       <Sparks
         points={[
-          [40, 70, 12],
-          [200, 52, 10],
-          [288, 92, 8],
+          [44, 76, 12],
+          [204, 56, 10],
+          [276, 92, 8],
         ]}
       />
     </Illustration>

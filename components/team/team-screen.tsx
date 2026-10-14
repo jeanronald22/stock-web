@@ -125,78 +125,80 @@ export function TeamScreen() {
         description={t("description")}
         actions={alone ? undefined : inviteButton}
       />
-      {alone ? (
-        <EmptyState
-          illustration={<TeamScene />}
-          title={t("empty.title")}
-          description={t("empty.description")}
-          action={inviteButton}
-        />
-      ) : (
-        <>
-          <div className="mt-8 overflow-hidden rounded-2xl border">
-            {team.isPending ? (
-              <ItemsTableSkeleton rows={SKELETON_ROWS} />
-            ) : (
+      <>
+        <div className="mt-8 overflow-hidden rounded-2xl border">
+          {team.isPending ? (
+            <ItemsTableSkeleton rows={SKELETON_ROWS} />
+          ) : (
+            <Table>
+              <TableHeader className="bg-muted/40">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="pl-4">{t("table.person")}</TableHead>
+                  <TableHead className="hidden sm:table-cell">
+                    {t("table.role")}
+                  </TableHead>
+                  <TableHead className="hidden md:table-cell">
+                    {t("table.stock")}
+                  </TableHead>
+                  <TableHead className="w-10" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {members.map((member) => (
+                  <MemberRow
+                    key={member.userId}
+                    member={member}
+                    grant={grantOf(GranteeKind.member, member.subject)}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </div>
+
+        {alone && (
+          <div className="mt-6 rounded-2xl border border-dashed">
+            <EmptyState
+              illustration={<TeamScene />}
+              title={t("empty.title")}
+              description={t("empty.description")}
+              action={inviteButton}
+            />
+          </div>
+        )}
+
+        {invitations.length > 0 && (
+          <section className="mt-10">
+            <h2 className="mb-3 text-lg font-semibold">{t("invitations")}</h2>
+            <div className="overflow-hidden rounded-2xl border">
               <Table>
                 <TableHeader className="bg-muted/40">
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="pl-4">{t("table.person")}</TableHead>
-                    <TableHead className="hidden sm:table-cell">
-                      {t("table.role")}
-                    </TableHead>
+                    <TableHead className="pl-4">{t("table.email")}</TableHead>
                     <TableHead className="hidden md:table-cell">
                       {t("table.stock")}
+                    </TableHead>
+                    <TableHead className="hidden sm:table-cell">
+                      {t("table.expiry")}
                     </TableHead>
                     <TableHead className="w-10" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {members.map((member) => (
-                    <MemberRow
-                      key={member.userId}
-                      member={member}
-                      grant={grantOf(GranteeKind.member, member.subject)}
+                  {invitations.map((invitation) => (
+                    <InvitationRow
+                      key={invitation.id}
+                      invitation={invitation}
+                      grant={grantOf(GranteeKind.invitation, invitation.id)}
+                      onShared={setShared}
                     />
                   ))}
                 </TableBody>
               </Table>
-            )}
-          </div>
-
-          {invitations.length > 0 && (
-            <section className="mt-10">
-              <h2 className="mb-3 text-lg font-semibold">{t("invitations")}</h2>
-              <div className="overflow-hidden rounded-2xl border">
-                <Table>
-                  <TableHeader className="bg-muted/40">
-                    <TableRow className="hover:bg-transparent">
-                      <TableHead className="pl-4">{t("table.email")}</TableHead>
-                      <TableHead className="hidden md:table-cell">
-                        {t("table.stock")}
-                      </TableHead>
-                      <TableHead className="hidden sm:table-cell">
-                        {t("table.expiry")}
-                      </TableHead>
-                      <TableHead className="w-10" />
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {invitations.map((invitation) => (
-                      <InvitationRow
-                        key={invitation.id}
-                        invitation={invitation}
-                        grant={grantOf(GranteeKind.invitation, invitation.id)}
-                        onShared={setShared}
-                      />
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </section>
-          )}
-        </>
-      )}
+            </div>
+          </section>
+        )}
+      </>
 
       <Sheet open={!!shared} onOpenChange={(open) => !open && setShared(null)}>
         <SheetContent className="w-full overflow-y-auto sm:max-w-md">

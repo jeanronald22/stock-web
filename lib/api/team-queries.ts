@@ -24,13 +24,14 @@ function useOrganizationId() {
   return useActiveOrganization().activeOrganizationId
 }
 
-export function useTeam() {
+/** [enabled] false pour un membre : l'équipe est réservée à ceux qui la gèrent. */
+export function useTeam({ enabled = true }: { enabled?: boolean } = {}) {
   const { platform } = useApi()
   const organizationId = useOrganizationId()
   return useQuery({
     queryKey: teamKeys.team(organizationId),
     queryFn: platform.team,
-    enabled: !!organizationId,
+    enabled: enabled && !!organizationId,
   })
 }
 
@@ -146,6 +147,17 @@ export function useAcceptInvitation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (token: string) => platform.acceptInvitation(token),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: platformKeys.me }),
+  })
+}
+
+/** Invitation reçue, acceptée depuis l'application (personne déjà inscrite, adresse confirmée). */
+export function useAcceptReceivedInvitation() {
+  const { platform } = useApi()
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => platform.acceptReceivedInvitation(id),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: platformKeys.me }),
   })

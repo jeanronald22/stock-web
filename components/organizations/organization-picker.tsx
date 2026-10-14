@@ -11,6 +11,7 @@ import { useActiveOrganization } from "@/lib/organization/active-organization"
 import { Routes } from "@/lib/routes"
 
 import { OrganizationAvatar } from "./organization-avatar"
+import { ReceivedInvitations } from "./received-invitations"
 
 export function OrganizationPicker() {
   const t = useTranslations()
@@ -19,6 +20,8 @@ export function OrganizationPicker() {
   const { setActiveOrganizationId } = useActiveOrganization()
 
   if (!me.data) return <Splash label={t("common.loading")} />
+
+  const invitedOnly = me.data.organizations.length === 0
 
   const choose = (id: string) => {
     setActiveOrganizationId(id)
@@ -32,12 +35,25 @@ export function OrganizationPicker() {
       </header>
       <main className="flex flex-1 justify-center px-4 pt-6 pb-16 sm:pt-16">
         <div className="w-full max-w-lg animate-rise-in">
+          {/* Invitée sans entreprise : on lui propose de rejoindre l'équipe, ou de créer la sienne. */}
           <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-            {t("organizations.title")}
+            {invitedOnly
+              ? t("organizations.invitedTitle")
+              : t("organizations.title")}
           </h1>
           <p className="mt-3 text-base text-muted-foreground sm:text-lg">
-            {t("organizations.description")}
+            {invitedOnly
+              ? t("organizations.invitedDescription")
+              : t("organizations.description")}
           </p>
+          {me.data.invitations.length > 0 && (
+            <div className="mt-10">
+              <ReceivedInvitations
+                invitations={me.data.invitations}
+                user={me.data.user}
+              />
+            </div>
+          )}
           <ul className="mt-10 grid gap-3">
             {me.data.organizations.map((organization) => (
               <li key={organization.id}>
@@ -78,7 +94,9 @@ export function OrganizationPicker() {
                 >
                   <PlusIcon className="size-5" />
                 </span>
-                {t("organizations.create")}
+                {invitedOnly
+                  ? t("organizations.createOwn")
+                  : t("organizations.create")}
               </button>
             </li>
           </ul>

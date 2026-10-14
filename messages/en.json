@@ -120,6 +120,14 @@
       "OWNER": "Owner",
       "ADMIN": "Administrator",
       "MEMBER": "Member"
+    },
+    "invitedTitle": "You are invited to a team",
+    "invitedDescription": "Join the business that invites you, or create your own.",
+    "createOwn": "Create my own business",
+    "invitations": {
+      "title": "{count, plural, one {Invitation received} other {Invitations received}}",
+      "from": "{inviter} invites you · {role}",
+      "join": "Join"
     }
   },
   "dashboard": {
@@ -141,7 +149,9 @@
       },
       "team": {
         "title": "Invite your team",
-        "description": "Your storekeepers will receive their invitation by email."
+        "description": "Storekeepers, controllers, managers: each one receives a link by email.",
+        "action": "Invite someone",
+        "done": "{count, plural, one {# person invited} other {# people invited}}"
       },
       "receipt": {
         "title": "Record a receipt",

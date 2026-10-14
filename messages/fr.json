@@ -120,6 +120,14 @@
       "OWNER": "Propriétaire",
       "ADMIN": "Administrateur",
       "MEMBER": "Membre"
+    },
+    "invitedTitle": "Vous êtes invité dans une équipe",
+    "invitedDescription": "Rejoignez l’entreprise qui vous invite, ou créez la vôtre.",
+    "createOwn": "Créer ma propre entreprise",
+    "invitations": {
+      "title": "{count, plural, one {Invitation reçue} other {Invitations reçues}}",
+      "from": "{inviter} vous invite · {role}",
+      "join": "Rejoindre"
     }
   },
   "dashboard": {
@@ -141,7 +149,9 @@
       },
       "team": {
         "title": "Inviter votre équipe",
-        "description": "Vos magasiniers recevront leur invitation par e-mail."
+        "description": "Magasiniers, contrôleurs, managers : chacun reçoit un lien par e-mail.",
+        "action": "Inviter une personne",
+        "done": "{count, plural, one {# personne invitée} other {# personnes invitées}}"
       },
       "receipt": {
         "title": "Enregistrer une réception",

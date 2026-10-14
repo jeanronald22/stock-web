@@ -138,3 +138,45 @@ test("une personne invitée rejoint l'équipe comme magasinière d'un seul dép�
   ).toBeVisible()
   await shot(page, testInfo, "06-fiche-membre")
 })
+
+test("une personne déjà inscrite rejoint l'équipe depuis son accueil, sans le lien", async ({
+  page,
+  browser,
+}, testInfo) => {
+  // Paul a déjà son compte et sa propre entreprise.
+  const context = await browser.newContext({
+    viewport: page.viewportSize() ?? undefined,
+  })
+  await redirectApi(context)
+  const paul = await context.newPage()
+  const paulEmail = await signUpWithBusiness(paul, testInfo, "deja-inscrit")
+  await dismissTour(paul, "Tout est ici")
+
+  await signUpWithBusiness(page, testInfo, "proprietaire")
+  await dismissTour(page, "Tout est ici")
+  await navigateTo(page, "Équipe")
+  await page.getByRole("link", { name: "Inviter" }).click()
+  await page.getByLabel("Adresse e-mail").fill(paulEmail)
+  const next = () => page.getByRole("button", { name: "Continuer" }).click()
+  await next()
+  await next()
+  await page.getByRole("radio", { name: /Gérant/ }).click()
+  await page.getByRole("button", { name: "Envoyer l’invitation" }).click()
+  await expect(
+    page.getByRole("heading", { name: "Invitation prête" })
+  ).toBeVisible()
+
+  // Son accueil annonce l'invitation ; il la rejoint et y entre directement.
+  await paul.reload()
+  const invitations = paul.getByRole("region", { name: "Invitation reçue" })
+  await expect(invitations).toContainText("Awa Bello vous invite · Membre")
+  await shot(paul, testInfo, "01-invitation-recue")
+  await invitations.getByRole("button", { name: "Rejoindre" }).click()
+  await expect(
+    paul.getByText("Bienvenue dans l’équipe de Quincaillerie Bello.")
+  ).toBeVisible()
+  await expect(
+    paul.getByRole("region", { name: "Invitation reçue" })
+  ).toBeHidden()
+  await context.close()
+})
