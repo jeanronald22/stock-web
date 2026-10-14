@@ -205,6 +205,38 @@ Côté utilisateur, ce sont les écrans de « Mon compte » : créer son entrepr
 - **Bon en PDF** (A4), généré dans l'application (@react-pdf/renderer, chargé au premier usage) : entreprise, numéro, dépôt, fournisseur ou client, lignes, cases de signature, pied de page en bas de chaque page avec sa numérotation. « Télécharger le PDF » l'enregistre (REC-2026-0001.pdf) ; « Imprimer » ouvre la boîte d'impression sur ce même PDF. Depuis la fiche du bon et depuis le menu de chaque ligne de la liste. Pas de photo sur le document.
 - Politique de confidentialité passée en version 0.4 (coordonnées des fournisseurs).
 
+## D23. Revue : écarts au modèle validé (D10) et plan de réalignement (2026-10-14)
+
+Les articles, dépôts, fournisseurs et bons (D19 à D22) ont été construits sans repartir du modèle validé (`docs/modele-donnees.html`) ni du questionnaire terrain (`docs/questionnaire-controleur-stock.pdf`). Écarts constatés :
+
+| Modèle D10 | Construit | Écart |
+|---|---|---|
+| `category` (arborescence) | rien | **manquant** : pas de catégories |
+| `sku_warehouse.min_qty_base` (seuil par dépôt), « alerte avant rupture » (questionnaire, Q44) | référencement sans seuil | **manquant** : ni seuil ni alerte |
+| `product` → `sku` (variantes : format, diamètre ; `attributes`, `barcode`, `supplier_ref`) | un seul niveau « article » | **simplifié** : pas de variantes, ni code-barres, ni référence fournisseur |
+| `unit` + `sku_unit` (facteur, conditionnement par défaut en réception et en sortie) | unité fixe + conditionnements sans défaut | **simplifié** |
+| `lot` (code, nuance, calibre, date) | texte libre « lot » | **simplifié** : nuance et calibre non distingués |
+| `partner` SUPPLIER · CUSTOMER · SITE | fournisseurs seulement | **partiel** : clients et chantiers en texte libre |
+| `stock_document` RECEIPT · ISSUE · RETURN · TRANSFER · DAMAGE · ADJUSTMENT | réception et sortie | **manquant** : retours, transferts (dépôt « En transit »), casse (motif, photo), ajustements |
+| Statuts DRAFT · PENDING · VALIDATED · IN_TRANSIT · RECEIVED · CANCELLED | validé à l'enregistrement (D21) | **écart assumé**, à revoir avec les transferts |
+| `qty_expected_base` (quantité annoncée sur le BL) | rien | **manquant** : l'écart à la réception (Q11, Q12) n'est pas tracé |
+| `location` (emplacements, Q27-Q28) | rien | **manquant** |
+| `inventory_count` + lignes, double comptage | rien | **prévu**, pas fait |
+| `stock_role` + accès par dépôt | tout membre peut tout faire | **manquant** |
+| Hors ligne : `row_version`, `device_id`, `synced_at`, `source` | identifiants créés par le client seulement | **partiel** |
+| `attachment` (pièces jointes génériques) | `item_image` (photo d'article) | **spécialisé** |
+| `ai_suggestion` (D5, MVP) | rien | **prévu**, pas fait |
+
+Écrans demandés le 2026-10-14 : filtres combinables sur les articles (catégorie, plusieurs dépôts, fournisseur, état du stock), filtre des bons par période et par type, tri par date croissante ou décroissante.
+
+**Plan de réalignement**, par lots livrables :
+- **Lot A** (en cours) : catégories ; seuils par dépôt et alertes (stock bas, rupture) ; filtres combinables des articles et du stock ; filtres des bons (période, type, dépôt, fournisseur) et tri par date.
+- **Lot B** : tiers clients et chantiers ; bons de retour, de casse (motif, photo) et d'ajustement ; quantité annoncée sur le BL et écart à la réception ; transferts entre dépôts (en transit, quantité reçue à l'arrivée).
+- **Lot C** : inventaires (complet, tournant, double comptage, ajustement à la clôture) ; emplacements.
+- **Lot D** : produit et variantes, table des unités, lot avec nuance et calibre ; rôles Stock par dépôt ; synchronisation hors ligne ; IA (D5).
+
+**Règle** : toute nouvelle fonctionnalité part des tables de D10 ; un écart volontaire est noté ici avant le code.
+
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
 - [ ] Nom de la marque et nom du produit de stock (voir D7). Pistes : Kreskala, Kreskio, Tissero, NarvalWorks, FourmiLabs.
