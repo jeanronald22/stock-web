@@ -51,6 +51,7 @@ export const ProblemCode = {
   invitationEmailMismatch: "invitation-email-mismatch",
   stockAccessDenied: "stock-access-denied",
   stockWarehousesRequired: "stock-warehouses-required",
+  notificationEmailUnavailable: "notification-email-unavailable",
   categoryNotFound: "category-not-found",
   categoryNameTaken: "category-name-taken",
   categoryUnavailable: "category-unavailable",

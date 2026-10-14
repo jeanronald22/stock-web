@@ -22,11 +22,14 @@ export type StockAccessContext = {
 
 const Context = createContext<StockAccessContext | null>(null)
 
+/** Écrans du compte et de l'équipe, ouverts même sans rôle Stock. */
+const ACCOUNT_ROUTES = [Routes.team, Routes.notificationSettings]
+
 /**
  * Rôle Stock de la personne connectée (DECISIONS.md, D25). L'API refuse de toute façon ce que le
  * rôle ne permet pas : ici, on évite seulement de proposer une action vouée à l'échec. Un membre
- * sans rôle Stock voit un message au lieu de l'écran, sauf sur les écrans de l'équipe : un
- * administrateur peut gérer l'équipe sans utiliser Stock.
+ * sans rôle Stock voit un message au lieu de l'écran, sauf sur les écrans de l'équipe et de son
+ * compte : un administrateur peut gérer l'équipe sans utiliser Stock.
  */
 export function StockAccessProvider({
   children,
@@ -34,7 +37,8 @@ export function StockAccessProvider({
   children: React.ReactNode
 }) {
   const t = useTranslations()
-  const gated = !usePathname().startsWith(Routes.team)
+  const pathname = usePathname()
+  const gated = !ACCOUNT_ROUTES.some((route) => pathname.startsWith(route))
   const query = useMyStockAccess()
   const value = useMemo<StockAccessContext | null>(() => {
     if (!query.data) return null

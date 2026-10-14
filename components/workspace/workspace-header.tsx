@@ -4,6 +4,7 @@ import { CircleHelpIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { KreskalaLogo } from "@/components/brand/kreskala-logo"
+import { NotificationBell } from "@/components/notifications/notification-bell"
 import { useCurrentTour } from "@/components/tour/tour-provider"
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
@@ -32,6 +33,7 @@ export function WorkspaceHeader() {
         <CircleHelpIcon />
         {t("guide")}
       </Button>
+      <NotificationBell />
     </header>
   )
 }

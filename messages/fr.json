@@ -17,7 +17,8 @@
     "team": "Équipe",
     "invitation": "Invitation",
     "newInvitation": "Inviter une personne",
-    "member": "Membre"
+    "member": "Membre",
+    "notifications": "Notifications"
   },
   "common": {
     "retry": "Réessayer",
@@ -927,5 +928,52 @@
       }
     },
     "eyebrow": "Invitation"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "open": "{count, plural, =0 {Notifications} one {Notifications, # non lue} other {Notifications, # non lues}}",
+    "unread": "{count, plural, one {# non lue} other {# non lues}}",
+    "allRead": "Tout est lu.",
+    "markAllRead": "Tout marquer comme lu",
+    "settings": "Réglages",
+    "empty": {
+      "title": "Rien de nouveau",
+      "description": "Les alertes de stock et les nouvelles de l’équipe s’afficheront ici."
+    },
+    "settingsTitle": "Notifications",
+    "settingsDescription": "Chaque avis s’affiche toujours dans l’application. Choisissez ceux que vous recevez aussi par e-mail.",
+    "email": "Recevoir aussi par e-mail",
+    "emailHint": "À l’adresse de votre compte.",
+    "emailOn": "E-mail activé.",
+    "emailOff": "E-mail coupé.",
+    "types": {
+      "STOCK_ALERT": {
+        "name": "Stock à commander",
+        "when": "Après une sortie, quand des articles passent au seuil d’alerte ou en rupture dans un de vos dépôts.",
+        "title": "{count, plural, one {# article à commander} other {# articles à commander}} · {warehouse}",
+        "line": "{name} : {quantity} (seuil {threshold})",
+        "others": "{count, plural, one {et # autre} other {et # autres}}"
+      },
+      "MEMBER_JOINED": {
+        "name": "Nouveau membre",
+        "when": "Quand une personne que vous avez invitée rejoint l’équipe.",
+        "title": "{name} a rejoint l’équipe",
+        "detail": "Invitation acceptée."
+      },
+      "INVITATION_RECEIVED": {
+        "name": "Invitation reçue",
+        "when": "Quand une entreprise vous invite.",
+        "title": "{inviter} vous invite à rejoindre {organization}",
+        "titleAnonymous": "Invitation à rejoindre {organization}",
+        "detail": "Ouvrez-la pour rejoindre l’équipe."
+      },
+      "ACCESS_CHANGED": {
+        "name": "Accès Stock",
+        "when": "Quand votre rôle ou vos dépôts changent.",
+        "title": "Votre accès Stock a changé",
+        "detail": "Vous êtes {role} : {warehouses}.",
+        "revoked": "Vous n’avez plus accès au stock de cette entreprise."
+      }
+    }
   }
 }

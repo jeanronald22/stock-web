@@ -17,6 +17,7 @@ export const Routes = {
   suppliers: "/fournisseurs",
   newSupplier: "/fournisseurs/nouveau",
   team: "/equipe",
+  notificationSettings: "/notifications",
   newInvitation: "/equipe/inviter",
   /** Lien reçu par e-mail ; même chemin que l'API (stock-api, TeamService.INVITATION_PATH). */
   invitation: "/invitation",

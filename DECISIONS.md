@@ -272,6 +272,25 @@ Réalise `invitation` (Plateforme) et `stock_role` + `stock_role_warehouse` (Sto
 - **E-mails** : envoyés par l'API derrière une interface (`InvitationMailer`), SMTP configurable (Mailpit en local), en français ou en anglais selon la langue de la personne qui invite.
 - **Précisions** : un magasinier peut créer le fournisseur d'une réception pendant sa saisie (nom et coordonnées), sans pouvoir le modifier ensuite ni toucher à son catalogue. Le propriétaire et les administrateurs voient tous les dépôts pour les attribuer, même sans rôle Stock. L'écran affiche en consultation seule ce que le rôle ne permet pas de modifier ; l'API refuse de toute façon.
 
+## D26. Notifications dans l'application et par e-mail (2026-10-14)
+
+Ajout au modèle D10, qui n'en prévoyait pas. Répond à « alerte avant rupture » (questionnaire, Q44) et au suivi de l'équipe (D25).
+
+- **Où** : dans la Plateforme (`platform.notification`, `platform.notification_preference`) : une notification s'adresse à une personne, quelle que soit l'application qui la déclenche. Stock ne lit pas ces tables (D8) : il publie un événement (« ces articles viennent de passer en alerte, prévenir ces personnes ») ; la Plateforme enregistre la notification et envoie l'e-mail.
+- **Texte** : enregistré comme un type et des paramètres, traduit à l'affichage (FR/EN) ; l'e-mail part dans la langue de la personne notifiée.
+- **Notifications de base** :
+
+| Type | Quand | Qui | In-app | E-mail (par défaut) |
+|---|---|---|---|---|
+| Stock en alerte | une sortie fait passer des articles au seuil ou en rupture dans un dépôt (un avis par bon) | propriétaire, gérants, managers et contrôleurs de ce dépôt | oui | oui |
+| Membre arrivé | une invitation est acceptée | la personne qui a invité et le propriétaire | oui | oui |
+| Invitation reçue | une personne déjà inscrite est invitée | elle (l'e-mail d'invitation part déjà) | oui | non |
+| Accès Stock modifié | rôle ou dépôts changés | la personne concernée | oui | oui |
+
+- **Préférences** : l'e-mail se désactive type par type (« Mon compte › Notifications ») ; l'avis dans l'application reste toujours.
+- **Lecture** : cloche dans l'en-tête avec le nombre de non lues, liste des dernières, « tout marquer comme lu » ; seules les notifications de l'entreprise active, et celles qui ne dépendent d'aucune entreprise (invitation reçue). Relues toutes les minutes.
+- **Envoi** : après l'enregistrement de l'opération, hors de la requête : un e-mail lent ou refusé ne retarde ni n'annule un bon. Conservation : 90 jours.
+
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
 - [ ] Nom de la marque et nom du produit de stock (voir D7). Pistes : Kreskala, Kreskio, Tissero, NarvalWorks, FourmiLabs.

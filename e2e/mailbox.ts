@@ -32,3 +32,32 @@ export async function waitForActionLink(
   }
   throw new Error(`Aucun e-mail de Keycloak reçu pour ${recipient}`)
 }
+
+/** Texte du dernier e-mail reçu par [recipient] dont le sujet contient [subject]. */
+export async function waitForMail(
+  recipient: string,
+  subject: string,
+  timeoutMs = 15_000
+): Promise<string> {
+  const deadline = Date.now() + timeoutMs
+  while (Date.now() < deadline) {
+    const list = (await (
+      await fetch(`${MAILPIT_URL}/api/v1/messages`)
+    ).json()) as {
+      messages: { ID: string; Subject: string; To: { Address: string }[] }[]
+    }
+    const message = list.messages.find(
+      (candidate) =>
+        candidate.Subject.includes(subject) &&
+        candidate.To.some((to) => to.Address === recipient)
+    )
+    if (message) {
+      const detail = (await (
+        await fetch(`${MAILPIT_URL}/api/v1/message/${message.ID}`)
+      ).json()) as MailpitMessage
+      return detail.Text
+    }
+    await new Promise((resolve) => setTimeout(resolve, 500))
+  }
+  throw new Error(`Aucun e-mail « ${subject} » reçu pour ${recipient}`)
+}

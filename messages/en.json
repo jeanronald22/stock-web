@@ -17,7 +17,8 @@
     "team": "Team",
     "invitation": "Invitation",
     "newInvitation": "Invite someone",
-    "member": "Member"
+    "member": "Member",
+    "notifications": "Notifications"
   },
   "common": {
     "retry": "Try again",
@@ -927,5 +928,52 @@
       }
     },
     "eyebrow": "Invitation"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "open": "{count, plural, =0 {Notifications} one {Notifications, # unread} other {Notifications, # unread}}",
+    "unread": "{count, plural, one {# unread} other {# unread}}",
+    "allRead": "All caught up.",
+    "markAllRead": "Mark all as read",
+    "settings": "Settings",
+    "empty": {
+      "title": "Nothing new",
+      "description": "Stock alerts and team news will show up here."
+    },
+    "settingsTitle": "Notifications",
+    "settingsDescription": "Every notice always shows in the app. Choose which ones you also receive by email.",
+    "email": "Also receive by email",
+    "emailHint": "At your account address.",
+    "emailOn": "Email on.",
+    "emailOff": "Email off.",
+    "types": {
+      "STOCK_ALERT": {
+        "name": "Stock to reorder",
+        "when": "After an issue, when items reach the alert threshold or run out in one of your warehouses.",
+        "title": "{count, plural, one {# item to reorder} other {# items to reorder}} · {warehouse}",
+        "line": "{name}: {quantity} (threshold {threshold})",
+        "others": "{count, plural, one {and # other} other {and # others}}"
+      },
+      "MEMBER_JOINED": {
+        "name": "New member",
+        "when": "When someone you invited joins the team.",
+        "title": "{name} joined the team",
+        "detail": "Invitation accepted."
+      },
+      "INVITATION_RECEIVED": {
+        "name": "Invitation received",
+        "when": "When a business invites you.",
+        "title": "{inviter} invites you to join {organization}",
+        "titleAnonymous": "Invitation to join {organization}",
+        "detail": "Open it to join the team."
+      },
+      "ACCESS_CHANGED": {
+        "name": "Stock access",
+        "when": "When your role or warehouses change.",
+        "title": "Your Stock access has changed",
+        "detail": "You are {role}: {warehouses}.",
+        "revoked": "You no longer have access to this business’s stock."
+      }
+    }
   }
 }

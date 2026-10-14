@@ -1,10 +1,11 @@
 import { expect, test } from "@playwright/test"
 
-import { waitForActionLink } from "./mailbox"
+import { waitForActionLink, waitForMail } from "./mailbox"
 import {
   callApi,
   dismissTour,
   navigateTo,
+  openNavigation,
   PASSWORD,
   redirectApi,
   shot,
@@ -17,14 +18,32 @@ test("une personne invitée rejoint l'équipe comme magasinière d'un seul dép�
   page,
   browser,
 }, testInfo) => {
-  await signUpWithBusiness(page, testInfo, "equipe")
+  const ownerEmail = await signUpWithBusiness(page, testInfo, "equipe")
   await dismissTour(page, "Tout est ici")
-  for (const name of ["Dépôt Bonabéri", "Boutique Akwa"])
+  const bonaberi = crypto.randomUUID()
+  for (const [id, name] of [
+    [bonaberi, "Dépôt Bonabéri"],
+    [crypto.randomUUID(), "Boutique Akwa"],
+  ])
     await callApi(page, "POST", "/v1/warehouses", {
-      id: crypto.randomUUID(),
+      id,
       name,
       kind: "WAREHOUSE",
     })
+  // Un câble suivi à Bonabéri (seuil 50 m), avec 80 m en stock.
+  const cable = crypto.randomUUID()
+  await callApi(page, "POST", "/v1/items", {
+    id: cable,
+    name: "Câble 2,5 mm²",
+    baseUnit: "METRE",
+    warehouses: [{ warehouseId: bonaberi, minQuantity: 50 }],
+  })
+  await callApi(page, "POST", "/v1/vouchers", {
+    id: crypto.randomUUID(),
+    type: "RECEIPT",
+    warehouseId: bonaberi,
+    lines: [{ itemId: cable, quantity: 80 }],
+  })
 
   // Invitation : une question par écran, puis le lien à partager.
   await navigateTo(page, "Équipe")
@@ -109,6 +128,7 @@ test("une personne invitée rejoint l'équipe comme magasinière d'un seul dép�
   await expect(guest.getByRole("link", { name: /Boutique Akwa/ })).toBeHidden()
   await expect(guest.getByRole("link", { name: "Nouveau dépôt" })).toBeHidden()
   await navigateTo(guest, "Articles")
+  await dismissTour(guest, "Retrouvez vite")
   await expect(guest.getByRole("link", { name: "Nouvel article" })).toBeHidden()
   await navigateTo(guest, "Bons")
   await dismissTour(guest, "Entrées et sorties")
@@ -121,7 +141,41 @@ test("une personne invitée rejoint l'équipe comme magasinière d'un seul dép�
       .getByRole("link", { name: "Équipe" })
   ).toBeHidden()
   await shot(guest, testInfo, "04-magasinier")
+  // Sa sortie fait passer le câble sous le seuil : le propriétaire sera prévenu.
+  await callApi(guest, "POST", "/v1/vouchers", {
+    id: crypto.randomUUID(),
+    type: "ISSUE",
+    warehouseId: bonaberi,
+    lines: [{ itemId: cable, quantity: 40 }],
+  })
   await context.close()
+
+  // Notifications du propriétaire : l'arrivée de Paul, puis l'alerte de stock, aussi par e-mail.
+  await expect(async () => {
+    await page.reload()
+    await expect(
+      page.getByRole("button", { name: "Notifications, 2 non lues" })
+    ).toBeVisible({ timeout: 2_000 })
+  }).toPass()
+  await page.getByRole("button", { name: "Notifications, 2 non lues" }).click()
+  const panel = page.getByRole("dialog", { name: "Notifications" })
+  await expect(panel).toContainText("1 article à commander · Dépôt Bonabéri")
+  await expect(panel).toContainText("Câble 2,5 mm² : 40 m (seuil 50 m)")
+  await expect(panel).toContainText("Paul Etoga a rejoint l’équipe")
+  await shot(page, testInfo, "05a-notifications")
+  await page.keyboard.press("Escape")
+  // Menus en mode clair : fond clair (le thème des composants forçait le mode sombre).
+  await openNavigation(page)
+  await page.getByRole("button", { name: "Ouvrir le menu du compte" }).click()
+  await shot(page, testInfo, "05b-menu-clair")
+  await page.keyboard.press("Escape")
+  await page.getByRole("button", { name: "Notifications, 2 non lues" }).click()
+  await panel.getByRole("button", { name: "Tout marquer comme lu" }).click()
+  await expect(panel).toContainText("Tout est lu.")
+  await page.keyboard.press("Escape")
+  expect(await waitForMail(ownerEmail, "1 article à commander")).toContain(
+    "Câble 2,5 mm² : 40 m, seuil 50 m (stock bas)"
+  )
 
   // Côté propriétaire : la personne est membre ; sa fiche change son accès Stock.
   await page.reload()
