@@ -1,6 +1,6 @@
 "use client"
 
-import { ArchiveIcon, ArchiveRestoreIcon } from "lucide-react"
+import { ArchiveIcon, ArchiveRestoreIcon, type LucideIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import {
@@ -19,7 +19,8 @@ import { Spinner } from "@/components/ui/spinner"
 type ArchiveLabels = { action: string; title: string; description: string }
 
 /**
- * Archiver demande confirmation (la fiche disparaît des listes) ; restaurer est immédiat.
+ * Archiver demande confirmation (la fiche disparaît des listes) ; restaurer est immédiat. Sert
+ * aussi à désactiver un membre de l'équipe, avec ses propres icônes.
  */
 export function ArchiveControl({
   archived,
@@ -28,6 +29,8 @@ export function ArchiveControl({
   restoreLabel,
   onArchive,
   onRestore,
+  archiveIcon: Archive = ArchiveIcon,
+  restoreIcon: Restore = ArchiveRestoreIcon,
 }: {
   archived: boolean
   pending: boolean
@@ -35,13 +38,15 @@ export function ArchiveControl({
   restoreLabel: string
   onArchive: () => void
   onRestore: () => void
+  archiveIcon?: LucideIcon
+  restoreIcon?: LucideIcon
 }) {
   const t = useTranslations("common")
 
   if (archived) {
     return (
       <Button variant="outline" onClick={onRestore} disabled={pending}>
-        {pending ? <Spinner /> : <ArchiveRestoreIcon />}
+        {pending ? <Spinner /> : <Restore />}
         {restoreLabel}
       </Button>
     )
@@ -57,7 +62,7 @@ export function ArchiveControl({
           />
         }
       >
-        <ArchiveIcon />
+        <Archive />
         {archiveLabels.action}
       </AlertDialogTrigger>
       <AlertDialogContent>

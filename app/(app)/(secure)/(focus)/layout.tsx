@@ -5,7 +5,7 @@ import { WorkspaceGate } from "@/components/workspace/workspace-gate"
 export default function FocusLayout({ children }: LayoutProps<"/">) {
   return (
     <WorkspaceGate>
-      <StockAccessProvider gated>{children}</StockAccessProvider>
+      <StockAccessProvider>{children}</StockAccessProvider>
     </WorkspaceGate>
   )
 }

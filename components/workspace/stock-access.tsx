@@ -1,6 +1,7 @@
 "use client"
 
 import { LockKeyholeIcon } from "lucide-react"
+import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { createContext, use, useMemo } from "react"
 
@@ -8,6 +9,7 @@ import { Splash } from "@/components/app/splash"
 import { EmptyState } from "@/components/catalog/empty-state"
 import { useMyStockAccess } from "@/lib/api/stock-queries"
 import type { MyStockAccess, StockPermission } from "@/lib/api/stock"
+import { Routes } from "@/lib/routes"
 
 import { PageBody } from "./page-header"
 
@@ -22,17 +24,17 @@ const Context = createContext<StockAccessContext | null>(null)
 
 /**
  * Rôle Stock de la personne connectée (DECISIONS.md, D25). L'API refuse de toute façon ce que le
- * rôle ne permet pas : ici, on évite seulement de proposer une action vouée à l'échec. [gated] :
- * un membre sans rôle Stock voit un message au lieu de l'écran (l'écran Équipe reste ouvert).
+ * rôle ne permet pas : ici, on évite seulement de proposer une action vouée à l'échec. Un membre
+ * sans rôle Stock voit un message au lieu de l'écran, sauf sur les écrans de l'équipe : un
+ * administrateur peut gérer l'équipe sans utiliser Stock.
  */
 export function StockAccessProvider({
-  gated,
   children,
 }: {
-  gated: boolean
   children: React.ReactNode
 }) {
   const t = useTranslations()
+  const gated = !usePathname().startsWith(Routes.team)
   const query = useMyStockAccess()
   const value = useMemo<StockAccessContext | null>(() => {
     if (!query.data) return null

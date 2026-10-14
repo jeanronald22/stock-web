@@ -3,122 +3,154 @@
 import { useTranslations } from "next-intl"
 
 import { Checkbox } from "@/components/ui/checkbox"
+import { warehouseKindIcons } from "@/components/warehouses/warehouse-kind"
 import { useWarehouses } from "@/lib/api/stock-queries"
-import { CatalogStatus, StockRole, stockRoles } from "@/lib/api/stock"
+import {
+  CatalogStatus,
+  StockRole,
+  stockRoles,
+  type WarehouseKind,
+} from "@/lib/api/stock"
 import { cn } from "@/lib/utils"
 
-/** Accès Stock en cours de saisie ; role null : aucun accès à Stock. */
-export type StockAccessValue = {
-  role: StockRole | null
-  warehouseIds: string[]
+/** Choix « aucun accès à Stock » à côté des rôles (aucun rôle Stock ne porte ce nom). */
+export const NO_STOCK_ROLE = "NONE"
+export type StockRoleChoice = StockRole | typeof NO_STOCK_ROLE
+
+/** Un rôle autre que gérant n'a accès qu'à ses dépôts (stock-api, StockRole.allWarehouses). */
+export function needsWarehouses(role: StockRoleChoice): boolean {
+  return role !== NO_STOCK_ROLE && role !== StockRole.generalManager
 }
 
-export const NO_STOCK_ACCESS: StockAccessValue = {
-  role: null,
-  warehouseIds: [],
-}
-
-/** Un rôle autre que gérant exige au moins un dépôt (stock-api, StockAccessService). */
-export function isAccessComplete(value: StockAccessValue): boolean {
-  return (
-    value.role === null ||
-    value.role === StockRole.generalManager ||
-    value.warehouseIds.length > 0
-  )
-}
-
-/** Rôle Stock (une carte par rôle, avec ce qu'il permet) et dépôts attribués. */
-export function StockAccessFields({
+/** Une carte par rôle Stock, avec ce qu'il permet, et « aucun accès ». */
+export function StockRoleField({
   value,
   onChange,
 }: {
-  value: StockAccessValue
-  onChange: (value: StockAccessValue) => void
+  value: StockRoleChoice
+  onChange: (role: StockRoleChoice) => void
+}) {
+  const t = useTranslations("team.stockRoles")
+  const options: StockRoleChoice[] = [...stockRoles, NO_STOCK_ROLE]
+  return (
+    <div
+      role="radiogroup"
+      aria-label={t("label")}
+      className="grid gap-2 sm:grid-cols-2"
+    >
+      {options.map((role) => (
+        <ChoiceCard
+          key={role}
+          selected={value === role}
+          label={t(`${role}.label`)}
+          hint={t(`${role}.hint`)}
+          onSelect={() => onChange(role)}
+        />
+      ))}
+    </div>
+  )
+}
+
+/** Dépôts attribués : une case par dépôt actif. */
+export function AssignedWarehousesField({
+  value,
+  onChange,
+  invalid,
+}: {
+  value: string[]
+  onChange: (warehouseIds: string[]) => void
+  invalid?: boolean
 }) {
   const t = useTranslations("team.stockRoles")
   // Relue à l'ouverture : un dépôt vient peut-être d'être déclaré.
   const warehouses =
     useWarehouses(CatalogStatus.active, { fresh: true }).data ?? []
-  const options = [...stockRoles, null] as const
-  const needsWarehouses =
-    value.role !== null && value.role !== StockRole.generalManager
-
+  if (warehouses.length === 0)
+    return <p className="text-sm text-muted-foreground">{t("noWarehouse")}</p>
   return (
-    <div className="space-y-4">
-      <div
-        role="radiogroup"
-        aria-label={t("label")}
-        className="grid gap-2 sm:grid-cols-2"
-      >
-        {options.map((role) => {
-          const key = role ?? "NONE"
-          const selected = value.role === role
-          return (
-            <button
-              key={key}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              onClick={() => onChange({ ...value, role })}
+    <ul aria-label={t("warehouses")} className="grid gap-2 sm:grid-cols-2">
+      {warehouses.map((warehouse) => {
+        const checked = value.includes(warehouse.id)
+        return (
+          <li key={warehouse.id}>
+            <label
               className={cn(
-                "rounded-xl border p-3 text-left transition-all focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:outline-none",
-                selected
-                  ? "border-primary bg-primary/5 ring-1 ring-primary"
-                  : "hover:border-foreground/20 hover:bg-muted/40"
+                "flex cursor-pointer items-center gap-3 rounded-xl border p-3 text-sm font-medium transition-colors",
+                checked ? "border-primary bg-primary/5" : "hover:bg-muted/40",
+                invalid && "border-destructive"
               )}
             >
-              <span className="block text-sm font-semibold">
-                {t(`${key}.label`)}
+              <Checkbox
+                checked={checked}
+                onCheckedChange={(next) =>
+                  onChange(
+                    next
+                      ? [...value, warehouse.id]
+                      : value.filter((id) => id !== warehouse.id)
+                  )
+                }
+              />
+              <WarehouseKindIcon
+                kind={warehouse.kind}
+                className="size-4 text-muted-foreground"
+              />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate">{warehouse.name}</span>
+                {warehouse.city && (
+                  <span className="block truncate text-xs font-normal text-muted-foreground">
+                    {warehouse.city}
+                  </span>
+                )}
               </span>
-              <span className="mt-0.5 block text-xs text-muted-foreground">
-                {t(`${key}.hint`)}
-              </span>
-            </button>
-          )
-        })}
-      </div>
-      {needsWarehouses && (
-        <fieldset className="space-y-2">
-          <legend className="mb-2 text-sm font-medium">
-            {t("warehouses")}
-          </legend>
-          {warehouses.length === 0 && (
-            <p className="text-sm text-muted-foreground">{t("noWarehouse")}</p>
-          )}
-          <ul className="grid gap-2 sm:grid-cols-2">
-            {warehouses.map((warehouse) => {
-              const checked = value.warehouseIds.includes(warehouse.id)
-              return (
-                <li key={warehouse.id}>
-                  <label
-                    className={cn(
-                      "flex cursor-pointer items-center gap-3 rounded-xl border p-3 text-sm font-medium transition-colors",
-                      checked
-                        ? "border-primary bg-primary/5"
-                        : "hover:bg-muted/40"
-                    )}
-                  >
-                    <Checkbox
-                      checked={checked}
-                      onCheckedChange={(next) =>
-                        onChange({
-                          ...value,
-                          warehouseIds: next
-                            ? [...value.warehouseIds, warehouse.id]
-                            : value.warehouseIds.filter(
-                                (id) => id !== warehouse.id
-                              ),
-                        })
-                      }
-                    />
-                    <span className="truncate">{warehouse.name}</span>
-                  </label>
-                </li>
-              )
-            })}
-          </ul>
-        </fieldset>
-      )}
-    </div>
+            </label>
+          </li>
+        )
+      })}
+    </ul>
   )
+}
+
+/** Carte de choix, même dessin que les unités de comptage et les types de dépôt. */
+export function ChoiceCard({
+  selected,
+  label,
+  hint,
+  onSelect,
+  disabled,
+}: {
+  selected: boolean
+  label: string
+  hint: string
+  onSelect: () => void
+  disabled?: boolean
+}) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={selected}
+      disabled={disabled}
+      onClick={onSelect}
+      className={cn(
+        "rounded-xl border p-3 text-left transition-all focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60",
+        selected
+          ? "border-primary bg-primary/5 ring-1 ring-primary"
+          : "hover:border-foreground/20 hover:bg-muted/40"
+      )}
+    >
+      <span className="block text-sm font-semibold">{label}</span>
+      <span className="mt-0.5 block text-xs text-muted-foreground">{hint}</span>
+    </button>
+  )
+}
+
+function WarehouseKindIcon({
+  kind,
+  className,
+}: {
+  kind: WarehouseKind
+  className?: string
+}) {
+  const Icon = warehouseKindIcons[kind]
+  return <Icon className={className} aria-hidden />
 }

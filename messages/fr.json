@@ -15,7 +15,9 @@
     "suppliers": "Fournisseurs",
     "newSupplier": "Nouveau fournisseur",
     "team": "Équipe",
-    "invitation": "Invitation"
+    "invitation": "Invitation",
+    "newInvitation": "Inviter une personne",
+    "member": "Membre"
   },
   "common": {
     "retry": "Réessayer",
@@ -753,15 +755,12 @@
   "team": {
     "title": "Équipe",
     "description": "Invitez vos collègues et choisissez ce que chacun peut faire, dépôt par dépôt.",
-    "membersOnly": "Seuls le propriétaire et les administrateurs gèrent l’équipe.",
-    "members": "Membres",
     "invitations": "Invitations en attente",
     "you": "vous",
     "disabled": "Désactivé",
     "pending": "En attente",
     "expired": "Expirée",
     "expiresOn": "valable jusqu’au {date}",
-    "actions": "Actions pour {name}",
     "invitationActions": "Actions pour l’invitation de {email}",
     "disable": "Désactiver",
     "enable": "Réactiver",
@@ -784,8 +783,8 @@
         "label": "Membre",
         "hint": "Travaille selon son rôle Stock, sans gérer l’équipe."
       },
-      "promote": "Nommer administrateur",
-      "demote": "Retirer le rôle d’administrateur"
+      "description": "Un administrateur invite et gère les membres de l’équipe.",
+      "ownerOnly": "Seul le propriétaire nomme ou retire un administrateur."
     },
     "stockRoles": {
       "label": "Rôle dans Stock",
@@ -816,15 +815,11 @@
       }
     },
     "access": {
-      "edit": "Accès Stock",
-      "title": "Accès Stock de {name}",
       "description": "Le rôle décide de ce que la personne peut faire ; les dépôts, où elle peut le faire.",
       "saved": "Accès Stock de {name} enregistré."
     },
     "invite": {
       "open": "Inviter",
-      "title": "Inviter une personne",
-      "description": "Elle reçoit un lien par e-mail, valable 7 jours. Elle se connecte avec cette adresse pour rejoindre l’équipe.",
       "email": "Adresse e-mail",
       "emailPlaceholder": "awa@exemple.cm",
       "submit": "Envoyer l’invitation",
@@ -839,6 +834,55 @@
       "whatsapp": "Envoyer par WhatsApp",
       "message": "Bonjour, je vous invite à rejoindre {organization} sur Kreskala : {link}",
       "hint": "Ce lien n’est affiché qu’une fois. Pour en obtenir un nouveau, renvoyez l’invitation."
+    },
+    "membersOnly": {
+      "title": "Réservé aux responsables",
+      "description": "Seuls le propriétaire et les administrateurs gèrent l’équipe."
+    },
+    "empty": {
+      "title": "Invitez votre équipe",
+      "description": "Magasiniers, contrôleurs, managers : chacun reçoit un lien et travaille dans ses dépôts, selon son rôle."
+    },
+    "table": {
+      "person": "Personne",
+      "role": "Rôle",
+      "stock": "Accès Stock",
+      "email": "Adresse",
+      "expiry": "Valable jusqu’au"
+    },
+    "memberNotFound": {
+      "title": "Membre introuvable",
+      "description": "Cette personne ne fait pas partie de l’équipe."
+    },
+    "disableConfirm": {
+      "title": "Désactiver {name} ?",
+      "description": "Cette personne n’aura plus accès à l’entreprise. Ses bons restent dans l’historique ; vous pourrez la réactiver."
+    },
+    "ownerDescription": "Le propriétaire a créé l’entreprise : il gère l’équipe et il est gérant dans Stock, d’office.",
+    "wizard": {
+      "eyebrow": "Nouvelle invitation",
+      "email": {
+        "title": "Qui invitez-vous ?",
+        "description": "La personne reçoit un lien par e-mail, valable 7 jours. Elle se connectera avec cette adresse."
+      },
+      "role": {
+        "title": "Quel rôle dans l’équipe ?",
+        "description": "Un administrateur peut à son tour inviter et gérer les membres."
+      },
+      "stockRole": {
+        "title": "Que fera-t-elle dans Stock ?",
+        "description": "Le rôle décide de ce qu’elle peut faire. Vous pourrez le changer à tout moment."
+      },
+      "warehouses": {
+        "title": "Dans quels dépôts ?",
+        "description": "Elle ne verra et ne mouvementera que le stock de ces dépôts.",
+        "required": "Choisissez au moins un dépôt."
+      }
+    },
+    "sent": {
+      "title": "Invitation prête",
+      "backToTeam": "Retour à l’équipe",
+      "inviteAnother": "Inviter une autre personne"
     }
   },
   "invitation": {
@@ -871,6 +915,7 @@
         "title": "Invitation annulée",
         "description": "Cette invitation à rejoindre {organization} a été annulée."
       }
-    }
+    },
+    "eyebrow": "Invitation"
   }
 }

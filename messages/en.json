@@ -15,7 +15,9 @@
     "suppliers": "Suppliers",
     "newSupplier": "New supplier",
     "team": "Team",
-    "invitation": "Invitation"
+    "invitation": "Invitation",
+    "newInvitation": "Invite someone",
+    "member": "Member"
   },
   "common": {
     "retry": "Try again",
@@ -753,15 +755,12 @@
   "team": {
     "title": "Team",
     "description": "Invite your colleagues and choose what each one can do, warehouse by warehouse.",
-    "membersOnly": "Only the owner and administrators manage the team.",
-    "members": "Members",
     "invitations": "Pending invitations",
     "you": "you",
     "disabled": "Disabled",
     "pending": "Pending",
     "expired": "Expired",
     "expiresOn": "valid until {date}",
-    "actions": "Actions for {name}",
     "invitationActions": "Actions for the invitation of {email}",
     "disable": "Disable",
     "enable": "Enable",
@@ -784,8 +783,8 @@
         "label": "Member",
         "hint": "Works according to their Stock role, without managing the team."
       },
-      "promote": "Make administrator",
-      "demote": "Remove administrator role"
+      "description": "An administrator invites and manages team members.",
+      "ownerOnly": "Only the owner appoints or removes an administrator."
     },
     "stockRoles": {
       "label": "Stock role",
@@ -816,15 +815,11 @@
       }
     },
     "access": {
-      "edit": "Stock access",
-      "title": "Stock access for {name}",
       "description": "The role decides what the person can do; the warehouses, where they can do it.",
       "saved": "Stock access for {name} saved."
     },
     "invite": {
       "open": "Invite",
-      "title": "Invite someone",
-      "description": "They receive a link by email, valid for 7 days, and sign in with this address to join the team.",
       "email": "Email address",
       "emailPlaceholder": "awa@example.com",
       "submit": "Send the invitation",
@@ -839,6 +834,55 @@
       "whatsapp": "Send on WhatsApp",
       "message": "Hello, I invite you to join {organization} on Kreskala: {link}",
       "hint": "This link is shown only once. To get a new one, resend the invitation."
+    },
+    "membersOnly": {
+      "title": "For team managers",
+      "description": "Only the owner and administrators manage the team."
+    },
+    "empty": {
+      "title": "Invite your team",
+      "description": "Storekeepers, controllers, managers: each one receives a link and works in their warehouses, according to their role."
+    },
+    "table": {
+      "person": "Person",
+      "role": "Role",
+      "stock": "Stock access",
+      "email": "Address",
+      "expiry": "Valid until"
+    },
+    "memberNotFound": {
+      "title": "Member not found",
+      "description": "This person is not part of the team."
+    },
+    "disableConfirm": {
+      "title": "Disable {name}?",
+      "description": "This person will no longer have access to the business. Their vouchers stay in the history; you can enable them again."
+    },
+    "ownerDescription": "The owner created the business: they manage the team and are general manager in Stock, by default.",
+    "wizard": {
+      "eyebrow": "New invitation",
+      "email": {
+        "title": "Who are you inviting?",
+        "description": "They receive a link by email, valid for 7 days, and will sign in with this address."
+      },
+      "role": {
+        "title": "What team role?",
+        "description": "An administrator can in turn invite and manage members."
+      },
+      "stockRole": {
+        "title": "What will they do in Stock?",
+        "description": "The role decides what they can do. You can change it at any time."
+      },
+      "warehouses": {
+        "title": "In which warehouses?",
+        "description": "They will only see and move the stock of these warehouses.",
+        "required": "Choose at least one warehouse."
+      }
+    },
+    "sent": {
+      "title": "Invitation ready",
+      "backToTeam": "Back to the team",
+      "inviteAnother": "Invite someone else"
     }
   },
   "invitation": {
@@ -871,6 +915,7 @@
         "title": "Invitation cancelled",
         "description": "This invitation to join {organization} has been cancelled."
       }
-    }
+    },
+    "eyebrow": "Invitation"
   }
 }

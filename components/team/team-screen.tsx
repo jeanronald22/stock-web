@@ -1,23 +1,26 @@
 "use client"
 
 import {
-  BanIcon,
+  ChevronRightIcon,
   EllipsisVerticalIcon,
-  KeyRoundIcon,
   RotateCcwIcon,
   SendIcon,
   ShieldCheckIcon,
   ShieldIcon,
-  UserCheckIcon,
+  UserPlusIcon,
   XIcon,
 } from "lucide-react"
+import Link from "next/link"
 import { useFormatter, useTranslations } from "next-intl"
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
 
+import { EmptyState } from "@/components/catalog/empty-state"
+import { InvitationScene } from "@/components/illustrations/invitation-scene"
+import { TeamScene } from "@/components/illustrations/team-scene"
 import { ItemsTableSkeleton } from "@/components/items/items-table"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,6 +35,14 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import { useWorkspace } from "@/components/workspace/workspace-context"
 import {
@@ -45,29 +56,18 @@ import {
 import { GranteeKind, StockRole, type StockGrant } from "@/lib/api/stock"
 import { useWarehouses } from "@/lib/api/stock-queries"
 import {
-  useChangeMemberRole,
-  useChangeMemberStatus,
   useResendInvitation,
   useRevokeInvitation,
   useStockGrants,
   useTeam,
 } from "@/lib/api/team-queries"
 import { useErrorMessage } from "@/lib/api/use-error-message"
+import { RecordRoutes, Routes } from "@/lib/routes"
 
-import { AccessSheet } from "./access-sheet"
 import { InvitationLink } from "./invitation-link"
-import { InviteSheet } from "./invite-sheet"
-import { NO_STOCK_ACCESS, type StockAccessValue } from "./stock-access-fields"
+import { memberName } from "./team-format"
 
 const SKELETON_ROWS = 4
-
-function fullName(member: TeamMember): string {
-  return (
-    [member.firstName, member.lastName].filter(Boolean).join(" ") ||
-    member.email ||
-    ""
-  )
-}
 
 /**
  * Équipe de l'entreprise (DECISIONS.md, D25) : membres avec leur rôle dans l'équipe et dans Stock,
@@ -77,8 +77,8 @@ export function TeamScreen() {
   const t = useTranslations("team")
   const team = useTeam()
   const grants = useStockGrants()
-  const [shared, setShared] = useState<InvitationSent | null>(null)
   const { organization } = useWorkspace()
+  const [shared, setShared] = useState<InvitationSent | null>(null)
 
   const grantOf = useMemo(() => {
     const byKey = new Map(
@@ -93,55 +93,113 @@ export function TeamScreen() {
   if (organization.role === MembershipRole.member) {
     return (
       <PageBody>
-        <PageHeader title={t("title")} description={t("membersOnly")} />
+        <PageHeader title={t("title")} />
+        <EmptyState
+          illustration={<TeamScene />}
+          title={t("membersOnly.title")}
+          description={t("membersOnly.description")}
+        />
       </PageBody>
     )
   }
+
+  const members = team.data?.members ?? []
+  const invitations = team.data?.invitations ?? []
+  // Seul le propriétaire, aucune invitation : l'écran vide porte l'action.
+  const alone =
+    team.isSuccess && members.length <= 1 && invitations.length === 0
+  const inviteButton = (
+    <Link
+      href={Routes.newInvitation}
+      className={buttonVariants({ size: "lg" })}
+    >
+      <UserPlusIcon />
+      {t("invite.open")}
+    </Link>
+  )
 
   return (
     <PageBody>
       <PageHeader
         title={t("title")}
         description={t("description")}
-        actions={<InviteSheet />}
+        actions={alone ? undefined : inviteButton}
       />
-      <section className="mt-8">
-        <h2 className="mb-3 text-lg font-semibold">{t("members")}</h2>
-        <div className="overflow-hidden rounded-2xl border">
-          {team.isPending ? (
-            <ItemsTableSkeleton rows={SKELETON_ROWS} />
-          ) : (
-            <ul className="divide-y">
-              {(team.data?.members ?? []).map((member) => (
-                <MemberRow
-                  key={member.userId}
-                  member={member}
-                  grant={grantOf(GranteeKind.member, member.subject)}
-                />
-              ))}
-            </ul>
-          )}
-        </div>
-      </section>
+      {alone ? (
+        <EmptyState
+          illustration={<TeamScene />}
+          title={t("empty.title")}
+          description={t("empty.description")}
+          action={inviteButton}
+        />
+      ) : (
+        <>
+          <div className="mt-8 overflow-hidden rounded-2xl border">
+            {team.isPending ? (
+              <ItemsTableSkeleton rows={SKELETON_ROWS} />
+            ) : (
+              <Table>
+                <TableHeader className="bg-muted/40">
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="pl-4">{t("table.person")}</TableHead>
+                    <TableHead className="hidden sm:table-cell">
+                      {t("table.role")}
+                    </TableHead>
+                    <TableHead className="hidden md:table-cell">
+                      {t("table.stock")}
+                    </TableHead>
+                    <TableHead className="w-10" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {members.map((member) => (
+                    <MemberRow
+                      key={member.userId}
+                      member={member}
+                      grant={grantOf(GranteeKind.member, member.subject)}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
 
-      {(team.data?.invitations.length ?? 0) > 0 && (
-        <section className="mt-10">
-          <h2 className="mb-3 text-lg font-semibold">{t("invitations")}</h2>
-          <ul className="divide-y overflow-hidden rounded-2xl border">
-            {team.data?.invitations.map((invitation) => (
-              <InvitationRow
-                key={invitation.id}
-                invitation={invitation}
-                grant={grantOf(GranteeKind.invitation, invitation.id)}
-                onShared={setShared}
-              />
-            ))}
-          </ul>
-        </section>
+          {invitations.length > 0 && (
+            <section className="mt-10">
+              <h2 className="mb-3 text-lg font-semibold">{t("invitations")}</h2>
+              <div className="overflow-hidden rounded-2xl border">
+                <Table>
+                  <TableHeader className="bg-muted/40">
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="pl-4">{t("table.email")}</TableHead>
+                      <TableHead className="hidden md:table-cell">
+                        {t("table.stock")}
+                      </TableHead>
+                      <TableHead className="hidden sm:table-cell">
+                        {t("table.expiry")}
+                      </TableHead>
+                      <TableHead className="w-10" />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {invitations.map((invitation) => (
+                      <InvitationRow
+                        key={invitation.id}
+                        invitation={invitation}
+                        grant={grantOf(GranteeKind.invitation, invitation.id)}
+                        onShared={setShared}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </section>
+          )}
+        </>
       )}
 
       <Sheet open={!!shared} onOpenChange={(open) => !open && setShared(null)}>
-        <SheetContent className="w-full sm:max-w-lg">
+        <SheetContent className="w-full overflow-y-auto sm:max-w-md">
           <SheetHeader className="border-b">
             <SheetTitle>{t("link.title")}</SheetTitle>
             <SheetDescription>
@@ -151,7 +209,8 @@ export function TeamScreen() {
                   : t("invite.notSent", { email: shared.invitation.email }))}
             </SheetDescription>
           </SheetHeader>
-          <div className="p-4">
+          <div className="space-y-6 p-4">
+            <InvitationScene className="mx-auto w-48" />
             {shared?.link && (
               <InvitationLink
                 link={shared.link}
@@ -165,12 +224,16 @@ export function TeamScreen() {
   )
 }
 
-/** « Magasinier · Dépôt Bonabéri, Boutique Akwa », « Gérant · tous les dépôts », « Aucun accès ». */
+/** « Magasinier · Dépôt Bonabéri », « Gérant · tous les dépôts », « Aucun accès Stock ». */
 function useAccessLabel() {
   const t = useTranslations("team.stockRoles")
-  const warehouses = useWarehouses().data ?? []
-  const names = new Map(
-    warehouses.map((warehouse) => [warehouse.id, warehouse.name])
+  const warehouses = useWarehouses().data
+  const names = useMemo(
+    () =>
+      new Map(
+        (warehouses ?? []).map((warehouse) => [warehouse.id, warehouse.name])
+      ),
+    [warehouses]
   )
   return (grant: StockGrant | undefined, owner = false): string => {
     if (owner)
@@ -183,14 +246,14 @@ function useAccessLabel() {
   }
 }
 
-function TeamRoleBadge({ role }: { role: MembershipRole }) {
+export function TeamRoleBadge({ role }: { role: MembershipRole }) {
   const t = useTranslations("team.role")
   const Icon =
-    role === MembershipRole.member
-      ? null
-      : role === MembershipRole.owner
-        ? ShieldCheckIcon
-        : ShieldIcon
+    role === MembershipRole.owner
+      ? ShieldCheckIcon
+      : role === MembershipRole.admin
+        ? ShieldIcon
+        : null
   return (
     <Badge
       variant={role === MembershipRole.member ? "outline" : "secondary"}
@@ -202,6 +265,7 @@ function TeamRoleBadge({ role }: { role: MembershipRole }) {
   )
 }
 
+/** Toute la ligne ouvre la fiche du membre (le lien du nom couvre la ligne). */
 function MemberRow({
   member,
   grant,
@@ -209,136 +273,62 @@ function MemberRow({
   member: TeamMember
   grant: StockGrant | undefined
 }) {
-  const t = useTranslations()
+  const t = useTranslations("team")
   const accessLabel = useAccessLabel()
-  const errorMessage = useErrorMessage()
-  const { organization } = useWorkspace()
-  const changeRole = useChangeMemberRole()
-  const changeStatus = useChangeMemberStatus()
-  const [editingAccess, setEditingAccess] = useState(false)
-  const name = fullName(member)
+  const name = memberName(member)
   const owner = member.role === MembershipRole.owner
-  const disabled = member.status === MembershipStatus.disabled
-  const actorIsOwner = organization.role === MembershipRole.owner
-  // Un administrateur ne gère que les membres ; le propriétaire et soi-même sont protégés (D25).
-  const manageable =
-    !owner && (actorIsOwner || member.role === MembershipRole.member)
-  const initial: StockAccessValue = grant
-    ? { role: grant.role, warehouseIds: grant.warehouseIds }
-    : NO_STOCK_ACCESS
-
-  const onError = (error: unknown) => toast.error(errorMessage(error))
-
   return (
-    <li className="flex flex-wrap items-center gap-3 p-4">
-      <span
-        className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold"
-        aria-hidden
-      >
-        {name.slice(0, 1).toUpperCase()}
-      </span>
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="truncate font-semibold">{name}</span>
-          {member.self && (
-            <span className="text-xs text-muted-foreground">
-              ({t("team.you")})
-            </span>
-          )}
-          <TeamRoleBadge role={member.role} />
-          {disabled && <Badge variant="danger">{t("team.disabled")}</Badge>}
-        </div>
-        {member.email && (
-          <p className="truncate text-sm text-muted-foreground">
-            {member.email}
-          </p>
-        )}
-        <p className="mt-0.5 truncate text-xs text-muted-foreground">
-          {accessLabel(grant, owner)}
-        </p>
-      </div>
-      {manageable && (
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label={t("team.actions", { name })}
-              />
-            }
+    <TableRow className="relative cursor-pointer">
+      <TableCell className="py-3 pl-4 whitespace-normal">
+        <div className="flex items-center gap-3">
+          <span
+            className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary"
+            aria-hidden
           >
-            <EllipsisVerticalIcon />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-60">
-            <DropdownMenuItem onClick={() => setEditingAccess(true)}>
-              <KeyRoundIcon />
-              {t("team.access.edit")}
-            </DropdownMenuItem>
-            {actorIsOwner && (
-              <DropdownMenuItem
-                onClick={() =>
-                  changeRole.mutate(
-                    {
-                      userId: member.userId,
-                      role:
-                        member.role === MembershipRole.admin
-                          ? MembershipRole.member
-                          : MembershipRole.admin,
-                    },
-                    { onError }
-                  )
-                }
+            {name.slice(0, 1).toUpperCase()}
+          </span>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href={RecordRoutes.member(member.userId)}
+                className="truncate font-semibold after:absolute after:inset-0 focus-visible:outline-none"
               >
-                <ShieldIcon />
-                {member.role === MembershipRole.admin
-                  ? t("team.role.demote")
-                  : t("team.role.promote")}
-              </DropdownMenuItem>
+                {name}
+              </Link>
+              {member.self && (
+                <span className="text-xs text-muted-foreground">
+                  ({t("you")})
+                </span>
+              )}
+              {member.status === MembershipStatus.disabled && (
+                <Badge variant="danger">{t("disabled")}</Badge>
+              )}
+            </div>
+            {member.email && (
+              <p className="truncate text-xs text-muted-foreground">
+                {member.email}
+              </p>
             )}
-            {!member.self && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  variant={disabled ? "default" : "destructive"}
-                  onClick={() =>
-                    changeStatus.mutate(
-                      {
-                        userId: member.userId,
-                        status: disabled
-                          ? MembershipStatus.active
-                          : MembershipStatus.disabled,
-                      },
-                      {
-                        onSuccess: () =>
-                          toast.success(
-                            disabled
-                              ? t("team.enabled", { name })
-                              : t("team.disabledDone", { name })
-                          ),
-                        onError,
-                      }
-                    )
-                  }
-                >
-                  {disabled ? <UserCheckIcon /> : <BanIcon />}
-                  {disabled ? t("team.enable") : t("team.disable")}
-                </DropdownMenuItem>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
-      {editingAccess && (
-        <AccessSheet
-          subject={member.subject}
-          name={name}
-          initial={initial}
-          open={editingAccess}
-          onOpenChange={setEditingAccess}
-        />
-      )}
-    </li>
+            {/* Petit écran : rôle et accès sous le nom, leurs colonnes étant masquées. */}
+            <p className="truncate text-xs text-muted-foreground md:hidden">
+              <span className="sm:hidden">
+                {t(`role.${member.role}.label`)} ·{" "}
+              </span>
+              {accessLabel(grant, owner)}
+            </p>
+          </div>
+        </div>
+      </TableCell>
+      <TableCell className="hidden sm:table-cell">
+        <TeamRoleBadge role={member.role} />
+      </TableCell>
+      <TableCell className="hidden text-sm md:table-cell">
+        {accessLabel(grant, owner)}
+      </TableCell>
+      <TableCell className="pr-4 text-muted-foreground">
+        <ChevronRightIcon className="size-4" aria-hidden />
+      </TableCell>
+    </TableRow>
   )
 }
 
@@ -351,76 +341,82 @@ function InvitationRow({
   grant: StockGrant | undefined
   onShared: (sent: InvitationSent) => void
 }) {
-  const t = useTranslations()
+  const t = useTranslations("team")
   const format = useFormatter()
   const accessLabel = useAccessLabel()
   const errorMessage = useErrorMessage()
   const resend = useResendInvitation()
   const revoke = useRevokeInvitation()
   const expired = invitation.state === InvitationState.expired
+  const expiry = format.dateTime(new Date(invitation.expiresAt), {
+    dateStyle: "medium",
+  })
 
   return (
-    <li className="flex flex-wrap items-center gap-3 p-4">
-      <div className="min-w-0 flex-1">
+    <TableRow>
+      <TableCell className="py-3 pl-4 whitespace-normal">
         <div className="flex flex-wrap items-center gap-2">
           <span className="truncate font-semibold">{invitation.email}</span>
           <TeamRoleBadge role={invitation.role} />
           <Badge variant={expired ? "danger" : "info"}>
-            {expired ? t("team.expired") : t("team.pending")}
+            {expired ? t("expired") : t("pending")}
           </Badge>
         </div>
-        <p className="mt-0.5 truncate text-xs text-muted-foreground">
-          {accessLabel(grant)} ·{" "}
-          {t("team.expiresOn", {
-            date: format.dateTime(new Date(invitation.expiresAt), {
-              dateStyle: "medium",
-            }),
-          })}
+        <p className="truncate text-xs text-muted-foreground md:hidden">
+          {accessLabel(grant)}
+          <span className="sm:hidden">
+            {" "}
+            · {t("expiresOn", { date: expiry })}
+          </span>
         </p>
-      </div>
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          render={
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              aria-label={t("team.invitationActions", {
-                email: invitation.email,
-              })}
-            />
-          }
-        >
-          <EllipsisVerticalIcon />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuItem
-            disabled={resend.isPending}
-            onClick={() =>
-              resend.mutate(invitation.id, {
-                onSuccess: onShared,
-                onError: (error) => toast.error(errorMessage(error)),
-              })
+      </TableCell>
+      <TableCell className="hidden text-sm md:table-cell">
+        {accessLabel(grant)}
+      </TableCell>
+      <TableCell className="hidden text-sm sm:table-cell">{expiry}</TableCell>
+      <TableCell className="pr-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label={t("invitationActions", { email: invitation.email })}
+              />
             }
           >
-            {expired ? <RotateCcwIcon /> : <SendIcon />}
-            {t("team.resend")}
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            variant="destructive"
-            onClick={() =>
-              revoke.mutate(invitation.id, {
-                onSuccess: () =>
-                  toast.success(t("team.revoked", { email: invitation.email })),
-                onError: (error) => toast.error(errorMessage(error)),
-              })
-            }
-          >
-            <XIcon />
-            {t("team.revoke")}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </li>
+            <EllipsisVerticalIcon />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem
+              disabled={resend.isPending}
+              onClick={() =>
+                resend.mutate(invitation.id, {
+                  onSuccess: onShared,
+                  onError: (error) => toast.error(errorMessage(error)),
+                })
+              }
+            >
+              {expired ? <RotateCcwIcon /> : <SendIcon />}
+              {t("resend")}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() =>
+                revoke.mutate(invitation.id, {
+                  onSuccess: () =>
+                    toast.success(t("revoked", { email: invitation.email })),
+                  onError: (error) => toast.error(errorMessage(error)),
+                })
+              }
+            >
+              <XIcon />
+              {t("revoke")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </TableCell>
+    </TableRow>
   )
 }

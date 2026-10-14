@@ -17,6 +17,7 @@ export const Routes = {
   suppliers: "/fournisseurs",
   newSupplier: "/fournisseurs/nouveau",
   team: "/equipe",
+  newInvitation: "/equipe/inviter",
   /** Lien reçu par e-mail ; même chemin que l'API (stock-api, TeamService.INVITATION_PATH). */
   invitation: "/invitation",
   /** Publique : ouverte depuis les écrans de connexion (Keycloak), avant toute connexion. */
@@ -32,6 +33,7 @@ export const RecordRoutes = {
   warehouse: (id: string) => `${Routes.warehouses}/${id}`,
   voucher: (id: string) => `${Routes.vouchers}/${id}`,
   supplier: (id: string) => `${Routes.suppliers}/${id}`,
+  member: (userId: string) => `${Routes.team}/${userId}`,
   invitation: (token: string) =>
     `${Routes.invitation}/${encodeURIComponent(token)}`,
 } as const

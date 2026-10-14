@@ -5,7 +5,6 @@ import {
   LinkIcon,
   MailCheckIcon,
   UserRoundIcon,
-  UsersIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
@@ -16,6 +15,7 @@ import { toast } from "sonner"
 import { FullPageMessage } from "@/components/app/full-page-message"
 import { Splash } from "@/components/app/splash"
 import { KreskalaLogo } from "@/components/brand/kreskala-logo"
+import { InvitationScene } from "@/components/illustrations/invitation-scene"
 import { Button } from "@/components/ui/button"
 import { Field, FieldLabel } from "@/components/ui/field"
 import {
@@ -86,35 +86,45 @@ export function InvitationScreen({ token }: { token: string }) {
     )
   }
 
+  // Même mise en page que les assistants : la question à gauche, l'illustration à droite.
   return (
-    <div className="flex min-h-dvh flex-col bg-background px-4 sm:px-8">
-      <header className="flex h-16 items-center">
+    <div className="flex min-h-dvh flex-col bg-background">
+      <header className="flex h-16 items-center px-4 sm:px-8">
         <KreskalaLogo className="h-8" />
       </header>
-      <main className="flex flex-1 items-center justify-center pb-16">
-        <div className="w-full max-w-sm">
-          <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/10">
-            <UsersIcon className="size-6 text-primary" aria-hidden />
-          </span>
-          <h1 className="mt-6 text-center text-2xl font-semibold tracking-tight text-balance">
-            {invitation.inviterName
-              ? t("title", {
-                  inviter: invitation.inviterName,
-                  organization: invitation.organizationName,
-                })
-              : t("titleAnonymous", {
-                  organization: invitation.organizationName,
-                })}
-          </h1>
-          <p className="mt-2 text-center text-pretty text-muted-foreground">
-            {t("sentTo", { email: invitation.email })}
-          </p>
-          <div className="mt-8">
-            {auth.isAuthenticated ? (
-              <SignedIn token={token} invitation={invitation} />
-            ) : (
-              <SignedOut token={token} email={invitation.email} />
-            )}
+      <main className="flex flex-1 justify-center px-4 pt-4 pb-16 sm:px-8 sm:pt-12 lg:items-center lg:pt-6">
+        <div className="grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
+          <div className="w-full max-w-lg justify-self-center lg:justify-self-start">
+            <div className="mb-6 w-40 lg:hidden">
+              <InvitationScene />
+            </div>
+            <p className="text-sm font-semibold text-primary">{t("eyebrow")}</p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+              {invitation.inviterName
+                ? t("title", {
+                    inviter: invitation.inviterName,
+                    organization: invitation.organizationName,
+                  })
+                : t("titleAnonymous", {
+                    organization: invitation.organizationName,
+                  })}
+            </h1>
+            <p className="mt-3 text-base text-pretty text-muted-foreground sm:text-lg">
+              {t("sentTo", { email: invitation.email })}
+            </p>
+            <div className="mt-10">
+              {auth.isAuthenticated ? (
+                <SignedIn token={token} invitation={invitation} />
+              ) : (
+                <SignedOut token={token} email={invitation.email} />
+              )}
+            </div>
+          </div>
+          <div
+            aria-hidden
+            className="hidden aspect-[4/3] items-center justify-center rounded-3xl bg-success-muted p-12 lg:flex"
+          >
+            <InvitationScene />
           </div>
         </div>
       </main>
@@ -145,7 +155,7 @@ function SignedOut({ token, email }: { token: string; email: string }) {
       >
         {t("signIn")}
       </Button>
-      <p className="text-center text-xs text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         {t("sameEmail", { email })}
       </p>
     </div>

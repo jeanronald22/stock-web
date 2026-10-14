@@ -26,23 +26,45 @@ test("une personne invitée rejoint l'équipe comme magasinière d'un seul dép�
       kind: "WAREHOUSE",
     })
 
-  // Invitation : adresse, rôle Stock et dépôt ; le lien s'affiche pour être partagé.
+  // Invitation : une question par écran, puis le lien à partager.
   await navigateTo(page, "Équipe")
-  await page.getByRole("button", { name: "Inviter" }).click()
-  const sheet = page.getByRole("dialog", { name: "Inviter une personne" })
+  await expect(
+    page.getByRole("heading", { name: "Invitez votre équipe" })
+  ).toBeVisible()
+  await shot(page, testInfo, "00-equipe-vide")
+  await page.getByRole("link", { name: "Inviter" }).click()
   const email = `invitee.${Date.now()}.${testInfo.project.name}@exemple.cm`
-  await sheet.getByLabel("Adresse e-mail").fill(email)
-  await sheet.getByRole("radio", { name: /Magasinier/ }).click()
-  await sheet.getByText("Dépôt Bonabéri").click()
-  await sheet.getByRole("button", { name: "Envoyer l’invitation" }).click()
-  const link = await sheet
+  const next = () => page.getByRole("button", { name: "Continuer" }).click()
+  await expect(
+    page.getByRole("heading", { name: "Qui invitez-vous ?" })
+  ).toBeVisible()
+  await page.getByLabel("Adresse e-mail").fill(email)
+  await next()
+  await expect(
+    page.getByRole("heading", { name: "Quel rôle dans l’équipe ?" })
+  ).toBeVisible()
+  await next()
+  await page.getByRole("radio", { name: /Magasinier/ }).click()
+  await next()
+  await expect(
+    page.getByRole("heading", { name: "Dans quels dépôts ?" })
+  ).toBeVisible()
+  await page.getByRole("button", { name: "Envoyer l’invitation" }).click()
+  await expect(page.getByText("Choisissez au moins un dépôt.")).toBeVisible()
+  await page.getByText("Dépôt Bonabéri").click()
+  await shot(page, testInfo, "01-depots")
+  await page.getByRole("button", { name: "Envoyer l’invitation" }).click()
+  await expect(
+    page.getByRole("heading", { name: "Invitation prête" })
+  ).toBeVisible()
+  const link = await page
     .getByRole("textbox", { name: "Lien d’invitation" })
     .inputValue()
-  await shot(page, testInfo, "01-invitation")
-  await sheet.getByRole("button", { name: "Fermer" }).click()
-  await expect(
-    page.getByRole("listitem").filter({ hasText: email })
-  ).toContainText("Magasinier · Dépôt Bonabéri")
+  await shot(page, testInfo, "02-invitation-prete")
+  await page.getByRole("button", { name: "Retour à l’équipe" }).click()
+  await expect(page.getByRole("row").filter({ hasText: email })).toContainText(
+    "Magasinier · Dépôt Bonabéri"
+  )
 
   // La personne invitée ouvre le lien sans compte, le crée avec l'adresse invitée, puis rejoint.
   const context = await browser.newContext({
@@ -56,7 +78,7 @@ test("une personne invitée rejoint l'équipe comme magasinière d'un seul dép�
       name: "Awa Bello vous invite à rejoindre Quincaillerie Bello",
     })
   ).toBeVisible()
-  await shot(guest, testInfo, "02-lien")
+  await shot(guest, testInfo, "03-lien")
   await guest.getByRole("button", { name: "Créer mon compte" }).click()
   await guest.getByLabel("Adresse e-mail").fill(email)
   await guest.getByRole("button", { name: "Continuer" }).click()
@@ -98,13 +120,21 @@ test("une personne invitée rejoint l'équipe comme magasinière d'un seul dép�
       .locator('[data-sidebar="sidebar"]')
       .getByRole("link", { name: "Équipe" })
   ).toBeHidden()
-  await shot(guest, testInfo, "03-magasinier")
+  await shot(guest, testInfo, "04-magasinier")
   await context.close()
 
-  // Côté propriétaire : la personne est membre, avec son accès Stock.
+  // Côté propriétaire : la personne est membre ; sa fiche change son accès Stock.
   await page.reload()
+  const row = page.getByRole("row").filter({ hasText: "Paul Etoga" })
+  await expect(row).toContainText("Magasinier · Dépôt Bonabéri")
+  await shot(page, testInfo, "05-equipe")
+  await row.getByRole("link", { name: "Paul Etoga" }).click()
+  await expect(page.getByRole("heading", { name: "Paul Etoga" })).toBeVisible()
+  await page.getByRole("radio", { name: /Contrôleur/ }).click()
+  await page.getByText("Boutique Akwa").click()
+  await page.getByRole("button", { name: "Enregistrer" }).click()
   await expect(
-    page.getByRole("listitem").filter({ hasText: "Paul Etoga" })
-  ).toContainText("Magasinier · Dépôt Bonabéri")
-  await shot(page, testInfo, "04-equipe")
+    page.getByText("Accès Stock de Paul Etoga enregistré.")
+  ).toBeVisible()
+  await shot(page, testInfo, "06-fiche-membre")
 })
