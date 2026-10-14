@@ -45,3 +45,16 @@ npm run test:e2e   # parcours complet contre la pile réelle, voir e2e/README.md
 | `lib/auth` | connexion OIDC (Keycloak, PKCE) |
 | `messages` | textes FR et EN ; le français est la référence typée |
 | `components/ui` | composants shadcn alignés sur la charte (rayon 0,45 rem, cibles tactiles de 44 px) |
+
+## Données de démonstration
+
+Remplit une entreprise existante (dépôts, fournisseurs, articles, réceptions et sorties) par l'API,
+en local, avec un compte propriétaire. Les identifiants passent par l'environnement :
+
+```bash
+SEED_EMAIL=vous@exemple.com SEED_PASSWORD='…' SEED_ORGANIZATION="Vimelec" npm run seed:demo
+```
+
+Relançable sans doublon. `SEED_ORGANIZATION` est facultatif (première entreprise dont le compte est
+propriétaire) ; `SEED_APP_URL` et `SEED_API_URL` changent les adresses (par défaut 3100 et 8081).
+
