@@ -5,7 +5,11 @@ import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { useEffect, useMemo, useState } from "react"
 
+import { useCategoryTree } from "@/components/categories/use-category-tree"
+import { CategoryFilter } from "@/components/catalog/category-filter"
+import { ClearFilters } from "@/components/catalog/clear-filters"
 import { EmptyState } from "@/components/catalog/empty-state"
+import { StockAlertFilter } from "@/components/catalog/stock-alert-filter"
 import { TablePagination } from "@/components/catalog/table-pagination"
 import { WarehouseFilter } from "@/components/catalog/warehouse-filter"
 import { ShelfScene } from "@/components/illustrations/shelf-scene"
@@ -31,9 +35,13 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { NewVoucherButtons } from "@/components/vouchers/vouchers-screen"
+
+import { StockStateBadge } from "./stock-state-badge"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
+import { StockState } from "@/lib/api/stock"
 import { useStockPage } from "@/lib/api/voucher-queries"
-import { useListParams } from "@/lib/list/use-list-params"
+import type { StockRow } from "@/lib/api/vouchers"
+import { STOCK_ALERT_STATES, useListParams } from "@/lib/list/use-list-params"
 import { RecordRoutes } from "@/lib/routes"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
 import { cn } from "@/lib/utils"
@@ -41,12 +49,16 @@ import { cn } from "@/lib/utils"
 const SEARCH_DELAY_MS = 300
 const SKELETON_ROWS = 8
 
-/** Stock par article, dans un dépôt ou dans tous ; « Rupture » signale un article à zéro. */
+/**
+ * Stock par article, cumulé sur les dépôts filtrés (ou tous). Les alertes viennent des seuils de
+ * chaque dépôt : « Stock bas » au seuil ou en dessous, « Rupture » à zéro.
+ */
 export function StockScreen() {
   const t = useTranslations("stock")
   const quantityLabel = useQuantityLabel()
   const list = useListParams()
-  const { text, warehouseId, page, size } = list.params
+  const categories = useCategoryTree()
+  const { text, warehouseIds, categoryId, stockAlert, page, size } = list.params
   const [typed, setTyped] = useState(text)
   const { setText } = list
   useEffect(() => {
@@ -56,13 +68,17 @@ export function StockScreen() {
   }, [typed, text, setText])
 
   const search = useMemo(
-    () => ({ text: text || undefined, warehouseId }),
-    [text, warehouseId]
+    () => ({
+      text: text || undefined,
+      warehouseIds,
+      categoryId,
+      stockStates: stockAlert && STOCK_ALERT_STATES[stockAlert],
+    }),
+    [text, warehouseIds, categoryId, stockAlert]
   )
   const stock = useStockPage(search, page, size)
   const total = stock.data?.total ?? 0
-  const filtered = !!text || !!warehouseId
-  const empty = stock.isSuccess && total === 0 && !filtered
+  const empty = stock.isSuccess && total === 0 && !list.filtered
   usePageTour("stock", { ready: stock.isSuccess })
 
   return (
@@ -80,8 +96,8 @@ export function StockScreen() {
         />
       ) : (
         <>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <InputGroup className="sm:max-w-md sm:flex-1">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <InputGroup className="sm:max-w-md sm:min-w-64 sm:flex-1">
               <InputGroupInput
                 type="search"
                 value={typed}
@@ -94,9 +110,21 @@ export function StockScreen() {
               </InputGroupAddon>
             </InputGroup>
             <WarehouseFilter
-              value={warehouseId}
-              onChange={list.setWarehouse}
+              value={warehouseIds}
+              onChange={list.setWarehouses}
               {...tourAnchor(TourAnchors.stockWarehouseFilter)}
+            />
+            <CategoryFilter value={categoryId} onChange={list.setCategory} />
+            <StockAlertFilter
+              value={stockAlert}
+              onChange={list.setStockAlert}
+            />
+            <ClearFilters
+              visible={list.filtered}
+              onClear={() => {
+                setTyped("")
+                list.reset()
+              }}
             />
           </div>
           <div className="mt-6 overflow-hidden rounded-2xl border">
@@ -141,7 +169,7 @@ export function StockScreen() {
                   <TableBody>
                     {(stock.data?.items ?? []).map((row) => (
                       <TableRow key={row.item.id} className="relative">
-                        <TableCell className="py-3 pl-4">
+                        <TableCell className="py-3 pl-4 whitespace-normal">
                           <div className="flex items-center gap-3">
                             <ItemThumb imageUrl={row.item.imageUrl} />
                             <div className="min-w-0">
@@ -156,6 +184,12 @@ export function StockScreen() {
                                   {row.item.reference}
                                 </p>
                               )}
+                              {row.item.categoryId && (
+                                <p className="truncate text-xs text-muted-foreground">
+                                  {categories.paths.get(row.item.categoryId)}
+                                </p>
+                              )}
+                              <StockAlerts row={row} />
                             </div>
                           </div>
                         </TableCell>
@@ -177,15 +211,17 @@ export function StockScreen() {
                           </div>
                         </TableCell>
                         <TableCell className="pr-4 text-right">
-                          {row.quantity > 0 ? (
-                            <span className="font-semibold tabular-nums">
+                          <div className="flex flex-col items-end gap-1">
+                            <span
+                              className={cn(
+                                "font-semibold tabular-nums",
+                                row.quantity === 0 && "text-muted-foreground"
+                              )}
+                            >
                               {quantityLabel(row.item.baseUnit, row.quantity)}
                             </span>
-                          ) : (
-                            <Badge variant="destructive">
-                              {t("outOfStock")}
-                            </Badge>
-                          )}
+                            <StockStateBadge state={row.state} />
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -204,5 +240,32 @@ export function StockScreen() {
         </>
       )}
     </PageBody>
+  )
+}
+
+/** Dépôts en alerte : « Boutique Akwa : 3 pièces, seuil 5 ». */
+function StockAlerts({ row }: { row: StockRow }) {
+  const t = useTranslations("stock")
+  const quantityLabel = useQuantityLabel()
+  if (row.alerts.length === 0) return null
+  return (
+    <ul className="mt-1 space-y-0.5 text-xs">
+      {row.alerts.map((alert) => (
+        <li
+          key={alert.warehouse.id}
+          className={cn(
+            alert.state === StockState.out
+              ? "text-destructive"
+              : "text-warning-muted-foreground"
+          )}
+        >
+          {t("alert", {
+            warehouse: alert.warehouse.name,
+            quantity: quantityLabel(row.item.baseUnit, alert.quantity),
+            threshold: quantityLabel(row.item.baseUnit, alert.minQuantity),
+          })}
+        </li>
+      ))}
+    </ul>
   )
 }

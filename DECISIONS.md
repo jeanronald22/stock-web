@@ -230,12 +230,23 @@ Les articles, dépôts, fournisseurs et bons (D19 à D22) ont été construits s
 Écrans demandés le 2026-10-14 : filtres combinables sur les articles (catégorie, plusieurs dépôts, fournisseur, état du stock), filtre des bons par période et par type, tri par date croissante ou décroissante.
 
 **Plan de réalignement**, par lots livrables :
-- **Lot A** (en cours) : catégories ; seuils par dépôt et alertes (stock bas, rupture) ; filtres combinables des articles et du stock ; filtres des bons (période, type, dépôt, fournisseur) et tri par date.
+- **Lot A** (livré, voir D24) : catégories ; seuils par dépôt et alertes (stock bas, rupture) ; filtres combinables des articles et du stock ; filtres des bons (période, type, dépôt, fournisseur) et tri par date.
 - **Lot B** : tiers clients et chantiers ; bons de retour, de casse (motif, photo) et d'ajustement ; quantité annoncée sur le BL et écart à la réception ; transferts entre dépôts (en transit, quantité reçue à l'arrivée).
 - **Lot C** : inventaires (complet, tournant, double comptage, ajustement à la clôture) ; emplacements.
 - **Lot D** : produit et variantes, table des unités, lot avec nuance et calibre ; rôles Stock par dépôt ; synchronisation hors ligne ; IA (D5).
 
 **Règle** : toute nouvelle fonctionnalité part des tables de D10 ; un écart volontaire est noté ici avant le code.
+
+## D24. Lot A : catégories, seuils d'alerte, filtres combinables (2026-10-14)
+
+Réalignement sur D10 (tables `category`, `sku_warehouse.min_qty_base`) :
+- **Catégories** (`stock.category`, V11) : arborescence libre, nom unique parmi les catégories de même parent, déplacement sans boucle, suppression d'une catégorie vide seulement. Gérées depuis la liste des articles (bouton « Catégories »), choisies dans la fiche. Filtrer une catégorie inclut ses sous-catégories.
+- **Seuil d'alerte par dépôt** (`item_warehouse.min_quantity`, en unité de base) saisi sous chaque dépôt coché de la fiche article. Écart de nom assumé : `item_warehouse` tient le rôle de `sku_warehouse` tant que les variantes (lot D) n'existent pas.
+- **États** : seul un article dont le seuil est renseigné est surveillé. Rupture : stock nul dans le dépôt ; stock bas : positif et au seuil ou en dessous. Seuil 0 : alerte seulement en rupture ; vide : jamais d'alerte (un article proposé partout mais stocké à un seul endroit ne crie pas en permanence). Calcul par la vue `stock.item_stock_state` (`security_invoker`, la sécurité par ligne s'applique).
+- **Filtres combinables** dans l'adresse : plusieurs dépôts (OU entre eux), catégorie, fournisseur, niveau de stock (« à commander », « stock bas », « en rupture »), statut ; ET entre filtres. Dépôt et alerte portent sur la même ligne : « Akwa + à commander » ne montre que ce qui manque à Akwa. « Effacer les filtres » quand un filtre est posé.
+- **Stock et accueil** : badge et détail par dépôt (« Boutique Akwa : 3 pièces, seuil 5 ») ; l'accueil annonce les articles à commander quand il y en a.
+- **Bons** : période du/au (jours inclus, fuseau des dépôts, Africa/Douala), plusieurs dépôts, fournisseur, type ; tri par date de l'opération, plus récents ou plus anciens d'abord.
+- Limite connue : le filtre fournisseur liste 100 fournisseurs actifs (une page de l'API) ; au-delà, passer par la fiche du fournisseur.
 
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).

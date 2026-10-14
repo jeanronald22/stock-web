@@ -38,7 +38,11 @@ export function itemFormSchema(messages: ItemFormMessages) {
           })
         )
         .max(StockLimits.packagingsPerItem),
-      warehouseIds: z.array(z.string()),
+      categoryId: z.string().nullable(),
+      // Seuil saisi en texte, vide : pas d'alerte dans ce dépôt.
+      warehouses: z.array(
+        z.object({ warehouseId: z.string(), minQuantity: z.string() })
+      ),
     })
     .superRefine((values, context) => {
       const seen = new Set<string>()
@@ -62,6 +66,18 @@ export function itemFormSchema(messages: ItemFormMessages) {
         if (name && seen.has(name)) issue("name", messages.duplicateName)
         seen.add(name)
       })
+      values.warehouses.forEach((placement, index) => {
+        // parseQuantity refuse aussi un nombre négatif.
+        if (
+          placement.minQuantity.trim() &&
+          parseQuantity(placement.minQuantity) === null
+        )
+          context.addIssue({
+            code: "custom",
+            path: ["warehouses", index, "minQuantity"],
+            message: messages.invalidNumber,
+          })
+      })
     })
 }
 
@@ -78,7 +94,13 @@ export function toItemInput(values: ItemFormValues): ItemInput {
       name: packaging.name,
       quantity: parseQuantity(packaging.quantity) ?? 0,
     })),
-    warehouseIds: values.warehouseIds,
+    warehouses: values.warehouses.map((placement) => ({
+      warehouseId: placement.warehouseId,
+      minQuantity: placement.minQuantity.trim()
+        ? parseQuantity(placement.minQuantity)
+        : null,
+    })),
+    categoryId: values.categoryId,
   }
 }
 
@@ -98,6 +120,18 @@ export function itemFormDefaults(
       name: packaging.name,
       quantity: formatQuantityInput(packaging.quantity, locale),
     })),
-    warehouseIds: item?.warehouseIds ?? defaultWarehouseIds,
+    categoryId: item?.categoryId ?? null,
+    warehouses: item
+      ? item.warehouses.map((placement) => ({
+          warehouseId: placement.warehouseId,
+          minQuantity:
+            placement.minQuantity === null
+              ? ""
+              : formatQuantityInput(placement.minQuantity, locale),
+        }))
+      : defaultWarehouseIds.map((warehouseId) => ({
+          warehouseId,
+          minQuantity: "",
+        })),
   }
 }

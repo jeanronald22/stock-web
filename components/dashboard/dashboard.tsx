@@ -23,6 +23,8 @@ import { Routes } from "@/lib/routes"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
 import { cn } from "@/lib/utils"
 
+import { StockAlertsCard } from "./stock-alerts-card"
+
 /** Tous les bons : seul le total sert, pour cocher l'étape « réception ». */
 const ALL_VOUCHERS = {}
 
@@ -104,6 +106,8 @@ export function Dashboard() {
           <ShelfScene className="ill-on-brand hidden max-w-64 sm:block" />
         </div>
       </section>
+
+      <StockAlertsCard />
 
       <ol
         className="mt-6 grid gap-4 sm:grid-cols-3"

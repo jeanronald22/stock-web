@@ -41,7 +41,7 @@ test("réception puis sortie : le stock suit, une sortie trop forte est refusée
     name: "Ciment CPJ 42,5",
     baseUnit: "PIECE",
     packagings: [{ name: "Palette", quantity: 40 }],
-    warehouseIds: [warehouseId],
+    warehouses: [{ warehouseId, minQuantity: null }],
   })
   await callApi(page, "POST", "/v1/items", {
     id: crypto.randomUUID(),
@@ -49,7 +49,7 @@ test("réception puis sortie : le stock suit, une sortie trop forte est refusée
     baseUnit: "SQUARE_METRE",
     batchTracking: true,
     packagings: [{ name: "Carton", quantity: 1.44 }],
-    warehouseIds: [warehouseId],
+    warehouses: [{ warehouseId, minQuantity: null }],
   })
 
   await uploadItemPhoto(

@@ -60,7 +60,7 @@ function ItemWizardSteps({ warehouses }: { warehouses: Warehouse[] }) {
       illustration: <CatalogScene />,
       title: t("items.wizard.identity.title"),
       description: t("items.wizard.identity.description"),
-      fields: ["name", "reference", "description"],
+      fields: ["name", "reference", "categoryId", "description"],
       content: <ItemIdentityFields form={form} autoFocus />,
     },
     {
@@ -92,7 +92,7 @@ function ItemWizardSteps({ warehouses }: { warehouses: Warehouse[] }) {
       illustration: <DepotsScene />,
       title: t("items.wizard.warehouses.title"),
       description: t("items.wizard.warehouses.description"),
-      fields: ["warehouseIds"],
+      fields: ["warehouses"],
       content: <ItemWarehousesField form={form} warehouses={warehouses} />,
     },
   ]

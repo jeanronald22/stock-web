@@ -133,7 +133,10 @@ function WarehouseDetails({
 /** Aperçu des articles proposés dans ce dépôt, avec un lien vers la liste filtrée. */
 function WarehouseItems({ warehouse }: { warehouse: Warehouse }) {
   const t = useTranslations("warehouses")
-  const search = useMemo(() => ({ warehouseId: warehouse.id }), [warehouse.id])
+  const search = useMemo(
+    () => ({ warehouseIds: [warehouse.id] }),
+    [warehouse.id]
+  )
   const items = useItemsPage(search, 0, PREVIEW_ITEMS)
   const preview = items.data?.items ?? []
   const listHref = `${Routes.items}?${ListQueryParams.warehouse}=${warehouse.id}`

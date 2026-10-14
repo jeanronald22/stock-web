@@ -144,6 +144,11 @@
         "action": "Nouvelle réception",
         "done": "{count, plural, one {# bon} other {# bons}}"
       }
+    },
+    "alerts": {
+      "title": "{count, plural, one {# article à commander} other {# articles à commander}}",
+      "seeAll": "Voir tout",
+      "where": "{warehouse} : {quantity}"
     }
   },
   "menu": {
@@ -205,8 +210,8 @@
         "description": "Tapez un morceau du nom ou de la référence."
       },
       "filter": {
-        "title": "Par dépôt",
-        "description": "N’affichez que les articles proposés dans un dépôt."
+        "title": "Filtres combinables",
+        "description": "Cochez un ou plusieurs dépôts, puis affinez par catégorie, fournisseur ou niveau de stock."
       }
     },
     "itemForm": {
@@ -232,7 +237,7 @@
     "stock": {
       "filter": {
         "title": "Dépôt par dépôt",
-        "description": "Choisissez un dépôt pour voir son stock ; « Rupture » signale ce qui manque."
+        "description": "Choisissez un ou plusieurs dépôts ; « Stock bas » et « Rupture » suivent le seuil d’alerte de chaque dépôt."
       }
     },
     "suppliers": {
@@ -246,32 +251,38 @@
     "PIECE": {
       "label": "Pièce",
       "hint": "Robinets, sacs de ciment, pots de peinture…",
-      "quantity": "{count, plural, one {# pièce} other {# pièces}}"
+      "quantity": "{count, plural, one {# pièce} other {# pièces}}",
+      "short": "pièces"
     },
     "KILOGRAM": {
       "label": "Kilogramme",
       "hint": "Clous, pointes, fer vendus au poids",
-      "quantity": "{count, number} kg"
+      "quantity": "{count, number} kg",
+      "short": "kg"
     },
     "LITRE": {
       "label": "Litre",
       "hint": "Peinture, huile, solvant au détail",
-      "quantity": "{count, number} L"
+      "quantity": "{count, number} L",
+      "short": "L"
     },
     "METRE": {
       "label": "Mètre",
       "hint": "Câble, tuyau, fer à béton",
-      "quantity": "{count, number} m"
+      "quantity": "{count, number} m",
+      "short": "m"
     },
     "SQUARE_METRE": {
       "label": "Mètre carré",
       "hint": "Carreaux, tôles, contreplaqué",
-      "quantity": "{count, number} m²"
+      "quantity": "{count, number} m²",
+      "short": "m²"
     },
     "CUBIC_METRE": {
       "label": "Mètre cube",
       "hint": "Sable, gravier",
-      "quantity": "{count, number} m³"
+      "quantity": "{count, number} m³",
+      "short": "m³"
     }
   },
   "warehouses": {
@@ -388,7 +399,13 @@
       "createWarehouse": "Créer un dépôt",
       "create": "Créer l’article",
       "photo": "Photo",
-      "photoHint": "Facultatif. Elle aide l’équipe à reconnaître l’article au dépôt."
+      "photoHint": "Facultatif. Elle aide l’équipe à reconnaître l’article au dépôt.",
+      "category": "Catégorie",
+      "noCategory": "Sans catégorie",
+      "categoryHint": "Créez vos catégories depuis la liste des articles, bouton « Catégories ».",
+      "minQuantity": "Seuil d’alerte",
+      "minQuantityPlaceholder": "Aucune alerte",
+      "minQuantityHint": "Seuil d’alerte : l’article passe « à commander » quand le stock du dépôt descend à ce niveau. 0 : alerte seulement en rupture. Vide : jamais d’alerte."
     },
     "created": "Article créé.",
     "saved": "Article enregistré.",
@@ -460,7 +477,21 @@
       "ACTIVE": "Actifs",
       "ARCHIVED": "Archivés"
     },
-    "allWarehouses": "Tous les dépôts"
+    "allWarehouses": "Tous les dépôts",
+    "allCategories": "Toutes les catégories",
+    "categoryFilter": "Filtrer par catégorie",
+    "allSuppliers": "Tous les fournisseurs",
+    "supplierFilter": "Filtrer par fournisseur",
+    "warehouseFilter": "Filtrer par dépôt",
+    "warehouseCount": "{count, plural, one {# dépôt} other {# dépôts}}",
+    "clearFilters": "Effacer les filtres",
+    "stockAlert": {
+      "label": "Filtrer par niveau de stock",
+      "all": "Tous les niveaux",
+      "any": "À commander",
+      "low": "Stock bas",
+      "out": "En rupture"
+    }
   },
   "vouchers": {
     "title": "Bons",
@@ -573,7 +604,17 @@
       "detail": "Ouvrir le détail",
       "print": "Imprimer",
       "download": "Télécharger le PDF"
-    }
+    },
+    "period": {
+      "from": "Du",
+      "to": "Au",
+      "fromLabel": "Bons à partir du",
+      "toLabel": "Bons jusqu’au",
+      "newestFirst": "Plus récents d’abord",
+      "oldestFirst": "Plus anciens d’abord"
+    },
+    "noResult": "Aucun bon ne correspond à ces filtres.",
+    "clearFilters": "Effacer les filtres"
   },
   "stock": {
     "title": "Stock",
@@ -585,7 +626,6 @@
       "batches": "Lots",
       "quantity": "En stock"
     },
-    "outOfStock": "Rupture",
     "empty": {
       "title": "Rien à compter pour l’instant",
       "description": "Le stock apparaît ici dès votre première réception."
@@ -596,7 +636,13 @@
       "reset": "Tout afficher"
     },
     "byWarehouse": "Stock par dépôt",
-    "noStock": "Aucun stock pour l’instant."
+    "noStock": "Aucun stock pour l’instant.",
+    "state": {
+      "OK": "Stock suffisant",
+      "LOW": "Stock bas",
+      "OUT": "Rupture"
+    },
+    "alert": "{warehouse} : {quantity}, seuil {threshold}"
   },
   "suppliers": {
     "title": "Fournisseurs",
@@ -670,5 +716,25 @@
       "badge": "Archivé"
     },
     "notFound": "Ce fournisseur n’existe pas ou a été retiré."
+  },
+  "categories": {
+    "open": "Catégories",
+    "title": "Catégories d’articles",
+    "description": "Rangez vos articles par familles et sous-familles : Électricité › Câbles, Carreaux › Sol…",
+    "empty": "Aucune catégorie pour l’instant. Créez la première ci-dessus.",
+    "name": "Nom de la catégorie",
+    "namePlaceholder": "Électricité",
+    "add": "Ajouter",
+    "parent": "Dans",
+    "root": "Catégorie principale",
+    "moveTo": "Ranger dans",
+    "itemCount": "{count, plural, =0 {aucun article} one {# article} other {# articles}}",
+    "actions": "Actions pour {name}",
+    "addChild": "Ajouter une sous-catégorie",
+    "edit": "Renommer ou déplacer",
+    "delete": "Supprimer",
+    "deleted": "Catégorie « {name} » supprimée.",
+    "save": "Enregistrer",
+    "cancel": "Annuler"
   }
 }

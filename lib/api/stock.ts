@@ -11,6 +11,8 @@ export const StockPaths = {
   itemArchive: (id: string) => `/v1/items/${id}/archive`,
   itemRestore: (id: string) => `/v1/items/${id}/restore`,
   itemImage: (id: string) => `/v1/items/${id}/image`,
+  categories: "/v1/categories",
+  category: (id: string) => `/v1/categories/${id}`,
 } as const
 
 /** Paramètres de recherche des listes (stock-api, StockApi et PageParams). */
@@ -19,6 +21,8 @@ export const StockQueryParams = {
   status: "status",
   warehouseId: "warehouseId",
   supplierId: "supplierId",
+  categoryId: "categoryId",
+  stockState: "stockState",
   page: "page",
   size: "size",
 } as const
@@ -79,6 +83,32 @@ export type WarehouseInput = {
 
 export type Packaging = { name: string; quantity: number }
 
+/**
+ * État du stock d'un article dans un dépôt (stock-api, StockState). Seul un article dont le seuil
+ * est renseigné est surveillé ; un seuil à 0 n'alerte qu'en rupture.
+ */
+export const stockStates = ["OK", "LOW", "OUT"] as const
+export type StockState = (typeof stockStates)[number]
+export const StockState = {
+  ok: "OK",
+  low: "LOW",
+  out: "OUT",
+} as const satisfies Record<string, StockState>
+
+/** Dépôt où l'article est proposé, avec son seuil d'alerte en unité de base (null : aucun). */
+export type ItemPlacement = { warehouseId: string; minQuantity: number | null }
+
+export type Category = {
+  id: string
+  name: string
+  parentId: string | null
+  /** Articles actifs rangés directement dans la catégorie. */
+  itemCount: number
+  version: number
+}
+
+export type CategoryInput = { name: string; parentId: string | null }
+
 export type Item = {
   id: string
   name: string
@@ -87,7 +117,8 @@ export type Item = {
   batchTracking: boolean
   description: string | null
   packagings: Packaging[]
-  warehouseIds: string[]
+  warehouses: ItemPlacement[]
+  categoryId: string | null
   status: CatalogStatus
   version: number
   createdAt: string
@@ -103,15 +134,20 @@ export type ItemInput = {
   batchTracking: boolean
   description?: string
   packagings: Packaging[]
-  warehouseIds: string[]
+  warehouses: ItemPlacement[]
+  categoryId: string | null
 }
 
+/** Critères combinés en ET ; plusieurs dépôts ou états se combinent en OU entre eux. */
 export type ItemSearch = {
   text?: string
-  warehouseId?: string
+  warehouseIds?: string[]
   status?: CatalogStatus
+  /** Catégorie, sous-catégories comprises. */
+  categoryId?: string
   /** Catalogue d'un fournisseur : seulement les articles qu'il livre. */
   supplierId?: string
+  stockStates?: StockState[]
 }
 
 /** Photos acceptées par l'API (stock-api, ImageFormat et ItemImageService). */
@@ -124,10 +160,14 @@ export const ItemImageRules = {
 
 export type Page<T> = { items: T[]; page: number; size: number; total: number }
 
-function query(params: Record<string, string | number | undefined>): string {
+export type QueryValue = string | number | readonly string[] | undefined
+
+/** Paramètres d'adresse ; une liste est envoyée en répétant le paramètre (dépôts multiples). */
+export function query(params: Record<string, QueryValue>): string {
   const search = new URLSearchParams()
   Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== "") search.set(key, String(value))
+    if (Array.isArray(value)) value.forEach((each) => search.append(key, each))
+    else if (value !== undefined && value !== "") search.set(key, String(value))
   })
   const text = search.toString()
   return text ? `?${text}` : ""
@@ -189,9 +229,11 @@ export const stockApi = (send: ApiClient) => {
           StockPaths.items +
           query({
             [StockQueryParams.search]: search.text,
-            [StockQueryParams.warehouseId]: search.warehouseId,
+            [StockQueryParams.warehouseId]: search.warehouseIds,
             [StockQueryParams.status]: search.status,
+            [StockQueryParams.categoryId]: search.categoryId,
             [StockQueryParams.supplierId]: search.supplierId,
+            [StockQueryParams.stockState]: search.stockStates,
             [StockQueryParams.page]: page,
             [StockQueryParams.size]: size,
           }),
@@ -239,6 +281,33 @@ export const stockApi = (send: ApiClient) => {
         ...scoped,
         method: "DELETE",
         path: StockPaths.itemImage(id),
+      }),
+
+    categories: () =>
+      send<Category[]>({
+        ...scoped,
+        method: "GET",
+        path: StockPaths.categories,
+      }),
+    createCategory: (id: string, input: CategoryInput) =>
+      send<Category>({
+        ...scoped,
+        method: "POST",
+        path: StockPaths.categories,
+        body: { id, ...input },
+      }),
+    updateCategory: (id: string, version: number, input: CategoryInput) =>
+      send<Category>({
+        ...scoped,
+        method: "PUT",
+        path: StockPaths.category(id),
+        body: { version, ...input },
+      }),
+    deleteCategory: (id: string) =>
+      send<void>({
+        ...scoped,
+        method: "DELETE",
+        path: StockPaths.category(id),
       }),
   }
 }

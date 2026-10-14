@@ -1,6 +1,12 @@
 import type { ApiClient } from "./http"
 import { isProblem, ProblemCode } from "./problem"
-import type { BaseUnit, Item, Page } from "./stock"
+import {
+  query,
+  type BaseUnit,
+  type Item,
+  type Page,
+  type StockState,
+} from "./stock"
 
 /** Routes des bons et du stock (stock-api, StockApi). */
 export const VoucherPaths = {
@@ -14,6 +20,11 @@ export const VoucherQueryParams = {
   type: "type",
   warehouseId: "warehouseId",
   supplierId: "supplierId",
+  categoryId: "categoryId",
+  stockState: "stockState",
+  from: "from",
+  to: "to",
+  order: "order",
   search: "q",
   page: "page",
   size: "size",
@@ -36,6 +47,14 @@ export const VoucherType = {
 } as const satisfies Record<string, VoucherType>
 
 export type WarehouseRef = { id: string; name: string }
+
+/** Ordre de la liste des bons, par date de l'opération (stock-api, VoucherOrder). */
+export const voucherOrders = ["NEWEST_FIRST", "OLDEST_FIRST"] as const
+export type VoucherOrder = (typeof voucherOrders)[number]
+export const VoucherOrder = {
+  newestFirst: "NEWEST_FIRST",
+  oldestFirst: "OLDEST_FIRST",
+} as const satisfies Record<string, VoucherOrder>
 
 export type VoucherSummary = {
   id: string
@@ -108,10 +127,21 @@ export function shortagesOf(error: unknown): Shortage[] {
 }
 
 export type BatchQuantity = { batch: string | null; quantity: number }
+/** Dépôt où l'article est au seuil ou en dessous, ou en rupture. */
+export type StockAlert = {
+  warehouse: WarehouseRef
+  state: StockState
+  quantity: number
+  minQuantity: number
+}
 export type StockRow = {
   item: Item
   quantity: number
   batches: BatchQuantity[]
+  /** La plus grave des alertes ; OK sans alerte. */
+  state: StockState
+  /** Dans les dépôts filtrés, rupture d'abord. */
+  alerts: StockAlert[]
 }
 export type WarehouseStock = {
   warehouse: WarehouseRef
@@ -120,20 +150,20 @@ export type WarehouseStock = {
 }
 export type ItemStock = { itemId: string; warehouses: WarehouseStock[] }
 
+/** [from] et [to] : jours inclus (AAAA-MM-JJ), comptés dans le fuseau des dépôts par l'API. */
 export type VoucherSearch = {
   type?: VoucherType
-  warehouseId?: string
+  warehouseIds?: string[]
   supplierId?: string
+  from?: string
+  to?: string
+  order?: VoucherOrder
 }
-export type StockSearch = { text?: string; warehouseId?: string }
-
-function query(params: Record<string, string | number | undefined>): string {
-  const search = new URLSearchParams()
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== "") search.set(key, String(value))
-  })
-  const text = search.toString()
-  return text ? `?${text}` : ""
+export type StockSearch = {
+  text?: string
+  warehouseIds?: string[]
+  categoryId?: string
+  stockStates?: StockState[]
 }
 
 export const voucherApi = (send: ApiClient) => {
@@ -147,8 +177,11 @@ export const voucherApi = (send: ApiClient) => {
           VoucherPaths.vouchers +
           query({
             [VoucherQueryParams.type]: search.type,
-            [VoucherQueryParams.warehouseId]: search.warehouseId,
+            [VoucherQueryParams.warehouseId]: search.warehouseIds,
             [VoucherQueryParams.supplierId]: search.supplierId,
+            [VoucherQueryParams.from]: search.from,
+            [VoucherQueryParams.to]: search.to,
+            [VoucherQueryParams.order]: search.order,
             [VoucherQueryParams.page]: page,
             [VoucherQueryParams.size]: size,
           }),
@@ -174,7 +207,9 @@ export const voucherApi = (send: ApiClient) => {
           VoucherPaths.stock +
           query({
             [VoucherQueryParams.search]: search.text,
-            [VoucherQueryParams.warehouseId]: search.warehouseId,
+            [VoucherQueryParams.warehouseId]: search.warehouseIds,
+            [VoucherQueryParams.categoryId]: search.categoryId,
+            [VoucherQueryParams.stockState]: search.stockStates,
             [VoucherQueryParams.page]: page,
             [VoucherQueryParams.size]: size,
           }),

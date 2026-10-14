@@ -144,6 +144,11 @@
         "action": "New receipt",
         "done": "{count, plural, one {# voucher} other {# vouchers}}"
       }
+    },
+    "alerts": {
+      "title": "{count, plural, one {# item to reorder} other {# items to reorder}}",
+      "seeAll": "See all",
+      "where": "{warehouse}: {quantity}"
     }
   },
   "menu": {
@@ -205,8 +210,8 @@
         "description": "Type part of the name or reference."
       },
       "filter": {
-        "title": "By depot",
-        "description": "Show only the items offered in one depot."
+        "title": "Combinable filters",
+        "description": "Tick one or more warehouses, then narrow down by category, supplier or stock level."
       }
     },
     "itemForm": {
@@ -231,8 +236,8 @@
     },
     "stock": {
       "filter": {
-        "title": "Depot by depot",
-        "description": "Choose a depot to see its stock; “Out of stock” flags what is missing."
+        "title": "Warehouse by warehouse",
+        "description": "Pick one or more warehouses; “Low stock” and “Out of stock” follow each warehouse’s alert threshold."
       }
     },
     "suppliers": {
@@ -246,32 +251,38 @@
     "PIECE": {
       "label": "Piece",
       "hint": "Taps, bags of cement, paint tins…",
-      "quantity": "{count, plural, one {# piece} other {# pieces}}"
+      "quantity": "{count, plural, one {# piece} other {# pieces}}",
+      "short": "pcs"
     },
     "KILOGRAM": {
       "label": "Kilogram",
       "hint": "Nails, iron sold by weight",
-      "quantity": "{count, number} kg"
+      "quantity": "{count, number} kg",
+      "short": "kg"
     },
     "LITRE": {
       "label": "Litre",
       "hint": "Paint, oil, solvent sold loose",
-      "quantity": "{count, number} L"
+      "quantity": "{count, number} L",
+      "short": "L"
     },
     "METRE": {
       "label": "Metre",
       "hint": "Cable, pipe, rebar",
-      "quantity": "{count, number} m"
+      "quantity": "{count, number} m",
+      "short": "m"
     },
     "SQUARE_METRE": {
       "label": "Square metre",
       "hint": "Tiles, roofing sheets, plywood",
-      "quantity": "{count, number} m²"
+      "quantity": "{count, number} m²",
+      "short": "m²"
     },
     "CUBIC_METRE": {
       "label": "Cubic metre",
       "hint": "Sand, gravel",
-      "quantity": "{count, number} m³"
+      "quantity": "{count, number} m³",
+      "short": "m³"
     }
   },
   "warehouses": {
@@ -388,7 +399,13 @@
       "createWarehouse": "Create a depot",
       "create": "Create item",
       "photo": "Photo",
-      "photoHint": "Optional. It helps the team recognise the item at the depot."
+      "photoHint": "Optional. It helps the team recognise the item at the depot.",
+      "category": "Category",
+      "noCategory": "No category",
+      "categoryHint": "Create your categories from the item list, “Categories” button.",
+      "minQuantity": "Alert threshold",
+      "minQuantityPlaceholder": "No alert",
+      "minQuantityHint": "Alert threshold: the item becomes “to reorder” when the warehouse stock drops to this level. 0: alert only when out of stock. Empty: never alert."
     },
     "created": "Item created.",
     "saved": "Item saved.",
@@ -460,7 +477,21 @@
       "ACTIVE": "Active",
       "ARCHIVED": "Archived"
     },
-    "allWarehouses": "All depots"
+    "allWarehouses": "All depots",
+    "allCategories": "All categories",
+    "categoryFilter": "Filter by category",
+    "allSuppliers": "All suppliers",
+    "supplierFilter": "Filter by supplier",
+    "warehouseFilter": "Filter by warehouse",
+    "warehouseCount": "{count, plural, one {# warehouse} other {# warehouses}}",
+    "clearFilters": "Clear filters",
+    "stockAlert": {
+      "label": "Filter by stock level",
+      "all": "All levels",
+      "any": "To reorder",
+      "low": "Low stock",
+      "out": "Out of stock"
+    }
   },
   "vouchers": {
     "title": "Vouchers",
@@ -573,7 +604,17 @@
       "detail": "Open details",
       "print": "Print",
       "download": "Download PDF"
-    }
+    },
+    "period": {
+      "from": "From",
+      "to": "To",
+      "fromLabel": "Vouchers from",
+      "toLabel": "Vouchers until",
+      "newestFirst": "Newest first",
+      "oldestFirst": "Oldest first"
+    },
+    "noResult": "No voucher matches these filters.",
+    "clearFilters": "Clear filters"
   },
   "stock": {
     "title": "Stock",
@@ -585,7 +626,6 @@
       "batches": "Batches",
       "quantity": "In stock"
     },
-    "outOfStock": "Out of stock",
     "empty": {
       "title": "Nothing to count yet",
       "description": "Stock appears here after your first receipt."
@@ -596,7 +636,13 @@
       "reset": "Show everything"
     },
     "byWarehouse": "Stock by depot",
-    "noStock": "No stock yet."
+    "noStock": "No stock yet.",
+    "state": {
+      "OK": "Enough stock",
+      "LOW": "Low stock",
+      "OUT": "Out of stock"
+    },
+    "alert": "{warehouse}: {quantity}, threshold {threshold}"
   },
   "suppliers": {
     "title": "Suppliers",
@@ -670,5 +716,25 @@
       "badge": "Archived"
     },
     "notFound": "This supplier does not exist or was removed."
+  },
+  "categories": {
+    "open": "Categories",
+    "title": "Item categories",
+    "description": "Group your items into families and sub-families: Electrical › Cables, Tiles › Floor…",
+    "empty": "No category yet. Create the first one above.",
+    "name": "Category name",
+    "namePlaceholder": "Electrical",
+    "add": "Add",
+    "parent": "In",
+    "root": "Main category",
+    "moveTo": "Move to",
+    "itemCount": "{count, plural, =0 {no items} one {# item} other {# items}}",
+    "actions": "Actions for {name}",
+    "addChild": "Add a subcategory",
+    "edit": "Rename or move",
+    "delete": "Delete",
+    "deleted": "Category “{name}” deleted.",
+    "save": "Save",
+    "cancel": "Cancel"
   }
 }

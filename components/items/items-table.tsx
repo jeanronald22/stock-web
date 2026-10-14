@@ -32,10 +32,13 @@ const VISIBLE_WAREHOUSES = 2
 export function ItemsTable({
   items,
   warehouseNames,
+  categoryPaths,
   stale,
 }: {
   items: Item[]
   warehouseNames: ReadonlyMap<string, string>
+  /** Chemin de chaque catégorie : « Électricité › Câbles ». */
+  categoryPaths: ReadonlyMap<string, string>
   /** Page précédente affichée pendant le chargement de la suivante. */
   stale: boolean
 }) {
@@ -61,12 +64,15 @@ export function ItemsTable({
       </TableHeader>
       <TableBody>
         {items.map((item) => {
-          const names = item.warehouseIds.flatMap(
-            (id) => warehouseNames.get(id) ?? []
+          const names = item.warehouses.flatMap(
+            (placement) => warehouseNames.get(placement.warehouseId) ?? []
           )
+          const category = item.categoryId
+            ? categoryPaths.get(item.categoryId)
+            : undefined
           return (
             <TableRow key={item.id} className="relative cursor-pointer">
-              <TableCell className="py-3 pl-4">
+              <TableCell className="py-3 pl-4 whitespace-normal">
                 <div className="flex items-center gap-3">
                   <ItemThumb imageUrl={item.imageUrl} />
                   <div className="min-w-0">
@@ -83,15 +89,19 @@ export function ItemsTable({
                         </Badge>
                       )}
                     </div>
-                    {item.reference && (
-                      <p className="font-mono text-xs text-muted-foreground">
-                        {item.reference}
+                    {(item.reference || category) && (
+                      <p className="truncate text-xs text-muted-foreground">
+                        {item.reference && (
+                          <span className="font-mono">{item.reference}</span>
+                        )}
+                        {item.reference && category && " · "}
+                        {category}
                       </p>
                     )}
                     <p className="truncate text-xs text-muted-foreground md:hidden">
                       {t(`units.${item.baseUnit}.label`)} ·{" "}
                       {t("items.warehouseCount", {
-                        count: item.warehouseIds.length,
+                        count: item.warehouses.length,
                       })}
                     </p>
                   </div>

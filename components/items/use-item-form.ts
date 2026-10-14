@@ -27,7 +27,8 @@ const FIELDS = [
   "baseUnit",
   "batchTracking",
   "packagings",
-  "warehouseIds",
+  "warehouses",
+  "categoryId",
 ] as const
 
 /**
@@ -74,7 +75,8 @@ export function useItemForm(
         error,
         {
           [ProblemCode.itemReferenceTaken]: "reference",
-          [ProblemCode.warehouseUnavailable]: "warehouseIds",
+          [ProblemCode.warehouseUnavailable]: "warehouses",
+          [ProblemCode.categoryUnavailable]: "categoryId",
           [ProblemCode.baseUnitLocked]: "baseUnit",
         },
         form.setError

@@ -90,9 +90,25 @@ const SUPPLIERS = [
   },
 ]
 
+/** Familles d'articles ; parent : clé de la catégorie qui la contient. */
+const CATEGORIES = [
+  { key: "electricite", name: "Électricité" },
+  { key: "cablage", name: "Câbles et gaines", parent: "electricite" },
+  { key: "protection", name: "Protection", parent: "electricite" },
+  { key: "appareillage", name: "Appareillage", parent: "electricite" },
+  { key: "eclairage", name: "Éclairage" },
+  { key: "peinture", name: "Peinture" },
+]
+
+/**
+ * min : seuil d'alerte par dépôt, en unité de base. Choisis pour que la démo montre quelques
+ * articles « stock bas » et une rupture après les bons ci-dessous.
+ */
 const ITEMS = [
   {
     key: "cable-25",
+    category: "cablage",
+    min: { "depot-bonaberi": 300, "boutique-akwa": 100 },
     name: "Câble rigide 2,5 mm² rouge",
     reference: "CAB-25-R",
     baseUnit: "METRE",
@@ -100,6 +116,8 @@ const ITEMS = [
   },
   {
     key: "cable-15",
+    category: "cablage",
+    min: { "depot-bonaberi": 300, "boutique-akwa": 100 },
     name: "Câble rigide 1,5 mm² bleu",
     reference: "CAB-15-B",
     baseUnit: "METRE",
@@ -107,6 +125,8 @@ const ITEMS = [
   },
   {
     key: "gaine-20",
+    category: "cablage",
+    min: { "depot-bonaberi": 100 },
     name: "Gaine ICTA 20 mm",
     reference: "GAI-20",
     baseUnit: "METRE",
@@ -114,6 +134,8 @@ const ITEMS = [
   },
   {
     key: "disj-16",
+    category: "protection",
+    min: { "depot-bonaberi": 40, "boutique-akwa": 30 },
     name: "Disjoncteur 16 A",
     reference: "DIS-16",
     baseUnit: "PIECE",
@@ -121,6 +143,8 @@ const ITEMS = [
   },
   {
     key: "disj-32",
+    category: "protection",
+    min: { "depot-bonaberi": 30 },
     name: "Disjoncteur 32 A",
     reference: "DIS-32",
     baseUnit: "PIECE",
@@ -128,6 +152,8 @@ const ITEMS = [
   },
   {
     key: "prise",
+    category: "appareillage",
+    min: { "depot-bonaberi": 50, "boutique-akwa": 30 },
     name: "Prise murale 2P+T",
     reference: "PRI-2PT",
     baseUnit: "PIECE",
@@ -135,6 +161,8 @@ const ITEMS = [
   },
   {
     key: "interrupteur",
+    category: "appareillage",
+    min: { "depot-bonaberi": 0, "boutique-akwa": 30 },
     name: "Interrupteur simple allumage",
     reference: "INT-SA",
     baseUnit: "PIECE",
@@ -142,6 +170,8 @@ const ITEMS = [
   },
   {
     key: "ampoule",
+    category: "eclairage",
+    min: { "boutique-akwa": 100 },
     name: "Ampoule LED 9 W E27",
     reference: "LED-9W",
     baseUnit: "PIECE",
@@ -149,6 +179,8 @@ const ITEMS = [
   },
   {
     key: "reglette",
+    category: "eclairage",
+    min: { "boutique-akwa": 40 },
     name: "Réglette LED 120 cm",
     reference: "REG-120",
     baseUnit: "PIECE",
@@ -156,6 +188,8 @@ const ITEMS = [
   },
   {
     key: "tableau",
+    category: "protection",
+    min: { "depot-bonaberi": 12 },
     name: "Tableau électrique 2 rangées",
     reference: "TAB-2R",
     baseUnit: "PIECE",
@@ -163,6 +197,8 @@ const ITEMS = [
   },
   {
     key: "boite-encastrement",
+    category: "appareillage",
+    min: { "boutique-akwa": 50 },
     name: "Boîte d’encastrement",
     reference: "BOI-ENC",
     baseUnit: "PIECE",
@@ -170,6 +206,8 @@ const ITEMS = [
   },
   {
     key: "peinture",
+    category: "peinture",
+    min: { "depot-bonaberi": 60 },
     name: "Peinture isolante blanche",
     reference: "PEI-ISO",
     baseUnit: "LITRE",
@@ -438,19 +476,57 @@ try {
     warehouseIds[WAREHOUSES.find((warehouse) => warehouse.key === key).name]
   console.log(`Dépôts : ${WAREHOUSES.length}`)
 
+  const categoryIds = {}
+
+  // Parents d'abord (ordre de CATEGORIES) ; une catégorie créée à la main sous le même nom est reprise.
+  for (const category of CATEGORIES) {
+    const existing = await call("GET", "/v1/categories", undefined, org)
+    const parentId = category.parent ? categoryIds[category.parent] : null
+    const same = existing.find(
+      (candidate) =>
+        candidate.parentId === parentId &&
+        candidate.name.toLowerCase() === category.name.toLowerCase()
+    )
+    categoryIds[category.key] =
+      same?.id ??
+      (
+        await call(
+          "POST",
+          "/v1/categories",
+          { id: id(`category-${category.key}`), name: category.name, parentId },
+          org
+        )
+      ).id
+  }
+  console.log(`Catégories : ${CATEGORIES.length}`)
+
   for (const item of ITEMS) {
-    const { key, ...fields } = item
+    const { key, category, min, ...fields } = item
     // Proposé dans les deux dépôts principaux ; les réceptions ajoutent les autres.
+    const placements = ["depot-bonaberi", "boutique-akwa"].map((warehouse) => ({
+      warehouseId: warehouseId(warehouse),
+      minQuantity: min[warehouse] ?? null,
+    }))
+    const body = {
+      batchTracking: false,
+      ...fields,
+      categoryId: categoryIds[category],
+      warehouses: placements,
+    }
+    const saved = await call("POST", "/v1/items", { id: id(key), ...body }, org)
+    // Article d'un passage précédent : catégorie et seuils sont remis, ses autres dépôts gardés.
+    const placed = new Set(placements.map((placement) => placement.warehouseId))
     await call(
-      "POST",
-      "/v1/items",
+      "PUT",
+      `/v1/items/${saved.id}`,
       {
-        id: id(key),
-        batchTracking: false,
-        ...fields,
-        warehouseIds: [
-          warehouseId("depot-bonaberi"),
-          warehouseId("boutique-akwa"),
+        version: saved.version,
+        ...body,
+        warehouses: [
+          ...placements,
+          ...saved.warehouses.filter(
+            (placement) => !placed.has(placement.warehouseId)
+          ),
         ],
       },
       org

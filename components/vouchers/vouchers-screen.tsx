@@ -13,7 +13,9 @@ import { useRouter } from "next/navigation"
 import { useFormatter, useTranslations } from "next-intl"
 import { useMemo } from "react"
 
+import { ClearFilters } from "@/components/catalog/clear-filters"
 import { EmptyState } from "@/components/catalog/empty-state"
+import { SupplierFilter } from "@/components/catalog/supplier-filter"
 import { TablePagination } from "@/components/catalog/table-pagination"
 import { WarehouseFilter } from "@/components/catalog/warehouse-filter"
 import { DocumentScene } from "@/components/illustrations/document-scene"
@@ -46,11 +48,12 @@ import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import { useVouchersPage } from "@/lib/api/voucher-queries"
 import { VoucherType, voucherTypes } from "@/lib/api/vouchers"
 import { useListParams } from "@/lib/list/use-list-params"
-
-import { useVoucherPdf } from "./use-voucher-pdf"
 import { RecordRoutes, Routes } from "@/lib/routes"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
 import { cn } from "@/lib/utils"
+
+import { PeriodFilter } from "./period-filter"
+import { useVoucherPdf } from "./use-voucher-pdf"
 
 const ALL_TYPES = "all"
 const SKELETON_ROWS = 8
@@ -97,15 +100,15 @@ export function VouchersScreen() {
   const t = useTranslations("vouchers")
   const format = useFormatter()
   const list = useListParams()
-  const { warehouseId, voucherType, page, size } = list.params
+  const { warehouseIds, voucherType, supplierId, from, to, order, page, size } =
+    list.params
   const search = useMemo(
-    () => ({ type: voucherType, warehouseId }),
-    [voucherType, warehouseId]
+    () => ({ type: voucherType, warehouseIds, supplierId, from, to, order }),
+    [voucherType, warehouseIds, supplierId, from, to, order]
   )
   const vouchers = useVouchersPage(search, page, size)
   const total = vouchers.data?.total ?? 0
-  const filtered = !!voucherType || !!warehouseId
-  const empty = vouchers.isSuccess && total === 0 && !filtered
+  const empty = vouchers.isSuccess && total === 0 && !list.filtered
   usePageTour("vouchers", { ready: vouchers.isSuccess })
 
   const typeOptions = [
@@ -132,7 +135,7 @@ export function VouchersScreen() {
         />
       ) : (
         <>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Select
               items={typeOptions}
               value={voucherType ?? ALL_TYPES}
@@ -154,15 +157,30 @@ export function VouchersScreen() {
                 ))}
               </SelectContent>
             </Select>
-            <WarehouseFilter value={warehouseId} onChange={list.setWarehouse} />
+            <WarehouseFilter
+              value={warehouseIds}
+              onChange={list.setWarehouses}
+            />
+            <SupplierFilter value={supplierId} onChange={list.setSupplier} />
+            <PeriodFilter
+              from={from}
+              to={to}
+              order={order}
+              onPeriodChange={list.setPeriod}
+              onOrderChange={list.setOrder}
+            />
+            <ClearFilters visible={list.filtered} onClear={list.reset} />
           </div>
           <div className="mt-6 overflow-hidden rounded-2xl border">
             {vouchers.isPending ? (
               <ItemsTableSkeleton rows={SKELETON_ROWS} />
             ) : total === 0 ? (
-              <p className="p-10 text-center text-muted-foreground">
-                {t("empty.title")}
-              </p>
+              <div className="p-10 text-center">
+                <p className="text-muted-foreground">{t("noResult")}</p>
+                <Button variant="outline" className="mt-4" onClick={list.reset}>
+                  {t("clearFilters")}
+                </Button>
+              </div>
             ) : (
               <>
                 <Table
