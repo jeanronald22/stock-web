@@ -24,6 +24,7 @@ export const ProblemCode = {
   itemNotFound: "item-not-found",
   itemReferenceTaken: "item-reference-taken",
   packagingNameDuplicate: "packaging-name-duplicate",
+  packagingDefaultDuplicate: "packaging-default-duplicate",
   packagingQuantityNotWhole: "packaging-quantity-not-whole",
   fileLinkInvalid: "file-link-invalid",
   imageUnsupported: "image-unsupported",

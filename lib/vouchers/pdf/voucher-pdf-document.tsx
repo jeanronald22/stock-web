@@ -1,26 +1,8 @@
-import {
-  Document,
-  Font,
-  Page,
-  StyleSheet,
-  Text,
-  View,
-} from "@react-pdf/renderer"
+import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer"
+
+import { PDF_FONT as FONT } from "@/lib/pdf/pdf-fonts"
 
 import type { VoucherPdfData } from "./voucher-pdf-data"
-
-/** Inter, la police de l'application (licence OFL, public/fonts) : accents et espaces fines des nombres. */
-const FONT = "Inter"
-Font.register({
-  family: FONT,
-  fonts: [
-    { src: "/fonts/inter-400.woff", fontWeight: 400 },
-    { src: "/fonts/inter-600.woff", fontWeight: 600 },
-    { src: "/fonts/inter-700.woff", fontWeight: 700 },
-  ],
-})
-// Pas de césure automatique : un nom d'article reste entier.
-Font.registerHyphenationCallback((word) => [word])
 
 const INK = "#171717"
 const MUTED = "#737373"

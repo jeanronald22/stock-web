@@ -375,6 +375,18 @@ Modèle D10 : `lot` (code, nuance, calibre, date de réception). Questionnaire :
 - **Garde-fou** : à la sortie, mélanger deux nuances ou deux calibres d'un même article sur un bon est signalé avant de valider (« 2 nuances différentes : le client risque de le voir »), sans l'interdire.
 - **Stock** : le détail par lot montre nuance et calibre, pour choisir le bon lot.
 
+## D36. Démarrage : conditionnement par défaut, import du catalogue, étiquettes (2026-10-15)
+
+Modèle D10 : `sku_unit.is_default_receive` et `is_default_issue`, `sku.barcode`. Questionnaire : on compte et on sort en cartons (Q19, Q24) ; le suivi se fait aujourd'hui sur cahier, fiches et Excel (Q5, Q41) ; 1 000 à 5 000 références (Q3) ; très peu de codes-barres (Q26) alors que le scan est demandé (Q42, Q44).
+
+- **Conditionnement par défaut** : un article peut désigner le conditionnement proposé d'office à la saisie des entrées (réception, retour client) et celui des sorties (sortie, transfert, retour fournisseur, casse, ajustement, inventaire). Deux réglages sous la liste des conditionnements, « Réceptions en » et « Sorties en » ; sans réglage, l'unité de base. La ligne garde un choix d'unité modifiable. Scanner un article déjà sur le bon ajoute une unité dans l'unité de la ligne : une étiquette de carton scannée ajoute un carton.
+- **Import du catalogue** depuis un fichier Excel (.xlsx) ou CSV (séparateur et encodage d'Excel reconnus), sans entrée de menu : depuis « Articles » (et l'écran vide du catalogue). Étapes : fichier (modèle à télécharger), colonnes (reconnues d'après leurs titres, ajustables), dépôts où proposer les articles, aperçu ligne par ligne, import, bilan. Colonnes : nom (obligatoire), référence, code-barres, unité, catégorie (« Carrelage > Sol », créée si elle n'existe pas), un conditionnement et sa quantité (il devient le conditionnement par défaut en réception et en sortie), suivi par lot, seuil d'alerte, description, stock actuel et son lot.
+- **Lignes en erreur** : signalées dans l'aperçu (nom manquant, unité inconnue, nombre illisible, doublon dans le fichier) et laissées de côté ; les refus du serveur (référence ou code-barres déjà pris) sont rapportés au bilan. Les lignes écartées se téléchargent en CSV avec leur motif, pour les corriger et les réimporter. Un article existant n'est pas mis à jour : sa référence est refusée comme doublon.
+- **Stock de départ** : la colonne « stock actuel » s'applique à un dépôt choisi, par un ajustement au motif « stock de départ » (posé par l'application, comme « inventaire »), réservé au droit de correction du dépôt. Un article suivi par lot demande son lot.
+- **Import par paquets** de 100 articles, chacun idempotent (identifiants choisis par l'application, ajustement compris) : une coupure réseau se reprend sans doublon.
+- **Codes-barres internes** : un article sans code peut en recevoir un, attribué par l'application (EAN-13 de la plage réservée à l'usage interne, préfixe 2, unique dans l'entreprise).
+- **Étiquettes** en PDF (comme les bons) : planche A4 de 24 (70 × 37 mm) ou 40 étiquettes (52,5 × 29,7 mm), ou rouleau 50 × 30 mm pour imprimante thermique. Nom, référence, code-barres et ses chiffres. Écran ouvert depuis « Articles », la fiche d'un article (avec ses copies) et une réception (une étiquette par conditionnement reçu). Les articles sans code le disent et proposent de leur en attribuer un.
+
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
 - [ ] Nom de la marque et nom du produit de stock (voir D7). Pistes : Kreskala, Kreskio, Tissero, NarvalWorks, FourmiLabs.

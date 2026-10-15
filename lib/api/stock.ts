@@ -14,6 +14,10 @@ export const StockPaths = {
   itemImage: (id: string) => `/v1/items/${id}/image`,
   itemThreshold: (id: string, warehouseId: string) =>
     `/v1/items/${id}/warehouses/${warehouseId}/threshold`,
+  /** Codes-barres internes pour les articles qui n'en ont pas (D36). */
+  itemBarcodes: "/v1/items/barcodes",
+  /** Import du catalogue par paquets, avec le stock de départ (D36). */
+  itemImport: "/v1/items/import",
   myAccess: "/v1/stock/access/me",
   access: "/v1/stock/access",
   memberAccess: (subject: string) => `/v1/stock/access/members/${subject}`,
@@ -50,7 +54,10 @@ export const StockLimits = {
   description: 500,
   packagingName: 40,
   packagingsPerItem: 10,
+  batch: 60,
   pageSize: 50,
+  /** Articles par paquet (import, codes-barres ; stock-api, StockLimits.ITEMS_PER_BATCH). */
+  itemsPerBatch: 100,
 } as const
 
 export const catalogStatuses = ["ACTIVE", "ARCHIVED"] as const
@@ -95,7 +102,33 @@ export type WarehouseInput = {
   address?: string
 }
 
-export type Packaging = { name: string; quantity: number }
+/** [defaultReceipt], [defaultIssue] : proposé d'office à la saisie des entrées, des sorties (D36). */
+export type Packaging = {
+  name: string
+  quantity: number
+  defaultReceipt: boolean
+  defaultIssue: boolean
+}
+
+/**
+ * Sens d'une saisie, pour le conditionnement proposé d'office (D36) : entrées (réception, retour
+ * client), ou sorties et comptages (sortie, transfert, retour fournisseur, casse, ajustement, inventaire).
+ */
+export const EntryDirection = { receipt: "receipt", issue: "issue" } as const
+export type EntryDirection =
+  (typeof EntryDirection)[keyof typeof EntryDirection]
+
+/** Le conditionnement proposé d'office dans ce sens ; undefined : l'unité de base. */
+export function defaultPackaging(
+  packagings: Packaging[],
+  direction: EntryDirection
+): Packaging | undefined {
+  return packagings.find((packaging) =>
+    direction === EntryDirection.receipt
+      ? packaging.defaultReceipt
+      : packaging.defaultIssue
+  )
+}
 
 /**
  * État du stock d'un article dans un dépôt (stock-api, StockState). Seul un article dont le seuil
@@ -208,6 +241,33 @@ export type ItemInput = {
   packagings: Packaging[]
   warehouses: ItemPlacement[]
   categoryId: string | null
+}
+
+/**
+ * Paquet d'import (D36) : articles à créer (identifiants choisis par l'application) et leur stock de
+ * départ dans un dépôt, en unité de base. Renvoyé après une coupure, il ne crée rien deux fois.
+ */
+export type ImportBatch = {
+  items: (ItemInput & { id: string })[]
+  opening?: {
+    voucherId: string
+    warehouseId: string
+    lines: { itemId: string; quantity: number; batch?: string }[]
+  }
+}
+
+export const ImportOutcome = {
+  created: "CREATED",
+  alreadyCreated: "ALREADY_CREATED",
+  rejected: "REJECTED",
+} as const
+export type ImportOutcome = (typeof ImportOutcome)[keyof typeof ImportOutcome]
+
+/** [code] : motif d'un refus (code de problème de l'API) ; [openingCode] : stock de départ non posé. */
+export type ImportResult = {
+  items: { id: string; outcome: ImportOutcome; code: string | null }[]
+  opening: { id: string; number: string } | null
+  openingCode: string | null
 }
 
 /** Critères combinés en ET ; plusieurs dépôts ou états se combinent en OU entre eux. */
@@ -363,6 +423,22 @@ export const stockApi = (send: ApiClient) => {
         ...scoped,
         method: "DELETE",
         path: StockPaths.itemImage(id),
+      }),
+
+    /** Attribue un code interne aux articles qui n'en ont pas ; renvoie tous les articles demandés. */
+    assignBarcodes: (itemIds: string[]) =>
+      send<Item[]>({
+        ...scoped,
+        method: "POST",
+        path: StockPaths.itemBarcodes,
+        body: { itemIds },
+      }),
+    importItems: (batch: ImportBatch) =>
+      send<ImportResult>({
+        ...scoped,
+        method: "POST",
+        path: StockPaths.itemImport,
+        body: batch,
       }),
 
     changeThreshold: (

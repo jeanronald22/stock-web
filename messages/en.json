@@ -31,7 +31,9 @@
     "editItem": "Edit item",
     "editWarehouse": "Edit warehouse",
     "editSupplier": "Edit supplier",
-    "editCustomer": "Edit customer"
+    "editCustomer": "Edit customer",
+    "labels": "Labels",
+    "importItems": "Import items"
   },
   "common": {
     "retry": "Try again",
@@ -486,7 +488,16 @@
       "barcode": "Barcode",
       "barcodePlaceholder": "6181234567890",
       "barcodeScan": "Scan the barcode",
-      "barcodeInvalid": "Digits and letters without spaces, 64 at most."
+      "barcodeInvalid": "Digits and letters without spaces, 64 at most.",
+      "defaults": {
+        "receipt": {
+          "label": "Receipts entered in"
+        },
+        "issue": {
+          "label": "Issues and counts in"
+        },
+        "hint": "Suggested on every voucher; each line can still be changed."
+      }
     },
     "created": "Item created.",
     "saved": "Item saved.",
@@ -561,7 +572,15 @@
       "more": "More actions",
       "receive": "New receipt of this item",
       "issue": "New issue of this item",
-      "category": "Category"
+      "category": "Category",
+      "defaultFor": "{directions, select, both {default for receipts and issues} receipt {default for receipts} other {default for issues}}",
+      "labels": "Print labels"
+    },
+    "more": {
+      "label": "Catalogue options",
+      "import": "Import an Excel file",
+      "importFromFile": "Or import an Excel file",
+      "labels": "Print labels"
     }
   },
   "pagination": {
@@ -667,7 +686,8 @@
       "returns": "{count, plural, one {Return:} other {Returns:}}",
       "closesInventory": "Gaps of the stocktake:",
       "seeInventory": "see the stocktake",
-      "preparedBy": "Prepared by"
+      "preparedBy": "Prepared by",
+      "labels": "Labels"
     },
     "form": {
       "noWarehouse": "No active depot. Declare a depot first.",
@@ -901,6 +921,10 @@
       "INVENTORY": {
         "label": "Stocktake",
         "hint": "Gaps found when closing a stocktake."
+      },
+      "OPENING": {
+        "label": "Opening stock",
+        "hint": "Stock on hand when the catalogue was imported."
       }
     },
     "photos": {
@@ -1647,6 +1671,261 @@
       "call": "Call",
       "whatsapp": "WhatsApp",
       "email": "Email"
+    }
+  },
+  "labels": {
+    "title": "Labels",
+    "breadcrumb": "Items",
+    "description": "Print your items’ barcodes, on A4 sheets or on a roll.",
+    "download": "Download PDF",
+    "print": "Print",
+    "items": {
+      "title": "Items to label",
+      "empty": {
+        "title": "No items yet",
+        "description": "Search for an item by name or reference, or scan it, to add it."
+      },
+      "noBarcode": "No barcode",
+      "copies": "Number of labels for {name}",
+      "less": "One label fewer for {name}",
+      "more": "One more label for {name}",
+      "remove": "Remove {name}"
+    },
+    "missing": {
+      "title": "{count, plural, one {# item has no barcode} other {# items have no barcode}}",
+      "assignHint": "They won’t be printed until they have one. The app can assign one.",
+      "askHint": "They won’t be printed. Ask whoever manages the catalogue to assign one.",
+      "assign": "{count, plural, one {Assign a code} other {Assign codes}}",
+      "done": "{count, plural, one {Code assigned} other {Codes assigned}}"
+    },
+    "formats": {
+      "label": "Format",
+      "A4_24": {
+        "label": "A4 sheet · 24",
+        "hint": "70 × 37 mm labels"
+      },
+      "A4_40": {
+        "label": "A4 sheet · 40",
+        "hint": "52.5 × 29.7 mm labels"
+      },
+      "ROLL_50X30": {
+        "label": "Roll",
+        "hint": "Label printer, 50 × 30 mm"
+      }
+    },
+    "start": {
+      "title": "Start at label {number}",
+      "hint": "Sheet already used? Tap the first free label.",
+      "slot": "Start at label {number}"
+    },
+    "summary": {
+      "labels": "{count, plural, =0 {No labels} one {# label} other {# labels}}",
+      "sheets": "{count, plural, one {# sheet} other {# sheets}}",
+      "roll": "one per label on the roll",
+      "tooMany": "No more than {max} labels at once: print in several runs."
+    }
+  },
+  "import": {
+    "eyebrow": "Import items",
+    "reasonColumn": "Reason",
+    "denied": {
+      "title": "For catalogue managers",
+      "description": "Only the general manager and managers import items.",
+      "back": "Back to items"
+    },
+    "fields": {
+      "name": {
+        "label": "Name",
+        "hint": "Beige tile 60x60"
+      },
+      "reference": {
+        "label": "Reference",
+        "hint": "CAR-6060"
+      },
+      "barcode": {
+        "label": "Barcode",
+        "hint": "EAN, UPC, Code 128…"
+      },
+      "unit": {
+        "label": "Unit",
+        "hint": "Piece, kg, litre, metre, m², m³; piece if empty"
+      },
+      "category": {
+        "label": "Category",
+        "hint": "Tiles > Floor; created if missing"
+      },
+      "packagingName": {
+        "label": "Packaging",
+        "hint": "Carton, bag, pallet…"
+      },
+      "packagingQuantity": {
+        "label": "Quantity per package",
+        "hint": "4 (pieces per carton)"
+      },
+      "batchTracking": {
+        "label": "Batch tracking",
+        "hint": "Yes or No; no if empty"
+      },
+      "minQuantity": {
+        "label": "Alert threshold",
+        "hint": "20; in each chosen warehouse"
+      },
+      "description": {
+        "label": "Description",
+        "hint": "Free text"
+      },
+      "stock": {
+        "label": "Stock on hand",
+        "hint": "102; in units, not cartons"
+      },
+      "batch": {
+        "label": "Batch",
+        "hint": "Batch of the stock on hand, for batch-tracked items"
+      }
+    },
+    "file": {
+      "title": "Import your catalogue",
+      "description": "An Excel or CSV file, one row per item. Nothing is saved until you have checked everything.",
+      "drop": "Drop your file here",
+      "formats": "Excel (.xlsx) or CSV, up to 5,000 items",
+      "choose": "Choose a file",
+      "change": "Choose another file",
+      "rows": "{count, plural, one {# row found} other {# rows found}}",
+      "required": "Choose a file first.",
+      "columnsTitle": "Columns",
+      "columns": "A header row, then one item per row. Only the {required} column is required; the others are recognised by their header.",
+      "downloadTemplate": "Download the Excel template",
+      "errors": {
+        "unsupported": "This file is neither an Excel workbook (.xlsx) nor a CSV. In Excel, use “Save as” then “Excel Workbook”.",
+        "tooLarge": "This file is larger than 5 MB. Split it into several files.",
+        "unreadable": "This file could not be read. Open it in Excel and save it again.",
+        "empty": "This file has no items: it needs a header row and at least one row.",
+        "tooManyRows": "More than {max} rows: split the file and import it in several runs."
+      },
+      "examples": [
+        {
+          "name": "Beige tile 60x60",
+          "reference": "CAR-6060",
+          "unit": "Piece",
+          "category": "Tiles > Floor",
+          "packagingName": "Carton",
+          "packagingQuantity": 4,
+          "batchTracking": "Yes",
+          "minQuantity": 20,
+          "stock": 102,
+          "batch": "L2409"
+        },
+        {
+          "name": "Mixer tap",
+          "reference": "ROB-MEL",
+          "unit": "Piece",
+          "category": "Sanitary",
+          "batchTracking": "No",
+          "minQuantity": 2,
+          "description": "Chrome",
+          "stock": 15
+        }
+      ]
+    },
+    "columns": {
+      "title": "Check the columns",
+      "description": "We matched them by their headers. Adjust if needed; a column left unchosen is not imported.",
+      "skip": "Don’t import",
+      "untitled": "Column {number}",
+      "required": "Required",
+      "example": "In the file: {value}",
+      "nameRequired": "Choose the column holding the item names."
+    },
+    "warehouses": {
+      "title": "Where are these items?",
+      "description": "They will be offered in the ticked warehouses, with the file’s alert threshold.",
+      "label": "Warehouses",
+      "required": "Tick at least one warehouse.",
+      "opening": {
+        "label": "Warehouse holding the stock",
+        "placeholder": "Choose the warehouse",
+        "hint": "The file’s stock will be set there by an “opening stock” adjustment.",
+        "unavailable": "The file’s stock won’t be imported: you need the right to correct stock in a ticked warehouse.",
+        "required": "Choose the warehouse holding the file’s stock."
+      }
+    },
+    "review": {
+      "title": "All set?",
+      "description": "Check before importing. Rows to fix are left aside.",
+      "submit": "{count, plural, =0 {Nothing to import} one {Import # item} other {Import # items}}",
+      "nothing": "No row is ready: fix the file, then choose it again.",
+      "stats": {
+        "ready": "Ready to import",
+        "blocked": "To fix",
+        "categories": "New categories"
+      },
+      "opening": "{count, plural, one {# item arrives} other {# items arrive}} with their stock, set in {warehouse}.",
+      "line": "Row {line}",
+      "unnamed": "No name",
+      "more": "{count, plural, one {and # more row} other {and # more rows}}",
+      "blocked": {
+        "title": "Rows to fix",
+        "description": "They won’t be imported. Download them, fix them, then import them in turn.",
+        "download": "Download rows to fix"
+      },
+      "preview": {
+        "title": "Preview: {shown} of {total}",
+        "item": "Item",
+        "unit": "Unit",
+        "category": "Category",
+        "packaging": "Packaging",
+        "stock": "Stock",
+        "batch": "Batch {batch}"
+      },
+      "problems": {
+        "nameMissing": "missing name",
+        "nameTooLong": "name too long (120 characters max)",
+        "referenceTooLong": "reference too long (40 characters max)",
+        "referenceDuplicate": "reference already used higher in the file",
+        "barcodeInvalid": "unreadable barcode (no spaces, 64 characters max)",
+        "barcodeDuplicate": "barcode already used higher in the file",
+        "unitUnknown": "unknown unit (piece, kg, litre, metre, m², m³)",
+        "categoryTooLong": "category name too long",
+        "packagingIncomplete": "packaging without its quantity, or the reverse",
+        "packagingNameTooLong": "packaging name too long (40 characters max)",
+        "packagingQuantityInvalid": "invalid quantity per package (whole number of pieces)",
+        "batchTrackingInvalid": "batch tracking: Yes or No",
+        "minQuantityInvalid": "unreadable alert threshold",
+        "descriptionTooLong": "description too long (500 characters max)",
+        "stockInvalid": "unreadable stock (whole number for pieces)",
+        "batchMissing": "missing batch for a batch-tracked item",
+        "batchTooLong": "batch too long (60 characters max)"
+      }
+    },
+    "result": {
+      "running": "Importing…",
+      "runningDescription": "Items are saved in batches of 100.",
+      "interrupted": "Import interrupted",
+      "progressLabel": "Import progress",
+      "progress": "{done} of {total} items",
+      "keepOpen": "Keep this page open until it finishes.",
+      "resumeHint": "Nothing is lost: resume when the network is back, without duplicates.",
+      "resume": "Resume",
+      "title": "{count, plural, =0 {No items imported} one {# item imported} other {# items imported}}",
+      "description": "They are in the catalogue, with their categories and packagings.",
+      "seeItems": "See items",
+      "opening": "{count, plural, one {Opening stock recorded by the adjustment:} other {Opening stock recorded by # adjustments:}}",
+      "openingFailed": "The opening stock was not set: {reasons}",
+      "line": "Row {line}",
+      "rejected": {
+        "title": "{count, plural, one {# row rejected} other {# rows rejected}}",
+        "download": "Download rejected rows"
+      }
+    },
+    "serverReasons": {
+      "referenceTaken": "an item in the catalogue already has this reference",
+      "barcodeTaken": "an item in the catalogue already has this barcode",
+      "categoryUnavailable": "category not found",
+      "warehouseUnavailable": "warehouse unavailable",
+      "accessDenied": "you don’t have this right in this warehouse",
+      "batchRequired": "missing batch for a batch-tracked item",
+      "quantityNotWhole": "non-whole quantity for an item counted in pieces",
+      "other": "rejected by the app"
     }
   }
 }

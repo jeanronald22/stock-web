@@ -1,6 +1,11 @@
 "use client"
 
-import { PlusIcon, SearchIcon } from "lucide-react"
+import {
+  FileSpreadsheetIcon,
+  PlusIcon,
+  SearchIcon,
+  TagIcon,
+} from "lucide-react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { useEffect, useMemo, useState } from "react"
@@ -41,6 +46,7 @@ import { useStockAccess } from "@/components/workspace/stock-access"
 
 import { ItemGridSkeleton } from "./item-card"
 import { ItemsGrid } from "./items-grid"
+import { ItemsMoreMenu } from "./items-more-menu"
 import { ItemsTable, ItemsTableSkeleton } from "./items-table"
 
 /** La recherche part quand la frappe se pose, pas à chaque lettre. */
@@ -133,11 +139,20 @@ export function ItemsScreen() {
         title={t("title")}
         description={t("description")}
         actions={
-          catalogEmpty || !manages ? undefined : (
+          catalogEmpty ? undefined : manages ? (
             <div className="flex flex-wrap gap-2">
               <CategoriesSheet />
+              <ItemsMoreMenu />
               {newButton}
             </div>
+          ) : (
+            <Link
+              href={Routes.labels}
+              className={buttonVariants({ variant: "outline", size: "lg" })}
+            >
+              <TagIcon />
+              {t("more.labels")}
+            </Link>
           )
         }
       />
@@ -147,7 +162,21 @@ export function ItemsScreen() {
           illustration={<CatalogScene />}
           title={t("empty.title")}
           description={t("empty.description")}
-          action={newButton || undefined}
+          action={
+            newButton && (
+              <div className="flex flex-col items-center gap-3">
+                {newButton}
+                {/* Un catalogue tenu dans Excel n'est pas à ressaisir (D36). */}
+                <Link
+                  href={Routes.importItems}
+                  className={buttonVariants({ variant: "ghost" })}
+                >
+                  <FileSpreadsheetIcon />
+                  {t("more.importFromFile")}
+                </Link>
+              </div>
+            )
+          }
         />
       ) : (
         <>

@@ -24,7 +24,11 @@ import {
 } from "@/components/vouchers/voucher-form-schema"
 import type { SheetLine, Tally } from "@/lib/api/inventories"
 import { useCountLine } from "@/lib/api/inventory-queries"
-import { wholeQuantityUnits } from "@/lib/api/stock"
+import {
+  defaultPackaging,
+  EntryDirection,
+  wholeQuantityUnits,
+} from "@/lib/api/stock"
 import { useErrorMessage } from "@/lib/api/use-error-message"
 import { parseQuantity } from "@/lib/forms/quantity"
 import { cn } from "@/lib/utils"
@@ -63,7 +67,12 @@ export function CountLine({
   const { item, count: counted } = line
   const [mode, setMode] = useState<Mode | null>(counted ? null : Mode.count)
   const [typed, setTyped] = useState("")
-  const [unit, setUnit] = useState<string>(BASE_UNIT_CHOICE)
+  // Comptage : le conditionnement proposé d'office pour les sorties (D36), comme sur les étagères.
+  const [unit, setUnit] = useState<string>(
+    () =>
+      defaultPackaging(item.packagings, EntryDirection.issue)?.name ??
+      BASE_UNIT_CHOICE
+  )
   const [error, setError] = useState<string | null>(null)
   const label = (quantity: number) => quantityLabel(item.baseUnit, quantity)
 

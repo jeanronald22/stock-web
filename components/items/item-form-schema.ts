@@ -44,6 +44,8 @@ export function itemFormSchema(messages: ItemFormMessages) {
           z.object({
             name: text(StockLimits.packagingName).min(1, messages.required),
             quantity: z.string(),
+            defaultReceipt: z.boolean(),
+            defaultIssue: z.boolean(),
           })
         )
         .max(StockLimits.packagingsPerItem),
@@ -103,6 +105,8 @@ export function toItemInput(values: ItemFormValues): ItemInput {
     packagings: values.packagings.map((packaging) => ({
       name: packaging.name,
       quantity: parseQuantity(packaging.quantity) ?? 0,
+      defaultReceipt: packaging.defaultReceipt,
+      defaultIssue: packaging.defaultIssue,
     })),
     warehouses: values.warehouses.map((placement) => ({
       warehouseId: placement.warehouseId,
@@ -130,6 +134,8 @@ export function itemFormDefaults(
     packagings: (item?.packagings ?? []).map((packaging) => ({
       name: packaging.name,
       quantity: formatQuantityInput(packaging.quantity, locale),
+      defaultReceipt: packaging.defaultReceipt,
+      defaultIssue: packaging.defaultIssue,
     })),
     categoryId: item?.categoryId ?? null,
     warehouses: item

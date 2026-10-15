@@ -5,6 +5,7 @@ import {
   LockIcon,
   PackageCheckIcon,
   PrinterIcon,
+  TagIcon,
   Undo2Icon,
 } from "lucide-react"
 import Link from "next/link"
@@ -31,6 +32,7 @@ import { useStockAccess } from "@/components/workspace/stock-access"
 import { StockPermission } from "@/lib/api/stock"
 import { useVoucher } from "@/lib/api/voucher-queries"
 import {
+  incomingTypes,
   movementOf,
   returnTypeOf,
   supplierTypes,
@@ -40,7 +42,12 @@ import {
   type Voucher,
   type VoucherRef,
 } from "@/lib/api/vouchers"
-import { EntryQueryParams, RecordRoutes, Routes } from "@/lib/routes"
+import {
+  EntryQueryParams,
+  LabelQueryParams,
+  RecordRoutes,
+  Routes,
+} from "@/lib/routes"
 
 import { useVoucherPdf } from "./use-voucher-pdf"
 import { VoucherPhotos } from "./voucher-photos"
@@ -158,6 +165,16 @@ export function VoucherScreen({ id }: { id: string }) {
             )}
             {data.hasDiscrepancy && <DiscrepancyBadge />}
             <VoucherPdfActions id={data.id} />
+            {/* Marchandise arrivée : on étiquette ce qui vient d'entrer (D36). */}
+            {incomingTypes.has(data.type) && (
+              <Link
+                href={`${Routes.labels}?${LabelQueryParams.voucher}=${data.id}`}
+                className={buttonVariants({ variant: "outline" })}
+              >
+                <TagIcon />
+                {t("vouchers.detail.labels")}
+              </Link>
+            )}
             {data.transferState === TransferState.inTransit &&
               data.destination &&
               covers(data.destination.id) &&
