@@ -44,11 +44,14 @@ export const RecordRoutes = {
   /** Modification de la fiche ; la fiche elle-même se consulte. */
   itemEdit: (id: string) => `${Routes.items}/${id}/modifier`,
   warehouse: (id: string) => `${Routes.warehouses}/${id}`,
+  warehouseEdit: (id: string) => `${Routes.warehouses}/${id}/modifier`,
   voucher: (id: string) => `${Routes.vouchers}/${id}`,
   /** Réception d'un transfert au dépôt d'arrivée (D27). */
   transferReceipt: (id: string) => `${Routes.vouchers}/${id}/receptionner`,
   supplier: (id: string) => `${Routes.suppliers}/${id}`,
+  supplierEdit: (id: string) => `${Routes.suppliers}/${id}/modifier`,
   customer: (id: string) => `${Routes.customers}/${id}`,
+  customerEdit: (id: string) => `${Routes.customers}/${id}/modifier`,
   request: (id: string) => `${Routes.requests}/${id}`,
   /** Inventaire d'un dépôt (D32), ouvert depuis « Stock ». */
   inventory: (id: string) => `${Routes.stock}/inventaires/${id}`,
@@ -67,6 +70,10 @@ export const EntryQueryParams = {
   barcode: "codebarres",
   /** Bon commencé depuis la fiche d'un article : il est déjà sur le bon. */
   item: "article",
+  /** Bon commencé depuis la fiche d'un dépôt, d'un fournisseur ou d'un client. */
+  warehouse: "depot",
+  supplier: "fournisseur",
+  customer: "client",
 } as const
 
 /** Filtres des listes conservés dans l'adresse : un lien partagé ouvre la même vue. */

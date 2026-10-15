@@ -27,7 +27,8 @@ export function WarehousesScreen() {
   const t = useTranslations("warehouses")
   const list = useListParams()
   const { status } = list.params
-  const warehouses = useWarehouses(status)
+  // Relue à l'ouverture : un écran vide « Déclarez votre premier dépôt » ne doit jamais mentir.
+  const warehouses = useWarehouses(status, { fresh: true })
   // Moins de cent dépôts par entreprise : la liste des archivés se charge entière, sans pagination.
   const archivedWarehouses = useWarehouses(CatalogStatus.archived)
   const archived = status === CatalogStatus.archived
