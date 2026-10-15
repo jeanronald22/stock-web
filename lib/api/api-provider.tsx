@@ -7,6 +7,11 @@ import { useAuth } from "react-oidc-context"
 import { useRuntimeConfig } from "@/components/providers/runtime-config-provider"
 import { useActiveOrganization } from "@/lib/organization/active-organization"
 
+import {
+  reportNetworkFailure,
+  reportNetworkSuccess,
+} from "@/lib/offline/connectivity"
+
 import { createApiClient, type ApiClient } from "./http"
 import { notificationApi } from "./notifications"
 import { platformApi } from "./platform"
@@ -19,6 +24,8 @@ import { requestApi } from "./voucher-requests"
 import { voucherApi } from "./vouchers"
 
 type Api = {
+  /** Envoi brut : la file hors ligne (D39) rejoue les requêtes telles qu'elles ont été préparées. */
+  send: ApiClient
   platform: ReturnType<typeof platformApi>
   stock: ReturnType<typeof stockApi>
   vouchers: ReturnType<typeof voucherApi>
@@ -45,8 +52,11 @@ export function ApiProvider({ children }: { children: React.ReactNode }) {
       getAccessToken: () => token,
       getLocale: () => locale,
       getOrganizationId: () => activeOrganizationId,
+      onNetworkFailure: reportNetworkFailure,
+      onNetworkResponse: reportNetworkSuccess,
     })
     return {
+      send,
       platform: platformApi(send),
       stock: stockApi(send),
       vouchers: voucherApi(send),

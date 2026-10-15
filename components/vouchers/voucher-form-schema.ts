@@ -163,6 +163,9 @@ export function voucherFormSchema(
 export type VoucherFormValues = z.infer<ReturnType<typeof voucherFormSchema>>
 export type VoucherFormLine = VoucherFormValues["lines"][number]
 
+/** Saisie gardée dans la file hors ligne (D39), pour la reprendre si l'API la refuse. */
+export type VoucherDraft = { entryType: EntryType; values: VoucherFormValues }
+
 /** Quantité en unité de base : « 3 Carton » de 12 pièces donne 36. */
 export function baseQuantity(
   item: Pick<Item, "packagings">,

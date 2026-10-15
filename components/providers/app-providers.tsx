@@ -1,10 +1,11 @@
 "use client"
 
-import { QueryClientProvider, useQueryClient } from "@tanstack/react-query"
+import { useQueryClient } from "@tanstack/react-query"
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client"
 import { WifiOffIcon } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
 import { UserManager } from "oidc-client-ts"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { AuthProvider, useAuth } from "react-oidc-context"
 
 import { FullPageMessage } from "@/components/app/full-page-message"
@@ -12,7 +13,14 @@ import { Splash } from "@/components/app/splash"
 import { ApiProvider } from "@/lib/api/api-provider"
 import { ApiError, ProblemCode } from "@/lib/api/problem"
 import { createQueryClient } from "@/lib/api/query-client"
-import { startCrossTabRenewal } from "@/lib/auth/cross-tab-renewal"
+import { renewTokens, startCrossTabRenewal } from "@/lib/auth/cross-tab-renewal"
+import { TokenRenewalContext } from "@/lib/auth/token-renewal"
+import { startConnectivity } from "@/lib/offline/connectivity"
+import {
+  createQueryPersister,
+  PERSISTED_CACHE_VERSION,
+  PERSISTED_MAX_AGE_MS,
+} from "@/lib/offline/query-persister"
 import {
   clearSigninParams,
   userManagerSettings,
@@ -65,24 +73,41 @@ function OidcProvider({ children }: { children: React.ReactNode }) {
     [config, locale]
   )
   useEffect(() => startCrossTabRenewal(userManager), [userManager])
+  const renew = useCallback(() => renewTokens(userManager), [userManager])
 
   return (
     <AuthProvider
       userManager={userManager}
       onSigninCallback={clearSigninParams}
     >
-      {children}
+      <TokenRenewalContext value={renew}>{children}</TokenRenewalContext>
     </AuthProvider>
   )
 }
 
 function QueryProvider({ children }: { children: React.ReactNode }) {
   const [client] = useState(createQueryClient)
+  const { apiUrl } = useRuntimeConfig()
+  useEffect(() => startConnectivity(apiUrl), [apiUrl])
+  const [persister] = useState(createQueryPersister)
   return (
-    <QueryClientProvider client={client}>
+    <PersistQueryClientProvider
+      client={client}
+      persistOptions={{
+        persister,
+        maxAge: PERSISTED_MAX_AGE_MS,
+        buster: PERSISTED_CACHE_VERSION,
+        // Seules les réponses réussies valent d'être relues sans réseau.
+        dehydrateOptions: {
+          shouldDehydrateQuery: (query) => query.state.status === "success",
+        },
+      }}
+      // Ce qui revient du téléphone s'affiche tout de suite, puis se relit dès que le réseau le permet.
+      onSuccess={() => client.invalidateQueries()}
+    >
       <SessionExpiryWatcher />
       {children}
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   )
 }
 

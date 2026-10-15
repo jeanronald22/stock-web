@@ -9,4 +9,6 @@ export const StorageKeys = {
   lastWarehousePrefix: "kreskala.last-warehouse.",
   /** Lien d'invitation ouvert avant la connexion : on y revient après (création de compte comprise). */
   pendingInvitation: "kreskala.pending-invitation",
+  /** Dernière configuration publique reçue : l'application redémarre sans réseau (D39). */
+  runtimeConfig: "kreskala.runtime-config",
 } as const

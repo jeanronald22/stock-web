@@ -8,7 +8,7 @@ import { privacyPolicyFr } from "@/content/legal/privacy-policy.fr"
  * politique est complétée dans les deux langues, puis la version et la date sont avancées (D18).
  */
 export const PrivacyPolicyRelease = {
-  version: "0.9",
+  version: "1.0",
   updatedOn: "2026-10-15",
 } as const
 

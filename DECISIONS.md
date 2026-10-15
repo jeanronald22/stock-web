@@ -414,6 +414,19 @@ Questionnaire : rapports au gérant (Q1) ; produits à écarts (Q33) ; casse, qu
 - **Exports Excel** de chaque rapport et du stock (filtres en cours, toutes les pages), à ouvrir tels quels.
 - **Calcul** : en SQL sur le registre des mouvements et les bons, dans le fuseau des dépôts ; rien n'est stocké en plus.
 
+## D39. Mode hors ligne (2026-10-15)
+
+Questionnaire : réseau moyen ou coupé souvent au dépôt, coupures d'électricité fréquentes (Q39, Q40) ; les mouvements sont enregistrés tout de suite ou en fin de journée (Q8). D3 et D10 : identifiants créés sur le téléphone, numéro attribué par le serveur, envoi idempotent.
+
+- **Ce qui marche sans réseau** : consulter ce qui a déjà été vu (accueil, stock, articles, dépôts, bons), et saisir tous les bons (réception, sortie, transfert, casse, ajustement, retours), les demandes de sortie à valider et la réception d'un transfert. Rouvrir l'application sans réseau fonctionne aussi, une fois qu'elle a été ouverte avec du réseau sur ce téléphone.
+- **Ce qui demande le réseau** : créer ou modifier une fiche (article, dépôt, contact, emplacement), les photos de casse, l'inventaire, les rapports, l'équipe. L'écran le dit au lieu d'échouer.
+- **File d'envoi** sur le téléphone (IndexedDB), propre à l'entreprise et à la personne : chaque bon y garde son identifiant, l'heure de la saisie (la date du bon est celle du terrain, pas celle de l'envoi) et de quoi reprendre la saisie. Envoi dans l'ordre de saisie, dès que le réseau revient, puis toutes les 30 secondes tant qu'il en reste ; renvoyer ne crée jamais de doublon (D21, D33).
+- **Refus à l'envoi** (stock insuffisant à ce moment, article archivé, validation désormais exigée…) : le bon reste sur le téléphone, marqué « à corriger » avec le motif ; on le reprend dans l'écran de saisie, ou on le supprime. Rien n'est perdu sans geste explicite.
+- **Visibilité** : un bandeau « hors ligne » dans l'en-tête, le nombre de bons en attente, et dans « Bons » une liste « À envoyer » (en attente, à corriger). Le stock affiché hors ligne est celui du dernier passage en ligne ; une sortie hors ligne ne peut pas vérifier le disponible, l'envoi le fera.
+- **Données** : les lectures sont gardées sur le téléphone (7 jours) ; le catalogue actif est copié en entier pour chercher et scanner un article sans réseau.
+- **Session** : hors ligne, la session gardée sur le téléphone suffit, même si le jeton d'accès a expiré ; il est renouvelé (jeton de rafraîchissement, `offline_access`) avant le premier envoi au retour du réseau. Se déconnecter vide la file : l'écran prévient s'il reste des bons à envoyer.
+- **Application installable** (manifeste) et **service worker** (Serwist) : les fichiers de l'application sont gardés à l'installation ; les pages visitées le sont aussi ; une page jamais ouverte affiche un écran « hors ligne » qui renvoie à l'accueil. Les appels à l'API ne passent jamais par le cache du service worker.
+
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
 - [ ] Nom de la marque et nom du produit de stock (voir D7). Pistes : Kreskala, Kreskio, Tissero, NarvalWorks, FourmiLabs.

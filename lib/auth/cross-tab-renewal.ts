@@ -7,14 +7,10 @@ const LOCK_NAME = "kreskala.token-renewal"
 const RENEWAL_MARGIN_SECONDS = 60
 
 /**
- * Renouvelle le jeton d'accès une seule fois pour tous les onglets ouverts : ils partagent les jetons
- * (stockage local), et Keycloak ferme la session si un même jeton de rafraîchissement est présenté
- * deux fois. Sous un verrou commun, chaque onglet relit d'abord le stockage : si un autre vient de
- * renouveler, il reprend ce jeton au lieu d'en redemander un.
- *
- * Renvoie la fonction d'arrêt.
+ * Jeton d'accès valide pour encore un moment : renouvelé s'il expire bientôt, sous le verrou commun
+ * aux onglets. Sert aussi à la file hors ligne (D39) avant de renvoyer ce qui attendait le réseau.
  */
-export function startCrossTabRenewal(userManager: UserManager): () => void {
+export async function renewTokens(userManager: UserManager): Promise<void> {
   async function renewOnce() {
     const stored = await userManager.getUser()
     if (stored && (stored.expires_in ?? 0) > RENEWAL_MARGIN_SECONDS) {
@@ -27,11 +23,20 @@ export function startCrossTabRenewal(userManager: UserManager): () => void {
       // Hors ligne ou session terminée : l'API répondra 401 et l'application renverra vers la connexion.
     }
   }
+  if ("locks" in navigator) await navigator.locks.request(LOCK_NAME, renewOnce)
+  else await renewOnce()
+}
 
-  const renew = () =>
-    "locks" in navigator
-      ? navigator.locks.request(LOCK_NAME, renewOnce)
-      : renewOnce()
+/**
+ * Renouvelle le jeton d'accès une seule fois pour tous les onglets ouverts : ils partagent les jetons
+ * (stockage local), et Keycloak ferme la session si un même jeton de rafraîchissement est présenté
+ * deux fois. Sous un verrou commun, chaque onglet relit d'abord le stockage : si un autre vient de
+ * renouveler, il reprend ce jeton au lieu d'en redemander un.
+ *
+ * Renvoie la fonction d'arrêt.
+ */
+export function startCrossTabRenewal(userManager: UserManager): () => void {
+  const renew = () => renewTokens(userManager)
 
   // Un autre onglet a renouvelé les jetons ou s'est déconnecté : cet onglet s'aligne.
   const onStorage = (event: StorageEvent) => {

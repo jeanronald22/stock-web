@@ -41,6 +41,9 @@ export type ApiClientDependencies = {
   getAccessToken: () => string | undefined
   getLocale: () => string
   getOrganizationId: () => string | null
+  /** L'API n'a pas pu être jointe (réseau coupé), ou a répondu : pour l'état hors ligne (D39). */
+  onNetworkFailure?: () => void
+  onNetworkResponse?: () => void
 }
 
 export type ApiClient = <T>(request: ApiRequest) => Promise<T>
@@ -77,8 +80,10 @@ export function createApiClient(deps: ApiClientDependencies): ApiClient {
               : JSON.stringify(request.body),
       })
     } catch {
+      deps.onNetworkFailure?.()
       throw new ApiError(0, ProblemCode.networkUnavailable, "", "")
     }
+    deps.onNetworkResponse?.()
 
     if (response.ok) {
       return (

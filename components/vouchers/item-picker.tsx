@@ -16,6 +16,9 @@ import { ItemThumb } from "@/components/items/item-thumb"
 import { Spinner } from "@/components/ui/spinner"
 import { BARCODE_PATTERN, CatalogStatus, type Item } from "@/lib/api/stock"
 import { useItemsPage } from "@/lib/api/stock-queries"
+import { searchCatalog } from "@/lib/offline/offline-catalog"
+import { useOfflineCatalog } from "@/lib/offline/use-offline-catalog"
+import { useOnline } from "@/lib/offline/use-online"
 import {
   BarcodeLookupKind,
   useBarcodeLookup,
@@ -68,9 +71,14 @@ export function ItemPicker({
     [deferred, warehouseId, supplierId]
   )
   const results = useItemsPage(search, 0, RESULTS)
-  const items = (results.data?.items ?? []).filter(
-    (item) => !excludedIds.has(item.id)
-  )
+  // Hors ligne (D39) : on cherche dans le catalogue copié sur le téléphone, sans le filtre fournisseur.
+  const online = useOnline()
+  const catalog = useOfflineCatalog()
+  const found =
+    !online && catalog
+      ? searchCatalog(catalog.items, { text: deferred, warehouseId }, RESULTS)
+      : (results.data?.items ?? [])
+  const items = found.filter((item) => !excludedIds.has(item.id))
   const [scanning, setScanning] = useState(false)
   const [notice, setNotice] = useState<Exclude<
     BarcodeLookup,
@@ -95,13 +103,11 @@ export function ItemPicker({
    */
   const onEnter = () => {
     const typed = text.trim()
-    const exact = (results.data?.items ?? []).find(
-      (item) => item.barcode === typed
-    )
+    const exact = found.find((item) => item.barcode === typed)
     if (exact) {
       ;(onScan ?? onPick)(exact)
       setText("")
-    } else if (deferred !== typed || results.isFetching) {
+    } else if (deferred !== typed || (online && results.isFetching)) {
       // Une douchette tape le code puis Entrée avant que la recherche ait répondu : on cherche le code.
       if (!BARCODE_PATTERN.test(typed)) return
       setText("")
@@ -196,7 +202,7 @@ export function ItemPicker({
             </button>
           </li>
         ))}
-        {results.isSuccess && items.length === 0 && (
+        {(results.isSuccess || !online) && items.length === 0 && (
           <li className="px-3 py-4 text-center text-sm text-muted-foreground">
             {onlySupplier
               ? t("noSupplierItem")

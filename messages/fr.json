@@ -2195,5 +2195,49 @@
       }
     },
     "exportButton": "Exporter"
+  },
+  "offline": {
+    "queued": "Bon gardé sur ce téléphone",
+    "queuedHint": "Il sera enregistré dès le retour du réseau.",
+    "photosLater": "Il sera enregistré dès le retour du réseau ; ajoutez les photos depuis sa fiche une fois envoyé.",
+    "queueFailed": "Ce téléphone n’a pas pu garder le bon. Réessayez quand le réseau revient.",
+    "sync": {
+      "sentOne": "Bon {number} envoyé.",
+      "sent": "{count, plural, one {# saisie envoyée} other {# saisies envoyées}} au retour du réseau.",
+      "rejected": "{count, plural, one {Une saisie n’a pas pu être enregistrée} other {# saisies n’ont pas pu être enregistrées}} : à corriger dans Bons.",
+      "see": "Voir"
+    },
+    "status": {
+      "offline": "Hors ligne",
+      "offlineWithPending": "Hors ligne · {count, plural, one {# à envoyer} other {# à envoyer}}",
+      "pending": "{count, plural, one {# à envoyer} other {# à envoyer}}",
+      "rejected": "{count, plural, one {# à corriger} other {# à corriger}}"
+    },
+    "panel": {
+      "title": "{count, plural, one {# saisie sur ce téléphone} other {# saisies sur ce téléphone}}",
+      "offlineHint": "Pas de réseau : elles partiront toutes seules dès qu’il revient.",
+      "sendingHint": "{count, plural, one {Envoi en cours…} other {Envoi en cours…}}",
+      "rejectedHint": "{count, plural, one {L’application a refusé une saisie : reprenez-la, ou supprimez-la.} other {L’application a refusé # saisies : reprenez-les, ou supprimez-les.}}",
+      "line": "{warehouse} · {count, plural, one {# article} other {# articles}} · saisi le {date}",
+      "waiting": "En attente",
+      "resume": "Reprendre",
+      "delete": "Supprimer",
+      "deleteTitle": "Supprimer cette saisie ?",
+      "deleteDescription": "Elle n’a jamais été enregistrée : elle sera perdue.",
+      "keep": "Garder",
+      "deleted": "Saisie supprimée."
+    },
+    "signOut": {
+      "needsNetwork": "Se déconnecter demande le réseau : la session se ferme chez le serveur.",
+      "title": "{count, plural, one {Une saisie n’est pas encore enregistrée} other {# saisies ne sont pas encore enregistrées}}",
+      "description": "Elles sont seulement sur ce téléphone. En vous déconnectant, elles seront perdues.",
+      "stay": "Rester connecté",
+      "confirm": "Me déconnecter quand même"
+    },
+    "page": {
+      "title": "Pas de réseau",
+      "description": "Cette page n’a pas encore été ouverte sur ce téléphone. L’accueil, le stock et la saisie des bons, eux, marchent sans réseau.",
+      "home": "Aller à l’accueil"
+    }
   }
 }

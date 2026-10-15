@@ -57,7 +57,11 @@ import {
   useSubmitRequest,
 } from "@/lib/api/request-queries"
 import { StockPermission } from "@/lib/api/stock"
-import { approvalTypes, type VoucherRequest } from "@/lib/api/voucher-requests"
+import {
+  approvalTypes,
+  RequestPaths,
+  type VoucherRequest,
+} from "@/lib/api/voucher-requests"
 import {
   useAddVoucherPhoto,
   useRecordVoucher,
@@ -68,11 +72,22 @@ import {
   returnOrigins,
   shortagesOf,
   supplierTypes,
+  VoucherPaths,
   VoucherType,
   type EntryType,
   type Returnable,
 } from "@/lib/api/vouchers"
-import { EntryQueryParams, RecordRoutes, Routes } from "@/lib/routes"
+import { isOnline } from "@/lib/offline/connectivity"
+import { OutboxKind, removeOutboxEntry } from "@/lib/offline/outbox"
+import { isNetworkError, useEnqueue } from "@/lib/offline/use-enqueue"
+import { useOnline } from "@/lib/offline/use-online"
+import { useOutbox } from "@/lib/offline/use-outbox"
+import {
+  EntryQueryParams,
+  OUTBOX_ANCHOR,
+  RecordRoutes,
+  Routes,
+} from "@/lib/routes"
 import {
   readLastWarehouse,
   rememberLastWarehouse,
@@ -89,6 +104,7 @@ import {
   todayOn,
   toVoucherInput,
   voucherFormSchema,
+  type VoucherDraft,
   type VoucherFormValues,
 } from "./voucher-form-schema"
 import { VoucherLinesField } from "./voucher-lines-field"
@@ -128,10 +144,20 @@ export function VoucherEntry({ type }: { type: EntryType }) {
   const previousCustomer = useCustomer(
     previous.data?.customerId ?? startingCustomerId
   )
-  // Liste à jour avant de proposer un dépôt : un collègue vient peut-être d'en déclarer un.
+  const online = useOnline()
+  // Saisie refusée à l'envoi (D39), reprise depuis la file : mêmes valeurs, même identifiant.
+  const draftId = searchParams.get(EntryQueryParams.draft) ?? undefined
+  const outbox = useOutbox()
+  const draftEntry = draftId
+    ? outbox.entries.find((entry) => entry.id === draftId)
+    : undefined
+  const draft = draftEntry && (draftEntry.draft as VoucherDraft)
+  // Liste à jour avant de proposer un dépôt : un collègue vient peut-être d'en déclarer un. Hors
+  // ligne, celle gardée sur le téléphone fait foi.
   if (
     !warehouses.data ||
-    !warehouses.isFetchedAfterMount ||
+    (!warehouses.isFetchedAfterMount && online) ||
+    (draftId && !outbox.loaded) ||
     !settings.data ||
     (originId && origin.isPending) ||
     (fromRequestId && previous.isPending) ||
@@ -192,6 +218,11 @@ export function VoucherEntry({ type }: { type: EntryType }) {
       startingWarehouseId={startingWarehouseId}
       startingSupplier={startingSupplier.data}
       issueApproval={settings.data.issueApproval}
+      draft={
+        draftEntry && draft?.entryType === type
+          ? { id: draftEntry.id, values: draft.values }
+          : undefined
+      }
     />
   )
 }
@@ -211,6 +242,7 @@ function VoucherEntryForm({
   startingWarehouseId,
   startingSupplier,
   issueApproval,
+  draft,
 }: {
   type: EntryType
   warehouses: Warehouse[]
@@ -224,6 +256,8 @@ function VoucherEntryForm({
   startingSupplier: Supplier | undefined
   /** Règle de l'entreprise (D33) : les sorties des magasiniers passent par une validation. */
   issueApproval: boolean
+  /** Saisie reprise de la file hors ligne (D39). */
+  draft: { id: string; values: VoucherFormValues } | undefined
 }) {
   const t = useTranslations()
   const router = useRouter()
@@ -235,7 +269,10 @@ function VoucherEntryForm({
   const searchRef = useRef<HTMLInputElement>(null)
   const transfer = type === VoucherType.transferOut
   // Un identifiant par bon : renvoyé après une coupure réseau, le même bon n'est pas compté deux fois.
-  const [voucherId, setVoucherId] = useState(() => crypto.randomUUID())
+  const [voucherId, setVoucherId] = useState(
+    () => draft?.id ?? crypto.randomUUID()
+  )
+  const enqueue = useEnqueue()
   const [today] = useState(todayOn)
   // Casse : photos choisies avant la validation, envoyées juste après (le bon doit exister).
   const [photos, setPhotos] = useState<File[]>([])
@@ -284,7 +321,7 @@ function VoucherEntryForm({
         type
       )
     ),
-    defaultValues: {
+    defaultValues: draft?.values ?? {
       warehouseId: defaultWarehouseId,
       destinationWarehouseId: previous?.destination?.id ?? "",
       reason: "",
@@ -389,14 +426,77 @@ function VoucherEntryForm({
     return true
   }
 
+  /** L'écran se vide pour le bon suivant ; une saisie reprise de la file retourne à la liste. */
+  const startNext = (values: VoucherFormValues) => {
+    if (draft) return router.replace(`${Routes.vouchers}#${OUTBOX_ANCHOR}`)
+    form.reset({
+      ...values,
+      supplier: null,
+      customer: null,
+      lines: [],
+      counterparty: "",
+      documentReference: "",
+      note: "",
+    })
+    setPhotos([])
+    setVoucherId(crypto.randomUUID())
+    searchRef.current?.focus()
+  }
+
+  /**
+   * Sans réseau (D39) : le bon part dans la file du téléphone, daté de la saisie, et sera envoyé
+   * au retour du réseau. Les photos de casse, elles, demandent le réseau.
+   */
+  const queue = async (values: VoucherFormValues, approval: boolean) => {
+    const input = toVoucherInput(type, values, today)
+    const warehouse = warehouses.find(
+      (candidate) => candidate.id === values.warehouseId
+    )
+    try {
+      await enqueue({
+        id: voucherId,
+        kind: approval ? OutboxKind.request : OutboxKind.voucher,
+        request: {
+          method: "POST",
+          path: approval ? RequestPaths.requests : VoucherPaths.vouchers,
+          body: {
+            id: voucherId,
+            ...input,
+            occurredAt: input.occurredAt ?? new Date().toISOString(),
+          },
+        },
+        summary: {
+          voucherType: type,
+          warehouseName: warehouse?.name ?? "",
+          lineCount: values.lines.length,
+          counterparty:
+            values.customer?.name ??
+            values.supplier?.name ??
+            (values.counterparty || null),
+        },
+        draft: { entryType: type, values } satisfies VoucherDraft,
+      })
+    } catch {
+      return toast.error(t("offline.queueFailed"))
+    }
+    rememberLastWarehouse(subject, organization.id, values.warehouseId)
+    toast.success(t("offline.queued"), {
+      description:
+        photos.length > 0 ? t("offline.photosLater") : t("offline.queuedHint"),
+    })
+    startNext(values)
+  }
+
   /** Demande à valider (D33) : rien ne sort avant la décision ; l'écran se vide pour la suivante. */
   const sendForApproval = async (values: VoucherFormValues) => {
+    if (!isOnline()) return queue(values, true)
     try {
       const request = await submitRequest.mutateAsync({
         id: voucherId,
         input: toVoucherInput(type, values, today),
       })
       rememberLastWarehouse(subject, organization.id, values.warehouseId)
+      if (draft) await removeOutboxEntry(draft.id)
       toast.success(t("requests.sent"), {
         action: {
           label: t("requests.see"),
@@ -404,30 +504,23 @@ function VoucherEntryForm({
         },
       })
       if (previous) return router.replace(RecordRoutes.request(request.id))
-      form.reset({
-        ...values,
-        supplier: null,
-        customer: null,
-        lines: [],
-        counterparty: "",
-        documentReference: "",
-        note: "",
-      })
-      setVoucherId(crypto.randomUUID())
-      searchRef.current?.focus()
+      startNext(values)
     } catch (error) {
+      if (isNetworkError(error)) return queue(values, true)
       toast.error(errorMessage(error))
     }
   }
 
   const submit = async (values: VoucherFormValues) => {
     if (needsApproval) return sendForApproval(values)
+    if (!isOnline()) return queue(values, false)
     try {
       const voucher = await record.mutateAsync({
         id: voucherId,
         input: toVoucherInput(type, values, today),
       })
       rememberLastWarehouse(subject, organization.id, values.warehouseId)
+      if (draft) await removeOutboxEntry(draft.id)
       // Un retour depuis un bon est complet : on ouvre le bon plutôt qu'un écran vide.
       if (fromOrigin) {
         toast.success(
@@ -448,19 +541,9 @@ function VoucherEntryForm({
           },
         }
       )
-      form.reset({
-        ...values,
-        supplier: null,
-        customer: null,
-        lines: [],
-        counterparty: "",
-        documentReference: "",
-        note: "",
-      })
-      setPhotos([])
-      setVoucherId(crypto.randomUUID())
-      searchRef.current?.focus()
+      startNext(values)
     } catch (error) {
+      if (isNetworkError(error)) return queue(values, false)
       if (placeShortages(error)) toast.error(t("vouchers.entry.shortages"))
       else if (placeBatchMismatch(error))
         toast.error(t("vouchers.form.batchMismatchToast"))

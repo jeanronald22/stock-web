@@ -2195,5 +2195,49 @@
       }
     },
     "exportButton": "Export"
+  },
+  "offline": {
+    "queued": "Voucher kept on this phone",
+    "queuedHint": "It will be recorded as soon as the network is back.",
+    "photosLater": "It will be recorded as soon as the network is back; add the photos from its page once sent.",
+    "queueFailed": "This phone could not keep the voucher. Try again when the network is back.",
+    "sync": {
+      "sentOne": "Voucher {number} sent.",
+      "sent": "{count, plural, one {# entry sent} other {# entries sent}} now that the network is back.",
+      "rejected": "{count, plural, one {An entry could not be recorded} other {# entries could not be recorded}}: fix it in Vouchers.",
+      "see": "See"
+    },
+    "status": {
+      "offline": "Offline",
+      "offlineWithPending": "Offline · {count} to send",
+      "pending": "{count} to send",
+      "rejected": "{count} to fix"
+    },
+    "panel": {
+      "title": "{count, plural, one {# entry on this phone} other {# entries on this phone}}",
+      "offlineHint": "No network: they will go out on their own as soon as it is back.",
+      "sendingHint": "Sending…",
+      "rejectedHint": "{count, plural, one {The app rejected an entry: resume it, or delete it.} other {The app rejected # entries: resume them, or delete them.}}",
+      "line": "{warehouse} · {count, plural, one {# item} other {# items}} · entered {date}",
+      "waiting": "Waiting",
+      "resume": "Resume",
+      "delete": "Delete",
+      "deleteTitle": "Delete this entry?",
+      "deleteDescription": "It was never recorded: it will be lost.",
+      "keep": "Keep",
+      "deleted": "Entry deleted."
+    },
+    "signOut": {
+      "needsNetwork": "Signing out needs the network: the session is closed on the server.",
+      "title": "{count, plural, one {An entry is not recorded yet} other {# entries are not recorded yet}}",
+      "description": "They only exist on this phone. Signing out will lose them.",
+      "stay": "Stay signed in",
+      "confirm": "Sign out anyway"
+    },
+    "page": {
+      "title": "No network",
+      "description": "This page has not been opened on this phone yet. The home page, stock and voucher entry work without a network.",
+      "home": "Go to the home page"
+    }
   }
 }

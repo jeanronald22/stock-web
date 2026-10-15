@@ -7,6 +7,8 @@ const BASE_DELAY_MS = 1_000
 const MAX_DELAY_MS = 15_000
 const SECOND_MS = 1_000
 const STALE_TIME_MS = 30_000
+/** Gardées en mémoire aussi longtemps que sur le téléphone (D39), pour être relues sans réseau. */
+const GC_TIME_MS = 7 * 24 * 60 * 60 * 1_000
 
 /**
  * Seules les erreurs passagères (réseau coupé, API saturée) sont relancées, en respectant le
@@ -32,6 +34,7 @@ export function createQueryClient(): QueryClient {
         retry: shouldRetry,
         retryDelay,
         staleTime: STALE_TIME_MS,
+        gcTime: GC_TIME_MS,
         refetchOnWindowFocus: true,
       },
       mutations: { retry: shouldRetry, retryDelay },

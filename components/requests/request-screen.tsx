@@ -52,22 +52,15 @@ import {
 import { useErrorMessage } from "@/lib/api/use-error-message"
 import {
   DECISION_NOTE_MAX,
-  type ApprovalType,
   RequestStatus,
   type VoucherRequest,
 } from "@/lib/api/voucher-requests"
-import { shortagesOf, VoucherType, type Shortage } from "@/lib/api/vouchers"
+import { shortagesOf, type Shortage } from "@/lib/api/vouchers"
 import { EntryQueryParams, RecordRoutes, Routes } from "@/lib/routes"
 import { cn } from "@/lib/utils"
+import { ENTRY_ROUTES } from "@/lib/vouchers/entry-routes"
 
 import { RequestStatusBadge } from "./request-status-badge"
-
-/** Écran de saisie d'où vient chaque type de demande, pour « Refaire la demande ». */
-const ENTRY_ROUTES = {
-  [VoucherType.issue]: Routes.newIssue,
-  [VoucherType.transferOut]: Routes.newTransfer,
-  [VoucherType.supplierReturn]: Routes.newSupplierReturn,
-} as const satisfies Record<ApprovalType, string>
 
 export function RequestScreen({ id }: { id: string }) {
   const t = useTranslations("requests")

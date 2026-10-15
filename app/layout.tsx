@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from "next-intl"
 import { getLocale } from "next-intl/server"
 
 import "./globals.css"
+import { ServiceWorker } from "@/components/offline/service-worker"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { cn } from "@/lib/utils"
@@ -56,7 +57,7 @@ export default async function RootLayout({
       <body>
         <NextIntlClientProvider>
           <ThemeProvider>
-            {children}
+            <ServiceWorker>{children}</ServiceWorker>
             {/* Téléphone : sous la barre du haut (64 px), pour ne jamais cacher le menu ni l'entreprise. */}
             <Toaster
               position="top-center"
