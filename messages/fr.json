@@ -825,7 +825,8 @@
       "receivedOf": "{received} reçus sur {expected}",
       "countedOf": "{counted} comptés (théorique {book})",
       "witnessedBy": "Témoin (nom et signature)",
-      "preparedBy": "Préparé par"
+      "preparedBy": "Préparé par",
+      "location": "Empl. {code}"
     },
     "menu": {
       "open": "Actions du bon {number}",
@@ -1150,11 +1151,11 @@
       },
       "MANAGER": {
         "label": "Manager",
-        "hint": "Responsable de ses dépôts : catalogue, seuils, bons, corrections."
+        "hint": "Responsable de ses dépôts : catalogue, seuils, emplacements, bons, corrections."
       },
       "CONTROLLER": {
         "label": "Contrôleur",
-        "hint": "Ses dépôts : réceptions, sorties, corrections et seuils d’alerte."
+        "hint": "Ses dépôts : réceptions, sorties, corrections, seuils d’alerte et emplacements."
       },
       "STOREKEEPER": {
         "label": "Magasinier",
@@ -1488,7 +1489,7 @@
     "gapsTitle": "Écarts",
     "closedWithAdjustment": "Clôturé : les écarts ont été inscrits au stock par le bon d’ajustement.",
     "closedWithoutGap": "Clôturé sans écart : le stock était juste.",
-    "searchPlaceholder": "Rechercher un article",
+    "searchPlaceholder": "Rechercher un article ou un emplacement",
     "filterLabel": "Lignes",
     "filters": {
       "TO_COUNT": "À compter",
@@ -1926,6 +1927,46 @@
       "batchRequired": "lot manquant pour un article suivi par lot",
       "quantityNotWhole": "quantité non entière pour un article compté à la pièce",
       "other": "refusé par l’application"
+    }
+  },
+  "locations": {
+    "title": "Emplacements",
+    "description": "Où se rangent les articles : allée, rayon, niveau.",
+    "empty": "Notez où se rangent les articles (allée, rayon, niveau) : l’emplacement s’affiche ensuite sur les bons et la feuille d’inventaire.",
+    "add": "Ajouter",
+    "addFirst": "Ajouter un emplacement",
+    "itemCount": "{count, plural, =0 {Aucun article} one {# article} other {# articles}}",
+    "archivedBadge": "Archivé",
+    "actions": "Actions sur l’emplacement {code}",
+    "edit": "Modifier",
+    "archive": "Archiver",
+    "restore": "Restaurer",
+    "archived": "Emplacement {code} archivé : les articles rangés là le gardent.",
+    "restored": "Emplacement {code} restauré.",
+    "showAll": "{count, plural, one {Voir # autre emplacement} other {Voir les # autres emplacements}}",
+    "showLess": "Voir moins",
+    "dialog": {
+      "newTitle": "Nouvel emplacement",
+      "editTitle": "Modifier l’emplacement",
+      "description": "Le code s’écrit sur l’étagère ; le libellé l’explique à qui ne connaît pas le dépôt.",
+      "code": "Code",
+      "codePlaceholder": "A-03-2",
+      "codeHint": "Court et unique dans ce dépôt : allée, rayon, niveau.",
+      "codeRequired": "Indiquez le code de l’emplacement.",
+      "label": "Libellé (facultatif)",
+      "labelPlaceholder": "Allée A, rayon 3, niveau 2",
+      "create": "Ajouter",
+      "save": "Enregistrer",
+      "created": "Emplacement {code} ajouté.",
+      "saved": "Emplacement enregistré."
+    },
+    "picker": {
+      "trigger": "Emplacement de {item}",
+      "none": "Pas d’emplacement",
+      "search": "Code ou libellé",
+      "empty": "Aucun emplacement : tapez un code pour le créer.",
+      "create": "Créer « {code} » et y ranger l’article",
+      "clear": "Retirer l’emplacement"
     }
   }
 }

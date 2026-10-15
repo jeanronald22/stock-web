@@ -12,6 +12,8 @@ export type VoucherPdfData = {
   lines: {
     name: string
     reference: string | null
+    /** « Empl. A-03-2 » : où prendre ou ranger l'article (D37). */
+    location: string | null
     batch: string
     entered: string
     quantity: string

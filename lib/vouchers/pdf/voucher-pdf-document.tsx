@@ -154,6 +154,9 @@ export function VoucherPdfDocument({ data }: { data: VoucherPdfData }) {
                 {line.reference && (
                   <Text style={styles.reference}>{line.reference}</Text>
                 )}
+                {line.location && (
+                  <Text style={styles.reference}>{line.location}</Text>
+                )}
               </View>
               <Text style={styles.colBatch}>{line.batch}</Text>
               <Text style={styles.colEntered}>{line.entered}</Text>

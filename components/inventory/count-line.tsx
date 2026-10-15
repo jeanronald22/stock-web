@@ -23,6 +23,7 @@ import {
   baseQuantity,
 } from "@/components/vouchers/voucher-form-schema"
 import type { SheetLine, Tally } from "@/lib/api/inventories"
+import { LocationLabel } from "@/components/locations/location-label"
 import { useCountLine } from "@/lib/api/inventory-queries"
 import {
   defaultPackaging,
@@ -46,12 +47,15 @@ export const COUNT_INPUT_ATTRIBUTE = "data-count-input"
  */
 export function CountLine({
   inventoryId,
+  warehouseId,
   line,
   editable,
   flagged,
   onSaved,
 }: {
   inventoryId: string
+  /** Dépôt compté : l'emplacement de l'article y est montré (D37). */
+  warehouseId: string
   line: SheetLine
   editable: boolean
   /** À recompter : la clôture a été refusée pour cette ligne. */
@@ -67,6 +71,9 @@ export function CountLine({
   const { item, count: counted } = line
   const [mode, setMode] = useState<Mode | null>(counted ? null : Mode.count)
   const [typed, setTyped] = useState("")
+  const location = item.warehouses.find(
+    (placement) => placement.warehouseId === warehouseId
+  )?.location
   // Comptage : le conditionnement proposé d'office pour les sorties (D36), comme sur les étagères.
   const [unit, setUnit] = useState<string>(
     () =>
@@ -125,6 +132,9 @@ export function CountLine({
         <ItemThumb imageUrl={item.imageUrl} size="sm" />
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold">{item.name}</p>
+          {location && (
+            <LocationLabel location={location} className="text-xs" />
+          )}
           <p className="truncate text-xs text-muted-foreground">
             {[
               item.reference,

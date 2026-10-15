@@ -387,6 +387,16 @@ Modèle D10 : `sku_unit.is_default_receive` et `is_default_issue`, `sku.barcode`
 - **Codes-barres internes** : un article sans code peut en recevoir un, attribué par l'application (EAN-13 de la plage réservée à l'usage interne, préfixe 2, unique dans l'entreprise).
 - **Étiquettes** en PDF (comme les bons) : planche A4 de 24 (70 × 37 mm) ou 40 étiquettes (52,5 × 29,7 mm), ou rouleau 50 × 30 mm pour imprimante thermique. Nom, référence, code-barres et ses chiffres. Écran ouvert depuis « Articles », la fiche d'un article (avec ses copies) et une réception (une étiquette par conditionnement reçu). Les articles sans code le disent et proposent de leur en attribuer un.
 
+## D37. Emplacements : retrouver un article dans le dépôt (2026-10-15)
+
+Modèle D10 : `location` (dépôt, code, libellé), `sku_warehouse.default_location_id`, et `location_id` sur les lignes, les mouvements et le stock. Questionnaire : le rangement fait partie du travail du contrôleur (Q1) ; les produits ont un emplacement, gardé de mémoire (Q27) ; on cherche rarement un produit (Q28) ; « retrouver l'emplacement d'un produit » est proposé parmi les fonctions utiles (Q44).
+
+- **Emplacements d'un dépôt** : un code court (« A-03-2 »), unique dans le dépôt, et un libellé facultatif (« Allée A, rayon 3, niveau 2 ») ; archivables. Ils se gèrent sur la fiche du dépôt, sans entrée de menu.
+- **Emplacement habituel d'un article** dans chaque dépôt où il est proposé (D10 : `default_location_id`), choisi sur la fiche de l'article ; un emplacement manquant se crée sur place.
+- **Écart assumé avec D10** : le stock reste compté par dépôt, sans `location_id` sur les lignes, les mouvements et le stock. On retrouve l'article sans demander l'emplacement à chaque saisie. Le stock par emplacement reste possible plus tard, sans reprise des données.
+- **Où il apparaît** : fiche de l'article (par dépôt), lignes des bons qui font sortir du stock (sortie, transfert, retour fournisseur, casse) et leur PDF, pour préparer la commande ; feuille d'inventaire, triée par emplacement, pour compter allée par allée.
+- **Droit** : nouveau droit « emplacements de ses dépôts » (créer, modifier, archiver, ranger un article) pour le gérant, le manager et le contrôleur ; tout le monde les voit.
+
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
 - [ ] Nom de la marque et nom du produit de stock (voir D7). Pistes : Kreskala, Kreskio, Tissero, NarvalWorks, FourmiLabs.
