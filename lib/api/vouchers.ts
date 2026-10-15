@@ -208,6 +208,8 @@ export type Voucher = Omit<VoucherSummary, "lineCount"> & {
   returns: VoucherRef[]
   /** Ajustement de clôture : l'inventaire dont il porte les écarts (D32). */
   inventoryId: string | null
+  /** Bon issu d'une demande (D33) : qui l'a préparé ; createdByName l'a validé. */
+  preparedByName: string | null
 }
 
 export type VoucherLineInput = {

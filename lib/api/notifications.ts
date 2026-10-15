@@ -18,6 +18,8 @@ export const notificationTypes = [
   "TRANSFER_SENT",
   "TRANSFER_RECEIVED",
   "RECEIPT_DISCREPANCY",
+  "VOUCHER_PENDING",
+  "VOUCHER_DECIDED",
 ] as const
 export type NotificationType = (typeof notificationTypes)[number]
 export const NotificationType = {
@@ -28,6 +30,8 @@ export const NotificationType = {
   transferSent: "TRANSFER_SENT",
   transferReceived: "TRANSFER_RECEIVED",
   receiptDiscrepancy: "RECEIPT_DISCREPANCY",
+  voucherPending: "VOUCHER_PENDING",
+  voucherDecided: "VOUCHER_DECIDED",
 } as const satisfies Record<string, NotificationType>
 
 /** Paramètres de chaque type (stock-api, NotificationParams). */
@@ -60,6 +64,12 @@ export type NotificationParams = {
   sourceName?: string
   lineCount?: number
   discrepancies?: TransferGap[]
+  /** Demande de sortie (D33). */
+  requestId?: string
+  requesterName?: string
+  deciderName?: string | null
+  approved?: boolean
+  decisionNote?: string | null
 }
 
 export type AppNotification = {

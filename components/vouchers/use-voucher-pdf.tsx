@@ -129,6 +129,9 @@ export function useVoucherPdf() {
           ? { label: t("detail.note"), text: voucher.note }
           : null,
         signatures: [
+          ...(voucher.preparedByName
+            ? [{ label: t("print.preparedBy"), name: voucher.preparedByName }]
+            : []),
           { label: t("print.validatedBy"), name: voucher.createdByName },
           {
             label: voucher.reason

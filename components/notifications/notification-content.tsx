@@ -4,6 +4,8 @@ import {
   BellRingIcon,
   KeyRoundIcon,
   MailOpenIcon,
+  ClipboardCheckIcon,
+  ClipboardClockIcon,
   FileWarningIcon,
   PackageCheckIcon,
   TruckIcon,
@@ -26,6 +28,8 @@ export const notificationIcons: Record<NotificationType, LucideIcon> = {
   [NotificationType.transferSent]: TruckIcon,
   [NotificationType.transferReceived]: PackageCheckIcon,
   [NotificationType.receiptDiscrepancy]: FileWarningIcon,
+  [NotificationType.voucherPending]: ClipboardClockIcon,
+  [NotificationType.voucherDecided]: ClipboardCheckIcon,
 }
 
 /** Titre et détail d'une notification, traduits depuis son type et ses paramètres (D26). */
@@ -103,6 +107,30 @@ export function useNotificationText() {
             count: params.lineCount ?? 0,
           }),
         }
+      case NotificationType.voucherPending:
+        return {
+          title: t("VOUCHER_PENDING.title", {
+            name: params.requesterName ?? "",
+            warehouse: params.warehouseName ?? "",
+          }),
+          detail: t("VOUCHER_PENDING.detail", { count: params.lineCount ?? 0 }),
+        }
+      case NotificationType.voucherDecided:
+        return params.approved
+          ? {
+              title: t("VOUCHER_DECIDED.approved", {
+                number: params.voucherNumber ?? "",
+              }),
+              detail: t("VOUCHER_DECIDED.by", {
+                name: params.deciderName ?? "",
+              }),
+            }
+          : {
+              title: t("VOUCHER_DECIDED.rejected", {
+                warehouse: params.warehouseName ?? "",
+              }),
+              detail: params.decisionNote ?? "",
+            }
       case NotificationType.receiptDiscrepancy: {
         const gaps = params.discrepancies ?? []
         return {

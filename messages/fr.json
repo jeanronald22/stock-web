@@ -26,7 +26,8 @@
     "customers": "Clients et chantiers",
     "inventory": "Inventaire",
     "newCustomerReturn": "Retour client",
-    "newSupplierReturn": "Retour fournisseur"
+    "newSupplierReturn": "Retour fournisseur",
+    "requests": "Demandes à valider"
   },
   "common": {
     "retry": "Réessayer",
@@ -179,6 +180,14 @@
       "seeAll": "Voir tout",
       "route": "{source} → {destination} · envoyé le {date}",
       "receive": "Réceptionner"
+    },
+    "requests": {
+      "toDecide": "{count, plural, one {# sortie à valider} other {# sorties à valider}}",
+      "waiting": "{count, plural, one {# demande en attente de validation} other {# demandes en attente de validation}}",
+      "seeAll": "Toutes les demandes",
+      "line": "{name} · {warehouse} · {count, plural, one {# article} other {# articles}} · {date}",
+      "review": "Examiner",
+      "open": "Voir"
     }
   },
   "menu": {
@@ -588,7 +597,8 @@
       "returnOf": "Retour du bon",
       "returns": "{count, plural, one {Retour :} other {Retours :}}",
       "closesInventory": "Écarts de l’inventaire :",
-      "seeInventory": "voir l’inventaire"
+      "seeInventory": "voir l’inventaire",
+      "preparedBy": "Préparé par"
     },
     "form": {
       "noWarehouse": "Aucun dépôt actif. Déclarez d’abord un dépôt.",
@@ -716,7 +726,8 @@
       },
       "receivedOf": "{received} reçus sur {expected}",
       "countedOf": "{counted} comptés (théorique {book})",
-      "witnessedBy": "Témoin (nom et signature)"
+      "witnessedBy": "Témoin (nom et signature)",
+      "preparedBy": "Préparé par"
     },
     "menu": {
       "open": "Actions du bon {number}",
@@ -1103,6 +1114,13 @@
       "title": "Invitation prête",
       "backToTeam": "Retour à l’équipe",
       "inviteAnother": "Inviter une autre personne"
+    },
+    "rules": {
+      "title": "Règles de travail",
+      "issueApproval": "Les sorties des magasiniers passent par une validation",
+      "issueApprovalHint": "Sorties, transferts et retours fournisseur préparés par un magasinier attendent l’accord d’un gérant, d’un manager ou d’un contrôleur du dépôt.",
+      "enabled": "Les sorties des magasiniers seront validées.",
+      "disabled": "Les magasiniers sortent à nouveau directement."
     }
   },
   "invitation": {
@@ -1201,6 +1219,19 @@
         "when": "Quand une réception dans un de vos dépôts ne correspond pas au bon de livraison.",
         "title": "Réception {number} : écart avec le bon de livraison",
         "gap": "{name} : {received} reçus sur {expected} annoncés"
+      },
+      "VOUCHER_PENDING": {
+        "name": "Sortie à valider",
+        "when": "Quand un magasinier prépare une sortie dans un dépôt dont vous validez les sorties.",
+        "title": "{name} a préparé une sortie · {warehouse}",
+        "detail": "{count, plural, one {# article} other {# articles}} à valider."
+      },
+      "VOUCHER_DECIDED": {
+        "name": "Décision sur une sortie",
+        "when": "Quand une sortie que vous avez préparée est validée ou refusée.",
+        "approved": "Votre sortie est validée : {number}",
+        "by": "Par {name}.",
+        "rejected": "Votre sortie est refusée · {warehouse}"
       }
     }
   },
@@ -1384,6 +1415,103 @@
       "quantity": "Quantité comptée ({unit})",
       "submit": "Enregistrer le comptage",
       "done": "{name} compté."
+    }
+  },
+  "requests": {
+    "title": "Demandes",
+    "description": "Les sorties préparées qui attendent l’accord d’un responsable du dépôt.",
+    "tabs": {
+      "label": "Bons et demandes",
+      "vouchers": "Bons",
+      "requests": "À valider"
+    },
+    "statusFilter": "État des demandes",
+    "filters": {
+      "PENDING": "En attente",
+      "APPROVED": "Validées",
+      "REJECTED": "Refusées",
+      "WITHDRAWN": "Retirées"
+    },
+    "status": {
+      "PENDING": "En attente",
+      "APPROVED": "Validée",
+      "REJECTED": "Refusée",
+      "WITHDRAWN": "Retirée"
+    },
+    "empty": {
+      "PENDING": {
+        "title": "Rien en attente",
+        "description": "Toutes les sorties préparées ont été traitées."
+      },
+      "APPROVED": {
+        "title": "Aucune demande validée",
+        "description": "Les sorties validées deviennent des bons, dans « Bons »."
+      },
+      "REJECTED": {
+        "title": "Aucune demande refusée",
+        "description": "Une demande refusée garde son motif ici."
+      },
+      "WITHDRAWN": {
+        "title": "Aucune demande retirée",
+        "description": "Une demande retirée par son auteur apparaît ici."
+      }
+    },
+    "table": {
+      "request": "Demande",
+      "warehouse": "Dépôt",
+      "preparedBy": "Préparée par",
+      "status": "État"
+    },
+    "noCounterparty": "Sans client",
+    "lineCount": "{count, plural, one {# article} other {# articles}}",
+    "notFound": "Demande introuvable",
+    "submit": "{count, plural, =0 {Envoyer pour validation} one {Envoyer pour validation · # article} other {Envoyer pour validation · # articles}}",
+    "approvalHint": "Un responsable du dépôt valide cette sortie avant qu’elle parte : le stock ne bouge qu’à ce moment-là.",
+    "sent": "Demande envoyée : un responsable du dépôt va la valider.",
+    "see": "Voir la demande",
+    "detail": {
+      "title": {
+        "ISSUE": "Sortie à valider",
+        "TRANSFER_OUT": "Transfert à valider",
+        "SUPPLIER_RETURN": "Retour fournisseur à valider"
+      },
+      "breadcrumb": "Demande",
+      "preparedOn": "Préparée le {date}",
+      "warehouse": "Dépôt",
+      "from": "Départ",
+      "to": "Arrivée",
+      "counterparty": "Client ou fournisseur",
+      "reference": "Référence du document",
+      "preparedBy": "Préparée par",
+      "lines": "Articles demandés",
+      "batch": "Lot {batch}",
+      "available": "En stock : {quantity}",
+      "note": "Note"
+    },
+    "decision": {
+      "pending": "En attente de validation par un responsable du dépôt.",
+      "pendingForYou": "Cette sortie attend votre décision : vérifiez le stock, puis validez ou refusez.",
+      "approved": "Validée par {name}, le {date} : c’est le bon",
+      "rejected": "Refusée par {name}, le {date}.",
+      "withdrawn": "Retirée le {date}.",
+      "redo": "Refaire la demande"
+    },
+    "actions": {
+      "approve": "Valider la sortie",
+      "reject": "Refuser",
+      "rejectTitle": "Refuser cette sortie ?",
+      "rejectDescription": "{name} verra votre motif et pourra refaire la demande.",
+      "rejectNote": "Motif",
+      "rejectNotePlaceholder": "Quantité à revoir, client non autorisé…",
+      "rejectNoteRequired": "Expliquez en quelques mots pourquoi.",
+      "approved": "Sortie validée : bon {number}.",
+      "seeVoucher": "Voir le bon",
+      "rejected": "Demande refusée.",
+      "shortages": "Stock insuffisant : les lignes en manque sont signalées.",
+      "withdraw": "Retirer la demande",
+      "withdrawTitle": "Retirer cette demande ?",
+      "withdrawDescription": "Elle ne sera pas validée ; vous pourrez la refaire.",
+      "withdrawn": "Demande retirée."
     }
   }
 }

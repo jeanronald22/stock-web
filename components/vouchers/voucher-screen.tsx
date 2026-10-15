@@ -122,6 +122,10 @@ export function VoucherScreen({ id }: { id: string }) {
       label: t("vouchers.detail.reference"),
       value: data.documentReference,
     },
+    data.preparedByName && {
+      label: t("vouchers.detail.preparedBy"),
+      value: data.preparedByName,
+    },
     { label: t("vouchers.detail.createdBy"), value: data.createdByName },
   ]
   const facts = candidates.filter((fact): fact is Fact => !!fact)

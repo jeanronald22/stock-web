@@ -26,7 +26,8 @@
     "customers": "Customers and sites",
     "inventory": "Stocktake",
     "newCustomerReturn": "Customer return",
-    "newSupplierReturn": "Supplier return"
+    "newSupplierReturn": "Supplier return",
+    "requests": "Requests to approve"
   },
   "common": {
     "retry": "Try again",
@@ -179,6 +180,14 @@
       "seeAll": "See all",
       "route": "{source} → {destination} · sent on {date}",
       "receive": "Receive"
+    },
+    "requests": {
+      "toDecide": "{count, plural, one {# issue to approve} other {# issues to approve}}",
+      "waiting": "{count, plural, one {# request waiting for approval} other {# requests waiting for approval}}",
+      "seeAll": "All requests",
+      "line": "{name} · {warehouse} · {count, plural, one {# item} other {# items}} · {date}",
+      "review": "Review",
+      "open": "Open"
     }
   },
   "menu": {
@@ -588,7 +597,8 @@
       "returnOf": "Return of voucher",
       "returns": "{count, plural, one {Return:} other {Returns:}}",
       "closesInventory": "Gaps of the stocktake:",
-      "seeInventory": "see the stocktake"
+      "seeInventory": "see the stocktake",
+      "preparedBy": "Prepared by"
     },
     "form": {
       "noWarehouse": "No active depot. Declare a depot first.",
@@ -716,7 +726,8 @@
       },
       "receivedOf": "{received} received of {expected}",
       "countedOf": "{counted} counted (book {book})",
-      "witnessedBy": "Witness (name and signature)"
+      "witnessedBy": "Witness (name and signature)",
+      "preparedBy": "Prepared by"
     },
     "menu": {
       "open": "Actions for voucher {number}",
@@ -1103,6 +1114,13 @@
       "title": "Invitation ready",
       "backToTeam": "Back to the team",
       "inviteAnother": "Invite someone else"
+    },
+    "rules": {
+      "title": "Work rules",
+      "issueApproval": "Storekeepers’ issues need approval",
+      "issueApprovalHint": "Issues, transfers and supplier returns prepared by a storekeeper wait for the approval of a general manager, manager or controller of the warehouse.",
+      "enabled": "Storekeepers’ issues will be approved.",
+      "disabled": "Storekeepers issue directly again."
     }
   },
   "invitation": {
@@ -1201,6 +1219,19 @@
         "when": "When a receipt in one of your warehouses does not match the delivery note.",
         "title": "Receipt {number}: discrepancy with the delivery note",
         "gap": "{name}: {received} received of {expected} announced"
+      },
+      "VOUCHER_PENDING": {
+        "name": "Issue to approve",
+        "when": "When a storekeeper prepares an issue in a warehouse whose issues you approve.",
+        "title": "{name} prepared an issue · {warehouse}",
+        "detail": "{count, plural, one {# item} other {# items}} to approve."
+      },
+      "VOUCHER_DECIDED": {
+        "name": "Decision on an issue",
+        "when": "When an issue you prepared is approved or rejected.",
+        "approved": "Your issue is approved: {number}",
+        "by": "By {name}.",
+        "rejected": "Your issue is rejected · {warehouse}"
       }
     }
   },
@@ -1384,6 +1415,103 @@
       "quantity": "Counted quantity ({unit})",
       "submit": "Save the count",
       "done": "{name} counted."
+    }
+  },
+  "requests": {
+    "title": "Requests",
+    "description": "Prepared issues waiting for a warehouse manager’s approval.",
+    "tabs": {
+      "label": "Vouchers and requests",
+      "vouchers": "Vouchers",
+      "requests": "To approve"
+    },
+    "statusFilter": "Request status",
+    "filters": {
+      "PENDING": "Pending",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "WITHDRAWN": "Withdrawn"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "WITHDRAWN": "Withdrawn"
+    },
+    "empty": {
+      "PENDING": {
+        "title": "Nothing pending",
+        "description": "All prepared issues have been handled."
+      },
+      "APPROVED": {
+        "title": "No approved request",
+        "description": "Approved issues become vouchers, in “Vouchers”."
+      },
+      "REJECTED": {
+        "title": "No rejected request",
+        "description": "A rejected request keeps its reason here."
+      },
+      "WITHDRAWN": {
+        "title": "No withdrawn request",
+        "description": "A request withdrawn by its author shows here."
+      }
+    },
+    "table": {
+      "request": "Request",
+      "warehouse": "Warehouse",
+      "preparedBy": "Prepared by",
+      "status": "Status"
+    },
+    "noCounterparty": "No customer",
+    "lineCount": "{count, plural, one {# item} other {# items}}",
+    "notFound": "Request not found",
+    "submit": "{count, plural, =0 {Send for approval} one {Send for approval · # item} other {Send for approval · # items}}",
+    "approvalHint": "A warehouse manager approves this issue before it leaves: stock only moves then.",
+    "sent": "Request sent: a warehouse manager will approve it.",
+    "see": "See the request",
+    "detail": {
+      "title": {
+        "ISSUE": "Issue to approve",
+        "TRANSFER_OUT": "Transfer to approve",
+        "SUPPLIER_RETURN": "Supplier return to approve"
+      },
+      "breadcrumb": "Request",
+      "preparedOn": "Prepared on {date}",
+      "warehouse": "Warehouse",
+      "from": "From",
+      "to": "To",
+      "counterparty": "Customer or supplier",
+      "reference": "Document reference",
+      "preparedBy": "Prepared by",
+      "lines": "Requested items",
+      "batch": "Batch {batch}",
+      "available": "In stock: {quantity}",
+      "note": "Note"
+    },
+    "decision": {
+      "pending": "Waiting for approval by a warehouse manager.",
+      "pendingForYou": "This issue awaits your decision: check stock, then approve or reject.",
+      "approved": "Approved by {name} on {date}: it is voucher",
+      "rejected": "Rejected by {name} on {date}.",
+      "withdrawn": "Withdrawn on {date}.",
+      "redo": "Redo the request"
+    },
+    "actions": {
+      "approve": "Approve the issue",
+      "reject": "Reject",
+      "rejectTitle": "Reject this issue?",
+      "rejectDescription": "{name} will see your reason and can redo the request.",
+      "rejectNote": "Reason",
+      "rejectNotePlaceholder": "Quantity to review, customer not allowed…",
+      "rejectNoteRequired": "Explain why in a few words.",
+      "approved": "Issue approved: voucher {number}.",
+      "seeVoucher": "See the voucher",
+      "rejected": "Request rejected.",
+      "shortages": "Not enough stock: short lines are flagged.",
+      "withdraw": "Withdraw the request",
+      "withdrawTitle": "Withdraw this request?",
+      "withdrawDescription": "It will not be approved; you can redo it.",
+      "withdrawn": "Request withdrawn."
     }
   }
 }

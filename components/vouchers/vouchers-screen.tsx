@@ -22,6 +22,7 @@ import { useMemo } from "react"
 
 import { ClearFilters } from "@/components/catalog/clear-filters"
 import { EmptyState } from "@/components/catalog/empty-state"
+import { VouchersTabs } from "@/components/requests/vouchers-tabs"
 import { SupplierFilter } from "@/components/catalog/supplier-filter"
 import { TablePagination } from "@/components/catalog/table-pagination"
 import { WarehouseFilter } from "@/components/catalog/warehouse-filter"
@@ -272,6 +273,7 @@ export function VouchersScreen() {
         description={t("description")}
         actions={empty ? undefined : <NewVoucherButtons />}
       />
+      <VouchersTabs />
       {empty ? (
         <EmptyState
           illustration={<DocumentScene />}

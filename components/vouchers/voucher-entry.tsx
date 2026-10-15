@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   ArrowRightLeftIcon,
+  ClipboardClockIcon,
   PlusIcon,
   Undo2Icon,
   WarehouseIcon,
@@ -36,10 +37,20 @@ import {
 } from "@/components/ui/select"
 import { Spinner } from "@/components/ui/spinner"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
+import { useStockAccess } from "@/components/workspace/stock-access"
 import { useWorkspace } from "@/components/workspace/workspace-context"
 import { CatalogStatus, type Warehouse } from "@/lib/api/stock"
 import { useTransferDestinations, useWarehouses } from "@/lib/api/stock-queries"
 import { useErrorMessage } from "@/lib/api/use-error-message"
+import { useCustomer } from "@/lib/api/customer-queries"
+import type { Customer } from "@/lib/api/customers"
+import {
+  useRequest,
+  useStockSettings,
+  useSubmitRequest,
+} from "@/lib/api/request-queries"
+import { StockPermission } from "@/lib/api/stock"
+import { approvalTypes, type VoucherRequest } from "@/lib/api/voucher-requests"
 import {
   useAddVoucherPhoto,
   useRecordVoucher,
@@ -66,6 +77,7 @@ import { ReasonField } from "./reason-field"
 import { SupplierField } from "./supplier-field"
 import { VoucherDetailsFields } from "./voucher-details-fields"
 import {
+  BASE_UNIT_CHOICE,
   newLine,
   todayOn,
   toVoucherInput,
@@ -82,13 +94,23 @@ export function VoucherEntry({ type }: { type: EntryType }) {
     type in returnOrigins
       ? (searchParams.get(EntryQueryParams.origin) ?? undefined)
       : undefined
+  // Refaire une demande refusée ou retirée (D33) : ses lignes, son dépôt et son tiers sont repris.
+  const fromRequestId = approvalTypes.has(type)
+    ? (searchParams.get(EntryQueryParams.fromRequest) ?? undefined)
+    : undefined
   const warehouses = useWarehouses(CatalogStatus.active, { fresh: true })
+  const settings = useStockSettings()
   const origin = useReturnable(originId)
+  const previous = useRequest(fromRequestId)
+  const previousCustomer = useCustomer(previous.data?.customerId ?? undefined)
   // Liste à jour avant de proposer un dépôt : un collègue vient peut-être d'en déclarer un.
   if (
     !warehouses.data ||
     !warehouses.isFetchedAfterMount ||
-    (originId && origin.isPending)
+    !settings.data ||
+    (originId && origin.isPending) ||
+    (fromRequestId && previous.isPending) ||
+    (previous.data?.customerId && previousCustomer.isPending)
   )
     return <Splash label={t("common.loading")} />
   if (originId && !origin.data) {
@@ -136,6 +158,9 @@ export function VoucherEntry({ type }: { type: EntryType }) {
       type={type}
       warehouses={warehouses.data}
       origin={origin.data}
+      previous={previous.data}
+      previousCustomer={previousCustomer.data}
+      issueApproval={settings.data.issueApproval}
     />
   )
 }
@@ -149,10 +174,17 @@ function VoucherEntryForm({
   type,
   warehouses,
   origin,
+  previous,
+  previousCustomer,
+  issueApproval,
 }: {
   type: EntryType
   warehouses: Warehouse[]
   origin: Returnable | undefined
+  previous: VoucherRequest | undefined
+  previousCustomer: Customer | undefined
+  /** Règle de l'entreprise (D33) : les sorties des magasiniers passent par une validation. */
+  issueApproval: boolean
 }) {
   const t = useTranslations()
   const router = useRouter()
@@ -171,6 +203,11 @@ function VoucherEntryForm({
   const addPhoto = useAddVoucherPhoto()
 
   const [defaultWarehouseId] = useState(() => {
+    if (
+      previous &&
+      warehouses.some((warehouse) => warehouse.id === previous.warehouse.id)
+    )
+      return previous.warehouse.id
     // Retour depuis un bon : son dépôt d'abord.
     if (
       origin &&
@@ -205,26 +242,53 @@ function VoucherEntryForm({
     ),
     defaultValues: {
       warehouseId: defaultWarehouseId,
-      destinationWarehouseId: "",
+      destinationWarehouseId: previous?.destination?.id ?? "",
       reason: "",
-      supplier: null,
-      customer: null,
-      originId: origin?.origin.id ?? "",
-      lines: (origin?.lines ?? [])
-        .filter((line) => line.remaining > 0)
-        .map((line) =>
-          newLine(line.item, {
+      supplier:
+        previous?.supplierId && previous.counterparty
+          ? { id: previous.supplierId, name: previous.counterparty }
+          : null,
+      customer: previousCustomer
+        ? {
+            id: previousCustomer.id,
+            name: previousCustomer.name,
+            kind: previousCustomer.kind,
+          }
+        : null,
+      originId: origin?.origin.id ?? previous?.origin?.id ?? "",
+      lines: previous
+        ? previous.lines.map((line) => ({
+            ...newLine(line.item),
+            quantity: String(line.enteredQuantity),
+            unit: line.packagingName ?? BASE_UNIT_CHOICE,
             batch: line.batch ?? "",
-            limit: line.remaining,
-            quantity: String(line.remaining),
-          })
-        ),
-      counterparty: "",
-      documentReference: "",
-      note: "",
+          }))
+        : (origin?.lines ?? [])
+            .filter((line) => line.remaining > 0)
+            .map((line) =>
+              newLine(line.item, {
+                batch: line.batch ?? "",
+                limit: line.remaining,
+                quantity: String(line.remaining),
+              })
+            ),
+      counterparty:
+        previous && !previous.supplierId && !previous.customerId
+          ? (previous.counterparty ?? "")
+          : "",
+      documentReference: previous?.documentReference ?? "",
+      note: previous?.note ?? "",
       occurredOn: today,
     },
   })
+  const { can, covers } = useStockAccess()
+  const warehouseId = useWatch({ control: form.control, name: "warehouseId" })
+  // Même règle que l'API (VoucherApprovals) : qui corrige le stock du dépôt sort sans demande.
+  const needsApproval =
+    issueApproval &&
+    approvalTypes.has(type) &&
+    !(can(StockPermission.correctStock) && covers(warehouseId))
+  const submitRequest = useSubmitRequest()
   const lineCount = useWatch({ control: form.control, name: "lines" }).length
   const supplier = useWatch({ control: form.control, name: "supplier" })
   const fromOrigin = !!origin
@@ -262,7 +326,39 @@ function VoucherEntryForm({
     return true
   }
 
+  /** Demande à valider (D33) : rien ne sort avant la décision ; l'écran se vide pour la suivante. */
+  const sendForApproval = async (values: VoucherFormValues) => {
+    try {
+      const request = await submitRequest.mutateAsync({
+        id: voucherId,
+        input: toVoucherInput(type, values, today),
+      })
+      rememberLastWarehouse(subject, organization.id, values.warehouseId)
+      toast.success(t("requests.sent"), {
+        action: {
+          label: t("requests.see"),
+          onClick: () => router.push(RecordRoutes.request(request.id)),
+        },
+      })
+      if (previous) return router.replace(RecordRoutes.request(request.id))
+      form.reset({
+        ...values,
+        supplier: null,
+        customer: null,
+        lines: [],
+        counterparty: "",
+        documentReference: "",
+        note: "",
+      })
+      setVoucherId(crypto.randomUUID())
+      searchRef.current?.focus()
+    } catch (error) {
+      toast.error(errorMessage(error))
+    }
+  }
+
   const submit = async (values: VoucherFormValues) => {
+    if (needsApproval) return sendForApproval(values)
     try {
       const voucher = await record.mutateAsync({
         id: voucherId,
@@ -312,12 +408,16 @@ function VoucherEntryForm({
       type="submit"
       size="xl"
       className="w-full"
-      disabled={record.isPending || addPhoto.isPending}
+      disabled={
+        record.isPending || addPhoto.isPending || submitRequest.isPending
+      }
     >
-      {(record.isPending || addPhoto.isPending) && (
+      {(record.isPending || addPhoto.isPending || submitRequest.isPending) && (
         <Spinner data-icon="inline-start" />
       )}
-      {t(`vouchers.entry.${type}.submit`, { count: lineCount })}
+      {needsApproval
+        ? t("requests.submit", { count: lineCount })
+        : t(`vouchers.entry.${type}.submit`, { count: lineCount })}
     </Button>
   )
 
@@ -442,6 +542,15 @@ function VoucherEntryForm({
             <DamagePhotosField files={photos} onChange={setPhotos} />
           )}
           <VoucherDetailsFields form={form} type={type} today={today} />
+          {needsApproval && (
+            <p className="flex gap-2 rounded-xl bg-warning-muted/60 p-3 text-sm text-warning-muted-foreground">
+              <ClipboardClockIcon
+                className="mt-0.5 size-4 shrink-0"
+                aria-hidden
+              />
+              {t("requests.approvalHint")}
+            </p>
+          )}
           <div className="hidden lg:block">{submitButton}</div>
         </aside>
 

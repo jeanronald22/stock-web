@@ -44,6 +44,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
+
+import { StockRules } from "./stock-rules"
 import { useWorkspace } from "@/components/workspace/workspace-context"
 import {
   InvitationState,
@@ -199,6 +201,8 @@ export function TeamScreen() {
           </section>
         )}
       </>
+
+      <StockRules />
 
       <Sheet open={!!shared} onOpenChange={(open) => !open && setShared(null)}>
         <SheetContent className="w-full overflow-y-auto sm:max-w-md">

@@ -16,6 +16,8 @@ export const Routes = {
   newTransfer: "/bons/transfert",
   newDamage: "/bons/casse",
   newAdjustment: "/bons/ajustement",
+  /** Demandes de sortie à valider (D33), onglet de « Bons ». */
+  requests: "/bons/demandes",
   /** Retours (D31) ; depuis un bon : ?origine=<id du bon>. */
   newCustomerReturn: "/bons/retour-client",
   newSupplierReturn: "/bons/retour-fournisseur",
@@ -45,6 +47,7 @@ export const RecordRoutes = {
   transferReceipt: (id: string) => `${Routes.vouchers}/${id}/receptionner`,
   supplier: (id: string) => `${Routes.suppliers}/${id}`,
   customer: (id: string) => `${Routes.customers}/${id}`,
+  request: (id: string) => `${Routes.requests}/${id}`,
   /** Inventaire d'un dépôt (D32), ouvert depuis « Stock ». */
   inventory: (id: string) => `${Routes.stock}/inventaires/${id}`,
   member: (userId: string) => `${Routes.team}/${userId}`,
@@ -56,6 +59,8 @@ export const RecordRoutes = {
 export const EntryQueryParams = {
   /** Retour : le bon dont il part. */
   origin: "origine",
+  /** Refaire une demande refusée ou retirée (D33) : ses lignes sont reprises. */
+  fromRequest: "demande",
 } as const
 
 /** Filtres des listes conservés dans l'adresse : un lien partagé ouvre la même vue. */
