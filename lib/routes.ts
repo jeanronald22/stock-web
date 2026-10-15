@@ -42,6 +42,8 @@ export const Routes = {
   /** Publique : ouverte depuis les écrans de connexion (Keycloak), avant toute connexion. */
   privacy: "/confidentialite",
   runtimeConfig: "/runtime-config",
+  /** Écran du service worker pour une page jamais ouverte sans réseau (D39). */
+  offline: "/hors-ligne",
 } as const
 
 export type AppRoute = (typeof Routes)[keyof typeof Routes]
@@ -74,6 +76,8 @@ export const EntryQueryParams = {
   origin: "origine",
   /** Refaire une demande refusée ou retirée (D33) : ses lignes sont reprises. */
   fromRequest: "demande",
+  /** Reprendre une saisie de la file hors ligne refusée à l'envoi (D39) : son identifiant. */
+  draft: "brouillon",
   /** Nouvel article depuis un code-barres inconnu (D34). */
   barcode: "codebarres",
   /** Bon commencé depuis la fiche d'un article : il est déjà sur le bon. */
@@ -83,6 +87,9 @@ export const EntryQueryParams = {
   supplier: "fournisseur",
   customer: "client",
 } as const
+
+/** Liste « À envoyer » (D39) sur l'écran des bons : l'en-tête y mène. */
+export const OUTBOX_ANCHOR = "a-envoyer"
 
 /** Étiquettes préremplies : des articles (identifiants séparés par des virgules), ou un bon reçu. */
 export const LabelQueryParams = {

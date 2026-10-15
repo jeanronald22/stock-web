@@ -87,12 +87,15 @@ export const privacyPolicyEn: PrivacyPolicyContent = {
           items: [
             "your sign-in tokens, so you do not have to sign in every time you open it;",
             "the business you chose, kept separately for each account;",
-            "the app’s language.",
+            "the app’s language;",
+            "a copy of what you have already viewed (stock, items, warehouses, vouchers, contacts, your name and email address), kept for seven days at most, so you can work without a network;",
+            "vouchers entered without a network, until they are sent;",
+            "the app’s own files, so it opens without a network.",
           ],
         },
         {
           kind: "paragraph",
-          text: "These are strictly necessary for the service. Kreskala uses no advertising cookies and no audience measurement tools. Signing out erases your sign-in tokens from the device.",
+          text: "These are strictly necessary for the service. Kreskala uses no advertising cookies and no audience measurement tools. Signing out erases from the device your sign-in tokens, the copy of your data, and any vouchers not yet sent (the app warns you first).",
         },
       ],
     },

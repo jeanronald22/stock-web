@@ -1,15 +1,10 @@
 "use client"
 
-import {
-  BellIcon,
-  ChevronsUpDownIcon,
-  LanguagesIcon,
-  LogOutIcon,
-} from "lucide-react"
+import { BellIcon, ChevronsUpDownIcon, LanguagesIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
-import { useAuth } from "react-oidc-context"
 
+import { SignOutItem } from "@/components/offline/sign-out-item"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -41,7 +36,6 @@ export function UserMenu() {
   const t = useTranslations()
   const locale = useLocale()
   const router = useRouter()
-  const auth = useAuth()
   const { user } = useWorkspace()
   const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ")
   const contact = user.email ?? user.phone ?? ""
@@ -109,10 +103,7 @@ export function UserMenu() {
               </DropdownMenuSubContent>
             </DropdownMenuSub>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => void auth.signoutRedirect()}>
-              <LogOutIcon />
-              {t("common.signOut")}
-            </DropdownMenuItem>
+            <SignOutItem />
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

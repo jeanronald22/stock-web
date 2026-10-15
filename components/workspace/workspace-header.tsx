@@ -4,6 +4,7 @@ import { CircleHelpIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { NotificationBell } from "@/components/notifications/notification-bell"
+import { ConnectivityStatus } from "@/components/offline/connectivity-status"
 import { useCurrentTour } from "@/components/tour/tour-provider"
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
@@ -24,6 +25,7 @@ export function WorkspaceHeader() {
       />
       <OrganizationSwitcher />
       <div className="flex-1" />
+      <ConnectivityStatus />
       <Button
         variant="ghost"
         size="sm"

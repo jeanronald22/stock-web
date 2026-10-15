@@ -32,12 +32,20 @@ import {
   VoucherLimits,
   VoucherType,
   type Voucher,
+  VoucherPaths,
+  type TransferReceiptInput,
 } from "@/lib/api/vouchers"
 import { useErrorMessage } from "@/lib/api/use-error-message"
 import { formatQuantityInput, parseQuantity } from "@/lib/forms/quantity"
-import { RecordRoutes, Routes } from "@/lib/routes"
+import { isOnline } from "@/lib/offline/connectivity"
+import { OutboxKind } from "@/lib/offline/outbox"
+import { isNetworkError, useEnqueue } from "@/lib/offline/use-enqueue"
+import { OUTBOX_ANCHOR, RecordRoutes, Routes } from "@/lib/routes"
 
 import { todayOn } from "./voucher-form-schema"
+
+/** Réception de transfert gardée hors ligne (D39) : de quoi rouvrir l'envoi si l'API la refuse. */
+export type TransferReceiptDraft = { transferId: string }
 
 export function TransferReceiptScreen({ id }: { id: string }) {
   const t = useTranslations()
@@ -95,6 +103,7 @@ function TransferReceiptForm({ transfer }: { transfer: Voucher }) {
   const batchLabel = useBatchLabel()
   const receive = useReceiveTransfer()
   const [receiptId] = useState(() => crypto.randomUUID())
+  const enqueue = useEnqueue()
   const [today] = useState(todayOn)
   const sentOn = transfer.occurredAt.slice(0, 10)
   const [received, setReceived] = useState(() =>
@@ -122,27 +131,60 @@ function TransferReceiptForm({ transfer }: { transfer: Voucher }) {
     event.preventDefault()
     setSubmitted(true)
     if (errors.some(Boolean) || dateError) return
+    const input = {
+      // Aujourd'hui : l'API date de l'enregistrement. Un autre jour : midi, heure locale.
+      occurredAt:
+        occurredOn === today
+          ? undefined
+          : new Date(`${occurredOn}T12:00:00`).toISOString(),
+      note: note.trim() || undefined,
+      lines: received.map((value) => ({
+        quantity: parseQuantity(value) ?? 0,
+      })),
+    }
+    if (!isOnline()) return queue(input)
     try {
       const voucher = await receive.mutateAsync({
         transferId: transfer.id,
         id: receiptId,
-        input: {
-          // Aujourd'hui : l'API date de l'enregistrement. Un autre jour : midi, heure locale.
-          occurredAt:
-            occurredOn === today
-              ? undefined
-              : new Date(`${occurredOn}T12:00:00`).toISOString(),
-          note: note.trim() || undefined,
-          lines: received.map((value) => ({
-            quantity: parseQuantity(value) ?? 0,
-          })),
-        },
+        input,
       })
       toast.success(t("vouchers.receive.done", { number: voucher.number }))
       router.replace(RecordRoutes.voucher(voucher.id))
     } catch (error) {
+      if (isNetworkError(error)) return queue(input)
       toast.error(errorMessage(error))
     }
+  }
+
+  /** Sans réseau (D39) : la réception attend sur le téléphone, datée de la saisie. */
+  const queue = async (input: TransferReceiptInput) => {
+    try {
+      await enqueue({
+        id: receiptId,
+        kind: OutboxKind.transferReceipt,
+        request: {
+          method: "POST",
+          path: VoucherPaths.transferReceipt(transfer.id),
+          body: {
+            id: receiptId,
+            ...input,
+            occurredAt: input.occurredAt ?? new Date().toISOString(),
+          },
+        },
+        summary: {
+          voucherType: VoucherType.transferIn,
+          warehouseName: transfer.destination?.name ?? transfer.warehouse.name,
+          lineCount: transfer.lines.length,
+          counterparty: transfer.number,
+        },
+        draft: { transferId: transfer.id } satisfies TransferReceiptDraft,
+      })
+    } catch {
+      return toast.error(t("offline.queueFailed"))
+    }
+    toast.success(t("offline.queued"), { description: t("offline.queuedHint") })
+    router.replace(`${Routes.vouchers}#${OUTBOX_ANCHOR}`)
   }
 
   const submitButton = (

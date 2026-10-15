@@ -5,6 +5,8 @@ import { useMemo } from "react"
 
 import { HomeRedirect } from "@/components/app/home-redirect"
 import { Splash } from "@/components/app/splash"
+import { CatalogSync } from "@/components/offline/catalog-sync"
+import { OutboxSync } from "@/components/offline/outbox-sync"
 import { TourProvider } from "@/components/tour/tour-provider"
 import { useMe } from "@/lib/api/platform-queries"
 import { useActiveOrganization } from "@/lib/organization/active-organization"
@@ -39,6 +41,9 @@ export function WorkspaceGate({ children }: { children: React.ReactNode }) {
 
   return (
     <WorkspaceContext value={workspace}>
+      {/* Ce qui a été saisi hors ligne part dès que le réseau revient (D39). */}
+      <OutboxSync />
+      <CatalogSync />
       <TourProvider>{children}</TourProvider>
     </WorkspaceContext>
   )

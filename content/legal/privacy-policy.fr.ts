@@ -94,12 +94,15 @@ export const privacyPolicyFr: PrivacyPolicyContent = {
           items: [
             "vos jetons de connexion, qui vous évitent de vous reconnecter à chaque ouverture ;",
             "l’entreprise que vous avez choisie, propre à chaque compte ;",
-            "la langue de l’application.",
+            "la langue de l’application ;",
+            "une copie de ce que vous avez déjà consulté (stock, articles, dépôts, bons, contacts, votre nom et votre adresse e-mail), gardée sept jours au plus, pour travailler sans réseau ;",
+            "les bons saisis sans réseau, le temps de les envoyer ;",
+            "les fichiers de l’application elle-même, pour qu’elle s’ouvre sans réseau.",
           ],
         },
         {
           kind: "paragraph",
-          text: "Ce sont des éléments strictement nécessaires au service. Kreskala n’utilise aucun cookie publicitaire ni outil de mesure d’audience. Se déconnecter efface vos jetons de connexion de l’appareil.",
+          text: "Ce sont des éléments strictement nécessaires au service. Kreskala n’utilise aucun cookie publicitaire ni outil de mesure d’audience. Se déconnecter efface de l’appareil vos jetons de connexion, la copie de vos données et les bons qui n’auraient pas encore été envoyés (l’application vous prévient avant).",
         },
       ],
     },

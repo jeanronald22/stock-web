@@ -1,4 +1,5 @@
 import type { NextConfig } from "next"
+import { withSerwist } from "@serwist/turbopack"
 import createNextIntlPlugin from "next-intl/plugin"
 
 const withNextIntl = createNextIntlPlugin()
@@ -14,4 +15,5 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default withNextIntl(nextConfig)
+// Serwist construit le service worker (D39) avec esbuild, gardé hors du bundle serveur.
+export default withSerwist(withNextIntl(nextConfig))
