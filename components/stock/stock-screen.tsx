@@ -1,6 +1,6 @@
 "use client"
 
-import { SearchIcon } from "lucide-react"
+import { ChartColumnIcon, SearchIcon } from "lucide-react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { useEffect, useMemo, useState } from "react"
@@ -21,7 +21,7 @@ import { useBatchLabel, useQuantityLabel } from "@/components/items/describe"
 import { ItemsTableSkeleton } from "@/components/items/items-table"
 import { usePageTour } from "@/components/tour/tour-provider"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   InputGroup,
   InputGroupAddon,
@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/table"
 import { NewVoucherButtons } from "@/components/vouchers/vouchers-screen"
 
+import { StockExportButton } from "./stock-export-button"
 import { StockGrid } from "./stock-grid"
 import { StockStateBadge } from "./stock-state-badge"
 import { InventoryBar } from "@/components/inventory/inventory-bar"
@@ -50,7 +51,7 @@ import {
   STOCK_ALERT_STATES,
   useListParams,
 } from "@/lib/list/use-list-params"
-import { RecordRoutes } from "@/lib/routes"
+import { RecordRoutes, Routes } from "@/lib/routes"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
 import { cn } from "@/lib/utils"
 
@@ -99,7 +100,20 @@ export function StockScreen() {
         description={t("description")}
         actions={<NewVoucherButtons />}
       />
-      <InventoryBar />
+      <InventoryBar
+        extra={
+          <>
+            <Link
+              href={Routes.reports}
+              className={buttonVariants({ variant: "ghost", size: "lg" })}
+            >
+              <ChartColumnIcon />
+              {t("reports")}
+            </Link>
+            {!empty && <StockExportButton search={search} />}
+          </>
+        }
+      />
       {empty ? (
         <EmptyState
           illustration={<ShelfScene />}

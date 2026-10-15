@@ -33,7 +33,10 @@
     "editSupplier": "Modifier le fournisseur",
     "editCustomer": "Modifier le client",
     "labels": "Étiquettes",
-    "importItems": "Importer des articles"
+    "importItems": "Importer des articles",
+    "reports": "Rapports · Mouvements",
+    "reportsDamage": "Rapports · Casse",
+    "reportsDiscrepancies": "Rapports · Écarts"
   },
   "common": {
     "retry": "Réessayer",
@@ -194,6 +197,57 @@
       "line": "{name} · {warehouse} · {count, plural, one {# article} other {# articles}} · {date}",
       "review": "Examiner",
       "open": "Voir"
+    },
+    "scope": "Vos dépôts : {warehouses}",
+    "activity": {
+      "title": "Activité de vos dépôts",
+      "controlTitle": "À vérifier",
+      "period": "Période",
+      "periods": {
+        "last7Days": "7 jours",
+        "last30Days": "30 jours"
+      },
+      "reports": "Rapports",
+      "chart": "Entrées et sorties",
+      "chartHint": "Nombre de bons par jour.",
+      "topIssued": "Les plus sortis",
+      "noIssue": "Aucune sortie sur la période.",
+      "damageByReason": "Casse par motif",
+      "details": "Détail",
+      "noDamage": "Aucune casse sur la période.",
+      "share": "{share} %",
+      "tiles": {
+        "inbound": "Entrées",
+        "outbound": "Sorties",
+        "vouchers": "bons",
+        "damage": "Casse",
+        "gaps": "Écarts à la réception",
+        "gapsHint": "livraisons non conformes",
+        "inventories": "Inventaires en cours",
+        "inventoriesHint": "à compter, puis clôturer"
+      }
+    },
+    "storekeeper": {
+      "actions": "Vos gestes du jour",
+      "receipt": {
+        "title": "Réception",
+        "description": "Ce qui arrive au dépôt"
+      },
+      "issue": {
+        "title": "Sortie",
+        "description": "Ce qui part vers un client ou un chantier"
+      },
+      "transfer": {
+        "title": "Transfert",
+        "description": "Vers un autre dépôt"
+      },
+      "today": "Aujourd’hui dans vos dépôts",
+      "todayVouchers": "Voir les bons du jour",
+      "counts": {
+        "inbound": "entrées",
+        "outbound": "sorties",
+        "damage": "casses"
+      }
     }
   },
   "menu": {
@@ -985,7 +1039,21 @@
       "OUT": "Rupture"
     },
     "alert": "{warehouse} : {quantity}, seuil {threshold}",
-    "batchCount": "{count, plural, one {# lot} other {# lots}}"
+    "batchCount": "{count, plural, one {# lot} other {# lots}}",
+    "reports": "Rapports",
+    "export": {
+      "file": "stock",
+      "sheet": "Stock",
+      "item": "Article",
+      "reference": "Référence",
+      "category": "Catégorie",
+      "unit": "Unité",
+      "quantity": "Quantité",
+      "packagings": "En conditionnements",
+      "state": "État",
+      "batches": "Lots",
+      "alerts": "Dépôts en alerte"
+    }
   },
   "suppliers": {
     "title": "Fournisseurs",
@@ -1826,7 +1894,8 @@
           "description": "Chromé",
           "stock": 15
         }
-      ]
+      ],
+      "templateSheet": "Articles"
     },
     "columns": {
       "title": "Vérifiez les colonnes",
@@ -1927,7 +1996,8 @@
       "batchRequired": "lot manquant pour un article suivi par lot",
       "quantityNotWhole": "quantité non entière pour un article compté à la pièce",
       "other": "refusé par l’application"
-    }
+    },
+    "templateSheet": "Articles"
   },
   "locations": {
     "title": "Emplacements",
@@ -1968,5 +2038,162 @@
       "create": "Créer « {code} » et y ranger l’article",
       "clear": "Retirer l’emplacement"
     }
+  },
+  "reports": {
+    "title": "Rapports",
+    "description": "Ce qui est entré, sorti, cassé, et où sont les écarts.",
+    "breadcrumb": "Stock",
+    "export": {
+      "item": "Article",
+      "reference": "Référence",
+      "unit": "Unité",
+      "received": "Réceptions",
+      "returnedByCustomers": "Retours clients",
+      "issued": "Sorties",
+      "returnedToSuppliers": "Retours fournisseurs",
+      "transferredIn": "Transferts reçus",
+      "transferredOut": "Transferts envoyés",
+      "damaged": "Casse",
+      "adjusted": "Ajustements",
+      "net": "Solde",
+      "day": "Jour",
+      "inboundVouchers": "Bons d’entrée",
+      "outboundVouchers": "Bons de sortie",
+      "occurrences": "Nombre de casses",
+      "reason": "Motif",
+      "vouchers": "Bons",
+      "lines": "Lignes",
+      "date": "Date",
+      "voucher": "Bon",
+      "supplier": "Fournisseur",
+      "expected": "Annoncé",
+      "gap": "Écart",
+      "receipts": "Réceptions",
+      "withDiscrepancy": "Avec écart",
+      "noSupplier": "Sans fournisseur",
+      "inventories": "Inventaires",
+      "files": {
+        "movements": "mouvements",
+        "damage": "casse",
+        "discrepancies": "ecarts"
+      },
+      "sheets": {
+        "byItem": "Par article",
+        "activity": "Activité",
+        "byReason": "Par motif",
+        "receiptGaps": "Réceptions",
+        "suppliers": "Fournisseurs",
+        "inventoryGaps": "Inventaires"
+      }
+    },
+    "tabs": {
+      "label": "Rapports",
+      "movements": "Mouvements",
+      "damage": "Casse",
+      "discrepancies": "Écarts"
+    },
+    "period": {
+      "label": "Période",
+      "presets": {
+        "last7Days": "7 derniers jours",
+        "last30Days": "30 derniers jours",
+        "thisMonth": "Ce mois-ci",
+        "lastMonth": "Le mois dernier",
+        "last3Months": "3 derniers mois"
+      },
+      "custom": "Dates libres",
+      "from": "Du",
+      "to": "au",
+      "fromLabel": "Début de la période",
+      "toLabel": "Fin de la période"
+    },
+    "activity": {
+      "inbound": "Entrées",
+      "outbound": "Sorties"
+    },
+    "stat": {
+      "change": "{change, number, ::+!} %"
+    },
+    "movements": {
+      "activity": "Activité",
+      "activityHint": "Bons d’entrée et de sortie, jour par jour.",
+      "byItem": "Par article",
+      "byItemHint": "{count, plural, =0 {Aucun article n’a bougé} one {# article a bougé} other {# articles ont bougé}}, chacun dans son unité.",
+      "search": "Rechercher un article",
+      "empty": "Rien n’a bougé sur cette période.",
+      "noMatch": "Aucun article ne correspond.",
+      "more": "Voir plus ({count, plural, one {# restant} other {# restants}})",
+      "compact": "Entrées {inbound} · Sorties {outbound} · Solde {net}",
+      "columns": {
+        "item": "Article",
+        "inbound": "Entrées",
+        "outbound": "Sorties",
+        "transfers": "Transferts",
+        "damage": "Casse",
+        "adjustments": "Ajustements",
+        "net": "Solde"
+      },
+      "totals": {
+        "inbound": "Entrées",
+        "outbound": "Sorties",
+        "damage": "Casse",
+        "adjustments": "Ajustements",
+        "vouchers": "bons"
+      }
+    },
+    "damage": {
+      "vouchers": "Bons de casse",
+      "lines": "Lignes cassées",
+      "items": "Articles touchés",
+      "empty": "Aucune casse sur cette période.",
+      "byReason": "Par motif",
+      "byReasonHint": "Nombre de lignes cassées pour chaque motif.",
+      "byItem": "Par article",
+      "byItemHint": "Les articles qui cassent le plus souvent en tête.",
+      "linesLabel": "Lignes",
+      "times": "{count, plural, one {# fois} other {# fois}}",
+      "columns": {
+        "item": "Article",
+        "quantity": "Quantité",
+        "times": "Casses"
+      }
+    },
+    "discrepancies": {
+      "totals": {
+        "receipts": "Réceptions avec écart",
+        "receiptsHint": "sur {total, plural, one {# réception} other {# réceptions}}",
+        "lines": "Lignes en écart",
+        "inventory": "Écarts d’inventaire",
+        "inventoryHint": "articles"
+      },
+      "suppliers": {
+        "title": "Par fournisseur",
+        "description": "Part des réceptions qui ne correspondaient pas au bon de livraison.",
+        "empty": "Aucune réception sur cette période.",
+        "none": "Sans fournisseur",
+        "count": "{withGap} sur {count, plural, one {# réception} other {# réceptions}}",
+        "share": "Part des réceptions avec écart, {name}",
+        "percent": "{share} %"
+      },
+      "receipts": {
+        "title": "Lignes reçues avec écart",
+        "description": "Annoncé sur le bon de livraison, et réellement reçu : de quoi faire recours au fournisseur.",
+        "empty": "Toutes les réceptions correspondaient au bon de livraison.",
+        "columns": {
+          "voucher": "Bon",
+          "item": "Article",
+          "expected": "Annoncé",
+          "received": "Reçu",
+          "gap": "Écart"
+        }
+      },
+      "inventory": {
+        "title": "Écarts d’inventaire",
+        "description": "Compté moins attendu, cumulé sur les inventaires clôturés de la période.",
+        "empty": "Aucun écart d’inventaire sur cette période.",
+        "inventories": "{count, plural, one {# inventaire} other {# inventaires}}"
+      }
+    },
+    "exportButton": "Exporter"
   }
 }

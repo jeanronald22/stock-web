@@ -33,7 +33,10 @@
     "editSupplier": "Edit supplier",
     "editCustomer": "Edit customer",
     "labels": "Labels",
-    "importItems": "Import items"
+    "importItems": "Import items",
+    "reports": "Reports · Movements",
+    "reportsDamage": "Reports · Damage",
+    "reportsDiscrepancies": "Reports · Discrepancies"
   },
   "common": {
     "retry": "Try again",
@@ -194,6 +197,57 @@
       "line": "{name} · {warehouse} · {count, plural, one {# item} other {# items}} · {date}",
       "review": "Review",
       "open": "Open"
+    },
+    "scope": "Your warehouses: {warehouses}",
+    "activity": {
+      "title": "Activity in your warehouses",
+      "controlTitle": "To check",
+      "period": "Period",
+      "periods": {
+        "last7Days": "7 days",
+        "last30Days": "30 days"
+      },
+      "reports": "Reports",
+      "chart": "Ins and outs",
+      "chartHint": "Number of vouchers per day.",
+      "topIssued": "Most issued",
+      "noIssue": "No issue over the period.",
+      "damageByReason": "Damage by reason",
+      "details": "Details",
+      "noDamage": "No damage over the period.",
+      "share": "{share}%",
+      "tiles": {
+        "inbound": "Ins",
+        "outbound": "Outs",
+        "vouchers": "vouchers",
+        "damage": "Damage",
+        "gaps": "Receipt discrepancies",
+        "gapsHint": "deliveries not as announced",
+        "inventories": "Counts in progress",
+        "inventoriesHint": "to count, then close"
+      }
+    },
+    "storekeeper": {
+      "actions": "Your tasks today",
+      "receipt": {
+        "title": "Receipt",
+        "description": "What arrives at the warehouse"
+      },
+      "issue": {
+        "title": "Issue",
+        "description": "What leaves for a customer or site"
+      },
+      "transfer": {
+        "title": "Transfer",
+        "description": "To another warehouse"
+      },
+      "today": "Today in your warehouses",
+      "todayVouchers": "See today’s vouchers",
+      "counts": {
+        "inbound": "ins",
+        "outbound": "outs",
+        "damage": "damage"
+      }
     }
   },
   "menu": {
@@ -985,7 +1039,21 @@
       "OUT": "Out of stock"
     },
     "alert": "{warehouse}: {quantity}, threshold {threshold}",
-    "batchCount": "{count, plural, one {# batch} other {# batches}}"
+    "batchCount": "{count, plural, one {# batch} other {# batches}}",
+    "reports": "Reports",
+    "export": {
+      "file": "stock",
+      "sheet": "Stock",
+      "item": "Item",
+      "reference": "Reference",
+      "category": "Category",
+      "unit": "Unit",
+      "quantity": "Quantity",
+      "packagings": "In packages",
+      "state": "Status",
+      "batches": "Batches",
+      "alerts": "Warehouses on alert"
+    }
   },
   "suppliers": {
     "title": "Suppliers",
@@ -1826,7 +1894,8 @@
           "description": "Chrome",
           "stock": 15
         }
-      ]
+      ],
+      "templateSheet": "Items"
     },
     "columns": {
       "title": "Check the columns",
@@ -1927,7 +1996,8 @@
       "batchRequired": "missing batch for a batch-tracked item",
       "quantityNotWhole": "non-whole quantity for an item counted in pieces",
       "other": "rejected by the app"
-    }
+    },
+    "templateSheet": "Items"
   },
   "locations": {
     "title": "Locations",
@@ -1968,5 +2038,162 @@
       "create": "Create “{code}” and store the item there",
       "clear": "Remove the location"
     }
+  },
+  "reports": {
+    "title": "Reports",
+    "description": "What came in, went out, broke, and where the discrepancies are.",
+    "breadcrumb": "Stock",
+    "export": {
+      "item": "Item",
+      "reference": "Reference",
+      "unit": "Unit",
+      "received": "Receipts",
+      "returnedByCustomers": "Customer returns",
+      "issued": "Issues",
+      "returnedToSuppliers": "Supplier returns",
+      "transferredIn": "Transfers in",
+      "transferredOut": "Transfers out",
+      "damaged": "Damage",
+      "adjusted": "Adjustments",
+      "net": "Net",
+      "day": "Day",
+      "inboundVouchers": "Inbound vouchers",
+      "outboundVouchers": "Outbound vouchers",
+      "occurrences": "Occurrences",
+      "reason": "Reason",
+      "vouchers": "Vouchers",
+      "lines": "Lines",
+      "date": "Date",
+      "voucher": "Voucher",
+      "supplier": "Supplier",
+      "expected": "Announced",
+      "gap": "Gap",
+      "receipts": "Receipts",
+      "withDiscrepancy": "With discrepancy",
+      "noSupplier": "No supplier",
+      "inventories": "Counts",
+      "files": {
+        "movements": "movements",
+        "damage": "damage",
+        "discrepancies": "discrepancies"
+      },
+      "sheets": {
+        "byItem": "By item",
+        "activity": "Activity",
+        "byReason": "By reason",
+        "receiptGaps": "Receipts",
+        "suppliers": "Suppliers",
+        "inventoryGaps": "Counts"
+      }
+    },
+    "tabs": {
+      "label": "Reports",
+      "movements": "Movements",
+      "damage": "Damage",
+      "discrepancies": "Discrepancies"
+    },
+    "period": {
+      "label": "Period",
+      "presets": {
+        "last7Days": "Last 7 days",
+        "last30Days": "Last 30 days",
+        "thisMonth": "This month",
+        "lastMonth": "Last month",
+        "last3Months": "Last 3 months"
+      },
+      "custom": "Custom dates",
+      "from": "From",
+      "to": "to",
+      "fromLabel": "Start of period",
+      "toLabel": "End of period"
+    },
+    "activity": {
+      "inbound": "Ins",
+      "outbound": "Outs"
+    },
+    "stat": {
+      "change": "{change, number, ::+!}%"
+    },
+    "movements": {
+      "activity": "Activity",
+      "activityHint": "Inbound and outbound vouchers, day by day.",
+      "byItem": "By item",
+      "byItemHint": "{count, plural, =0 {No item moved} one {# item moved} other {# items moved}}, each in its own unit.",
+      "search": "Search for an item",
+      "empty": "Nothing moved over this period.",
+      "noMatch": "No item matches.",
+      "more": "Show more ({count} left)",
+      "compact": "In {inbound} · Out {outbound} · Net {net}",
+      "columns": {
+        "item": "Item",
+        "inbound": "Ins",
+        "outbound": "Outs",
+        "transfers": "Transfers",
+        "damage": "Damage",
+        "adjustments": "Adjustments",
+        "net": "Net"
+      },
+      "totals": {
+        "inbound": "Ins",
+        "outbound": "Outs",
+        "damage": "Damage",
+        "adjustments": "Adjustments",
+        "vouchers": "vouchers"
+      }
+    },
+    "damage": {
+      "vouchers": "Damage vouchers",
+      "lines": "Damaged lines",
+      "items": "Items affected",
+      "empty": "No damage over this period.",
+      "byReason": "By reason",
+      "byReasonHint": "Number of damaged lines for each reason.",
+      "byItem": "By item",
+      "byItemHint": "Items that break most often first.",
+      "linesLabel": "Lines",
+      "times": "{count, plural, one {# time} other {# times}}",
+      "columns": {
+        "item": "Item",
+        "quantity": "Quantity",
+        "times": "Occurrences"
+      }
+    },
+    "discrepancies": {
+      "totals": {
+        "receipts": "Receipts with discrepancy",
+        "receiptsHint": "out of {total, plural, one {# receipt} other {# receipts}}",
+        "lines": "Lines with discrepancy",
+        "inventory": "Count discrepancies",
+        "inventoryHint": "items"
+      },
+      "suppliers": {
+        "title": "By supplier",
+        "description": "Share of receipts that did not match the delivery note.",
+        "empty": "No receipt over this period.",
+        "none": "No supplier",
+        "count": "{withGap} of {count, plural, one {# receipt} other {# receipts}}",
+        "share": "Share of receipts with discrepancy, {name}",
+        "percent": "{share}%"
+      },
+      "receipts": {
+        "title": "Lines received with discrepancy",
+        "description": "Announced on the delivery note, and actually received: what you need to claim from the supplier.",
+        "empty": "Every receipt matched its delivery note.",
+        "columns": {
+          "voucher": "Voucher",
+          "item": "Item",
+          "expected": "Announced",
+          "received": "Received",
+          "gap": "Gap"
+        }
+      },
+      "inventory": {
+        "title": "Count discrepancies",
+        "description": "Counted minus expected, summed over the counts closed in the period.",
+        "empty": "No count discrepancy over this period.",
+        "inventories": "{count, plural, one {# count} other {# counts}}"
+      }
+    },
+    "exportButton": "Export"
   }
 }

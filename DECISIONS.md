@@ -397,6 +397,23 @@ Modèle D10 : `location` (dépôt, code, libellé), `sku_warehouse.default_locat
 - **Où il apparaît** : fiche de l'article (par dépôt), lignes des bons qui font sortir du stock (sortie, transfert, retour fournisseur, casse) et leur PDF, pour préparer la commande ; feuille d'inventaire, triée par emplacement, pour compter allée par allée.
 - **Droit** : nouveau droit « emplacements de ses dépôts » (créer, modifier, archiver, ranger un article) pour le gérant, le manager et le contrôleur ; tout le monde les voit.
 
+## D38. Tableau de bord par rôle, rapports et exports (2026-10-15)
+
+Questionnaire : rapports au gérant (Q1) ; produits à écarts (Q33) ; casse, quand, quoi (Q34, Q36) ; recours au fournisseur quand la livraison ne correspond pas (Q12) ; Excel déjà utilisé (Q41).
+
+- **Accueil par rôle**, toujours limité aux dépôts de la personne :
+  - gérant et manager : l'activité de la période (réceptions, sorties, casse, écarts à la réception, articles en alerte), la courbe des entrées et des sorties jour par jour, les articles les plus sortis, la casse par motif, puis ce qui attend une décision (sorties à valider, transferts à réceptionner, alertes) ;
+  - contrôleur : ce qu'il doit vérifier (écarts à la réception, casse, inventaires en cours, alertes, sorties à valider) ;
+  - magasinier : ses gestes du jour (réception, sortie, transfert à réceptionner), ses demandes en attente ou refusées, l'activité du jour dans ses dépôts, les alertes.
+  Les premiers pas (dépôt, article, réception, équipe) ne s'affichent plus une fois faits.
+- **Quantités** : un total qui mélange des pièces et des kilos ne veut rien dire. Les chiffres d'ensemble comptent des bons et des lignes ; les quantités restent par article, dans son unité.
+- **Rapports**, sans entrée de menu : depuis l'accueil et « Stock ». Période (raccourcis 7 jours, ce mois, mois dernier, 3 mois, ou dates libres) et dépôts. Trois vues :
+  - mouvements par article : entrées, sorties, transferts, retours, casse, ajustements, solde ;
+  - casse par motif et par article ;
+  - écarts : réceptions qui ne correspondent pas au bon de livraison, par fournisseur et ligne par ligne (pour le recours), et écarts d'inventaire par article.
+- **Exports Excel** de chaque rapport et du stock (filtres en cours, toutes les pages), à ouvrir tels quels.
+- **Calcul** : en SQL sur le registre des mouvements et les bons, dans le fuseau des dépôts ; rien n'est stocké en plus.
+
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
 - [ ] Nom de la marque et nom du produit de stock (voir D7). Pistes : Kreskala, Kreskio, Tissero, NarvalWorks, FourmiLabs.

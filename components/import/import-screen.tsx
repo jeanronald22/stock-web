@@ -171,14 +171,16 @@ function ImportWizard({ warehouses }: { warehouses: Warehouse[] }) {
     rows: { row: PreparedRow; reason: string }[]
   ) =>
     chosen &&
-    void downloadWorkbook(
-      fileName,
-      [...chosen.table.headers, t("import.reasonColumn")],
-      rows.map(({ row, reason }) => [
-        ...chosen.table.headers.map((_, index) => row.cells[index] ?? null),
-        reason,
-      ])
-    )
+    void downloadWorkbook(fileName, [
+      {
+        name: t("import.templateSheet"),
+        headers: [...chosen.table.headers, t("import.reasonColumn")],
+        rows: rows.map(({ row, reason }) => [
+          ...chosen.table.headers.map((_, index) => row.cells[index] ?? null),
+          reason,
+        ]),
+      },
+    ])
 
   const go = (next: Step) => {
     setStepError(null)

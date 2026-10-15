@@ -9,18 +9,23 @@ import { buttonVariants } from "@/components/ui/button"
 import { InventoryStatus } from "@/lib/api/inventories"
 import { useInventories } from "@/lib/api/inventory-queries"
 import { RecordRoutes } from "@/lib/routes"
+import { cn } from "@/lib/utils"
 
 /** Un dépôt n'a qu'un inventaire ouvert à la fois : cette liste reste courte. */
 const OPEN_SHOWN = 20
 
 /** Inventaires en cours dans ses dépôts : on les reprend d'un geste, magasiniers compris. */
-export function OpenInventories() {
+export function OpenInventories({
+  className = "mt-6",
+}: {
+  className?: string
+}) {
   const t = useTranslations("inventory")
   const open = useInventories(InventoryStatus.open, 0, OPEN_SHOWN)
   const inventories = open.data?.items ?? []
   if (inventories.length === 0) return null
   return (
-    <ul className="mt-6 space-y-2" aria-label={t("openTitle")}>
+    <ul className={cn("space-y-2", className)} aria-label={t("openTitle")}>
       {inventories.map((inventory) => {
         const { lines, counted } = inventory.progress
         return (
