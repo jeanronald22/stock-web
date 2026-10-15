@@ -2,7 +2,7 @@
 
 import { ArrowRightIcon, ClipboardClockIcon } from "lucide-react"
 import Link from "next/link"
-import { useFormatter, useTranslations } from "next-intl"
+import { useFormatter, useNow, useTranslations } from "next-intl"
 
 import { buttonVariants } from "@/components/ui/button"
 import { useStockAccess } from "@/components/workspace/stock-access"
@@ -10,6 +10,8 @@ import { useRequests } from "@/lib/api/request-queries"
 import { StockPermission } from "@/lib/api/stock"
 import { RequestStatus } from "@/lib/api/voucher-requests"
 import { RecordRoutes, Routes } from "@/lib/routes"
+
+const MINUTE_MS = 60 * 1000
 
 /** Demandes lues pour l'accueil ; la liste complète est dans « Bons ». */
 const PREVIEW = 5
@@ -21,6 +23,7 @@ const PREVIEW = 5
 export function RequestsCard() {
   const t = useTranslations("dashboard.requests")
   const format = useFormatter()
+  const now = useNow({ updateInterval: MINUTE_MS })
   const decides = useStockAccess().can(StockPermission.correctStock)
   const pending = useRequests(RequestStatus.pending, 0, PREVIEW)
   const rows = pending.data?.items ?? []
@@ -67,7 +70,7 @@ export function RequestsCard() {
                   name: request.requestedByName,
                   warehouse: request.warehouse.name,
                   count: request.lineCount,
-                  date: format.relativeTime(new Date(request.requestedAt)),
+                  date: format.relativeTime(new Date(request.requestedAt), now),
                 })}
               </p>
             </div>

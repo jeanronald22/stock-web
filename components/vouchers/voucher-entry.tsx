@@ -48,6 +48,8 @@ import {
 import { isProblem, ProblemCode } from "@/lib/api/problem"
 import { useErrorMessage } from "@/lib/api/use-error-message"
 import { useCustomer } from "@/lib/api/customer-queries"
+import { useSupplier } from "@/lib/api/supplier-queries"
+import type { Supplier } from "@/lib/api/suppliers"
 import type { Customer } from "@/lib/api/customers"
 import {
   useRequest,
@@ -109,11 +111,23 @@ export function VoucherEntry({ type }: { type: EntryType }) {
   // Bon commencé depuis la fiche d'un article : il est déjà sur le bon.
   const startingItemId = searchParams.get(EntryQueryParams.item) ?? undefined
   const startingItem = useItem(startingItemId)
+  // Bon commencé depuis la fiche d'un dépôt, d'un fournisseur ou d'un client.
+  const startingWarehouseId =
+    searchParams.get(EntryQueryParams.warehouse) ?? undefined
+  const startingSupplierId = supplierTypes.has(type)
+    ? (searchParams.get(EntryQueryParams.supplier) ?? undefined)
+    : undefined
+  const startingCustomerId = customerTypes.has(type)
+    ? (searchParams.get(EntryQueryParams.customer) ?? undefined)
+    : undefined
+  const startingSupplier = useSupplier(startingSupplierId)
   const warehouses = useWarehouses(CatalogStatus.active, { fresh: true })
   const settings = useStockSettings()
   const origin = useReturnable(originId)
   const previous = useRequest(fromRequestId)
-  const previousCustomer = useCustomer(previous.data?.customerId ?? undefined)
+  const previousCustomer = useCustomer(
+    previous.data?.customerId ?? startingCustomerId
+  )
   // Liste à jour avant de proposer un dépôt : un collègue vient peut-être d'en déclarer un.
   if (
     !warehouses.data ||
@@ -122,6 +136,8 @@ export function VoucherEntry({ type }: { type: EntryType }) {
     (originId && origin.isPending) ||
     (fromRequestId && previous.isPending) ||
     (startingItemId && startingItem.isPending) ||
+    (startingSupplierId && startingSupplier.isPending) ||
+    (startingCustomerId && previousCustomer.isPending) ||
     (previous.data?.customerId && previousCustomer.isPending)
   )
     return <Splash label={t("common.loading")} />
@@ -173,6 +189,8 @@ export function VoucherEntry({ type }: { type: EntryType }) {
       previous={previous.data}
       previousCustomer={previousCustomer.data}
       startingItem={startingItem.data}
+      startingWarehouseId={startingWarehouseId}
+      startingSupplier={startingSupplier.data}
       issueApproval={settings.data.issueApproval}
     />
   )
@@ -190,6 +208,8 @@ function VoucherEntryForm({
   previous,
   previousCustomer,
   startingItem,
+  startingWarehouseId,
+  startingSupplier,
   issueApproval,
 }: {
   type: EntryType
@@ -199,6 +219,9 @@ function VoucherEntryForm({
   previousCustomer: Customer | undefined
   /** Article déjà sur le bon (bon commencé depuis sa fiche). */
   startingItem: Item | undefined
+  /** Dépôt et fournisseur du bon, quand il part de leur fiche (le client passe par previousCustomer). */
+  startingWarehouseId: string | undefined
+  startingSupplier: Supplier | undefined
   /** Règle de l'entreprise (D33) : les sorties des magasiniers passent par une validation. */
   issueApproval: boolean
 }) {
@@ -219,6 +242,11 @@ function VoucherEntryForm({
   const addPhoto = useAddVoucherPhoto()
 
   const [defaultWarehouseId] = useState(() => {
+    if (
+      startingWarehouseId &&
+      warehouses.some((warehouse) => warehouse.id === startingWarehouseId)
+    )
+      return startingWarehouseId
     if (
       previous &&
       warehouses.some((warehouse) => warehouse.id === previous.warehouse.id)
@@ -263,7 +291,9 @@ function VoucherEntryForm({
       supplier:
         previous?.supplierId && previous.counterparty
           ? { id: previous.supplierId, name: previous.counterparty }
-          : null,
+          : startingSupplier
+            ? { id: startingSupplier.id, name: startingSupplier.name }
+            : null,
       customer: previousCustomer
         ? {
             id: previousCustomer.id,

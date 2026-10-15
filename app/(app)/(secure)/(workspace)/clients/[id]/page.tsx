@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 
-import { CustomerScreen } from "@/components/customers/customer-screen"
+import { CustomerDetailScreen } from "@/components/customers/customer-detail-screen"
 import { PageTransition } from "@/components/motion/page-transition"
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -9,13 +9,11 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("customers") }
 }
 
-export default async function CustomerPage({
-  params,
-}: PageProps<"/clients/[id]">) {
+export default async function Page({ params }: PageProps<"/clients/[id]">) {
   const { id } = await params
   return (
     <PageTransition>
-      <CustomerScreen id={id} />
+      <CustomerDetailScreen id={id} />
     </PageTransition>
   )
 }

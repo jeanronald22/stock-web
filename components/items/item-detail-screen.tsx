@@ -1,42 +1,25 @@
 "use client"
 
 import {
-  ArchiveIcon,
-  ArchiveRestoreIcon,
   ArrowDownToLineIcon,
   ArrowUpFromLineIcon,
   BellIcon,
-  EllipsisVerticalIcon,
-  PencilIcon,
 } from "lucide-react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { useFormatter, useTranslations } from "next-intl"
-import { useMemo, useState, type ReactNode } from "react"
+import { useMemo, useState } from "react"
 import { toast } from "sonner"
 
 import { useCategoryTree } from "@/components/categories/use-category-tree"
-import { EmptyState } from "@/components/catalog/empty-state"
-import { SearchScene } from "@/components/illustrations/search-scene"
+import { RecordActions } from "@/components/records/record-actions"
+import { RecordFacts } from "@/components/records/record-facts"
+import {
+  RecordNotFound,
+  RecordSkeleton,
+} from "@/components/records/record-states"
+import { VoucherHistory } from "@/components/records/voucher-history"
 import { StockStateBadge } from "@/components/stock/stock-state-badge"
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
-import { Button, buttonVariants } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
 import {
   Sheet,
   SheetContent,
@@ -45,7 +28,6 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
-import { VoucherTypeBadge } from "@/components/vouchers/vouchers-screen"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import { useStockAccess } from "@/components/workspace/stock-access"
 import {
@@ -57,7 +39,7 @@ import {
 } from "@/lib/api/stock"
 import { useItem, useItemStatus, useWarehouses } from "@/lib/api/stock-queries"
 import { useErrorMessage } from "@/lib/api/use-error-message"
-import { useItemStock, useVouchersPage } from "@/lib/api/voucher-queries"
+import { useItemStock } from "@/lib/api/voucher-queries"
 import type { WarehouseStock } from "@/lib/api/vouchers"
 import {
   EntryQueryParams,
@@ -75,43 +57,21 @@ import {
 import { ItemThresholds } from "./item-thresholds"
 import { ItemThumb } from "./item-thumb"
 
-/** Derniers bons montrés sur la fiche ; la liste des bons montre le reste. */
-const LATEST_VOUCHERS = 8
-
 export function ItemDetailScreen({ id }: { id: string }) {
   const t = useTranslations("items")
   const item = useItem(id)
   // Relue à l'ouverture : un dépôt vient peut-être d'être ajouté.
   const warehouses = useWarehouses(CatalogStatus.active, { fresh: true })
 
-  if (item.isPending || warehouses.isPending) {
+  if (item.isPending || warehouses.isPending) return <RecordSkeleton />
+  if (!item.data)
     return (
-      <PageBody>
-        <Skeleton className="h-9 w-64" />
-        <Skeleton className="mt-8 h-40 rounded-2xl" />
-        <Skeleton className="mt-6 h-64 rounded-2xl" />
-      </PageBody>
+      <RecordNotFound
+        title={t("notFound")}
+        listLabel={t("title")}
+        listHref={Routes.items}
+      />
     )
-  }
-  if (!item.data) {
-    return (
-      <PageBody>
-        <EmptyState
-          illustration={<SearchScene />}
-          title={t("notFound")}
-          description=""
-          action={
-            <Link
-              href={Routes.items}
-              className={buttonVariants({ variant: "outline" })}
-            >
-              {t("title")}
-            </Link>
-          }
-        />
-      </PageBody>
-    )
-  }
   return <ItemDetails item={item.data} warehouses={warehouses.data ?? []} />
 }
 
@@ -202,16 +162,7 @@ function ItemDetails({
             {archived && (
               <Badge variant="secondary">{t("items.restore.badge")}</Badge>
             )}
-            {manages && (
-              <Link
-                href={RecordRoutes.itemEdit(item.id)}
-                className={buttonVariants()}
-              >
-                <PencilIcon />
-                {t("items.detail.edit")}
-              </Link>
-            )}
-            <ItemMenu item={item} manages={manages} archived={archived} />
+            <ItemActions item={item} manages={manages} archived={archived} />
           </>
         }
       />
@@ -223,7 +174,7 @@ function ItemDetails({
           <WarehouseStock item={item} lines={lines} warehouses={warehouses} />
           <ItemHistory item={item} />
         </div>
-        <ItemFacts item={item} />
+        <ItemFacts item={item} category={category?.path} />
       </div>
     </PageBody>
   )
@@ -388,152 +339,81 @@ function WarehouseStock({
 /** Ce qui a bougé : les derniers bons qui portent l'article, avec son mouvement sur chacun. */
 function ItemHistory({ item }: { item: Item }) {
   const t = useTranslations("items.detail")
-  const format = useFormatter()
   const quantityLabel = useQuantityLabel()
   const search = useMemo(() => ({ itemId: item.id }), [item.id])
-  const vouchers = useVouchersPage(search, 0, LATEST_VOUCHERS)
-  const rows = vouchers.data?.items ?? []
-  const total = vouchers.data?.total ?? 0
-
   return (
-    <section aria-labelledby="item-history-title">
-      <h2 id="item-history-title" className="mb-3 text-lg font-semibold">
-        {t("history")}
-      </h2>
-      {vouchers.isPending ? (
-        <Skeleton className="h-40 rounded-2xl" />
-      ) : rows.length === 0 ? (
-        <p className="rounded-xl border border-dashed p-5 text-sm text-muted-foreground">
-          {t("noHistory")}
-        </p>
-      ) : (
-        <>
-          <ul className="divide-y rounded-2xl border">
-            {rows.map((voucher) => {
-              const movement = voucher.itemMovement ?? 0
-              return (
-                <li key={voucher.id}>
-                  <Link
-                    href={RecordRoutes.voucher(voucher.id)}
-                    className="flex flex-wrap items-center gap-x-3 gap-y-1 p-3 transition-colors hover:bg-muted/40"
-                  >
-                    <span className="font-mono font-semibold">
-                      {voucher.number}
-                    </span>
-                    <VoucherTypeBadge type={voucher.type} />
-                    <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
-                      {format.dateTime(new Date(voucher.occurredAt), {
-                        dateStyle: "medium",
-                      })}
-                      {" · "}
-                      {voucher.warehouse.name}
-                      {voucher.counterparty && ` · ${voucher.counterparty}`}
-                    </span>
-                    <span
-                      className={cn(
-                        "font-semibold tabular-nums",
-                        movement > 0 && "text-success-muted-foreground"
-                      )}
-                    >
-                      {movement === 0
-                        ? t("unchanged")
-                        : `${movement > 0 ? "+" : "−"} ${quantityLabel(item.baseUnit, Math.abs(movement))}`}
-                    </span>
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
-          {total > rows.length && (
-            <Link
-              href={`${Routes.vouchers}?${ListQueryParams.item}=${item.id}`}
-              className={cn(buttonVariants({ variant: "outline" }), "mt-3")}
-            >
-              {t("allHistory", { count: total })}
-            </Link>
-          )}
-        </>
-      )}
-    </section>
+    <VoucherHistory
+      title={t("history")}
+      search={search}
+      empty={t("noHistory")}
+      allHref={`${Routes.vouchers}?${ListQueryParams.item}=${item.id}`}
+      detail={(voucher) => {
+        const movement = voucher.itemMovement ?? 0
+        return (
+          <span
+            className={cn(
+              "font-semibold tabular-nums",
+              movement > 0 && "text-success-muted-foreground"
+            )}
+          >
+            {movement === 0
+              ? t("unchanged")
+              : `${movement > 0 ? "+" : "−"} ${quantityLabel(item.baseUnit, Math.abs(movement))}`}
+          </span>
+        )
+      }}
+    />
   )
 }
 
 /** Ce qui décrit l'article : de quoi le reconnaître et le compter. */
-function ItemFacts({ item }: { item: Item }) {
+function ItemFacts({ item, category }: { item: Item; category?: string }) {
   const t = useTranslations()
   const quantityLabel = useQuantityLabel()
-  const facts: { label: string; value: ReactNode }[] = [
-    { label: t("items.detail.unit"), value: t(`units.${item.baseUnit}.label`) },
-    ...(item.packagings.length > 0
-      ? [
-          {
-            label: t("items.detail.packagings"),
-            value: (
-              <ul>
-                {item.packagings.map((packaging) => (
-                  <li key={packaging.name}>
-                    {packaging.name} ={" "}
-                    {quantityLabel(item.baseUnit, packaging.quantity)}
-                  </li>
-                ))}
-              </ul>
-            ),
-          },
-        ]
-      : []),
-    {
-      label: t("items.detail.batchTracking"),
-      value: item.batchTracking
-        ? t("items.detail.byBatch")
-        : t("items.detail.noBatch"),
-    },
-    ...(item.reference
-      ? [
-          {
-            label: t("items.detail.reference"),
-            value: <span className="font-mono">{item.reference}</span>,
-          },
-        ]
-      : []),
-    ...(item.barcode
-      ? [
-          {
-            label: t("items.detail.barcode"),
-            value: <span className="font-mono">{item.barcode}</span>,
-          },
-        ]
-      : []),
-  ]
   return (
-    <aside
-      aria-labelledby="item-facts-title"
-      className="rounded-2xl border p-5 lg:sticky lg:top-20"
-    >
-      <h2 id="item-facts-title" className="text-lg font-semibold">
-        {t("items.detail.facts")}
-      </h2>
-      <dl className="mt-3 space-y-3">
-        {facts.map((fact) => (
-          <div key={fact.label}>
-            <dt className="text-sm text-muted-foreground">{fact.label}</dt>
-            <dd className="mt-0.5 font-medium">{fact.value}</dd>
-          </div>
-        ))}
-      </dl>
-      {item.description && (
-        <p className="mt-4 border-t pt-4 text-sm whitespace-pre-line text-muted-foreground">
-          {item.description}
-        </p>
-      )}
-    </aside>
+    <RecordFacts
+      title={t("items.detail.facts")}
+      note={item.description}
+      facts={[
+        {
+          label: t("items.detail.unit"),
+          value: t(`units.${item.baseUnit}.label`),
+        },
+        item.packagings.length > 0 && {
+          label: t("items.detail.packagings"),
+          value: (
+            <ul>
+              {item.packagings.map((packaging) => (
+                <li key={packaging.name}>
+                  {packaging.name} ={" "}
+                  {quantityLabel(item.baseUnit, packaging.quantity)}
+                </li>
+              ))}
+            </ul>
+          ),
+        },
+        {
+          label: t("items.detail.batchTracking"),
+          value: item.batchTracking
+            ? t("items.detail.byBatch")
+            : t("items.detail.noBatch"),
+        },
+        category && { label: t("items.detail.category"), value: category },
+        item.reference && {
+          label: t("items.detail.reference"),
+          value: <span className="font-mono">{item.reference}</span>,
+        },
+        item.barcode && {
+          label: t("items.detail.barcode"),
+          value: <span className="font-mono">{item.barcode}</span>,
+        },
+      ]}
+    />
   )
 }
 
-/**
- * Le reste des actions : commencer un bon avec l'article déjà dessus, et, pour qui gère le
- * catalogue, archiver ou restaurer (avec confirmation pour archiver).
- */
-function ItemMenu({
+/** Modifier (catalogue), commencer un bon avec l'article, archiver ou restaurer. */
+function ItemActions({
   item,
   manages,
   archived,
@@ -543,13 +423,9 @@ function ItemMenu({
   archived: boolean
 }) {
   const t = useTranslations()
-  const router = useRouter()
   const errorMessage = useErrorMessage()
   const status = useItemStatus()
   const records = useStockAccess().can(StockPermission.recordMovements)
-  const [confirming, setConfirming] = useState(false)
-  if (!records && !manages) return null
-
   const withItem = (route: string) =>
     `${route}?${EntryQueryParams.item}=${item.id}`
   const changeStatus = (target: CatalogStatus) =>
@@ -565,77 +441,40 @@ function ItemMenu({
         onError: (error) => toast.error(errorMessage(error)),
       }
     )
-
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          render={
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label={t("items.detail.more")}
-            />
-          }
-        >
-          <EllipsisVerticalIcon />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-60">
-          {records && !archived && (
-            <>
-              <DropdownMenuItem
-                onClick={() => router.push(withItem(Routes.newReceipt))}
-              >
-                <ArrowDownToLineIcon />
-                {t("items.detail.receive")}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => router.push(withItem(Routes.newIssue))}
-              >
-                <ArrowUpFromLineIcon />
-                {t("items.detail.issue")}
-              </DropdownMenuItem>
-            </>
-          )}
-          {manages && records && !archived && <DropdownMenuSeparator />}
-          {manages &&
-            (archived ? (
-              <DropdownMenuItem
-                onClick={() => changeStatus(CatalogStatus.active)}
-              >
-                <ArchiveRestoreIcon />
-                {t("items.restore.action")}
-              </DropdownMenuItem>
-            ) : (
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={() => setConfirming(true)}
-              >
-                <ArchiveIcon />
-                {t("items.archive.action")}
-              </DropdownMenuItem>
-            ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <AlertDialog open={confirming} onOpenChange={setConfirming}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("items.archive.title")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("items.archive.description")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
-            <AlertDialogCancel
-              variant="destructive"
-              onClick={() => changeStatus(CatalogStatus.archived)}
-            >
-              {t("items.archive.action")}
-            </AlertDialogCancel>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+    <RecordActions
+      editHref={manages ? RecordRoutes.itemEdit(item.id) : undefined}
+      actions={
+        records && !archived
+          ? [
+              {
+                icon: ArrowDownToLineIcon,
+                label: t("items.detail.receive"),
+                href: withItem(Routes.newReceipt),
+              },
+              {
+                icon: ArrowUpFromLineIcon,
+                label: t("items.detail.issue"),
+                href: withItem(Routes.newIssue),
+              },
+            ]
+          : []
+      }
+      archive={
+        manages
+          ? {
+              archived,
+              labels: {
+                action: t("items.archive.action"),
+                title: t("items.archive.title"),
+                description: t("items.archive.description"),
+                restore: t("items.restore.action"),
+              },
+              onArchive: () => changeStatus(CatalogStatus.archived),
+              onRestore: () => changeStatus(CatalogStatus.active),
+            }
+          : undefined
+      }
+    />
   )
 }

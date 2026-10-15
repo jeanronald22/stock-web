@@ -28,7 +28,10 @@
     "newCustomerReturn": "Customer return",
     "newSupplierReturn": "Supplier return",
     "requests": "Requests to approve",
-    "editItem": "Edit item"
+    "editItem": "Edit item",
+    "editWarehouse": "Edit warehouse",
+    "editSupplier": "Edit supplier",
+    "editCustomer": "Edit customer"
   },
   "common": {
     "retry": "Try again",
@@ -404,6 +407,27 @@
         "title": "What is it called?",
         "description": "A name the whole team recognises, and how to find it."
       }
+    },
+    "detail": {
+      "editTitle": "Edit warehouse",
+      "summary": "At a glance",
+      "offered": "Items offered here",
+      "items": "{count, plural, one {item} other {items}}",
+      "toOrderCount": "{count, plural, one {# item to order} other {# items to order}}",
+      "nothingToOrder": "Nothing to order for now.",
+      "toOrder": "To order",
+      "threshold": "Threshold: {quantity}",
+      "allToOrder": "See the {count} items to order",
+      "history": "Latest movements",
+      "noHistory": "No voucher in this warehouse yet.",
+      "facts": "Details",
+      "kind": "Type",
+      "city": "City",
+      "address": "Address",
+      "receive": "New receipt in this warehouse",
+      "issue": "New issue from this warehouse",
+      "transfer": "Transfer from this warehouse",
+      "seeItems": "See its items"
     }
   },
   "items": {
@@ -536,7 +560,8 @@
       "barcode": "Barcode",
       "more": "More actions",
       "receive": "New receipt of this item",
-      "issue": "New issue of this item"
+      "issue": "New issue of this item",
+      "category": "Category"
     }
   },
   "pagination": {
@@ -1002,7 +1027,24 @@
       "done": "Supplier restored.",
       "badge": "Archived"
     },
-    "notFound": "This supplier does not exist or was removed."
+    "notFound": "This supplier does not exist or was removed.",
+    "detail": {
+      "editTitle": "Edit supplier",
+      "summary": "At a glance",
+      "lastReceipt": "Last delivery",
+      "receiptCount": "{count, plural, one {# receipt in all} other {# receipts in all}}",
+      "neverDelivered": "No receipt yet.",
+      "gaps": "{count, plural, one {# receipt with a discrepancy, to claim} other {# receipts with a discrepancy, to claim}}",
+      "history": "Receipts and returns",
+      "noHistory": "No voucher with this supplier yet.",
+      "catalog": "What they deliver",
+      "itemCount": "{count, plural, =0 {no items} one {# item} other {# items}}",
+      "noCatalog": "Their catalog fills up with each receipt; you can also adjust it in “Edit”.",
+      "moreItems": "and {count} more",
+      "facts": "Contact details",
+      "receive": "New receipt from this supplier",
+      "return": "Return to this supplier"
+    }
   },
   "categories": {
     "open": "Categories",
@@ -1354,6 +1396,16 @@
       "description": "What was delivered to them, and what they brought back.",
       "none": "No issues yet.",
       "all": "See the {count} vouchers"
+    },
+    "detail": {
+      "editTitle": "Edit customer",
+      "summary": "At a glance",
+      "lastIssue": "Last delivery",
+      "issueCount": "{count, plural, one {# issue in all} other {# issues in all}}",
+      "neverServed": "No issue yet.",
+      "facts": "Contact details",
+      "issue": "New issue for this customer",
+      "return": "Return from this customer"
     }
   },
   "inventory": {
@@ -1579,5 +1631,16 @@
   "batches": {
     "shade": "shade {shade}",
     "caliber": "cal. {caliber}"
+  },
+  "records": {
+    "edit": "Edit",
+    "more": "More actions",
+    "cancel": "Cancel",
+    "allVouchers": "See the {count} vouchers",
+    "contact": {
+      "call": "Call",
+      "whatsapp": "WhatsApp",
+      "email": "Email"
+    }
   }
 }

@@ -210,11 +210,16 @@ test("articles et dépôts : un article proposé dans un dépôt et pas dans l'a
     page.getByRole("link", { name: /Dépôt Bonabéri.*1 article/ })
   ).toBeVisible()
   await page.getByRole("link", { name: /Dépôt Bonabéri/ }).click()
-  await dismissTour(page, "Le type de lieu")
-  await expect(
-    page.getByRole("link", { name: "Carreau 60x60 beige" })
-  ).toBeVisible()
+  await expect(page.getByText("Articles proposés ici")).toBeVisible()
   await shot(page, testInfo, "06-fiche-depot")
+  await page.getByRole("link", { name: "Voir ses articles" }).click()
+  await expect(
+    page.getByRole("link", { name: /Carreau 60x60 beige/ })
+  ).toBeVisible()
+  // La modification du dépôt a son guide, qui s'ouvre seul puis se relance à la demande.
+  await page.goBack()
+  await page.getByRole("link", { name: "Modifier" }).click()
+  await dismissTour(page, "Le type de lieu")
   await page.getByRole("button", { name: "Guide" }).click()
   await dismissTour(page, "Le type de lieu")
 })
