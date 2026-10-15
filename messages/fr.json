@@ -31,7 +31,9 @@
     "editItem": "Modifier l’article",
     "editWarehouse": "Modifier le dépôt",
     "editSupplier": "Modifier le fournisseur",
-    "editCustomer": "Modifier le client"
+    "editCustomer": "Modifier le client",
+    "labels": "Étiquettes",
+    "importItems": "Importer des articles"
   },
   "common": {
     "retry": "Réessayer",
@@ -486,7 +488,16 @@
       "barcode": "Code-barres",
       "barcodePlaceholder": "6181234567890",
       "barcodeScan": "Scanner le code-barres",
-      "barcodeInvalid": "Chiffres et lettres sans espace, 64 au plus."
+      "barcodeInvalid": "Chiffres et lettres sans espace, 64 au plus.",
+      "defaults": {
+        "receipt": {
+          "label": "Réceptions saisies en"
+        },
+        "issue": {
+          "label": "Sorties et comptages en"
+        },
+        "hint": "Proposé d’office sur les bons ; chaque ligne reste modifiable."
+      }
     },
     "created": "Article créé.",
     "saved": "Article enregistré.",
@@ -561,7 +572,15 @@
       "more": "Autres actions",
       "receive": "Nouvelle réception de cet article",
       "issue": "Nouvelle sortie de cet article",
-      "category": "Catégorie"
+      "category": "Catégorie",
+      "defaultFor": "{directions, select, both {par défaut en réception et en sortie} receipt {par défaut en réception} other {par défaut en sortie}}",
+      "labels": "Imprimer des étiquettes"
+    },
+    "more": {
+      "label": "Options du catalogue",
+      "import": "Importer un fichier Excel",
+      "importFromFile": "Ou importer un fichier Excel",
+      "labels": "Imprimer des étiquettes"
     }
   },
   "pagination": {
@@ -667,7 +686,8 @@
       "returns": "{count, plural, one {Retour :} other {Retours :}}",
       "closesInventory": "Écarts de l’inventaire :",
       "seeInventory": "voir l’inventaire",
-      "preparedBy": "Préparé par"
+      "preparedBy": "Préparé par",
+      "labels": "Étiquettes"
     },
     "form": {
       "noWarehouse": "Aucun dépôt actif. Déclarez d’abord un dépôt.",
@@ -901,6 +921,10 @@
       "INVENTORY": {
         "label": "Inventaire",
         "hint": "Écarts constatés à la clôture d’un inventaire."
+      },
+      "OPENING": {
+        "label": "Stock de départ",
+        "hint": "Stock présent à l’import du catalogue."
       }
     },
     "photos": {
@@ -1647,6 +1671,261 @@
       "call": "Appeler",
       "whatsapp": "WhatsApp",
       "email": "E-mail"
+    }
+  },
+  "labels": {
+    "title": "Étiquettes",
+    "breadcrumb": "Articles",
+    "description": "Imprimez les codes-barres de vos articles, sur planche A4 ou en rouleau.",
+    "download": "Télécharger le PDF",
+    "print": "Imprimer",
+    "items": {
+      "title": "Articles à étiqueter",
+      "empty": {
+        "title": "Aucun article pour l’instant",
+        "description": "Cherchez un article par son nom ou sa référence, ou scannez-le, pour l’ajouter."
+      },
+      "noBarcode": "Sans code-barres",
+      "copies": "Nombre d’étiquettes pour {name}",
+      "less": "Une étiquette de moins pour {name}",
+      "more": "Une étiquette de plus pour {name}",
+      "remove": "Retirer {name}"
+    },
+    "missing": {
+      "title": "{count, plural, one {# article n’a pas de code-barres} other {# articles n’ont pas de code-barres}}",
+      "assignHint": "Ils ne seront pas imprimés tant qu’ils n’en ont pas. L’application peut leur en attribuer un.",
+      "askHint": "Ils ne seront pas imprimés. Demandez à la personne qui gère le catalogue de leur en attribuer un.",
+      "assign": "{count, plural, one {Lui attribuer un code} other {Leur attribuer un code}}",
+      "done": "{count, plural, one {Code attribué} other {Codes attribués}}"
+    },
+    "formats": {
+      "label": "Format",
+      "A4_24": {
+        "label": "Planche A4 · 24",
+        "hint": "Étiquettes de 70 × 37 mm"
+      },
+      "A4_40": {
+        "label": "Planche A4 · 40",
+        "hint": "Étiquettes de 52,5 × 29,7 mm"
+      },
+      "ROLL_50X30": {
+        "label": "Rouleau",
+        "hint": "Imprimante d’étiquettes, 50 × 30 mm"
+      }
+    },
+    "start": {
+      "title": "Commencer à l’étiquette {number}",
+      "hint": "Planche déjà entamée ? Touchez la première étiquette libre.",
+      "slot": "Commencer à l’étiquette {number}"
+    },
+    "summary": {
+      "labels": "{count, plural, =0 {Aucune étiquette} one {# étiquette} other {# étiquettes}}",
+      "sheets": "{count, plural, one {# planche} other {# planches}}",
+      "roll": "une par étiquette du rouleau",
+      "tooMany": "Pas plus de {max} étiquettes à la fois : imprimez en plusieurs fois."
+    }
+  },
+  "import": {
+    "eyebrow": "Importer des articles",
+    "reasonColumn": "Motif",
+    "denied": {
+      "title": "Réservé à la gestion du catalogue",
+      "description": "Seuls le gérant et les managers importent des articles.",
+      "back": "Retour aux articles"
+    },
+    "fields": {
+      "name": {
+        "label": "Nom",
+        "hint": "Carreau 60x60 beige"
+      },
+      "reference": {
+        "label": "Référence",
+        "hint": "CAR-6060"
+      },
+      "barcode": {
+        "label": "Code-barres",
+        "hint": "EAN, UPC, Code 128…"
+      },
+      "unit": {
+        "label": "Unité",
+        "hint": "Pièce, kg, litre, mètre, m², m³ ; pièce si vide"
+      },
+      "category": {
+        "label": "Catégorie",
+        "hint": "Carrelage > Sol ; créée si elle n’existe pas"
+      },
+      "packagingName": {
+        "label": "Conditionnement",
+        "hint": "Carton, sac, palette…"
+      },
+      "packagingQuantity": {
+        "label": "Quantité par conditionnement",
+        "hint": "4 (pièces par carton)"
+      },
+      "batchTracking": {
+        "label": "Suivi par lot",
+        "hint": "Oui ou Non ; non si vide"
+      },
+      "minQuantity": {
+        "label": "Seuil d'alerte",
+        "hint": "20 ; dans chaque dépôt choisi"
+      },
+      "description": {
+        "label": "Description",
+        "hint": "Texte libre"
+      },
+      "stock": {
+        "label": "Stock actuel",
+        "hint": "102 ; en unité, pas en cartons"
+      },
+      "batch": {
+        "label": "Lot",
+        "hint": "Lot du stock actuel, pour un article suivi par lot"
+      }
+    },
+    "file": {
+      "title": "Importez votre catalogue",
+      "description": "Un fichier Excel ou CSV, une ligne par article. Rien n’est enregistré avant que vous ayez tout vérifié.",
+      "drop": "Glissez votre fichier ici",
+      "formats": "Excel (.xlsx) ou CSV, jusqu’à 5 000 articles",
+      "choose": "Choisir un fichier",
+      "change": "Choisir un autre fichier",
+      "rows": "{count, plural, one {# ligne trouvée} other {# lignes trouvées}}",
+      "required": "Choisissez d’abord un fichier.",
+      "columnsTitle": "Les colonnes",
+      "columns": "Une ligne de titres, puis un article par ligne. Seule la colonne {required} est obligatoire ; les autres sont reconnues d’après leur titre.",
+      "downloadTemplate": "Télécharger le modèle Excel",
+      "errors": {
+        "unsupported": "Ce fichier n’est pas un classeur Excel (.xlsx) ni un CSV. Depuis Excel, choisissez « Enregistrer sous » puis « Classeur Excel ».",
+        "tooLarge": "Ce fichier dépasse 5 Mo. Découpez-le en plusieurs fichiers.",
+        "unreadable": "Ce fichier n’a pas pu être lu. Ouvrez-le dans Excel et enregistrez-le de nouveau.",
+        "empty": "Ce fichier ne contient pas d’articles : il faut une ligne de titres puis au moins une ligne.",
+        "tooManyRows": "Plus de {max} lignes : découpez le fichier et importez-le en plusieurs fois."
+      },
+      "examples": [
+        {
+          "name": "Carreau 60x60 beige",
+          "reference": "CAR-6060",
+          "unit": "Pièce",
+          "category": "Carrelage > Sol",
+          "packagingName": "Carton",
+          "packagingQuantity": 4,
+          "batchTracking": "Oui",
+          "minQuantity": 20,
+          "stock": 102,
+          "batch": "L2409"
+        },
+        {
+          "name": "Robinet mélangeur",
+          "reference": "ROB-MEL",
+          "unit": "Pièce",
+          "category": "Sanitaire",
+          "batchTracking": "Non",
+          "minQuantity": 2,
+          "description": "Chromé",
+          "stock": 15
+        }
+      ]
+    },
+    "columns": {
+      "title": "Vérifiez les colonnes",
+      "description": "Nous les avons reconnues d’après leurs titres. Corrigez si besoin ; une colonne non choisie n’est pas importée.",
+      "skip": "Ne pas importer",
+      "untitled": "Colonne {number}",
+      "required": "Obligatoire",
+      "example": "Dans le fichier : {value}",
+      "nameRequired": "Indiquez la colonne qui donne le nom des articles."
+    },
+    "warehouses": {
+      "title": "Où sont ces articles ?",
+      "description": "Ils seront proposés dans les dépôts cochés, avec le seuil d’alerte du fichier.",
+      "label": "Dépôts",
+      "required": "Cochez au moins un dépôt.",
+      "opening": {
+        "label": "Dépôt du stock actuel",
+        "placeholder": "Choisir le dépôt",
+        "hint": "Le stock du fichier y sera posé par un ajustement « stock de départ ».",
+        "unavailable": "Le stock du fichier ne sera pas importé : il faut le droit de corriger le stock d’un dépôt coché.",
+        "required": "Choisissez le dépôt où se trouve le stock du fichier."
+      }
+    },
+    "review": {
+      "title": "Tout est prêt ?",
+      "description": "Vérifiez avant d’importer. Les lignes à corriger sont laissées de côté.",
+      "submit": "{count, plural, =0 {Rien à importer} one {Importer # article} other {Importer # articles}}",
+      "nothing": "Aucune ligne n’est prête : corrigez le fichier, puis choisissez-le de nouveau.",
+      "stats": {
+        "ready": "Prêts à importer",
+        "blocked": "À corriger",
+        "categories": "Nouvelles catégories"
+      },
+      "opening": "{count, plural, one {# article arrive} other {# articles arrivent}} avec leur stock, posé dans {warehouse}.",
+      "line": "Ligne {line}",
+      "unnamed": "Sans nom",
+      "more": "{count, plural, one {et # autre ligne} other {et # autres lignes}}",
+      "blocked": {
+        "title": "Lignes à corriger",
+        "description": "Elles ne seront pas importées. Téléchargez-les, corrigez-les, puis importez-les à leur tour.",
+        "download": "Télécharger les lignes à corriger"
+      },
+      "preview": {
+        "title": "Aperçu : {shown} sur {total}",
+        "item": "Article",
+        "unit": "Unité",
+        "category": "Catégorie",
+        "packaging": "Conditionnement",
+        "stock": "Stock",
+        "batch": "Lot {batch}"
+      },
+      "problems": {
+        "nameMissing": "nom manquant",
+        "nameTooLong": "nom trop long (120 caractères au plus)",
+        "referenceTooLong": "référence trop longue (40 caractères au plus)",
+        "referenceDuplicate": "référence déjà vue plus haut dans le fichier",
+        "barcodeInvalid": "code-barres illisible (pas d’espace, 64 caractères au plus)",
+        "barcodeDuplicate": "code-barres déjà vu plus haut dans le fichier",
+        "unitUnknown": "unité inconnue (pièce, kg, litre, mètre, m², m³)",
+        "categoryTooLong": "nom de catégorie trop long",
+        "packagingIncomplete": "conditionnement sans sa quantité, ou l’inverse",
+        "packagingNameTooLong": "nom de conditionnement trop long (40 caractères au plus)",
+        "packagingQuantityInvalid": "quantité par conditionnement invalide (nombre entier de pièces)",
+        "batchTrackingInvalid": "suivi par lot : Oui ou Non",
+        "minQuantityInvalid": "seuil d’alerte illisible",
+        "descriptionTooLong": "description trop longue (500 caractères au plus)",
+        "stockInvalid": "stock illisible (nombre entier pour des pièces)",
+        "batchMissing": "lot manquant pour un article suivi par lot",
+        "batchTooLong": "lot trop long (60 caractères au plus)"
+      }
+    },
+    "result": {
+      "running": "Import en cours…",
+      "runningDescription": "Les articles sont enregistrés par paquets de 100.",
+      "interrupted": "Import interrompu",
+      "progressLabel": "Avancement de l’import",
+      "progress": "{done} sur {total} articles",
+      "keepOpen": "Gardez cette page ouverte jusqu’à la fin.",
+      "resumeHint": "Rien n’est perdu : reprenez quand le réseau revient, sans doublon.",
+      "resume": "Reprendre",
+      "title": "{count, plural, =0 {Aucun article importé} one {# article importé} other {# articles importés}}",
+      "description": "Ils sont dans le catalogue, avec leurs catégories et leurs conditionnements.",
+      "seeItems": "Voir les articles",
+      "opening": "{count, plural, one {Stock de départ enregistré par l’ajustement :} other {Stock de départ enregistré par # ajustements :}}",
+      "openingFailed": "Le stock de départ n’a pas été posé : {reasons}",
+      "line": "Ligne {line}",
+      "rejected": {
+        "title": "{count, plural, one {# ligne refusée} other {# lignes refusées}}",
+        "download": "Télécharger les lignes refusées"
+      }
+    },
+    "serverReasons": {
+      "referenceTaken": "un article du catalogue a déjà cette référence",
+      "barcodeTaken": "un article du catalogue a déjà ce code-barres",
+      "categoryUnavailable": "catégorie introuvable",
+      "warehouseUnavailable": "dépôt indisponible",
+      "accessDenied": "vous n’avez pas ce droit dans ce dépôt",
+      "batchRequired": "lot manquant pour un article suivi par lot",
+      "quantityNotWhole": "quantité non entière pour un article compté à la pièce",
+      "other": "refusé par l’application"
     }
   }
 }

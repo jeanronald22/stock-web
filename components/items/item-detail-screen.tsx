@@ -4,6 +4,7 @@ import {
   ArrowDownToLineIcon,
   ArrowUpFromLineIcon,
   BellIcon,
+  TagIcon,
 } from "lucide-react"
 import { useFormatter, useTranslations } from "next-intl"
 import { useMemo, useState } from "react"
@@ -32,6 +33,7 @@ import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import { useStockAccess } from "@/components/workspace/stock-access"
 import {
   CatalogStatus,
+  EntryDirection,
   StockPermission,
   StockState,
   type Item,
@@ -43,6 +45,7 @@ import { useItemStock } from "@/lib/api/voucher-queries"
 import type { WarehouseStock } from "@/lib/api/vouchers"
 import {
   EntryQueryParams,
+  LabelQueryParams,
   ListQueryParams,
   RecordRoutes,
   Routes,
@@ -387,6 +390,19 @@ function ItemFacts({ item, category }: { item: Item; category?: string }) {
                 <li key={packaging.name}>
                   {packaging.name} ={" "}
                   {quantityLabel(item.baseUnit, packaging.quantity)}
+                  {(packaging.defaultReceipt || packaging.defaultIssue) && (
+                    <span className="text-muted-foreground">
+                      {" · "}
+                      {t("items.detail.defaultFor", {
+                        directions:
+                          packaging.defaultReceipt && packaging.defaultIssue
+                            ? "both"
+                            : packaging.defaultReceipt
+                              ? EntryDirection.receipt
+                              : EntryDirection.issue,
+                      })}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -445,20 +461,29 @@ function ItemActions({
     <RecordActions
       editHref={manages ? RecordRoutes.itemEdit(item.id) : undefined}
       actions={
-        records && !archived
-          ? [
+        archived
+          ? []
+          : [
+              ...(records
+                ? [
+                    {
+                      icon: ArrowDownToLineIcon,
+                      label: t("items.detail.receive"),
+                      href: withItem(Routes.newReceipt),
+                    },
+                    {
+                      icon: ArrowUpFromLineIcon,
+                      label: t("items.detail.issue"),
+                      href: withItem(Routes.newIssue),
+                    },
+                  ]
+                : []),
               {
-                icon: ArrowDownToLineIcon,
-                label: t("items.detail.receive"),
-                href: withItem(Routes.newReceipt),
-              },
-              {
-                icon: ArrowUpFromLineIcon,
-                label: t("items.detail.issue"),
-                href: withItem(Routes.newIssue),
+                icon: TagIcon,
+                label: t("items.detail.labels"),
+                href: `${Routes.labels}?${LabelQueryParams.items}=${item.id}`,
               },
             ]
-          : []
       }
       archive={
         manages

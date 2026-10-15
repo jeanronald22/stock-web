@@ -139,6 +139,42 @@ export function useItem(id: string | undefined) {
   })
 }
 
+/**
+ * Étiquettes préremplies (D36) : les articles demandés, une étiquette chacun ; ou ceux d'un bon,
+ * une étiquette par conditionnement saisi (25 cartons reçus, 25 étiquettes).
+ */
+export function useLabelSeed(itemIds: string[], voucherId: string | null) {
+  const { stock, vouchers } = useApi()
+  const organizationId = useOrganizationId()
+  return useQuery({
+    queryKey: [
+      ...stockKeys.all(organizationId),
+      "label-seed",
+      itemIds,
+      voucherId,
+    ] as const,
+    queryFn: async () => {
+      const lines = voucherId
+        ? (await vouchers.voucher(voucherId)).lines.map((line) => ({
+            itemId: line.itemId,
+            copies: Math.ceil(line.enteredQuantity),
+          }))
+        : itemIds.map((itemId) => ({ itemId, copies: 1 }))
+      // Un article sur plusieurs lignes (plusieurs lots) : une seule ligne d'étiquettes.
+      const copies = new Map<string, number>()
+      lines.forEach((line) =>
+        copies.set(line.itemId, (copies.get(line.itemId) ?? 0) + line.copies)
+      )
+      const items = await Promise.all(
+        [...copies.keys()].map((id) => stock.item(id))
+      )
+      return items.map((item) => ({ item, copies: copies.get(item.id) ?? 1 }))
+    },
+    enabled: !!organizationId && (itemIds.length > 0 || !!voucherId),
+    staleTime: Infinity,
+  })
+}
+
 /** Après toute écriture, le catalogue de l'entreprise est relu : listes, compteurs et fiches restent cohérents. */
 function useStockMutation<Input, Output>(
   mutationFn: (input: Input) => Promise<Output>
@@ -268,6 +304,11 @@ export function useMyStockAccess() {
 }
 
 /** Seuil d'alerte d'un dépôt, réglable aussi par un contrôleur. */
+export function useAssignBarcodes() {
+  const { stock } = useApi()
+  return useStockMutation((itemIds: string[]) => stock.assignBarcodes(itemIds))
+}
+
 export function useChangeThreshold() {
   const { stock } = useApi()
   return useStockMutation(

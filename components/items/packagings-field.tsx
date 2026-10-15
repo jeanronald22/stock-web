@@ -8,32 +8,61 @@ import {
   type Control,
   type FieldErrors,
   type UseFormRegister,
+  type UseFormSetValue,
 } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
-import { FieldError } from "@/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field"
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
   InputGroupText,
 } from "@/components/ui/input-group"
-import { StockLimits, type BaseUnit } from "@/lib/api/stock"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { EntryDirection, StockLimits, type BaseUnit } from "@/lib/api/stock"
 import { parseQuantity } from "@/lib/forms/quantity"
 
 import { useQuantityLabel } from "./describe"
 import type { ItemFormValues } from "./item-form-schema"
 
-const EMPTY_PACKAGING = { name: "", quantity: "" }
+const EMPTY_PACKAGING = {
+  name: "",
+  quantity: "",
+  defaultReceipt: false,
+  defaultIssue: false,
+}
+
+/** Choix « unité de base » des réglages par défaut : aucun conditionnement n'est proposé d'office. */
+const BASE_UNIT_DEFAULT = ""
+
+/** Drapeau du formulaire qui porte le réglage de chaque sens. */
+const DEFAULT_FLAGS = {
+  [EntryDirection.receipt]: "defaultReceipt",
+  [EntryDirection.issue]: "defaultIssue",
+} as const
 
 /** Conditionnements de l'article, chacun avec son équivalent en unité de base. */
 export function PackagingsField({
   control,
   register,
+  setValue,
   errors,
 }: {
   control: Control<ItemFormValues>
   register: UseFormRegister<ItemFormValues>
+  setValue: UseFormSetValue<ItemFormValues>
   errors: FieldErrors<ItemFormValues>["packagings"]
 }) {
   const t = useTranslations("items.form")
@@ -112,6 +141,19 @@ export function PackagingsField({
           </div>
         )
       })}
+      <PackagingDefaults
+        baseUnit={baseUnit}
+        packagings={values ?? []}
+        onChange={(direction, index) =>
+          (values ?? []).forEach((_, row) =>
+            setValue(
+              `packagings.${row}.${DEFAULT_FLAGS[direction]}`,
+              row === index,
+              { shouldDirty: true }
+            )
+          )
+        }
+      />
       {fields.length < StockLimits.packagingsPerItem && (
         <Button
           type="button"
@@ -122,6 +164,75 @@ export function PackagingsField({
           {t("addPackaging")}
         </Button>
       )}
+    </div>
+  )
+}
+
+/**
+ * Conditionnement proposé d'office sur les bons (D36) : « Réceptions en Carton », « Sorties en
+ * Pièce ». Affiché dès qu'un conditionnement est nommé ; chaque ligne de bon reste modifiable.
+ */
+function PackagingDefaults({
+  baseUnit,
+  packagings,
+  onChange,
+}: {
+  baseUnit: BaseUnit
+  packagings: ItemFormValues["packagings"]
+  /** [index] : la ligne du conditionnement choisi, -1 pour l'unité de base. */
+  onChange: (direction: EntryDirection, index: number) => void
+}) {
+  const t = useTranslations("items.form.defaults")
+  const tUnits = useTranslations("units")
+  const named = packagings
+    .map((packaging, index) => ({ name: packaging.name.trim(), index }))
+    .filter((packaging) => packaging.name)
+  if (named.length === 0) return null
+  const choices = [
+    { value: BASE_UNIT_DEFAULT, label: tUnits(`${baseUnit}.label`) },
+    ...named.map((packaging) => ({
+      value: String(packaging.index),
+      label: packaging.name,
+    })),
+  ]
+  return (
+    <div className="rounded-xl bg-muted/50 p-3">
+      <div className="grid gap-3 sm:grid-cols-2">
+        {Object.values(EntryDirection).map((direction) => {
+          const chosen = packagings.findIndex(
+            (packaging) =>
+              packaging.name.trim() && packaging[DEFAULT_FLAGS[direction]]
+          )
+          const id = `packaging-default-${direction}`
+          return (
+            <Field key={direction}>
+              <FieldLabel htmlFor={id}>{t(`${direction}.label`)}</FieldLabel>
+              <Select
+                items={choices}
+                value={chosen < 0 ? BASE_UNIT_DEFAULT : String(chosen)}
+                onValueChange={(value) =>
+                  onChange(
+                    direction,
+                    value && value !== BASE_UNIT_DEFAULT ? Number(value) : -1
+                  )
+                }
+              >
+                <SelectTrigger id={id} className="w-full bg-background">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {choices.map((choice) => (
+                    <SelectItem key={choice.value} value={choice.value}>
+                      {choice.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+          )
+        })}
+      </div>
+      <FieldDescription className="mt-2">{t("hint")}</FieldDescription>
     </div>
   )
 }

@@ -304,17 +304,17 @@ function VoucherEntryForm({
       originId: origin?.origin.id ?? previous?.origin?.id ?? "",
       lines: previous
         ? previous.lines.map((line) => ({
-            ...newLine(line.item),
+            ...newLine(line.item, type),
             quantity: String(line.enteredQuantity),
             unit: line.packagingName ?? BASE_UNIT_CHOICE,
             batch: line.batch ?? "",
           }))
         : startingItem
-          ? [newLine(startingItem)]
+          ? [newLine(startingItem, type)]
           : (origin?.lines ?? [])
               .filter((line) => line.remaining > 0)
               .map((line) =>
-                newLine(line.item, {
+                newLine(line.item, type, {
                   batch: line.batch ?? "",
                   limit: line.remaining,
                   quantity: String(line.remaining),

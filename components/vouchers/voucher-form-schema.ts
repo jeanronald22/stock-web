@@ -1,6 +1,7 @@
 import { z } from "zod"
 
 import {
+  defaultPackaging,
   wholeQuantityUnits,
   type BaseUnit,
   type Item,
@@ -10,6 +11,7 @@ import type { CustomerKind } from "@/lib/api/customers"
 import {
   correctionTypes,
   customerTypes,
+  entryDirectionOf,
   OTHER_REASON,
   supplierTypes,
   VoucherLimits,
@@ -174,7 +176,15 @@ export function baseQuantity(
 /** Ligne proposée par un bon d'origine (retour) : lot imposé, plafond et quantité pré-remplie. */
 export type LinePreset = { batch: string; limit: number; quantity: string }
 
-export function newLine(item: Item, preset?: LinePreset): VoucherFormLine {
+/**
+ * Nouvelle ligne pour [item] sur un bon de [type] : dans le conditionnement proposé d'office pour
+ * ce sens (D36), sauf ligne reprise d'un bon d'origine, dont la quantité est en unité de base.
+ */
+export function newLine(
+  item: Item,
+  type: EntryType,
+  preset?: LinePreset
+): VoucherFormLine {
   return {
     key: crypto.randomUUID(),
     itemId: item.id,
@@ -186,7 +196,10 @@ export function newLine(item: Item, preset?: LinePreset): VoucherFormLine {
       packagings: item.packagings,
     },
     quantity: preset?.quantity ?? "",
-    unit: BASE_UNIT_CHOICE,
+    unit: preset
+      ? BASE_UNIT_CHOICE
+      : (defaultPackaging(item.packagings, entryDirectionOf(type))?.name ??
+        BASE_UNIT_CHOICE),
     batch: preset?.batch ?? "",
     expected: "",
     limit: preset?.limit ?? null,

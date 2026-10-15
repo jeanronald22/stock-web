@@ -8,6 +8,10 @@ export const Routes = {
   dashboard: "/accueil",
   items: "/articles",
   newItem: "/articles/nouveau",
+  /** Import du catalogue depuis un fichier (D36). */
+  importItems: "/articles/importer",
+  /** Étiquettes à imprimer (D36) ; préremplies par LabelQueryParams. */
+  labels: "/articles/etiquettes",
   warehouses: "/depots",
   newWarehouse: "/depots/nouveau",
   vouchers: "/bons",
@@ -74,6 +78,12 @@ export const EntryQueryParams = {
   warehouse: "depot",
   supplier: "fournisseur",
   customer: "client",
+} as const
+
+/** Étiquettes préremplies : des articles (identifiants séparés par des virgules), ou un bon reçu. */
+export const LabelQueryParams = {
+  items: "articles",
+  voucher: "bon",
 } as const
 
 /** Filtres des listes conservés dans l'adresse : un lien partagé ouvre la même vue. */

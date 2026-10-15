@@ -2,7 +2,7 @@
 
 import "driver.js/dist/driver.css"
 
-import { driver } from "driver.js"
+import { driver, type Driver } from "driver.js"
 import { useTranslations } from "next-intl"
 import {
   createContext,
@@ -10,6 +10,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react"
 import { useAuth } from "react-oidc-context"
@@ -34,6 +35,8 @@ type TourContextValue = {
   current: TourId | null
   setCurrent: (tour: TourId | null) => void
   start: (tour: TourId) => void
+  /** Ferme la visite affichée : son calque n'appartient pas à l'écran et lui survivrait. */
+  stop: () => void
 }
 
 const TourContext = createContext<TourContextValue | null>(null)
@@ -42,6 +45,12 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
   const t = useTranslations("tours")
   const subject = useAuth().user?.profile.sub
   const [current, setCurrent] = useState<TourId | null>(null)
+  const active = useRef<Driver | null>(null)
+
+  const stop = useCallback(() => {
+    active.current?.destroy()
+    active.current = null
+  }, [])
 
   const start = useCallback(
     (tour: TourId) => {
@@ -59,7 +68,8 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
         })
       if (steps.length === 0) return
       if (subject) markTourSeen(subject, tour)
-      driver({
+      active.current?.destroy()
+      active.current = driver({
         steps,
         popoverClass: POPOVER_CLASS,
         animate: !window.matchMedia(REDUCED_MOTION).matches,
@@ -70,14 +80,15 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
         doneBtnText: t("done"),
         stagePadding: 6,
         stageRadius: 12,
-      }).drive()
+      })
+      active.current.drive()
     },
     [t, subject]
   )
 
   const value = useMemo(
-    () => ({ current, setCurrent, start }),
-    [current, start]
+    () => ({ current, setCurrent, start, stop }),
+    [current, start, stop]
   )
   return <TourContext value={value}>{children}</TourContext>
 }
@@ -97,13 +108,17 @@ export function usePageTour(
   tour: TourId,
   { ready = true }: { ready?: boolean } = {}
 ) {
-  const { setCurrent, start } = useTourContext()
+  const { setCurrent, start, stop } = useTourContext()
   const subject = useAuth().user?.profile.sub
 
+  // En quittant l'écran, sa visite se ferme : elle n'a plus rien à montrer sur le suivant.
   useEffect(() => {
     setCurrent(tour)
-    return () => setCurrent(null)
-  }, [tour, setCurrent])
+    return () => {
+      setCurrent(null)
+      stop()
+    }
+  }, [tour, setCurrent, stop])
 
   useEffect(() => {
     if (!ready || !subject || hasSeenTour(subject, tour)) return

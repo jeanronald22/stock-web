@@ -1,6 +1,7 @@
 import type { ApiClient } from "./http"
 import { isProblem, ProblemCode } from "./problem"
 import {
+  EntryDirection,
   ItemImageRules,
   query,
   type BaseUnit,
@@ -109,10 +110,13 @@ export const voucherReasons = {
 } as const
 /** Clôture d'un inventaire (D32) : posé par l'API, jamais proposé à la saisie. */
 export const INVENTORY_REASON = "INVENTORY"
+/** Stock de départ d'un catalogue importé (D36) : posé par l'API, jamais proposé à la saisie. */
+export const OPENING_REASON = "OPENING"
 export type VoucherReason =
   | (typeof voucherReasons)[typeof VoucherType.damage][number]
   | (typeof voucherReasons)[typeof VoucherType.adjustment][number]
   | typeof INVENTORY_REASON
+  | typeof OPENING_REASON
 export const OTHER_REASON = "OTHER" satisfies VoucherReason
 
 /** Photos d'une casse (stock-api, StockLimits.PHOTOS_PER_VOUCHER). */
@@ -124,6 +128,11 @@ export const incomingTypes: ReadonlySet<VoucherType> = new Set([
   VoucherType.transferIn,
   VoucherType.customerReturn,
 ])
+
+/** Sens de saisie d'un bon (D36) : ses lignes partent du conditionnement proposé d'office dans ce sens. */
+export function entryDirectionOf(type: VoucherType): EntryDirection {
+  return incomingTypes.has(type) ? EntryDirection.receipt : EntryDirection.issue
+}
 
 /** Mouvement signé d'une ligne, en unité de base : l'ajustement va du théorique au compté. */
 export function movementOf(

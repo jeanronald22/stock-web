@@ -118,7 +118,7 @@ export function VoucherLinesField({
           warehouseId={incomingTypes.has(type) ? undefined : warehouseId}
           excludedIds={excluded}
           onPick={(item) =>
-            append(newLine(item), {
+            append(newLine(item, type), {
               focusName: `lines.${fields.length}.quantity`,
             })
           }
@@ -131,7 +131,7 @@ export function VoucherLinesField({
               )
             if (index < 0)
               return append(
-                { ...newLine(item), quantity: "1" },
+                { ...newLine(item, type), quantity: "1" },
                 { focusName: `lines.${fields.length}.quantity` }
               )
             const current =

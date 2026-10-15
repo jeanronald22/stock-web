@@ -289,6 +289,7 @@ export function ItemPackagingsFields({ form }: ItemFormProps) {
     <PackagingsField
       control={form.control}
       register={form.register}
+      setValue={form.setValue}
       errors={form.formState.errors.packagings}
     />
   )

@@ -7,6 +7,7 @@ import { AnchoredElements } from "@/components/motion/transitions"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Spinner } from "@/components/ui/spinner"
+import { cn } from "@/lib/utils"
 
 type StepShellProps = {
   step: number
@@ -23,6 +24,8 @@ type StepShellProps = {
   onExit: () => void
   /** « Quitter » par défaut ; « Annuler » pour une création qu'on abandonne. */
   exitLabel?: string
+  /** Contenu large (un tableau à vérifier) : toute la largeur, sans l'illustration à côté. */
+  wide?: boolean
   children: React.ReactNode
 }
 
@@ -43,6 +46,7 @@ export function StepShell({
   onBack,
   onExit,
   exitLabel,
+  wide = false,
   children,
 }: StepShellProps) {
   const t = useTranslations()
@@ -61,9 +65,19 @@ export function StepShell({
       </header>
 
       <main className="flex flex-1 justify-center px-4 pt-4 pb-36 sm:px-8 sm:pt-12 lg:items-center lg:pt-6">
-        <div className="grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
-          <div className="w-full max-w-lg justify-self-center lg:justify-self-start">
-            <div className="mb-6 w-40 lg:hidden">{illustration}</div>
+        <div
+          className={cn(
+            "grid w-full max-w-6xl items-center gap-8",
+            !wide && "lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16"
+          )}
+        >
+          <div
+            className={cn(
+              "w-full justify-self-center",
+              wide ? "min-w-0" : "max-w-lg lg:justify-self-start"
+            )}
+          >
+            {!wide && <div className="mb-6 w-40 lg:hidden">{illustration}</div>}
             <p className="text-sm font-semibold text-primary">{eyebrow}</p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
               {title}
@@ -73,12 +87,14 @@ export function StepShell({
             </p>
             <div className="mt-10">{children}</div>
           </div>
-          <div
-            aria-hidden
-            className="hidden aspect-[4/3] items-center justify-center rounded-3xl bg-success-muted p-12 lg:flex"
-          >
-            {illustration}
-          </div>
+          {!wide && (
+            <div
+              aria-hidden
+              className="hidden aspect-[4/3] items-center justify-center rounded-3xl bg-success-muted p-12 lg:flex"
+            >
+              {illustration}
+            </div>
+          )}
         </div>
       </main>
 
