@@ -42,3 +42,6 @@ next-env.d.ts
 # tests de bout en bout
 /test-results/
 /playwright-report/
+
+# lecteur de codes-barres copié de node_modules (scripts/copy-zxing.mjs)
+/public/vendor/zxing/

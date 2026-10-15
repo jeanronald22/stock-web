@@ -1,8 +1,7 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
-import { Suspense } from "react"
 
-import { ItemScreen } from "@/components/items/item-screen"
+import { ItemDetailScreen } from "@/components/items/item-detail-screen"
 import { PageTransition } from "@/components/motion/page-transition"
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -16,9 +15,7 @@ export default async function ItemPage({
   const { id } = await params
   return (
     <PageTransition>
-      <Suspense>
-        <ItemScreen id={id} />
-      </Suspense>
+      <ItemDetailScreen id={id} />
     </PageTransition>
   )
 }

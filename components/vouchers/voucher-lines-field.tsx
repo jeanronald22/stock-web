@@ -1,6 +1,6 @@
 "use client"
 
-import { XIcon } from "lucide-react"
+import { TriangleAlertIcon, XIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 import {
@@ -10,7 +10,7 @@ import {
   type UseFormReturn,
 } from "react-hook-form"
 
-import { useQuantityLabel } from "@/components/items/describe"
+import { useBatchLabel, useQuantityLabel } from "@/components/items/describe"
 import { ItemThumb } from "@/components/items/item-thumb"
 import { Button } from "@/components/ui/button"
 import {
@@ -29,8 +29,13 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { incomingTypes, VoucherType, type EntryType } from "@/lib/api/vouchers"
-import { useItemStock } from "@/lib/api/voucher-queries"
+import {
+  incomingTypes,
+  VoucherLimits,
+  VoucherType,
+  type EntryType,
+} from "@/lib/api/vouchers"
+import { useItemStock, useItemStocks } from "@/lib/api/voucher-queries"
 import { parseQuantity } from "@/lib/forms/quantity"
 
 import { ItemPicker } from "./item-picker"
@@ -117,6 +122,25 @@ export function VoucherLinesField({
               focusName: `lines.${fields.length}.quantity`,
             })
           }
+          onScan={(item) => {
+            // Scanné une nouvelle fois : une unité de plus sur sa ligne (sans lot, il n'y en a qu'une).
+            const index = form
+              .getValues("lines")
+              .findIndex(
+                (line) => line.itemId === item.id && !line.item.batchTracking
+              )
+            if (index < 0)
+              return append(
+                { ...newLine(item), quantity: "1" },
+                { focusName: `lines.${fields.length}.quantity` }
+              )
+            const current =
+              parseQuantity(form.getValues(`lines.${index}.quantity`)) ?? 0
+            form.setValue(`lines.${index}.quantity`, String(current + 1), {
+              shouldValidate: true,
+            })
+            form.setFocus(`lines.${index}.quantity`)
+          }}
         />
       )}
       <p
@@ -138,9 +162,72 @@ export function VoucherLinesField({
           />
         ))}
       </ul>
+      {!incomingTypes.has(type) && <MixedBatchesWarning lines={lines ?? []} />}
       {rootError && "message" in rootError && (
         <FieldError errors={[rootError as { message?: string }]} />
       )}
+    </div>
+  )
+}
+
+/**
+ * Deux nuances ou deux calibres d'un même article sur un bon qui sort (D35) : le client risque de le
+ * voir à la pose. Signalé, pas interdit (un lot peut manquer).
+ */
+function MixedBatchesWarning({ lines }: { lines: VoucherFormValues["lines"] }) {
+  const t = useTranslations("vouchers.form")
+  const tracked = lines.filter((line) => line.item.batchTracking && line.batch)
+  const itemIds = [...new Set(tracked.map((line) => line.itemId))]
+  const stocks = useItemStocks(itemIds)
+  const mixed = itemIds.flatMap((itemId, position) => {
+    const batches = (stocks[position]?.data?.warehouses ?? []).flatMap(
+      (entry) => entry.batches
+    )
+    const chosen = tracked
+      .filter((line) => line.itemId === itemId)
+      .map((line) => batches.find((batch) => batch.batch === line.batch))
+    const distinct = (values: (string | null | undefined)[]) =>
+      new Set(values.filter(Boolean).map((value) => value!.toLowerCase())).size
+    const shades = distinct(chosen.map((batch) => batch?.shade))
+    const calibers = distinct(chosen.map((batch) => batch?.caliber))
+    if (shades < 2 && calibers < 2) return []
+    const name = tracked.find((line) => line.itemId === itemId)!.item.name
+    return [{ itemId, name, shades, calibers }]
+  })
+  if (mixed.length === 0) return null
+  return (
+    <div
+      role="status"
+      className="flex gap-2 rounded-xl border border-warning/40 bg-warning-muted/60 p-3 text-sm text-warning-muted-foreground"
+    >
+      <TriangleAlertIcon className="mt-0.5 size-4 shrink-0" aria-hidden />
+      <div>
+        <ul className="space-y-1 font-medium">
+          {mixed.flatMap((entry) => [
+            ...(entry.shades > 1
+              ? [
+                  <li key={`${entry.itemId}-shade`}>
+                    {t("mixedShades", {
+                      name: entry.name,
+                      count: entry.shades,
+                    })}
+                  </li>,
+                ]
+              : []),
+            ...(entry.calibers > 1
+              ? [
+                  <li key={`${entry.itemId}-caliber`}>
+                    {t("mixedCalibers", {
+                      name: entry.name,
+                      count: entry.calibers,
+                    })}
+                  </li>,
+                ]
+              : []),
+          ])}
+        </ul>
+        <p className="mt-1">{t("mixedConsequence")}</p>
+      </div>
     </div>
   )
 }
@@ -156,12 +243,16 @@ function VoucherLineRow({
   LineNavigation & { index: number; compare: boolean; onRemove: () => void }) {
   const t = useTranslations()
   const quantityLabel = useQuantityLabel()
+  const batchLabel = useBatchLabel()
   const line = useWatch({ control: form.control, name: `lines.${index}` })
   const warehouseId = useWatch({ control: form.control, name: "warehouseId" })
   const errors = form.formState.errors.lines?.[index]
   // Le stock part du dépôt (sortie, transfert, casse) ou y est compté : le disponible s'affiche.
   const issue = !incomingTypes.has(type)
-  const stock = useItemStock(issue ? line.itemId : undefined)
+  // Réception par lot : le stock dit ce qu'on sait déjà des lots de l'article (nuance, calibre).
+  const stock = useItemStock(
+    issue || line.item.batchTracking ? line.itemId : undefined
+  )
   const inWarehouse = stock.data?.warehouses.find(
     (entry) => entry.warehouse.id === warehouseId
   )
@@ -189,8 +280,21 @@ function VoucherLineRow({
   ]
   const batchItems = (inWarehouse?.batches ?? []).map((batch) => ({
     value: batch.batch ?? "",
-    label: `${batch.batch} · ${quantityLabel(line.item.baseUnit, batch.quantity)}`,
+    label: `${batchLabel(batch.batch ?? "", batch)} · ${quantityLabel(line.item.baseUnit, batch.quantity)}`,
   }))
+  // Réception d'un lot déjà connu, dans n'importe quel dépôt : ses caractéristiques s'affichent.
+  const knownBatch =
+    type === VoucherType.receipt && line.batch.trim()
+      ? stock.data?.warehouses
+          .flatMap((entry) => entry.batches)
+          .find(
+            (batch) =>
+              batch.batch?.toLowerCase() === line.batch.trim().toLowerCase() &&
+              (batch.shade || batch.caliber)
+          )
+      : undefined
+  const traitsInput =
+    type === VoucherType.receipt && line.item.batchTracking && !knownBatch
   // Écart affiché avant validation : compté − théorique (ajustement), reçu − annoncé (réception).
   const available = line.item.batchTracking
     ? inWarehouse?.batches.find((batch) => batch.batch === line.batch)?.quantity
@@ -342,6 +446,27 @@ function VoucherLineRow({
           <XIcon />
         </Button>
       </div>
+      {traitsInput && (
+        <div className="mt-2 grid grid-cols-2 gap-2 md:max-w-sm">
+          {(["shade", "caliber"] as const).map((trait) => (
+            <InputGroupInputBox key={trait}>
+              <InputGroupInput
+                placeholder={t(`vouchers.form.${trait}`)}
+                aria-label={`${t(`vouchers.form.${trait}`)} · ${line.item.name}`}
+                maxLength={VoucherLimits.batchTrait}
+                {...form.register(`lines.${index}.${trait}`)}
+              />
+            </InputGroupInputBox>
+          ))}
+        </div>
+      )}
+      {knownBatch && (
+        <p className="mt-2 text-sm text-muted-foreground">
+          {t("vouchers.form.knownBatch", {
+            batch: batchLabel(knownBatch.batch ?? "", knownBatch),
+          })}
+        </p>
+      )}
       {compare && (
         <div className="mt-2 flex items-center gap-3 md:max-w-xs">
           <label

@@ -128,13 +128,14 @@ export function useItemCount() {
   })
 }
 
-export function useItem(id: string) {
+/** [id] absent : rien n'est chargé (article facultatif, comme un bon commencé sans article). */
+export function useItem(id: string | undefined) {
   const { stock } = useApi()
   const organizationId = useOrganizationId()
   return useQuery({
-    queryKey: stockKeys.item(organizationId, id),
-    queryFn: () => stock.item(id),
-    enabled: !!organizationId,
+    queryKey: stockKeys.item(organizationId, id ?? ""),
+    queryFn: () => stock.item(id!),
+    enabled: !!organizationId && !!id,
   })
 }
 

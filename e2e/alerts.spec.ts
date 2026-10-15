@@ -87,6 +87,7 @@ test("catégories, seuils d'alerte et filtres combinables", async ({
 
   // Le câble est rangé dans « Électricité › Câbles », avec un seuil de 200 m à Bonabéri.
   await page.getByRole("link", { name: /Câble rigide/ }).click()
+  await page.getByRole("link", { name: "Modifier" }).click()
   await dismissTour(page, "L’unité de comptage")
   await page.getByRole("combobox", { name: /Catégorie/ }).click()
   await page.getByRole("option", { name: "Câbles" }).click()

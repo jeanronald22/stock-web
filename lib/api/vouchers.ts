@@ -25,6 +25,7 @@ export const VoucherQueryParams = {
   warehouseId: "warehouseId",
   supplierId: "supplierId",
   customerId: "customerId",
+  itemId: "itemId",
   categoryId: "categoryId",
   stockState: "stockState",
   from: "from",
@@ -40,6 +41,8 @@ export const VoucherQueryParams = {
 /** Mêmes limites que l'API (stock-api, StockLimits). */
 export const VoucherLimits = {
   batch: 60,
+  /** Nuance ou calibre d'un lot (stock-api, StockLimits.BATCH_TRAIT). */
+  batchTrait: 20,
   counterparty: 120,
   documentReference: 60,
   note: 500,
@@ -172,6 +175,8 @@ export type VoucherSummary = {
   reason: VoucherReason | null
   /** Une ligne reçue autrement qu'attendu (bon de livraison, transfert). */
   hasDiscrepancy: boolean
+  /** Recherche par article : son mouvement net sur ce bon, en unité de base. */
+  itemMovement: number | null
 }
 
 export type VoucherLine = {
@@ -188,6 +193,9 @@ export type VoucherLine = {
   batch: string | null
   /** Attendu : envoyé (transfert), annoncé (bon de livraison) ou théorique (ajustement). */
   expectedQuantity: number | null
+  /** Caractéristiques du lot (D35). */
+  shade: string | null
+  caliber: string | null
 }
 
 export type Voucher = Omit<VoucherSummary, "lineCount"> & {
@@ -208,6 +216,8 @@ export type Voucher = Omit<VoucherSummary, "lineCount"> & {
   returns: VoucherRef[]
   /** Ajustement de clôture : l'inventaire dont il porte les écarts (D32). */
   inventoryId: string | null
+  /** Bon issu d'une demande (D33) : qui l'a préparé ; createdByName l'a validé. */
+  preparedByName: string | null
 }
 
 export type VoucherLineInput = {
@@ -218,6 +228,9 @@ export type VoucherLineInput = {
   batch?: string
   /** Réception : quantité annoncée par le bon de livraison, dans la même unité. */
   expectedQuantity?: number
+  /** Réception d'un article suivi par lot : nuance et calibre du lot (D35). */
+  shade?: string
+  caliber?: string
 }
 
 export type VoucherInput = {
@@ -281,7 +294,13 @@ export function shortagesOf(error: unknown): Shortage[] {
   return Array.isArray(shortages) ? (shortages as Shortage[]) : []
 }
 
-export type BatchQuantity = { batch: string | null; quantity: number }
+/** Stock d'un lot, avec sa nuance et son calibre (D35) pour choisir le bon. */
+export type BatchQuantity = {
+  batch: string | null
+  quantity: number
+  shade: string | null
+  caliber: string | null
+}
 /** Dépôt où l'article est au seuil ou en dessous, ou en rupture. */
 export type StockAlert = {
   warehouse: WarehouseRef
@@ -314,6 +333,8 @@ export type VoucherSearch = {
   warehouseIds?: string[]
   supplierId?: string
   customerId?: string
+  /** Bons qui portent cet article (historique de sa fiche). */
+  itemId?: string
   from?: string
   to?: string
   order?: VoucherOrder
@@ -343,6 +364,7 @@ export const voucherApi = (send: ApiClient) => {
             [VoucherQueryParams.warehouseId]: search.warehouseIds,
             [VoucherQueryParams.supplierId]: search.supplierId,
             [VoucherQueryParams.customerId]: search.customerId,
+            [VoucherQueryParams.itemId]: search.itemId,
             [VoucherQueryParams.from]: search.from,
             [VoucherQueryParams.to]: search.to,
             [VoucherQueryParams.order]: search.order,

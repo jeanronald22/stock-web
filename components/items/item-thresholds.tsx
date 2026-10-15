@@ -21,15 +21,18 @@ import { useErrorMessage } from "@/lib/api/use-error-message"
 import { formatQuantityInput, parseQuantity } from "@/lib/forms/quantity"
 
 /**
- * Seuils d'alerte des dépôts du rôle, pour qui règle les seuils sans gérer le catalogue
- * (contrôleur) : un enregistrement par dépôt, sans toucher au reste de la fiche.
+ * Seuils d'alerte des dépôts du rôle, pour qui règle les seuils (gérant, manager, contrôleur) : un
+ * enregistrement par dépôt, sans toucher au reste de la fiche.
  */
 export function ItemThresholds({
   item,
   warehouses,
+  bare = false,
 }: {
   item: Item
   warehouses: Warehouse[]
+  /** Sans titre de section : dans un panneau qui a déjà le sien. */
+  bare?: boolean
 }) {
   const t = useTranslations()
   const { covers } = useStockAccess()
@@ -41,22 +44,26 @@ export function ItemThresholds({
       covers(placement.warehouseId) && names.has(placement.warehouseId)
   )
   if (placements.length === 0) return null
+  const list = (
+    <ul className={bare ? "grid gap-3" : "grid gap-3 sm:grid-cols-2"}>
+      {placements.map((placement) => (
+        <ThresholdRow
+          key={placement.warehouseId}
+          item={item}
+          placement={placement}
+          warehouseName={names.get(placement.warehouseId) ?? ""}
+          unitLabel={t(`units.${item.baseUnit}.short`)}
+        />
+      ))}
+    </ul>
+  )
+  if (bare) return list
   return (
     <FormSection
       title={t("items.form.minQuantity")}
       description={t("items.form.minQuantityHint")}
     >
-      <ul className="grid gap-3 sm:grid-cols-2">
-        {placements.map((placement) => (
-          <ThresholdRow
-            key={placement.warehouseId}
-            item={item}
-            placement={placement}
-            warehouseName={names.get(placement.warehouseId) ?? ""}
-            unitLabel={t(`units.${item.baseUnit}.short`)}
-          />
-        ))}
-      </ul>
+      {list}
     </FormSection>
   )
 }

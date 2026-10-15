@@ -1,6 +1,11 @@
 "use client"
 
-import { BanIcon, ClipboardCheckIcon, SearchIcon } from "lucide-react"
+import {
+  BanIcon,
+  ClipboardCheckIcon,
+  ScanBarcodeIcon,
+  SearchIcon,
+} from "lucide-react"
 import Link from "next/link"
 import { useFormatter, useTranslations } from "next-intl"
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -19,9 +24,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button, buttonVariants } from "@/components/ui/button"
+import { BarcodeScanner } from "@/components/scan/barcode-scanner"
 import {
   InputGroup,
   InputGroupAddon,
+  InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group"
 import { Progress } from "@/components/ui/progress"
@@ -131,17 +138,48 @@ function InventorySheet({ inventory }: { inventory: Inventory }) {
   const rows = sheet.data?.items ?? []
   const total = sheet.data?.total ?? 0
   const listRef = useRef<HTMLUListElement>(null)
+  const [scanning, setScanning] = useState(false)
+  // Après un scan, la saisie va à la ligne trouvée dès qu'elle s'affiche.
+  const focusFound = useRef(false)
+  useEffect(() => {
+    if (!focusFound.current || sheet.isFetching) return
+    focusFound.current = false
+    listRef.current
+      ?.querySelector<HTMLInputElement>(`[${COUNT_INPUT_ATTRIBUTE}]`)
+      ?.focus()
+  }, [sheet.isFetching, sheet.data])
+
+  /** Scan (D34) : la recherche trouve l'article par son code exact, sur toute la feuille. */
+  const scanned = (code: string) => {
+    setTyped(code)
+    setText(code)
+    setFilter(ALL_LINES)
+    setPage(0)
+    focusFound.current = true
+  }
 
   /** Après un comptage, la saisie passe à la ligne suivante (ou reste en place si la ligne quitte le filtre). */
-  const focusAfter = (index: number) => {
-    const inputs = listRef.current?.querySelectorAll<HTMLInputElement>(
-      `[${COUNT_INPUT_ATTRIBUTE}]`
-    )
-    const next =
-      inputs?.[filter === SheetFilter.toCount ? index : index + 1] ??
-      inputs?.[0]
-    next?.focus()
-  }
+  const focusAfter = (index: number) =>
+    // Après le rendu (la ligne comptée a quitté la liste), et sans voler la saisie en cours :
+    // qui tape déjà le comptage suivant garde son curseur.
+    requestAnimationFrame(() => {
+      const list = listRef.current
+      const active = document.activeElement
+      if (
+        list &&
+        active instanceof HTMLElement &&
+        list.contains(active) &&
+        active.hasAttribute(COUNT_INPUT_ATTRIBUTE)
+      )
+        return
+      const inputs = list?.querySelectorAll<HTMLInputElement>(
+        `[${COUNT_INPUT_ATTRIBUTE}]`
+      )
+      const next =
+        inputs?.[filter === SheetFilter.toCount ? index : index + 1] ??
+        inputs?.[0]
+      next?.focus()
+    })
 
   return (
     <PageBody>
@@ -237,7 +275,20 @@ function InventorySheet({ inventory }: { inventory: Inventory }) {
           <InputGroupAddon>
             {sheet.isFetching ? <Spinner /> : <SearchIcon />}
           </InputGroupAddon>
+          <InputGroupAddon align="inline-end">
+            <InputGroupButton
+              aria-label={t("scan")}
+              onClick={() => setScanning(true)}
+            >
+              <ScanBarcodeIcon />
+            </InputGroupButton>
+          </InputGroupAddon>
         </InputGroup>
+        <BarcodeScanner
+          open={scanning}
+          onOpenChange={setScanning}
+          onDetected={scanned}
+        />
         <div
           role="tablist"
           aria-label={t("filterLabel")}
@@ -342,22 +393,23 @@ function CloseInventory({
   const close = useCloseInventory()
   const { lines, counted, gaps } = inventory.progress
 
-  const confirm = () =>
-    close.mutate(inventory.id, {
-      onSuccess: (closed) =>
-        toast.success(
-          closed.adjustment
-            ? t("done", { number: closed.adjustment.number })
-            : t("doneWithoutGap")
-        ),
-      onError: (error) => {
-        const moved = movedLinesOf(error)
-        if (moved.length > 0) {
-          onMoved(moved)
-          toast.error(t("moved", { count: moved.length }))
-        } else toast.error(errorMessage(error))
-      },
-    })
+  // mutateAsync : une fois clos, ce bouton disparaît ; le message doit partir quand même.
+  const confirm = async () => {
+    try {
+      const closed = await close.mutateAsync(inventory.id)
+      toast.success(
+        closed.adjustment
+          ? t("done", { number: closed.adjustment.number })
+          : t("doneWithoutGap")
+      )
+    } catch (error) {
+      const moved = movedLinesOf(error)
+      if (moved.length > 0) {
+        onMoved(moved)
+        toast.error(t("moved", { count: moved.length }))
+      } else toast.error(errorMessage(error))
+    }
+  }
 
   return (
     <AlertDialog>
@@ -376,7 +428,7 @@ function CloseInventory({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{tCommon("cancel")}</AlertDialogCancel>
-          <AlertDialogCancel onClick={confirm}>
+          <AlertDialogCancel onClick={() => void confirm()}>
             {t("confirm")}
           </AlertDialogCancel>
         </AlertDialogFooter>

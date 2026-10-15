@@ -16,6 +16,8 @@ export const Routes = {
   newTransfer: "/bons/transfert",
   newDamage: "/bons/casse",
   newAdjustment: "/bons/ajustement",
+  /** Demandes de sortie à valider (D33), onglet de « Bons ». */
+  requests: "/bons/demandes",
   /** Retours (D31) ; depuis un bon : ?origine=<id du bon>. */
   newCustomerReturn: "/bons/retour-client",
   newSupplierReturn: "/bons/retour-fournisseur",
@@ -39,12 +41,15 @@ export type AppRoute = (typeof Routes)[keyof typeof Routes]
 /** Fiches : adresse construite à partir de l'identifiant. */
 export const RecordRoutes = {
   item: (id: string) => `${Routes.items}/${id}`,
+  /** Modification de la fiche ; la fiche elle-même se consulte. */
+  itemEdit: (id: string) => `${Routes.items}/${id}/modifier`,
   warehouse: (id: string) => `${Routes.warehouses}/${id}`,
   voucher: (id: string) => `${Routes.vouchers}/${id}`,
   /** Réception d'un transfert au dépôt d'arrivée (D27). */
   transferReceipt: (id: string) => `${Routes.vouchers}/${id}/receptionner`,
   supplier: (id: string) => `${Routes.suppliers}/${id}`,
   customer: (id: string) => `${Routes.customers}/${id}`,
+  request: (id: string) => `${Routes.requests}/${id}`,
   /** Inventaire d'un dépôt (D32), ouvert depuis « Stock ». */
   inventory: (id: string) => `${Routes.stock}/inventaires/${id}`,
   member: (userId: string) => `${Routes.team}/${userId}`,
@@ -56,6 +61,12 @@ export const RecordRoutes = {
 export const EntryQueryParams = {
   /** Retour : le bon dont il part. */
   origin: "origine",
+  /** Refaire une demande refusée ou retirée (D33) : ses lignes sont reprises. */
+  fromRequest: "demande",
+  /** Nouvel article depuis un code-barres inconnu (D34). */
+  barcode: "codebarres",
+  /** Bon commencé depuis la fiche d'un article : il est déjà sur le bon. */
+  item: "article",
 } as const
 
 /** Filtres des listes conservés dans l'adresse : un lien partagé ouvre la même vue. */
@@ -70,6 +81,8 @@ export const ListQueryParams = {
   category: "categorie",
   supplier: "fournisseur",
   customer: "client",
+  /** Bons qui portent cet article. */
+  item: "article",
   /** Clients ou chantiers seulement (voir CustomerKindParam). */
   customerKind: "genre",
   stockAlert: "alerte",

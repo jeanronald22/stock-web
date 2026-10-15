@@ -31,14 +31,20 @@ export const StockQueryParams = {
   supplierId: "supplierId",
   categoryId: "categoryId",
   stockState: "stockState",
+  barcode: "barcode",
   page: "page",
   size: "size",
 } as const
+
+/** Code-barres valide : caractères imprimables sans espace, comme l'API (V21). */
+export const BARCODE_PATTERN = /^[!-~]{1,64}$/
 
 /** Mêmes limites que l'API (stock-api, StockLimits), pour signaler l'erreur avant l'envoi. */
 export const StockLimits = {
   name: 120,
   reference: 40,
+  /** Code-barres : caractères imprimables sans espace (stock-api, StockLimits.BARCODE_PATTERN). */
+  barcode: 64,
   city: 80,
   address: 200,
   description: 500,
@@ -176,6 +182,8 @@ export type Item = {
   id: string
   name: string
   reference: string | null
+  /** Code-barres (D34), scanné à la caméra ou à la douchette. */
+  barcode: string | null
   baseUnit: BaseUnit
   batchTracking: boolean
   description: string | null
@@ -193,6 +201,7 @@ export type Item = {
 export type ItemInput = {
   name: string
   reference?: string
+  barcode?: string
   baseUnit: BaseUnit
   batchTracking: boolean
   description?: string
@@ -211,6 +220,8 @@ export type ItemSearch = {
   /** Catalogue d'un fournisseur : seulement les articles qu'il livre. */
   supplierId?: string
   stockStates?: StockState[]
+  /** Scan : le code-barres exact. */
+  barcode?: string
 }
 
 /** Photos acceptées par l'API (stock-api, ImageFormat et ItemImageService). */
@@ -304,6 +315,7 @@ export const stockApi = (send: ApiClient) => {
             [StockQueryParams.categoryId]: search.categoryId,
             [StockQueryParams.supplierId]: search.supplierId,
             [StockQueryParams.stockState]: search.stockStates,
+            [StockQueryParams.barcode]: search.barcode,
             [StockQueryParams.page]: page,
             [StockQueryParams.size]: size,
           }),

@@ -8,9 +8,8 @@ import { FormActions, FormSection } from "@/components/catalog/form-section"
 import { usePageTour } from "@/components/tour/tour-provider"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
-import { ReadOnlyNotice } from "@/components/workspace/read-only-notice"
 import type { Item, Warehouse } from "@/lib/api/stock"
-import { Routes } from "@/lib/routes"
+import { RecordRoutes } from "@/lib/routes"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
 
 import {
@@ -22,18 +21,15 @@ import {
 import { ItemPhotoField } from "./item-photo"
 import { useItemForm } from "./use-item-form"
 
-/** Fiche d'un article : tout est modifiable sur un seul écran. */
+/** Modification d'un article : tout se change sur un seul écran, puis retour à sa fiche. */
 export function ItemForm({
   item,
   warehouses,
   onConflict,
-  readOnly = false,
 }: {
   item: Item
   warehouses: Warehouse[]
   onConflict: () => void
-  /** Consultation seule : le rôle Stock ne permet pas de modifier le catalogue. */
-  readOnly?: boolean
 }) {
   const t = useTranslations()
   const router = useRouter()
@@ -41,13 +37,14 @@ export function ItemForm({
   usePageTour("itemForm")
 
   const onSubmit = form.handleSubmit(async (values) => {
-    if (await submit(values)) toast.success(t("items.saved"))
+    if (!(await submit(values))) return
+    toast.success(t("items.saved"))
+    router.push(RecordRoutes.item(item.id))
   })
 
   return (
     <form onSubmit={(event) => void onSubmit(event)} noValidate>
-      {readOnly && <ReadOnlyNotice />}
-      <fieldset disabled={readOnly} className="contents">
+      <fieldset className="contents">
         <FormSection
           title={t("items.form.photo")}
           description={t("items.form.photoHint")}
@@ -78,22 +75,20 @@ export function ItemForm({
           <ItemWarehousesField form={form} warehouses={warehouses} />
         </FormSection>
       </fieldset>
-      {!readOnly && (
-        <FormActions>
-          <Button
-            type="button"
-            variant="ghost"
-            size="lg"
-            onClick={() => router.push(Routes.items)}
-          >
-            {t("common.cancel")}
-          </Button>
-          <Button type="submit" size="lg" disabled={pending}>
-            {pending && <Spinner />}
-            {t("common.save")}
-          </Button>
-        </FormActions>
-      )}
+      <FormActions>
+        <Button
+          type="button"
+          variant="ghost"
+          size="lg"
+          onClick={() => router.push(RecordRoutes.item(item.id))}
+        >
+          {t("common.cancel")}
+        </Button>
+        <Button type="submit" size="lg" disabled={pending}>
+          {pending && <Spinner />}
+          {t("common.save")}
+        </Button>
+      </FormActions>
     </form>
   )
 }

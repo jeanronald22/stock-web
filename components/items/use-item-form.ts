@@ -23,6 +23,7 @@ import {
 const FIELDS = [
   "name",
   "reference",
+  "barcode",
   "description",
   "baseUnit",
   "batchTracking",
@@ -38,7 +39,9 @@ const FIELDS = [
 export function useItemForm(
   item: Item | undefined,
   defaultWarehouseIds: string[],
-  onConflict?: () => void
+  onConflict?: () => void,
+  /** Nouvel article créé depuis un code inconnu scanné (D34). */
+  initialBarcode?: string
 ) {
   const t = useTranslations()
   const locale = useLocale()
@@ -56,9 +59,13 @@ export function useItemForm(
         positive: t("validation.positive"),
         wholeNumber: t("validation.wholeNumber"),
         duplicateName: t("validation.duplicateName"),
+        invalidBarcode: t("items.form.barcodeInvalid"),
       })
     ),
-    defaultValues: itemFormDefaults(item, defaultWarehouseIds, locale),
+    defaultValues: {
+      ...itemFormDefaults(item, defaultWarehouseIds, locale),
+      ...(initialBarcode && !item ? { barcode: initialBarcode } : {}),
+    },
   })
 
   const submit = async (values: ItemFormValues): Promise<boolean> => {
@@ -75,6 +82,7 @@ export function useItemForm(
         error,
         {
           [ProblemCode.itemReferenceTaken]: "reference",
+          [ProblemCode.itemBarcodeTaken]: "barcode",
           [ProblemCode.warehouseUnavailable]: "warehouses",
           [ProblemCode.categoryUnavailable]: "categoryId",
           [ProblemCode.baseUnitLocked]: "baseUnit",

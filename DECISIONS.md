@@ -233,7 +233,7 @@ Les articles, dépôts, fournisseurs et bons (D19 à D22) ont été construits s
 - **Lot A** (livré, voir D24) : catégories ; seuils par dépôt et alertes (stock bas, rupture) ; filtres combinables des articles et du stock ; filtres des bons (période, type, dépôt, fournisseur) et tri par date.
 - **Lot B** (transferts D27 ; casse, ajustements, écarts à la réception D28 ; clients et chantiers D30 ; retours D31) : tiers clients et chantiers ; bons de retour, de casse (motif, photo) et d'ajustement ; quantité annoncée sur le BL et écart à la réception ; transferts entre dépôts (en transit, quantité reçue à l'arrivée).
 - **Lot C** (en cours : inventaire D32) : inventaires (complet, tournant, double comptage, ajustement à la clôture) ; emplacements.
-- **Lot D** : produit et variantes, table des unités, lot avec nuance et calibre ; rôles Stock par dépôt ; synchronisation hors ligne ; IA (D5).
+- **Lot D** (en cours : sorties à valider D33, codes-barres D34, nuance et calibre D35) : produit et variantes, table des unités, lot avec nuance et calibre ; rôles Stock par dépôt ; synchronisation hors ligne ; IA (D5).
 
 **Règle** : toute nouvelle fonctionnalité part des tables de D10 ; un écart volontaire est noté ici avant le code.
 
@@ -345,6 +345,35 @@ Modèle D10 : `inventory_count` (complet ou tournant, périmètre par catégorie
 - **Double comptage** : une ligne en écart peut être recomptée (idéalement par une autre personne) ; le second comptage est retenu, le premier reste visible.
 - **Clôture** : un bon d'ajustement (motif « inventaire ») porte tous les écarts ; les articles non comptés ne bougent pas (l'écran le dit avant de clôturer). Sans écart, l'inventaire se clôt sans bon. Un inventaire peut aussi être annulé : rien ne bouge.
 - **Écran** : pas d'onglet en plus : on lance et reprend un inventaire depuis « Stock », qui signale les inventaires en cours ; l'historique s'y consulte aussi ; le bon d'ajustement renvoie à son inventaire.
+
+## D33. Sorties à valider (2026-10-14)
+
+Modèle D10 : statuts DRAFT · PENDING · VALIDATED · CANCELLED, `validated_by`, `validated_at`. Questionnaire : le magasinier signe seul le bon de sortie (Q14) ; de la marchandise sort parfois sans être notée (Q15).
+
+- **Registre intact** (D21) : un bon validé ne change jamais. Une sortie en attente n'est donc pas un bon : c'est une **demande** (`stock.voucher_request`, avec ses lignes), modifiable par personne, qui devient un bon à sa validation (même identifiant, idempotent). Écart assumé avec D10 : le statut vit sur la demande, pas sur le bon.
+- **Règle de l'entreprise** : « Les sorties des magasiniers passent par une validation », désactivée par défaut, réglée dans « Équipe » par le propriétaire et les administrateurs. Elle vaut pour ce qui fait sortir du stock à la main : sortie, envoi de transfert, retour fournisseur. Casse et ajustement sont déjà réservés aux correcteurs.
+- **Qui valide** : ceux qui corrigent le stock du dépôt (gérant, manager, contrôleur). Leurs propres sorties ne passent pas par une demande.
+- **Validation** : la sortie part au moment de la validation (date et stock de cet instant ; un manque est signalé ligne par ligne). Le bon garde les deux signatures : préparé par le magasinier, validé par le responsable (écran et PDF).
+- **Refus** avec un motif obligatoire ; **retrait** par la personne qui a préparé, tant que rien n'est décidé. Une demande refusée se reprend en un geste (« Refaire la demande »).
+- **Avis (D26)** : « sortie à valider » aux valideurs du dépôt ; « sortie validée » ou « refusée » à la personne qui l'a préparée.
+- **Écrans** : pas d'onglet : dans « Bons », un filtre « À valider » avec son nombre, une fiche de demande ; l'accueil annonce les demandes en attente. À la saisie, le bouton dit « Envoyer pour validation ».
+
+## D34. Codes-barres et scan (2026-10-14)
+
+Modèle D10 : `sku.barcode`. Questionnaire : peu de codes-barres aujourd'hui (Q26) mais le scan est demandé (Q42, Q44 « inventaire par scan »).
+
+- **Code-barres de l'article** : facultatif, unique dans l'entreprise ; plusieurs formats (EAN-13, EAN-8, UPC, Code 128, QR).
+- **Scan** par la caméra du téléphone (API du navigateur, avec repli pour ceux qui ne l'ont pas ; module chargé depuis l'application elle-même, pas d'un service tiers) ou par une douchette (elle tape le code puis Entrée).
+- **Où** : fiche article (saisir le code en le scannant), saisie des bons (scanner ajoute l'article, ou augmente sa quantité s'il est déjà sur le bon), inventaire (scanner amène à la ligne de l'article). Un code inconnu le dit clairement et propose de l'associer à un article (si on gère le catalogue).
+
+## D35. Lots : nuance et calibre (2026-10-14)
+
+Modèle D10 : `lot` (code, nuance, calibre, date de réception). Questionnaire : une nuance ou un calibre différent livré au client est rapporté et échangé (Q18, Q22).
+
+- **Le lot reste la clé du stock** (texte saisi à la réception, D21) ; nuance et calibre deviennent des **caractéristiques du lot** (`stock.batch_attributes` : article, lot, nuance, calibre, première réception), saisies à la réception pour les articles suivis par lot. Écart assumé avec D10 : pas de clé `lot_id`, pour ne pas réécrire le registre ; même information.
+- **Affichage** partout où un lot apparaît : « L2409 · nuance B2 · cal. 9 ».
+- **Garde-fou** : à la sortie, mélanger deux nuances ou deux calibres d'un même article sur un bon est signalé avant de valider (« 2 nuances différentes : le client risque de le voir »), sans l'interdire.
+- **Stock** : le détail par lot montre nuance et calibre, pour choisir le bon lot.
 
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).

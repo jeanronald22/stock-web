@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils"
 import { ReceivedInvitations } from "@/components/organizations/received-invitations"
 import { useMe } from "@/lib/api/platform-queries"
 
+import { RequestsCard } from "./requests-card"
 import { StockAlertsCard } from "./stock-alerts-card"
 import { TransfersToReceiveCard } from "./transfers-to-receive-card"
 
@@ -136,6 +137,8 @@ export function Dashboard() {
           <ReceivedInvitations invitations={invitations} user={me.data.user} />
         </div>
       )}
+
+      <RequestsCard />
 
       <TransfersToReceiveCard />
 

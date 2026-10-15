@@ -1,21 +1,30 @@
 "use client"
 
-import { PlusIcon, SearchIcon } from "lucide-react"
+import { PlusIcon, ScanBarcodeIcon, SearchIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useDeferredValue, useMemo, useState } from "react"
 
+import { BarcodeScanner } from "@/components/scan/barcode-scanner"
+import { ScanNotice } from "@/components/scan/scan-notice"
 import {
   InputGroup,
   InputGroupAddon,
+  InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group"
 import { ItemThumb } from "@/components/items/item-thumb"
 import { Spinner } from "@/components/ui/spinner"
-import { CatalogStatus, type Item } from "@/lib/api/stock"
+import { BARCODE_PATTERN, CatalogStatus, type Item } from "@/lib/api/stock"
 import { useItemsPage } from "@/lib/api/stock-queries"
+import {
+  BarcodeLookupKind,
+  useBarcodeLookup,
+  type BarcodeLookup,
+} from "@/lib/scan/use-barcode-lookup"
 import { cn } from "@/lib/utils"
 
 const RESULTS = 8
+const ENTER = "Enter"
 
 /**
  * Recherche d'un article à ajouter au bon. Pour une sortie, seuls les articles proposés dans le
@@ -25,10 +34,13 @@ export function ItemPicker({
   warehouseId,
   excludedIds,
   onPick,
+  onScan,
   inputRef,
   autoFocus,
   supplier,
 }: {
+  /** Article scanné (D34) : déjà sur le bon, il n'est pas exclu ; à défaut, [onPick]. */
+  onScan?: (item: Item) => void
   /** Réception : ses articles d'abord, tout le catalogue d'un clic. */
   supplier?: { id: string; name: string } | null
   /** Champ de recherche : la saisie y revient après chaque quantité (touche Entrée). */
@@ -59,6 +71,43 @@ export function ItemPicker({
   const items = (results.data?.items ?? []).filter(
     (item) => !excludedIds.has(item.id)
   )
+  const [scanning, setScanning] = useState(false)
+  const [notice, setNotice] = useState<Exclude<
+    BarcodeLookup,
+    { kind: "found" }
+  > | null>(null)
+  const lookup = useBarcodeLookup()
+  const scanned = async (code: string) => {
+    const result = await lookup(code, warehouseId)
+    if (result.kind === BarcodeLookupKind.found) {
+      setNotice(null)
+      ;(onScan ?? onPick)(result.item)
+    } else setNotice(result)
+  }
+  const pick = (item: Item) => {
+    onPick(item)
+    setText("")
+  }
+
+  /**
+   * Entrée : l'article dont le code-barres est exactement le texte (une douchette tape le code puis
+   * Entrée), sinon le seul résultat ; sinon on laisse choisir.
+   */
+  const onEnter = () => {
+    const typed = text.trim()
+    const exact = (results.data?.items ?? []).find(
+      (item) => item.barcode === typed
+    )
+    if (exact) {
+      ;(onScan ?? onPick)(exact)
+      setText("")
+    } else if (deferred !== typed || results.isFetching) {
+      // Une douchette tape le code puis Entrée avant que la recherche ait répondu : on cherche le code.
+      if (!BARCODE_PATTERN.test(typed)) return
+      setText("")
+      void scanned(typed)
+    } else if (items.length === 1) pick(items[0])
+  }
 
   return (
     <div className="rounded-xl border">
@@ -69,13 +118,34 @@ export function ItemPicker({
           type="search"
           value={text}
           onChange={(event) => setText(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key !== ENTER || !text.trim()) return
+            event.preventDefault()
+            onEnter()
+          }}
           placeholder={t("searchItem")}
           aria-label={t("searchItem")}
         />
         <InputGroupAddon>
           {results.isFetching ? <Spinner /> : <SearchIcon />}
         </InputGroupAddon>
+        <InputGroupAddon align="inline-end">
+          <InputGroupButton
+            aria-label={t("scan")}
+            onClick={() => setScanning(true)}
+          >
+            <ScanBarcodeIcon />
+          </InputGroupButton>
+        </InputGroupAddon>
       </InputGroup>
+      <BarcodeScanner
+        open={scanning}
+        onOpenChange={setScanning}
+        onDetected={(code) => void scanned(code)}
+      />
+      {notice && (
+        <ScanNotice result={notice} onDismiss={() => setNotice(null)} />
+      )}
       {supplier && (
         <div
           className="flex flex-wrap gap-2 border-b px-3 py-2"
@@ -108,10 +178,7 @@ export function ItemPicker({
           <li key={item.id}>
             <button
               type="button"
-              onClick={() => {
-                onPick(item)
-                setText("")
-              }}
+              onClick={() => pick(item)}
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-muted focus-visible:bg-muted focus-visible:outline-none"
             >
               <ItemThumb imageUrl={item.imageUrl} size="sm" />
