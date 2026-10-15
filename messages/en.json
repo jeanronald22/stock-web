@@ -451,7 +451,11 @@
       "categoryHint": "Create your categories from the item list, “Categories” button.",
       "minQuantity": "Alert threshold",
       "minQuantityPlaceholder": "No alert",
-      "minQuantityHint": "Alert threshold: the item becomes “to reorder” when the warehouse stock drops to this level. 0: alert only when out of stock. Empty: never alert."
+      "minQuantityHint": "Alert threshold: the item becomes “to reorder” when the warehouse stock drops to this level. 0: alert only when out of stock. Empty: never alert.",
+      "barcode": "Barcode",
+      "barcodePlaceholder": "6181234567890",
+      "barcodeScan": "Scan the barcode",
+      "barcodeInvalid": "Digits and letters without spaces, 64 at most."
     },
     "created": "Item created.",
     "saved": "Item saved.",
@@ -659,7 +663,8 @@
         "SITE": "Add the site “{name}”"
       },
       "useWithoutRecord": "Just “{name}”, without a record",
-      "withoutRecord": "no record"
+      "withoutRecord": "no record",
+      "scan": "Scan an item"
     },
     "entry": {
       "see": "See voucher",
@@ -1415,7 +1420,8 @@
       "quantity": "Counted quantity ({unit})",
       "submit": "Save the count",
       "done": "{name} counted."
-    }
+    },
+    "scan": "Scan an item"
   },
   "requests": {
     "title": "Requests",
@@ -1513,5 +1519,17 @@
       "withdrawDescription": "It will not be approved; you can redo it.",
       "withdrawn": "Request withdrawn."
     }
+  },
+  "scan": {
+    "title": "Scan a barcode",
+    "description": "Place the code inside the frame: it is read automatically.",
+    "camera": "Camera image",
+    "blocked": "Camera unavailable or denied. Allow it in the browser, or type the code below.",
+    "typePlaceholder": "Or type the code",
+    "type": "Barcode",
+    "use": "Use",
+    "notInWarehouse": "{name} is not offered in this warehouse.",
+    "unknown": "Unknown code {code}: no item has it.",
+    "createItem": "Create the item"
   }
 }

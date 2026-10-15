@@ -1,7 +1,8 @@
 "use client"
 
-import { HashIcon, TagIcon } from "lucide-react"
+import { HashIcon, ScanBarcodeIcon, TagIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { useState } from "react"
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form"
 
 import { useCategoryTree } from "@/components/categories/use-category-tree"
@@ -13,9 +14,11 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
+import { BarcodeScanner } from "@/components/scan/barcode-scanner"
 import {
   InputGroup,
   InputGroupAddon,
+  InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group"
 import {
@@ -87,6 +90,7 @@ export function ItemIdentityFields({
         </InputGroup>
         <FieldError errors={[errors.reference]} />
       </Field>
+      <ItemBarcodeField form={form} />
       <ItemCategoryField form={form} />
       <Field data-invalid={!!errors.description}>
         <FieldLabel htmlFor="description">
@@ -101,6 +105,54 @@ export function ItemIdentityFields({
         <FieldError errors={[errors.description]} />
       </Field>
     </FieldGroup>
+  )
+}
+
+/** Code-barres (D34) : tapé, ou lu par la caméra ; une douchette le tape d'elle-même. */
+function ItemBarcodeField({ form }: ItemFormProps) {
+  const t = useTranslations()
+  const [scanning, setScanning] = useState(false)
+  const error = form.formState.errors.barcode
+  return (
+    <Field data-invalid={!!error}>
+      <FieldLabel htmlFor="barcode">
+        {t("items.form.barcode")}{" "}
+        <span className="font-normal text-muted-foreground">
+          ({t("common.optional")})
+        </span>
+      </FieldLabel>
+      <InputGroup>
+        <InputGroupInput
+          id="barcode"
+          className="font-mono"
+          inputMode="numeric"
+          autoComplete="off"
+          placeholder={t("items.form.barcodePlaceholder")}
+          aria-invalid={!!error}
+          {...form.register("barcode")}
+        />
+        <InputGroupAddon align="inline-end">
+          <InputGroupButton
+            aria-label={t("items.form.barcodeScan")}
+            onClick={() => setScanning(true)}
+          >
+            <ScanBarcodeIcon />
+          </InputGroupButton>
+        </InputGroupAddon>
+      </InputGroup>
+      <FieldError errors={[error]} />
+      <BarcodeScanner
+        open={scanning}
+        onOpenChange={setScanning}
+        title={t("items.form.barcodeScan")}
+        onDetected={(code) =>
+          form.setValue("barcode", code, {
+            shouldDirty: true,
+            shouldValidate: true,
+          })
+        }
+      />
+    </Field>
   )
 }
 

@@ -61,6 +61,8 @@ export const EntryQueryParams = {
   origin: "origine",
   /** Refaire une demande refusée ou retirée (D33) : ses lignes sont reprises. */
   fromRequest: "demande",
+  /** Nouvel article depuis un code-barres inconnu (D34). */
+  barcode: "codebarres",
 } as const
 
 /** Filtres des listes conservés dans l'adresse : un lien partagé ouvre la même vue. */

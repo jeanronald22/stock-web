@@ -451,7 +451,11 @@
       "categoryHint": "Créez vos catégories depuis la liste des articles, bouton « Catégories ».",
       "minQuantity": "Seuil d’alerte",
       "minQuantityPlaceholder": "Aucune alerte",
-      "minQuantityHint": "Seuil d’alerte : l’article passe « à commander » quand le stock du dépôt descend à ce niveau. 0 : alerte seulement en rupture. Vide : jamais d’alerte."
+      "minQuantityHint": "Seuil d’alerte : l’article passe « à commander » quand le stock du dépôt descend à ce niveau. 0 : alerte seulement en rupture. Vide : jamais d’alerte.",
+      "barcode": "Code-barres",
+      "barcodePlaceholder": "6181234567890",
+      "barcodeScan": "Scanner le code-barres",
+      "barcodeInvalid": "Chiffres et lettres sans espace, 64 au plus."
     },
     "created": "Article créé.",
     "saved": "Article enregistré.",
@@ -659,7 +663,8 @@
         "SITE": "Ajouter le chantier « {name} »"
       },
       "useWithoutRecord": "Juste « {name} », sans fiche",
-      "withoutRecord": "sans fiche"
+      "withoutRecord": "sans fiche",
+      "scan": "Scanner un article"
     },
     "entry": {
       "see": "Voir le bon",
@@ -1415,7 +1420,8 @@
       "quantity": "Quantité comptée ({unit})",
       "submit": "Enregistrer le comptage",
       "done": "{name} compté."
-    }
+    },
+    "scan": "Scanner un article"
   },
   "requests": {
     "title": "Demandes",
@@ -1513,5 +1519,17 @@
       "withdrawDescription": "Elle ne sera pas validée ; vous pourrez la refaire.",
       "withdrawn": "Demande retirée."
     }
+  },
+  "scan": {
+    "title": "Scanner un code-barres",
+    "description": "Placez le code dans le cadre : il est lu tout seul.",
+    "camera": "Image de la caméra",
+    "blocked": "Caméra indisponible ou refusée. Autorisez-la dans le navigateur, ou tapez le code ci-dessous.",
+    "typePlaceholder": "Ou tapez le code",
+    "type": "Code-barres",
+    "use": "Valider",
+    "notInWarehouse": "{name} n’est pas proposé dans ce dépôt.",
+    "unknown": "Code {code} inconnu : aucun article ne le porte.",
+    "createItem": "Créer l’article"
   }
 }

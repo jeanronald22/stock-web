@@ -1,6 +1,7 @@
 import { z } from "zod"
 
 import {
+  BARCODE_PATTERN,
   baseUnits,
   StockLimits,
   wholeQuantityUnits,
@@ -16,6 +17,7 @@ export type ItemFormMessages = {
   positive: string
   wholeNumber: string
   duplicateName: string
+  invalidBarcode: string
 }
 
 /** Règles du formulaire d'article : les mêmes que l'API, vérifiées avant l'envoi. */
@@ -26,6 +28,13 @@ export function itemFormSchema(messages: ItemFormMessages) {
     .object({
       name: text(StockLimits.name).min(1, messages.required),
       reference: text(StockLimits.reference),
+      barcode: z
+        .string()
+        .trim()
+        .refine(
+          (value) => !value || BARCODE_PATTERN.test(value),
+          messages.invalidBarcode
+        ),
       description: text(StockLimits.description),
       baseUnit: z.enum(baseUnits),
       batchTracking: z.boolean(),
@@ -87,6 +96,7 @@ export function toItemInput(values: ItemFormValues): ItemInput {
   return {
     name: values.name,
     reference: values.reference || undefined,
+    barcode: values.barcode || undefined,
     description: values.description || undefined,
     baseUnit: values.baseUnit,
     batchTracking: values.batchTracking,
@@ -113,6 +123,7 @@ export function itemFormDefaults(
   return {
     name: item?.name ?? "",
     reference: item?.reference ?? "",
+    barcode: item?.barcode ?? "",
     description: item?.description ?? "",
     baseUnit: item?.baseUnit ?? "PIECE",
     batchTracking: item?.batchTracking ?? false,

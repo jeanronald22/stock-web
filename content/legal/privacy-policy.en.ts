@@ -42,6 +42,7 @@ export const privacyPolicyEn: PrivacyPolicyContent = {
             "Your suppliers’ contact details (name, phone, email, address): your business is responsible for them, Kreskala keeps them on its behalf.",
             "Your customers’ and sites’ contact details (name, phone, delivery address, note): likewise, your business is responsible for them. Only note what is needed to deliver.",
             "The item photos you upload. Choose photos of products: avoid photos in which a person can be recognised.",
+            "Barcode scanning uses your device’s camera: the image is analysed on the device and is neither sent nor kept; only the code read is used to find the item.",
             "Damage photos attached to a voucher, as proof of the goods’ condition. Same advice: photograph the goods, not people.",
             "Technical sign-in data: date and time, IP address, browser type, and a trace code attached to each error so we can fix it.",
           ],

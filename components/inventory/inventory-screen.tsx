@@ -1,6 +1,11 @@
 "use client"
 
-import { BanIcon, ClipboardCheckIcon, SearchIcon } from "lucide-react"
+import {
+  BanIcon,
+  ClipboardCheckIcon,
+  ScanBarcodeIcon,
+  SearchIcon,
+} from "lucide-react"
 import Link from "next/link"
 import { useFormatter, useTranslations } from "next-intl"
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -19,9 +24,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button, buttonVariants } from "@/components/ui/button"
+import { BarcodeScanner } from "@/components/scan/barcode-scanner"
 import {
   InputGroup,
   InputGroupAddon,
+  InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group"
 import { Progress } from "@/components/ui/progress"
@@ -131,6 +138,25 @@ function InventorySheet({ inventory }: { inventory: Inventory }) {
   const rows = sheet.data?.items ?? []
   const total = sheet.data?.total ?? 0
   const listRef = useRef<HTMLUListElement>(null)
+  const [scanning, setScanning] = useState(false)
+  // Après un scan, la saisie va à la ligne trouvée dès qu'elle s'affiche.
+  const focusFound = useRef(false)
+  useEffect(() => {
+    if (!focusFound.current || sheet.isFetching) return
+    focusFound.current = false
+    listRef.current
+      ?.querySelector<HTMLInputElement>(`[${COUNT_INPUT_ATTRIBUTE}]`)
+      ?.focus()
+  }, [sheet.isFetching, sheet.data])
+
+  /** Scan (D34) : la recherche trouve l'article par son code exact, sur toute la feuille. */
+  const scanned = (code: string) => {
+    setTyped(code)
+    setText(code)
+    setFilter(ALL_LINES)
+    setPage(0)
+    focusFound.current = true
+  }
 
   /** Après un comptage, la saisie passe à la ligne suivante (ou reste en place si la ligne quitte le filtre). */
   const focusAfter = (index: number) => {
@@ -237,7 +263,20 @@ function InventorySheet({ inventory }: { inventory: Inventory }) {
           <InputGroupAddon>
             {sheet.isFetching ? <Spinner /> : <SearchIcon />}
           </InputGroupAddon>
+          <InputGroupAddon align="inline-end">
+            <InputGroupButton
+              aria-label={t("scan")}
+              onClick={() => setScanning(true)}
+            >
+              <ScanBarcodeIcon />
+            </InputGroupButton>
+          </InputGroupAddon>
         </InputGroup>
+        <BarcodeScanner
+          open={scanning}
+          onOpenChange={setScanning}
+          onDetected={scanned}
+        />
         <div
           role="tablist"
           aria-label={t("filterLabel")}

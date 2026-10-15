@@ -14,7 +14,7 @@ import { PhotoScene } from "@/components/illustrations/photo-scene"
 import { FormWizard, type WizardStep } from "@/components/wizard/form-wizard"
 import { CatalogStatus, type Warehouse } from "@/lib/api/stock"
 import { useUploadItemImage, useWarehouses } from "@/lib/api/stock-queries"
-import { ListQueryParams, Routes } from "@/lib/routes"
+import { EntryQueryParams, ListQueryParams, Routes } from "@/lib/routes"
 
 import {
   ItemCountingFields,
@@ -41,7 +41,8 @@ export function ItemWizard() {
 function ItemWizardSteps({ warehouses }: { warehouses: Warehouse[] }) {
   const t = useTranslations()
   const router = useRouter()
-  const fromList = useSearchParams().get(ListQueryParams.warehouse)
+  const searchParams = useSearchParams()
+  const fromList = searchParams.get(ListQueryParams.warehouse)
   const defaultWarehouseIds = fromList
     ? [fromList]
     : warehouses.length === 1
@@ -49,7 +50,9 @@ function ItemWizardSteps({ warehouses }: { warehouses: Warehouse[] }) {
       : []
   const { form, submit, pending, itemId } = useItemForm(
     undefined,
-    defaultWarehouseIds
+    defaultWarehouseIds,
+    undefined,
+    searchParams.get(EntryQueryParams.barcode) ?? undefined
   )
   const upload = useUploadItemImage()
   const [photo, setPhoto] = useState<File | null>(null)

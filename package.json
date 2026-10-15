@@ -4,7 +4,9 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "predev": "node scripts/copy-zxing.mjs",
     "dev": "next dev --port 3100",
+    "prebuild": "node scripts/copy-zxing.mjs",
     "build": "next build",
     "start": "next start --port 3100",
     "lint": "eslint",

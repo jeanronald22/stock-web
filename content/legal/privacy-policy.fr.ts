@@ -49,6 +49,7 @@ export const privacyPolicyFr: PrivacyPolicyContent = {
             "Les coordonnées de vos fournisseurs (nom, téléphone, e-mail, adresse) : votre entreprise en est responsable, Kreskala les conserve pour elle.",
             "Les coordonnées de vos clients et chantiers (nom, téléphone, adresse de livraison, note) : de même, votre entreprise en est responsable. N’y notez que ce qui sert à livrer.",
             "Les photos d’articles que vous déposez. Choisissez des photos de produits : évitez qu’on y reconnaisse une personne.",
+            "Le scan des codes-barres utilise la caméra de votre appareil : l’image est analysée sur place et n’est ni envoyée ni conservée ; seul le code lu sert à trouver l’article.",
             "Les photos de casse jointes à un bon, comme preuve de l’état de la marchandise. Même conseil : photographiez la marchandise, pas les personnes.",
             "Les données techniques de connexion : date et heure, adresse IP, type de navigateur, et un code de suivi associé à chaque erreur pour pouvoir la corriger.",
           ],

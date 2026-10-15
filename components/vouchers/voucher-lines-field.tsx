@@ -117,6 +117,25 @@ export function VoucherLinesField({
               focusName: `lines.${fields.length}.quantity`,
             })
           }
+          onScan={(item) => {
+            // Scanné une nouvelle fois : une unité de plus sur sa ligne (sans lot, il n'y en a qu'une).
+            const index = form
+              .getValues("lines")
+              .findIndex(
+                (line) => line.itemId === item.id && !line.item.batchTracking
+              )
+            if (index < 0)
+              return append(
+                { ...newLine(item), quantity: "1" },
+                { focusName: `lines.${fields.length}.quantity` }
+              )
+            const current =
+              parseQuantity(form.getValues(`lines.${index}.quantity`)) ?? 0
+            form.setValue(`lines.${index}.quantity`, String(current + 1), {
+              shouldValidate: true,
+            })
+            form.setFocus(`lines.${index}.quantity`)
+          }}
         />
       )}
       <p
