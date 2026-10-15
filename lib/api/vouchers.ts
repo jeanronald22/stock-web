@@ -40,6 +40,8 @@ export const VoucherQueryParams = {
 /** Mêmes limites que l'API (stock-api, StockLimits). */
 export const VoucherLimits = {
   batch: 60,
+  /** Nuance ou calibre d'un lot (stock-api, StockLimits.BATCH_TRAIT). */
+  batchTrait: 20,
   counterparty: 120,
   documentReference: 60,
   note: 500,
@@ -188,6 +190,9 @@ export type VoucherLine = {
   batch: string | null
   /** Attendu : envoyé (transfert), annoncé (bon de livraison) ou théorique (ajustement). */
   expectedQuantity: number | null
+  /** Caractéristiques du lot (D35). */
+  shade: string | null
+  caliber: string | null
 }
 
 export type Voucher = Omit<VoucherSummary, "lineCount"> & {
@@ -220,6 +225,9 @@ export type VoucherLineInput = {
   batch?: string
   /** Réception : quantité annoncée par le bon de livraison, dans la même unité. */
   expectedQuantity?: number
+  /** Réception d'un article suivi par lot : nuance et calibre du lot (D35). */
+  shade?: string
+  caliber?: string
 }
 
 export type VoucherInput = {
@@ -283,7 +291,13 @@ export function shortagesOf(error: unknown): Shortage[] {
   return Array.isArray(shortages) ? (shortages as Shortage[]) : []
 }
 
-export type BatchQuantity = { batch: string | null; quantity: number }
+/** Stock d'un lot, avec sa nuance et son calibre (D35) pour choisir le bon. */
+export type BatchQuantity = {
+  batch: string | null
+  quantity: number
+  shade: string | null
+  caliber: string | null
+}
 /** Dépôt où l'article est au seuil ou en dessous, ou en rupture. */
 export type StockAlert = {
   warehouse: WarehouseRef

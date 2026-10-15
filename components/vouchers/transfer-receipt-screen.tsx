@@ -9,7 +9,7 @@ import { toast } from "sonner"
 
 import { EmptyState } from "@/components/catalog/empty-state"
 import { SearchScene } from "@/components/illustrations/search-scene"
-import { useQuantityLabel } from "@/components/items/describe"
+import { useBatchLabel, useQuantityLabel } from "@/components/items/describe"
 import { ItemThumb } from "@/components/items/item-thumb"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -92,6 +92,7 @@ function TransferReceiptForm({ transfer }: { transfer: Voucher }) {
   const router = useRouter()
   const errorMessage = useErrorMessage()
   const quantityLabel = useQuantityLabel()
+  const batchLabel = useBatchLabel()
   const receive = useReceiveTransfer()
   const [receiptId] = useState(() => crypto.randomUUID())
   const [today] = useState(todayOn)
@@ -201,7 +202,7 @@ function TransferReceiptForm({ transfer }: { transfer: Voucher }) {
                         quantity: quantityLabel(line.baseUnit, line.quantity),
                       })}
                       {line.batch &&
-                        ` · ${t("vouchers.detail.batch")} ${line.batch}`}
+                        ` · ${t("vouchers.detail.batch")} ${batchLabel(line.batch, line)}`}
                     </p>
                   </div>
                   {gap !== null && gap !== 0 && (

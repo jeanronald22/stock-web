@@ -79,6 +79,9 @@ export type SheetLine = {
   /** Stock actuel du lot dans le dépôt. */
   stock: number
   count: LineCount | null
+  /** Caractéristiques du lot (D35). */
+  shade: string | null
+  caliber: string | null
 }
 
 export type CountInput = {

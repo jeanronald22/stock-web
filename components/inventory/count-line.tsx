@@ -5,7 +5,7 @@ import { useFormatter, useTranslations } from "next-intl"
 import { useState } from "react"
 import { toast } from "sonner"
 
-import { useQuantityLabel } from "@/components/items/describe"
+import { useBatchLabel, useQuantityLabel } from "@/components/items/describe"
 import { ItemThumb } from "@/components/items/item-thumb"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -57,6 +57,7 @@ export function CountLine({
   const t = useTranslations("inventory.line")
   const tUnits = useTranslations("units")
   const quantityLabel = useQuantityLabel()
+  const batchLabel = useBatchLabel()
   const errorMessage = useErrorMessage()
   const count = useCountLine(inventoryId)
   const { item, count: counted } = line
@@ -116,7 +117,10 @@ export function CountLine({
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold">{item.name}</p>
           <p className="truncate text-xs text-muted-foreground">
-            {[item.reference, line.batch && t("batch", { batch: line.batch })]
+            {[
+              item.reference,
+              line.batch && t("batch", { batch: batchLabel(line.batch, line) }),
+            ]
               .filter(Boolean)
               .join(" · ")}
           </p>

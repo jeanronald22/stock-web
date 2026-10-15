@@ -3,6 +3,7 @@
 import {
   keepPreviousData,
   useMutation,
+  useQueries,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query"
@@ -102,6 +103,19 @@ export function useItemStock(itemId: string | undefined) {
     queryKey: voucherKeys.itemStock(organizationId, itemId ?? ""),
     queryFn: () => vouchers.itemStock(itemId!),
     enabled: !!organizationId && !!itemId,
+  })
+}
+
+/** Stock de plusieurs articles à la fois, partagé avec useItemStock (même clé de cache). */
+export function useItemStocks(itemIds: string[]) {
+  const { vouchers } = useApi()
+  const organizationId = useOrganizationId()
+  return useQueries({
+    queries: itemIds.map((itemId) => ({
+      queryKey: voucherKeys.itemStock(organizationId, itemId),
+      queryFn: () => vouchers.itemStock(itemId),
+      enabled: !!organizationId,
+    })),
   })
 }
 

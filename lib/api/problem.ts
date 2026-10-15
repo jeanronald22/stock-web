@@ -43,6 +43,7 @@ export const ProblemCode = {
   returnOriginInvalid: "return-origin-invalid",
   returnItemNotInOrigin: "return-item-not-in-origin",
   returnExceedsOrigin: "return-exceeds-origin",
+  batchTraitsMismatch: "batch-traits-mismatch",
   itemBarcodeTaken: "item-barcode-taken",
   voucherApprovalRequired: "voucher-approval-required",
   voucherRequestDecided: "voucher-request-decided",

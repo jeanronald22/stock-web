@@ -15,7 +15,7 @@ import { WarehouseFilter } from "@/components/catalog/warehouse-filter"
 import { ShelfScene } from "@/components/illustrations/shelf-scene"
 import { SearchScene } from "@/components/illustrations/search-scene"
 import { ItemThumb } from "@/components/items/item-thumb"
-import { useQuantityLabel } from "@/components/items/describe"
+import { useBatchLabel, useQuantityLabel } from "@/components/items/describe"
 import { ItemsTableSkeleton } from "@/components/items/items-table"
 import { usePageTour } from "@/components/tour/tour-provider"
 import { Badge } from "@/components/ui/badge"
@@ -57,6 +57,7 @@ const SKELETON_ROWS = 8
 export function StockScreen() {
   const t = useTranslations("stock")
   const quantityLabel = useQuantityLabel()
+  const batchLabel = useBatchLabel()
   const list = useListParams()
   const categories = useCategoryTree()
   const { text, warehouseIds, categoryId, stockAlert, page, size } = list.params
@@ -203,7 +204,7 @@ export function StockScreen() {
                                 variant="outline"
                                 className="font-normal"
                               >
-                                {batch.batch} ·{" "}
+                                {batchLabel(batch.batch ?? "", batch)} ·{" "}
                                 {quantityLabel(
                                   row.item.baseUnit,
                                   batch.quantity

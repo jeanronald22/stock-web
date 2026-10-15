@@ -41,6 +41,7 @@ import { useStockAccess } from "@/components/workspace/stock-access"
 import { useWorkspace } from "@/components/workspace/workspace-context"
 import { CatalogStatus, type Warehouse } from "@/lib/api/stock"
 import { useTransferDestinations, useWarehouses } from "@/lib/api/stock-queries"
+import { isProblem, ProblemCode } from "@/lib/api/problem"
 import { useErrorMessage } from "@/lib/api/use-error-message"
 import { useCustomer } from "@/lib/api/customer-queries"
 import type { Customer } from "@/lib/api/customers"
@@ -85,6 +86,9 @@ import {
   type VoucherFormValues,
 } from "./voucher-form-schema"
 import { VoucherLinesField } from "./voucher-lines-field"
+
+/** Lot en cause dans une erreur de l'API (stock-api, ProblemFields.BATCH). */
+const BATCH_FIELD = "batch"
 
 /** Retour depuis un bon (D31, ?origine=…) : les lignes qui restent à retourner sont proposées. */
 export function VoucherEntry({ type }: { type: EntryType }) {
@@ -314,6 +318,21 @@ function VoucherEntryForm({
     return shortages.length > 0
   }
 
+  /** Lot connu avec une autre nuance ou un autre calibre (D35) : l'erreur va sur sa ligne. */
+  const placeBatchMismatch = (error: unknown): boolean => {
+    if (!isProblem(error, ProblemCode.batchTraitsMismatch)) return false
+    const batch = String(error.body[BATCH_FIELD] ?? "").toLowerCase()
+    const index = form
+      .getValues("lines")
+      .findIndex((line) => line.batch.trim().toLowerCase() === batch)
+    if (index < 0) return false
+    form.setError(`lines.${index}.batch`, {
+      type: "server",
+      message: t("vouchers.form.batchMismatch"),
+    })
+    return true
+  }
+
   /** Le bon est déjà enregistré : une photo refusée se rajoute depuis sa fiche. */
   const sendPhotos = async (id: string): Promise<boolean> => {
     for (const file of photos) {
@@ -399,6 +418,8 @@ function VoucherEntryForm({
       searchRef.current?.focus()
     } catch (error) {
       if (placeShortages(error)) toast.error(t("vouchers.entry.shortages"))
+      else if (placeBatchMismatch(error))
+        toast.error(t("vouchers.form.batchMismatchToast"))
       else toast.error(errorMessage(error))
     }
   }

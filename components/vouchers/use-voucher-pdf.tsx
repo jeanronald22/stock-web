@@ -5,7 +5,7 @@ import { useFormatter, useTranslations } from "next-intl"
 import { useCallback, useState } from "react"
 import { toast } from "sonner"
 
-import { useQuantityLabel } from "@/components/items/describe"
+import { useBatchLabel, useQuantityLabel } from "@/components/items/describe"
 import { useWorkspace } from "@/components/workspace/workspace-context"
 import { useApi } from "@/lib/api/api-provider"
 import { useErrorMessage } from "@/lib/api/use-error-message"
@@ -32,6 +32,7 @@ export function useVoucherPdf() {
   const t = useTranslations("vouchers")
   const format = useFormatter()
   const quantityLabel = useQuantityLabel()
+  const batchLabel = useBatchLabel()
   const errorMessage = useErrorMessage()
   const queryClient = useQueryClient()
   const { vouchers } = useApi()
@@ -100,7 +101,7 @@ export function useVoucherPdf() {
         lines: voucher.lines.map((line) => ({
           name: line.itemName,
           reference: line.itemReference,
-          batch: line.batch ?? EMPTY,
+          batch: line.batch ? batchLabel(line.batch, line) : EMPTY,
           entered: line.packagingName
             ? `${format.number(line.enteredQuantity)} ${line.packagingName}`
             : EMPTY,
@@ -150,7 +151,7 @@ export function useVoucherPdf() {
         }),
       }
     },
-    [t, format, quantityLabel, organization]
+    [t, format, quantityLabel, batchLabel, organization]
   )
 
   const render = useCallback(

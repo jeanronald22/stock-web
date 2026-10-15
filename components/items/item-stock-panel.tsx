@@ -7,12 +7,13 @@ import { Badge } from "@/components/ui/badge"
 import type { Item } from "@/lib/api/stock"
 import { useItemStock } from "@/lib/api/voucher-queries"
 
-import { useQuantityLabel } from "./describe"
+import { useBatchLabel, useQuantityLabel } from "./describe"
 
 /** Stock de l'article sur sa fiche, dépôt par dépôt et lot par lot. */
 export function ItemStockPanel({ item }: { item: Item }) {
   const t = useTranslations("stock")
   const quantityLabel = useQuantityLabel()
+  const batchLabel = useBatchLabel()
   const stock = useItemStock(item.id)
   const warehouses = stock.data?.warehouses ?? []
 
@@ -45,7 +46,7 @@ export function ItemStockPanel({ item }: { item: Item }) {
                     variant="outline"
                     className="font-normal"
                   >
-                    {batch.batch} ·{" "}
+                    {batchLabel(batch.batch ?? "", batch)} ·{" "}
                     {quantityLabel(item.baseUnit, batch.quantity)}
                   </Badge>
                 ))}

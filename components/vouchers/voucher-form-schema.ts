@@ -85,6 +85,9 @@ export function voucherFormSchema(
             expected: z.string(),
             // Retour depuis un bon : ce qui reste à retourner, en unité de base (D31).
             limit: z.number().nullable(),
+            // Réception d'un article suivi par lot : nuance et calibre du lot (D35).
+            shade: text(VoucherLimits.batchTrait),
+            caliber: text(VoucherLimits.batchTrait),
           })
         )
         .min(1, messages.linesRequired)
@@ -187,6 +190,8 @@ export function newLine(item: Item, preset?: LinePreset): VoucherFormLine {
     batch: preset?.batch ?? "",
     expected: "",
     limit: preset?.limit ?? null,
+    shade: "",
+    caliber: "",
   }
 }
 
@@ -240,6 +245,12 @@ export function toVoucherInput(
         type === VoucherType.receipt && line.expected.trim()
           ? (parseQuantity(line.expected) ?? undefined)
           : undefined,
+      ...(type === VoucherType.receipt && line.item.batchTracking
+        ? {
+            shade: line.shade.trim() || undefined,
+            caliber: line.caliber.trim() || undefined,
+          }
+        : {}),
     })),
   }
 }

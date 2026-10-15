@@ -664,7 +664,15 @@
       },
       "useWithoutRecord": "Just “{name}”, without a record",
       "withoutRecord": "no record",
-      "scan": "Scan an item"
+      "scan": "Scan an item",
+      "shade": "Shade",
+      "caliber": "Caliber",
+      "knownBatch": "Batch already known: {batch}.",
+      "batchMismatch": "This batch is already known with another shade or caliber: check the code on the box.",
+      "batchMismatchToast": "A batch does not match what is already known: see the flagged line.",
+      "mixedShades": "{name}: {count} different shades on this voucher.",
+      "mixedCalibers": "{name}: {count} different calibers on this voucher.",
+      "mixedConsequence": "The customer may notice when laying them: prefer a single batch if possible."
     },
     "entry": {
       "see": "See voucher",
@@ -1531,5 +1539,9 @@
     "notInWarehouse": "{name} is not offered in this warehouse.",
     "unknown": "Unknown code {code}: no item has it.",
     "createItem": "Create the item"
+  },
+  "batches": {
+    "shade": "shade {shade}",
+    "caliber": "cal. {caliber}"
   }
 }

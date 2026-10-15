@@ -664,7 +664,15 @@
       },
       "useWithoutRecord": "Juste « {name} », sans fiche",
       "withoutRecord": "sans fiche",
-      "scan": "Scanner un article"
+      "scan": "Scanner un article",
+      "shade": "Nuance",
+      "caliber": "Calibre",
+      "knownBatch": "Lot déjà connu : {batch}.",
+      "batchMismatch": "Ce lot est déjà connu avec une autre nuance ou un autre calibre : vérifiez le code sur le carton.",
+      "batchMismatchToast": "Un lot ne correspond pas à ce qui est déjà connu : voir la ligne signalée.",
+      "mixedShades": "{name} : {count} nuances différentes sur ce bon.",
+      "mixedCalibers": "{name} : {count} calibres différents sur ce bon.",
+      "mixedConsequence": "Le client risque de le voir à la pose : préférez un seul lot si possible."
     },
     "entry": {
       "see": "Voir le bon",
@@ -1531,5 +1539,9 @@
     "notInWarehouse": "{name} n’est pas proposé dans ce dépôt.",
     "unknown": "Code {code} inconnu : aucun article ne le porte.",
     "createItem": "Créer l’article"
+  },
+  "batches": {
+    "shade": "nuance {shade}",
+    "caliber": "cal. {caliber}"
   }
 }

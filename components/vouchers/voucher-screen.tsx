@@ -13,7 +13,7 @@ import type { ReactNode } from "react"
 
 import { EmptyState } from "@/components/catalog/empty-state"
 import { SearchScene } from "@/components/illustrations/search-scene"
-import { useQuantityLabel } from "@/components/items/describe"
+import { useBatchLabel, useQuantityLabel } from "@/components/items/describe"
 import { ItemThumb } from "@/components/items/item-thumb"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -55,6 +55,7 @@ export function VoucherScreen({ id }: { id: string }) {
   const t = useTranslations()
   const format = useFormatter()
   const quantityLabel = useQuantityLabel()
+  const batchLabel = useBatchLabel()
   const voucher = useVoucher(id)
   const { can, covers } = useStockAccess()
 
@@ -251,14 +252,17 @@ export function VoucherScreen({ id }: { id: string }) {
                       )}
                       {line.batch && (
                         <p className="text-xs text-muted-foreground sm:hidden">
-                          {t("vouchers.detail.batch")} {line.batch}
+                          {t("vouchers.detail.batch")}{" "}
+                          {batchLabel(line.batch, line)}
                         </p>
                       )}
                     </div>
                   </div>
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">
-                  {line.batch ?? (
+                  {line.batch ? (
+                    batchLabel(line.batch, line)
+                  ) : (
                     <span className="text-muted-foreground">—</span>
                   )}
                 </TableCell>
