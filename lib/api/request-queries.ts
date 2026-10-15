@@ -32,8 +32,12 @@ export const requestKeys = {
     [...stockKeys.all(organizationId), "settings"] as const,
 }
 
-/** Demandes relues chaque minute : un avis de validation ne doit pas attendre un rechargement. */
+/**
+ * Les demandes se font à plusieurs (qui prépare, qui valide) : relues à chaque ouverture d'écran
+ * et chaque minute, plutôt que gardées en cache.
+ */
 const REFRESH_MS = 60_000
+const SHARED = { staleTime: 0, refetchInterval: REFRESH_MS } as const
 
 function useOrganizationId() {
   return useActiveOrganization().activeOrganizationId
@@ -72,6 +76,7 @@ export function useRequests(
     queryFn: () => requests.requests(status, page, size),
     placeholderData: keepPreviousData,
     enabled: !!organizationId,
+    ...SHARED,
   })
 }
 
@@ -82,7 +87,7 @@ export function usePendingRequestCount() {
     queryKey: requestKeys.pendingCount(organizationId),
     queryFn: () => requests.pendingCount(),
     enabled: !!organizationId,
-    refetchInterval: REFRESH_MS,
+    ...SHARED,
   })
 }
 
@@ -93,6 +98,7 @@ export function useRequest(id: string | undefined) {
     queryKey: requestKeys.request(organizationId, id ?? ""),
     queryFn: () => requests.request(id!),
     enabled: !!organizationId && !!id,
+    ...SHARED,
   })
 }
 

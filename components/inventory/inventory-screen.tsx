@@ -159,15 +159,27 @@ function InventorySheet({ inventory }: { inventory: Inventory }) {
   }
 
   /** Après un comptage, la saisie passe à la ligne suivante (ou reste en place si la ligne quitte le filtre). */
-  const focusAfter = (index: number) => {
-    const inputs = listRef.current?.querySelectorAll<HTMLInputElement>(
-      `[${COUNT_INPUT_ATTRIBUTE}]`
-    )
-    const next =
-      inputs?.[filter === SheetFilter.toCount ? index : index + 1] ??
-      inputs?.[0]
-    next?.focus()
-  }
+  const focusAfter = (index: number) =>
+    // Après le rendu (la ligne comptée a quitté la liste), et sans voler la saisie en cours :
+    // qui tape déjà le comptage suivant garde son curseur.
+    requestAnimationFrame(() => {
+      const list = listRef.current
+      const active = document.activeElement
+      if (
+        list &&
+        active instanceof HTMLElement &&
+        list.contains(active) &&
+        active.hasAttribute(COUNT_INPUT_ATTRIBUTE)
+      )
+        return
+      const inputs = list?.querySelectorAll<HTMLInputElement>(
+        `[${COUNT_INPUT_ATTRIBUTE}]`
+      )
+      const next =
+        inputs?.[filter === SheetFilter.toCount ? index : index + 1] ??
+        inputs?.[0]
+      next?.focus()
+    })
 
   return (
     <PageBody>
@@ -381,22 +393,23 @@ function CloseInventory({
   const close = useCloseInventory()
   const { lines, counted, gaps } = inventory.progress
 
-  const confirm = () =>
-    close.mutate(inventory.id, {
-      onSuccess: (closed) =>
-        toast.success(
-          closed.adjustment
-            ? t("done", { number: closed.adjustment.number })
-            : t("doneWithoutGap")
-        ),
-      onError: (error) => {
-        const moved = movedLinesOf(error)
-        if (moved.length > 0) {
-          onMoved(moved)
-          toast.error(t("moved", { count: moved.length }))
-        } else toast.error(errorMessage(error))
-      },
-    })
+  // mutateAsync : une fois clos, ce bouton disparaît ; le message doit partir quand même.
+  const confirm = async () => {
+    try {
+      const closed = await close.mutateAsync(inventory.id)
+      toast.success(
+        closed.adjustment
+          ? t("done", { number: closed.adjustment.number })
+          : t("doneWithoutGap")
+      )
+    } catch (error) {
+      const moved = movedLinesOf(error)
+      if (moved.length > 0) {
+        onMoved(moved)
+        toast.error(t("moved", { count: moved.length }))
+      } else toast.error(errorMessage(error))
+    }
+  }
 
   return (
     <AlertDialog>
@@ -415,7 +428,7 @@ function CloseInventory({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{tCommon("cancel")}</AlertDialogCancel>
-          <AlertDialogCancel onClick={confirm}>
+          <AlertDialogCancel onClick={() => void confirm()}>
             {t("confirm")}
           </AlertDialogCancel>
         </AlertDialogFooter>

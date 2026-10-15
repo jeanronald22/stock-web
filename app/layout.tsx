@@ -33,6 +33,9 @@ export const viewport: Viewport = {
   ],
 }
 
+/** Hauteur de la barre du haut (WorkspaceHeader, h-16) plus un léger écart. */
+const TOASTS_BELOW_HEADER_PX = 72
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -54,7 +57,12 @@ export default async function RootLayout({
         <NextIntlClientProvider>
           <ThemeProvider>
             {children}
-            <Toaster position="top-center" richColors />
+            {/* Téléphone : sous la barre du haut (64 px), pour ne jamais cacher le menu ni l'entreprise. */}
+            <Toaster
+              position="top-center"
+              richColors
+              mobileOffset={{ top: TOASTS_BELOW_HEADER_PX }}
+            />
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

@@ -106,7 +106,7 @@ test("sortie à valider : préparée par le magasinier, refusée avec motif, ref
   // Le magasinier lit le motif et refait la demande, lignes reprises.
   await navigateTo(storekeeper, "Bons")
   await storekeeper.getByRole("link", { name: /À valider/ }).click()
-  await storekeeper.getByRole("radio", { name: "Refusées" }).click()
+  await storekeeper.getByRole("button", { name: "Refusées" }).click()
   await storekeeper.getByRole("link", { name: "Sans client" }).click()
   await expect(
     storekeeper.getByText("« Trop pour ce chantier : 20 au plus »")

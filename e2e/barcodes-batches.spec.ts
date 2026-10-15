@@ -62,7 +62,7 @@ test("code-barres : la douchette ajoute l'article, un second passage ajoute une 
   await expect(
     page.getByText("Code 6189999999999 inconnu : aucun article ne le porte.")
   ).toBeVisible()
-  await page.getByRole("button", { name: "Créer l’article" }).click()
+  await page.getByRole("link", { name: "Créer l’article" }).click()
   await expect(page.getByLabel(/Code-barres/)).toHaveValue("6189999999999")
 })
 
@@ -90,7 +90,7 @@ test("lots : nuance et calibre à la réception, mélange de nuances signalé à
     await page
       .getByRole("searchbox", { name: "Rechercher un article à ajouter" })
       .fill("Carreau")
-    await page.getByRole("button", { name: /Carreau 60x60/ }).click()
+    await page.getByRole("button", { name: /^Carreau 60x60/ }).click()
     const lines = page
       .getByRole("listitem")
       .filter({ hasText: "Carreau 60x60" })
@@ -124,7 +124,7 @@ test("lots : nuance et calibre à la réception, mélange de nuances signalé à
     await page
       .getByRole("searchbox", { name: "Rechercher un article à ajouter" })
       .fill("Carreau")
-    await page.getByRole("button", { name: /Carreau 60x60/ }).click()
+    await page.getByRole("button", { name: /^Carreau 60x60/ }).click()
     const line = page
       .getByRole("listitem")
       .filter({ hasText: "Carreau 60x60" })
@@ -143,8 +143,15 @@ test("lots : nuance et calibre à la réception, mélange de nuances signalé à
     .getByRole("button", { name: /Valider la sortie · 2 articles/ })
     .click()
   await expect(page.getByText(`Sortie SOR-${year}-0001 validée.`)).toBeVisible()
-  await page.getByRole("button", { name: "Voir le bon" }).click()
+  await page
+    .getByRole("listitem")
+    .filter({ hasText: `Sortie SOR-${year}-0001 validée.` })
+    .getByRole("button", { name: "Voir le bon" })
+    .click()
   await expect(
-    page.getByText("L2409 · nuance B2 · cal. 9").first()
+    page
+      .getByText("L2409 · nuance B2 · cal. 9")
+      .filter({ visible: true })
+      .first()
   ).toBeVisible()
 })

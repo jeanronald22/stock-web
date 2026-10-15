@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl"
 import { useDeferredValue, useMemo, useState } from "react"
 
 import { BarcodeScanner } from "@/components/scan/barcode-scanner"
+import { ScanNotice } from "@/components/scan/scan-notice"
 import {
   InputGroup,
   InputGroupAddon,
@@ -13,9 +14,13 @@ import {
 } from "@/components/ui/input-group"
 import { ItemThumb } from "@/components/items/item-thumb"
 import { Spinner } from "@/components/ui/spinner"
-import { CatalogStatus, type Item } from "@/lib/api/stock"
+import { BARCODE_PATTERN, CatalogStatus, type Item } from "@/lib/api/stock"
 import { useItemsPage } from "@/lib/api/stock-queries"
-import { useBarcodeLookup } from "@/lib/scan/use-barcode-lookup"
+import {
+  BarcodeLookupKind,
+  useBarcodeLookup,
+  type BarcodeLookup,
+} from "@/lib/scan/use-barcode-lookup"
 import { cn } from "@/lib/utils"
 
 const RESULTS = 8
@@ -67,10 +72,17 @@ export function ItemPicker({
     (item) => !excludedIds.has(item.id)
   )
   const [scanning, setScanning] = useState(false)
+  const [notice, setNotice] = useState<Exclude<
+    BarcodeLookup,
+    { kind: "found" }
+  > | null>(null)
   const lookup = useBarcodeLookup()
   const scanned = async (code: string) => {
-    const item = await lookup(code, warehouseId)
-    if (item) (onScan ?? onPick)(item)
+    const result = await lookup(code, warehouseId)
+    if (result.kind === BarcodeLookupKind.found) {
+      setNotice(null)
+      ;(onScan ?? onPick)(result.item)
+    } else setNotice(result)
   }
   const pick = (item: Item) => {
     onPick(item)
@@ -89,6 +101,11 @@ export function ItemPicker({
     if (exact) {
       ;(onScan ?? onPick)(exact)
       setText("")
+    } else if (deferred !== typed || results.isFetching) {
+      // Une douchette tape le code puis Entrée avant que la recherche ait répondu : on cherche le code.
+      if (!BARCODE_PATTERN.test(typed)) return
+      setText("")
+      void scanned(typed)
     } else if (items.length === 1) pick(items[0])
   }
 
@@ -126,6 +143,9 @@ export function ItemPicker({
         onOpenChange={setScanning}
         onDetected={(code) => void scanned(code)}
       />
+      {notice && (
+        <ScanNotice result={notice} onDismiss={() => setNotice(null)} />
+      )}
       {supplier && (
         <div
           className="flex flex-wrap gap-2 border-b px-3 py-2"
