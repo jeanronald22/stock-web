@@ -185,8 +185,8 @@ test("articles et dépôts : un article proposé dans un dépôt et pas dans l'a
   // Archivé, le ciment quitte la liste ; le filtre « Archivés » le retrouve.
   await page.goto("/articles")
   await page.getByRole("link", { name: /Ciment CPJ 42,5/ }).click()
-  await dismissTour(page, "L’unité de comptage")
-  await page.getByRole("button", { name: "Archiver" }).click()
+  await page.getByRole("button", { name: "Autres actions" }).click()
+  await page.getByRole("menuitem", { name: "Archiver" }).click()
   await page
     .getByRole("alertdialog")
     .getByRole("button", { name: "Archiver" })

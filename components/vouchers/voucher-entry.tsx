@@ -39,8 +39,12 @@ import { Spinner } from "@/components/ui/spinner"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import { useStockAccess } from "@/components/workspace/stock-access"
 import { useWorkspace } from "@/components/workspace/workspace-context"
-import { CatalogStatus, type Warehouse } from "@/lib/api/stock"
-import { useTransferDestinations, useWarehouses } from "@/lib/api/stock-queries"
+import { CatalogStatus, type Item, type Warehouse } from "@/lib/api/stock"
+import {
+  useItem,
+  useTransferDestinations,
+  useWarehouses,
+} from "@/lib/api/stock-queries"
 import { isProblem, ProblemCode } from "@/lib/api/problem"
 import { useErrorMessage } from "@/lib/api/use-error-message"
 import { useCustomer } from "@/lib/api/customer-queries"
@@ -102,6 +106,9 @@ export function VoucherEntry({ type }: { type: EntryType }) {
   const fromRequestId = approvalTypes.has(type)
     ? (searchParams.get(EntryQueryParams.fromRequest) ?? undefined)
     : undefined
+  // Bon commencé depuis la fiche d'un article : il est déjà sur le bon.
+  const startingItemId = searchParams.get(EntryQueryParams.item) ?? undefined
+  const startingItem = useItem(startingItemId)
   const warehouses = useWarehouses(CatalogStatus.active, { fresh: true })
   const settings = useStockSettings()
   const origin = useReturnable(originId)
@@ -114,6 +121,7 @@ export function VoucherEntry({ type }: { type: EntryType }) {
     !settings.data ||
     (originId && origin.isPending) ||
     (fromRequestId && previous.isPending) ||
+    (startingItemId && startingItem.isPending) ||
     (previous.data?.customerId && previousCustomer.isPending)
   )
     return <Splash label={t("common.loading")} />
@@ -164,6 +172,7 @@ export function VoucherEntry({ type }: { type: EntryType }) {
       origin={origin.data}
       previous={previous.data}
       previousCustomer={previousCustomer.data}
+      startingItem={startingItem.data}
       issueApproval={settings.data.issueApproval}
     />
   )
@@ -180,6 +189,7 @@ function VoucherEntryForm({
   origin,
   previous,
   previousCustomer,
+  startingItem,
   issueApproval,
 }: {
   type: EntryType
@@ -187,6 +197,8 @@ function VoucherEntryForm({
   origin: Returnable | undefined
   previous: VoucherRequest | undefined
   previousCustomer: Customer | undefined
+  /** Article déjà sur le bon (bon commencé depuis sa fiche). */
+  startingItem: Item | undefined
   /** Règle de l'entreprise (D33) : les sorties des magasiniers passent par une validation. */
   issueApproval: boolean
 }) {
@@ -267,15 +279,17 @@ function VoucherEntryForm({
             unit: line.packagingName ?? BASE_UNIT_CHOICE,
             batch: line.batch ?? "",
           }))
-        : (origin?.lines ?? [])
-            .filter((line) => line.remaining > 0)
-            .map((line) =>
-              newLine(line.item, {
-                batch: line.batch ?? "",
-                limit: line.remaining,
-                quantity: String(line.remaining),
-              })
-            ),
+        : startingItem
+          ? [newLine(startingItem)]
+          : (origin?.lines ?? [])
+              .filter((line) => line.remaining > 0)
+              .map((line) =>
+                newLine(line.item, {
+                  batch: line.batch ?? "",
+                  limit: line.remaining,
+                  quantity: String(line.remaining),
+                })
+              ),
       counterparty:
         previous && !previous.supplierId && !previous.customerId
           ? (previous.counterparty ?? "")

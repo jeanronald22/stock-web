@@ -27,7 +27,8 @@
     "inventory": "Stocktake",
     "newCustomerReturn": "Customer return",
     "newSupplierReturn": "Supplier return",
-    "requests": "Requests to approve"
+    "requests": "Requests to approve",
+    "editItem": "Edit item"
   },
   "common": {
     "retry": "Try again",
@@ -298,37 +299,43 @@
       "label": "Piece",
       "hint": "Taps, bags of cement, paint tins…",
       "quantity": "{count, plural, one {# piece} other {# pieces}}",
-      "short": "pcs"
+      "short": "pcs",
+      "unitPlural": "{count, plural, one {piece} other {pieces}}"
     },
     "KILOGRAM": {
       "label": "Kilogram",
       "hint": "Nails, iron sold by weight",
       "quantity": "{count, number} kg",
-      "short": "kg"
+      "short": "kg",
+      "unitPlural": "kg"
     },
     "LITRE": {
       "label": "Litre",
       "hint": "Paint, oil, solvent sold loose",
       "quantity": "{count, number} L",
-      "short": "L"
+      "short": "L",
+      "unitPlural": "{count, plural, one {litre} other {litres}}"
     },
     "METRE": {
       "label": "Metre",
       "hint": "Cable, pipe, rebar",
       "quantity": "{count, number} m",
-      "short": "m"
+      "short": "m",
+      "unitPlural": "{count, plural, one {metre} other {metres}}"
     },
     "SQUARE_METRE": {
       "label": "Square metre",
       "hint": "Tiles, roofing sheets, plywood",
       "quantity": "{count, number} m²",
-      "short": "m²"
+      "short": "m²",
+      "unitPlural": "m²"
     },
     "CUBIC_METRE": {
       "label": "Cubic metre",
       "hint": "Sand, gravel",
       "quantity": "{count, number} m³",
-      "short": "m³"
+      "short": "m³",
+      "unitPlural": "m³"
     }
   },
   "warehouses": {
@@ -502,7 +509,35 @@
     },
     "moreWarehouses": "+{count}",
     "thresholdSaved": "Threshold saved for {warehouse}.",
-    "saveThreshold": "Save the threshold for {warehouse}"
+    "saveThreshold": "Save the threshold for {warehouse}",
+    "detail": {
+      "edit": "Edit",
+      "editTitle": "Edit item",
+      "inStock": "In stock in your warehouses",
+      "breakdown": "that is {breakdown}",
+      "byWarehouse": "By warehouse",
+      "thresholds": "Alert thresholds",
+      "thresholdsHint": "Below this threshold, the item becomes “to order” and the warehouse managers are notified. Empty: no alert.",
+      "noWarehouse": "This item is not offered in any of your warehouses.",
+      "threshold": "Alert threshold: {quantity}",
+      "noThreshold": "No alert threshold",
+      "batches": "Batches in stock",
+      "history": "Latest movements",
+      "noHistory": "No voucher carries this item yet.",
+      "unchanged": "Unchanged",
+      "allHistory": "See its {count} vouchers",
+      "facts": "Details",
+      "unit": "Counted in",
+      "packagings": "Packagings",
+      "batchTracking": "Batches",
+      "byBatch": "Tracked by batch",
+      "noBatch": "Not tracked by batch",
+      "reference": "Reference",
+      "barcode": "Barcode",
+      "more": "More actions",
+      "receive": "New receipt of this item",
+      "issue": "New issue of this item"
+    }
   },
   "pagination": {
     "range": "{from}–{to} of {total}",
@@ -1538,7 +1573,8 @@
     "use": "Use",
     "notInWarehouse": "{name} is not offered in this warehouse.",
     "unknown": "Unknown code {code}: no item has it.",
-    "createItem": "Create the item"
+    "createItem": "Create the item",
+    "dismiss": "Close the message"
   },
   "batches": {
     "shade": "shade {shade}",

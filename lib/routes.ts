@@ -41,6 +41,8 @@ export type AppRoute = (typeof Routes)[keyof typeof Routes]
 /** Fiches : adresse construite à partir de l'identifiant. */
 export const RecordRoutes = {
   item: (id: string) => `${Routes.items}/${id}`,
+  /** Modification de la fiche ; la fiche elle-même se consulte. */
+  itemEdit: (id: string) => `${Routes.items}/${id}/modifier`,
   warehouse: (id: string) => `${Routes.warehouses}/${id}`,
   voucher: (id: string) => `${Routes.vouchers}/${id}`,
   /** Réception d'un transfert au dépôt d'arrivée (D27). */
@@ -63,6 +65,8 @@ export const EntryQueryParams = {
   fromRequest: "demande",
   /** Nouvel article depuis un code-barres inconnu (D34). */
   barcode: "codebarres",
+  /** Bon commencé depuis la fiche d'un article : il est déjà sur le bon. */
+  item: "article",
 } as const
 
 /** Filtres des listes conservés dans l'adresse : un lien partagé ouvre la même vue. */
@@ -77,6 +81,8 @@ export const ListQueryParams = {
   category: "categorie",
   supplier: "fournisseur",
   customer: "client",
+  /** Bons qui portent cet article. */
+  item: "article",
   /** Clients ou chantiers seulement (voir CustomerKindParam). */
   customerKind: "genre",
   stockAlert: "alerte",

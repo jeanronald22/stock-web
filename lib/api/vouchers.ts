@@ -25,6 +25,7 @@ export const VoucherQueryParams = {
   warehouseId: "warehouseId",
   supplierId: "supplierId",
   customerId: "customerId",
+  itemId: "itemId",
   categoryId: "categoryId",
   stockState: "stockState",
   from: "from",
@@ -174,6 +175,8 @@ export type VoucherSummary = {
   reason: VoucherReason | null
   /** Une ligne reçue autrement qu'attendu (bon de livraison, transfert). */
   hasDiscrepancy: boolean
+  /** Recherche par article : son mouvement net sur ce bon, en unité de base. */
+  itemMovement: number | null
 }
 
 export type VoucherLine = {
@@ -330,6 +333,8 @@ export type VoucherSearch = {
   warehouseIds?: string[]
   supplierId?: string
   customerId?: string
+  /** Bons qui portent cet article (historique de sa fiche). */
+  itemId?: string
   from?: string
   to?: string
   order?: VoucherOrder
@@ -359,6 +364,7 @@ export const voucherApi = (send: ApiClient) => {
             [VoucherQueryParams.warehouseId]: search.warehouseIds,
             [VoucherQueryParams.supplierId]: search.supplierId,
             [VoucherQueryParams.customerId]: search.customerId,
+            [VoucherQueryParams.itemId]: search.itemId,
             [VoucherQueryParams.from]: search.from,
             [VoucherQueryParams.to]: search.to,
             [VoucherQueryParams.order]: search.order,

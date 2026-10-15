@@ -235,6 +235,7 @@ export function VouchersScreen() {
     voucherKind,
     supplierId,
     customerId,
+    itemId,
     from,
     to,
     order,
@@ -247,11 +248,12 @@ export function VouchersScreen() {
       warehouseIds,
       supplierId,
       customerId,
+      itemId,
       from,
       to,
       order,
     }),
-    [voucherKind, warehouseIds, supplierId, customerId, from, to, order]
+    [voucherKind, warehouseIds, supplierId, customerId, itemId, from, to, order]
   )
   const vouchers = useVouchersPage(search, page, size)
   const total = vouchers.data?.total ?? 0

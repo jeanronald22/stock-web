@@ -27,7 +27,8 @@
     "inventory": "Inventaire",
     "newCustomerReturn": "Retour client",
     "newSupplierReturn": "Retour fournisseur",
-    "requests": "Demandes à valider"
+    "requests": "Demandes à valider",
+    "editItem": "Modifier l’article"
   },
   "common": {
     "retry": "Réessayer",
@@ -298,37 +299,43 @@
       "label": "Pièce",
       "hint": "Robinets, sacs de ciment, pots de peinture…",
       "quantity": "{count, plural, one {# pièce} other {# pièces}}",
-      "short": "pièces"
+      "short": "pièces",
+      "unitPlural": "{count, plural, one {pièce} other {pièces}}"
     },
     "KILOGRAM": {
       "label": "Kilogramme",
       "hint": "Clous, pointes, fer vendus au poids",
       "quantity": "{count, number} kg",
-      "short": "kg"
+      "short": "kg",
+      "unitPlural": "kg"
     },
     "LITRE": {
       "label": "Litre",
       "hint": "Peinture, huile, solvant au détail",
       "quantity": "{count, number} L",
-      "short": "L"
+      "short": "L",
+      "unitPlural": "{count, plural, one {litre} other {litres}}"
     },
     "METRE": {
       "label": "Mètre",
       "hint": "Câble, tuyau, fer à béton",
       "quantity": "{count, number} m",
-      "short": "m"
+      "short": "m",
+      "unitPlural": "{count, plural, one {mètre} other {mètres}}"
     },
     "SQUARE_METRE": {
       "label": "Mètre carré",
       "hint": "Carreaux, tôles, contreplaqué",
       "quantity": "{count, number} m²",
-      "short": "m²"
+      "short": "m²",
+      "unitPlural": "m²"
     },
     "CUBIC_METRE": {
       "label": "Mètre cube",
       "hint": "Sable, gravier",
       "quantity": "{count, number} m³",
-      "short": "m³"
+      "short": "m³",
+      "unitPlural": "m³"
     }
   },
   "warehouses": {
@@ -502,7 +509,35 @@
     },
     "moreWarehouses": "+{count}",
     "thresholdSaved": "Seuil enregistré pour {warehouse}.",
-    "saveThreshold": "Enregistrer le seuil de {warehouse}"
+    "saveThreshold": "Enregistrer le seuil de {warehouse}",
+    "detail": {
+      "edit": "Modifier",
+      "editTitle": "Modifier l’article",
+      "inStock": "En stock dans vos dépôts",
+      "breakdown": "soit {breakdown}",
+      "byWarehouse": "Par dépôt",
+      "thresholds": "Seuils d’alerte",
+      "thresholdsHint": "Sous ce seuil, l’article passe « à commander » et les responsables du dépôt sont prévenus. Vide : pas d’alerte.",
+      "noWarehouse": "Cet article n’est proposé dans aucun de vos dépôts.",
+      "threshold": "Seuil d’alerte : {quantity}",
+      "noThreshold": "Pas de seuil d’alerte",
+      "batches": "Lots en stock",
+      "history": "Derniers mouvements",
+      "noHistory": "Aucun bon ne porte encore cet article.",
+      "unchanged": "Inchangé",
+      "allHistory": "Voir ses {count} bons",
+      "facts": "Fiche",
+      "unit": "Compté en",
+      "packagings": "Conditionnements",
+      "batchTracking": "Lots",
+      "byBatch": "Suivi par lot",
+      "noBatch": "Sans suivi par lot",
+      "reference": "Référence",
+      "barcode": "Code-barres",
+      "more": "Autres actions",
+      "receive": "Nouvelle réception de cet article",
+      "issue": "Nouvelle sortie de cet article"
+    }
   },
   "pagination": {
     "range": "{from}–{to} sur {total}",
@@ -1538,7 +1573,8 @@
     "use": "Valider",
     "notInWarehouse": "{name} n’est pas proposé dans ce dépôt.",
     "unknown": "Code {code} inconnu : aucun article ne le porte.",
-    "createItem": "Créer l’article"
+    "createItem": "Créer l’article",
+    "dismiss": "Fermer le message"
   },
   "batches": {
     "shade": "nuance {shade}",

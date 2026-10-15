@@ -40,6 +40,7 @@ export type ListParams = {
   categoryId: string | undefined
   supplierId: string | undefined
   customerId: string | undefined
+  itemId: string | undefined
   customerKind: CustomerKind | undefined
   stockAlert: StockAlertParam | undefined
   /** Page affichée, à partir de 0 (l'adresse montre « page=1 » pour la première). */
@@ -60,6 +61,7 @@ const FILTER_KEYS = [
   "category",
   "supplier",
   "customer",
+  "item",
   "customerKind",
   "stockAlert",
   "voucherType",
@@ -102,6 +104,7 @@ export function useListParams() {
     categoryId: searchParams.get(ListQueryParams.category) ?? undefined,
     supplierId: searchParams.get(ListQueryParams.supplier) ?? undefined,
     customerId: searchParams.get(ListQueryParams.customer) ?? undefined,
+    itemId: searchParams.get(ListQueryParams.item) ?? undefined,
     customerKind:
       CUSTOMER_KINDS[
         searchParams.get(ListQueryParams.customerKind) as CustomerKindParam
