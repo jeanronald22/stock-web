@@ -96,7 +96,12 @@ export const ListQueryParams = {
   from: "du",
   to: "au",
   order: "ordre",
+  /** Liste (par défaut) ou grille (GRID_VIEW_PARAM) : articles et stock. */
+  view: "vue",
 } as const
+
+/** Valeur de « vue » pour l'affichage en grille ; absente, la liste. */
+export const GRID_VIEW_PARAM = "grille"
 
 /** Valeurs de « alerte » : articles en alerte, au seuil ou en rupture. */
 export const StockAlertParam = {

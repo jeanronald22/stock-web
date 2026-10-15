@@ -9,11 +9,16 @@ import { VoucherOrder } from "@/lib/api/vouchers"
 import {
   ARCHIVED_STATUS_PARAM,
   CustomerKindParam,
+  GRID_VIEW_PARAM,
   ListQueryParams,
   OLDEST_FIRST_PARAM,
   StockAlertParam,
 } from "@/lib/routes"
 import { VoucherKind } from "@/lib/vouchers/voucher-kinds"
+
+/** Affichage d'une liste : tableau dense, ou grille de cartes avec les photos. */
+export const ListView = { list: "list", grid: "grid" } as const
+export type ListView = (typeof ListView)[keyof typeof ListView]
 
 /** Nombres de lignes proposés ; le premier de la liste n'est pas le défaut (voir DEFAULT_PAGE_SIZE). */
 export const PAGE_SIZES = [25, 50, 100] as const
@@ -52,6 +57,7 @@ export type ListParams = {
   from: string | undefined
   to: string | undefined
   order: VoucherOrder
+  view: ListView
 }
 
 /** Filtres que « Effacer les filtres » remet à zéro (pas la page, les lignes ni le statut). */
@@ -128,6 +134,10 @@ export function useListParams() {
       searchParams.get(ListQueryParams.order) === OLDEST_FIRST_PARAM
         ? VoucherOrder.oldestFirst
         : VoucherOrder.newestFirst,
+    view:
+      searchParams.get(ListQueryParams.view) === GRID_VIEW_PARAM
+        ? ListView.grid
+        : ListView.list,
   }
 
   const update = useCallback(
@@ -184,6 +194,12 @@ export function useListParams() {
       }),
     setVoucherKind: (kind: VoucherKind | undefined) =>
       update({ voucherType: kind }),
+    // L'affichage n'est pas un filtre : il garde la page en cours.
+    setView: (view: ListView) =>
+      update({
+        view: view === ListView.grid ? GRID_VIEW_PARAM : undefined,
+        page: searchParams.get(ListQueryParams.page) ?? undefined,
+      }),
     setPeriod: (from: string | undefined, to: string | undefined) =>
       update({ from, to }),
     setOrder: (order: VoucherOrder) =>

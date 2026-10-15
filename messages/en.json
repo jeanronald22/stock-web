@@ -603,6 +603,11 @@
       "any": "To reorder",
       "low": "Low stock",
       "out": "Out of stock"
+    },
+    "view": {
+      "label": "Display",
+      "list": "Show as a list",
+      "grid": "Show as a grid"
     }
   },
   "vouchers": {
@@ -954,7 +959,8 @@
       "LOW": "Low stock",
       "OUT": "Out of stock"
     },
-    "alert": "{warehouse}: {quantity}, threshold {threshold}"
+    "alert": "{warehouse}: {quantity}, threshold {threshold}",
+    "batchCount": "{count, plural, one {# batch} other {# batches}}"
   },
   "suppliers": {
     "title": "Suppliers",

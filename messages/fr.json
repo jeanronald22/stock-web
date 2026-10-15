@@ -603,6 +603,11 @@
       "any": "À commander",
       "low": "Stock bas",
       "out": "En rupture"
+    },
+    "view": {
+      "label": "Affichage",
+      "list": "Afficher en liste",
+      "grid": "Afficher en grille"
     }
   },
   "vouchers": {
@@ -954,7 +959,8 @@
       "LOW": "Stock bas",
       "OUT": "Rupture"
     },
-    "alert": "{warehouse} : {quantity}, seuil {threshold}"
+    "alert": "{warehouse} : {quantity}, seuil {threshold}",
+    "batchCount": "{count, plural, one {# lot} other {# lots}}"
   },
   "suppliers": {
     "title": "Fournisseurs",

@@ -8,12 +8,14 @@ import { useEffect, useMemo, useState } from "react"
 import { useCategoryTree } from "@/components/categories/use-category-tree"
 import { CategoryFilter } from "@/components/catalog/category-filter"
 import { ClearFilters } from "@/components/catalog/clear-filters"
+import { ViewToggle } from "@/components/catalog/view-toggle"
 import { EmptyState } from "@/components/catalog/empty-state"
 import { StockAlertFilter } from "@/components/catalog/stock-alert-filter"
 import { TablePagination } from "@/components/catalog/table-pagination"
 import { WarehouseFilter } from "@/components/catalog/warehouse-filter"
 import { ShelfScene } from "@/components/illustrations/shelf-scene"
 import { SearchScene } from "@/components/illustrations/search-scene"
+import { ItemGridSkeleton } from "@/components/items/item-card"
 import { ItemThumb } from "@/components/items/item-thumb"
 import { useBatchLabel, useQuantityLabel } from "@/components/items/describe"
 import { ItemsTableSkeleton } from "@/components/items/items-table"
@@ -36,13 +38,18 @@ import {
 } from "@/components/ui/table"
 import { NewVoucherButtons } from "@/components/vouchers/vouchers-screen"
 
+import { StockGrid } from "./stock-grid"
 import { StockStateBadge } from "./stock-state-badge"
 import { InventoryBar } from "@/components/inventory/inventory-bar"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import { StockState } from "@/lib/api/stock"
 import { useStockPage } from "@/lib/api/voucher-queries"
 import type { StockRow } from "@/lib/api/vouchers"
-import { STOCK_ALERT_STATES, useListParams } from "@/lib/list/use-list-params"
+import {
+  ListView,
+  STOCK_ALERT_STATES,
+  useListParams,
+} from "@/lib/list/use-list-params"
 import { RecordRoutes } from "@/lib/routes"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
 import { cn } from "@/lib/utils"
@@ -60,7 +67,9 @@ export function StockScreen() {
   const batchLabel = useBatchLabel()
   const list = useListParams()
   const categories = useCategoryTree()
-  const { text, warehouseIds, categoryId, stockAlert, page, size } = list.params
+  const { text, warehouseIds, categoryId, stockAlert, page, size, view } =
+    list.params
+  const grid = view === ListView.grid
   const [typed, setTyped] = useState(text)
   const { setText } = list
   useEffect(() => {
@@ -100,18 +109,22 @@ export function StockScreen() {
       ) : (
         <>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <InputGroup className="sm:max-w-md sm:min-w-64 sm:flex-1">
-              <InputGroupInput
-                type="search"
-                value={typed}
-                onChange={(event) => setTyped(event.target.value)}
-                placeholder={t("searchPlaceholder")}
-                aria-label={t("searchPlaceholder")}
-              />
-              <InputGroupAddon>
-                {stock.isFetching ? <Spinner /> : <SearchIcon />}
-              </InputGroupAddon>
-            </InputGroup>
+            {/* Téléphone : la recherche et l'affichage partagent une ligne ; ailleurs, l'affichage ferme la barre. */}
+            <div className="flex gap-2 sm:contents">
+              <InputGroup className="flex-1 sm:max-w-md sm:min-w-64">
+                <InputGroupInput
+                  type="search"
+                  value={typed}
+                  onChange={(event) => setTyped(event.target.value)}
+                  placeholder={t("searchPlaceholder")}
+                  aria-label={t("searchPlaceholder")}
+                />
+                <InputGroupAddon>
+                  {stock.isFetching ? <Spinner /> : <SearchIcon />}
+                </InputGroupAddon>
+              </InputGroup>
+              <ViewToggle value={view} onChange={list.setView} />
+            </div>
             <WarehouseFilter
               value={warehouseIds}
               onChange={list.setWarehouses}
@@ -130,9 +143,18 @@ export function StockScreen() {
               }}
             />
           </div>
-          <div className="mt-6 overflow-hidden rounded-2xl border">
+          <div
+            className={cn(
+              "mt-6",
+              !grid && "overflow-hidden rounded-2xl border"
+            )}
+          >
             {stock.isPending ? (
-              <ItemsTableSkeleton rows={SKELETON_ROWS} />
+              grid ? (
+                <ItemGridSkeleton cards={SKELETON_ROWS} />
+              ) : (
+                <ItemsTableSkeleton rows={SKELETON_ROWS} />
+              )
             ) : total === 0 ? (
               <EmptyState
                 illustration={<SearchScene />}
@@ -150,6 +172,22 @@ export function StockScreen() {
                   </Button>
                 }
               />
+            ) : grid ? (
+              <>
+                <StockGrid
+                  rows={stock.data?.items ?? []}
+                  categoryPaths={categories.paths}
+                  stale={stock.isPlaceholderData}
+                />
+                <TablePagination
+                  detached
+                  page={page}
+                  size={size}
+                  total={total}
+                  onPageChange={list.setPage}
+                  onSizeChange={list.setSize}
+                />
+              </>
             ) : (
               <>
                 <Table
