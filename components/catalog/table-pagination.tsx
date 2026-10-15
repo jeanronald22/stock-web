@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { PAGE_SIZES } from "@/lib/list/use-list-params"
+import { cn } from "@/lib/utils"
 
 /** Bas de tableau : « 51–100 sur 230 », lignes par page, page précédente et suivante. */
 export function TablePagination({
@@ -20,12 +21,15 @@ export function TablePagination({
   total,
   onPageChange,
   onSizeChange,
+  detached = false,
 }: {
   page: number
   size: number
   total: number
   onPageChange: (page: number) => void
   onSizeChange: (size: number) => void
+  /** Sous une grille de cartes : un encadré à part, pas le bas d'un tableau. */
+  detached?: boolean
 }) {
   const t = useTranslations("pagination")
   const pages = Math.max(1, Math.ceil(total / size))
@@ -37,7 +41,12 @@ export function TablePagination({
   }))
 
   return (
-    <div className="flex flex-col gap-3 border-t px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+    <div
+      className={cn(
+        "flex flex-col gap-3 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between",
+        detached ? "mt-4 rounded-2xl border" : "border-t"
+      )}
+    >
       <p className="text-muted-foreground" aria-live="polite">
         {t("range", { from, to, total })}
       </p>
