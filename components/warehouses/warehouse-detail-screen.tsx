@@ -11,6 +11,7 @@ import { useMemo } from "react"
 import { toast } from "sonner"
 
 import { useQuantityLabel } from "@/components/items/describe"
+import { WarehouseLocations } from "@/components/locations/warehouse-locations"
 import { ItemThumb } from "@/components/items/item-thumb"
 import { RecordActions } from "@/components/records/record-actions"
 import { RecordFacts } from "@/components/records/record-facts"
@@ -115,6 +116,7 @@ function WarehouseDetails({ warehouse }: { warehouse: Warehouse }) {
             rows={toOrder.data?.items}
             total={toOrder.data?.total ?? 0}
           />
+          <WarehouseLocations warehouse={warehouse} />
           <VoucherHistory
             title={t("warehouses.detail.history")}
             search={historySearch}

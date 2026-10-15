@@ -6,6 +6,7 @@ import {
   query,
   type BaseUnit,
   type Item,
+  type LocationRef,
   type Page,
   type StockState,
 } from "./stock"
@@ -205,6 +206,8 @@ export type VoucherLine = {
   /** Caractéristiques du lot (D35). */
   shade: string | null
   caliber: string | null
+  /** Emplacement actuel de l'article dans le dépôt du bon (D37). */
+  location: LocationRef | null
 }
 
 export type Voucher = Omit<VoucherSummary, "lineCount"> & {

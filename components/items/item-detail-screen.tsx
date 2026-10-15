@@ -11,6 +11,7 @@ import { useMemo, useState } from "react"
 import { toast } from "sonner"
 
 import { useCategoryTree } from "@/components/categories/use-category-tree"
+import { ItemLocationPicker } from "@/components/locations/item-location-picker"
 import { RecordActions } from "@/components/records/record-actions"
 import { RecordFacts } from "@/components/records/record-facts"
 import {
@@ -37,6 +38,7 @@ import {
   StockPermission,
   StockState,
   type Item,
+  type LocationRef,
   type Warehouse,
 } from "@/lib/api/stock"
 import { useItem, useItemStatus, useWarehouses } from "@/lib/api/stock-queries"
@@ -83,6 +85,8 @@ type WarehouseLine = {
   warehouse: { id: string; name: string }
   stock: WarehouseStock | undefined
   minQuantity: number | null
+  /** Emplacement habituel dans ce dépôt (D37). */
+  location: LocationRef | null
   state: StockState
 }
 
@@ -134,14 +138,15 @@ function ItemDetails({
         const entry = entries.find(
           (candidate) => candidate.warehouse.id === warehouse.id
         )
-        const minQuantity =
-          item.warehouses.find(
-            (placement) => placement.warehouseId === warehouse.id
-          )?.minQuantity ?? null
+        const placement = item.warehouses.find(
+          (candidate) => candidate.warehouseId === warehouse.id
+        )
+        const minQuantity = placement?.minQuantity ?? null
         return {
           warehouse,
           stock: entry,
           minQuantity,
+          location: placement?.location ?? null,
           state: stateOf(entry?.quantity ?? 0, minQuantity),
         }
       })
@@ -250,7 +255,9 @@ function WarehouseStock({
   const t = useTranslations("items.detail")
   const quantityLabel = useQuantityLabel()
   const batchLabel = useBatchLabel()
-  const canSetThresholds = useStockAccess().can(StockPermission.setThresholds)
+  const { can, covers } = useStockAccess()
+  const canSetThresholds = can(StockPermission.setThresholds)
+  const canArrange = can(StockPermission.manageLocations)
   const [thresholds, setThresholds] = useState(false)
 
   return (
@@ -296,6 +303,17 @@ function WarehouseStock({
                         ),
                       })}
                 </p>
+                <ItemLocationPicker
+                  itemId={item.id}
+                  itemName={item.name}
+                  warehouseId={line.warehouse.id}
+                  location={line.location}
+                  editable={
+                    canArrange &&
+                    covers(line.warehouse.id) &&
+                    item.status === CatalogStatus.active
+                  }
+                />
                 {(line.stock?.batches.length ?? 0) > 0 && (
                   <ul
                     className="mt-2 flex flex-wrap gap-1"

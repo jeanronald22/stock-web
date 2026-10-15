@@ -7,6 +7,11 @@ export const StockPaths = {
   warehouseArchive: (id: string) => `/v1/warehouses/${id}/archive`,
   warehouseRestore: (id: string) => `/v1/warehouses/${id}/restore`,
   transferDestinations: "/v1/warehouses/destinations",
+  warehouseLocations: (warehouseId: string) =>
+    `/v1/warehouses/${warehouseId}/locations`,
+  location: (id: string) => `/v1/locations/${id}`,
+  locationArchive: (id: string) => `/v1/locations/${id}/archive`,
+  locationRestore: (id: string) => `/v1/locations/${id}/restore`,
   items: "/v1/items",
   item: (id: string) => `/v1/items/${id}`,
   itemArchive: (id: string) => `/v1/items/${id}/archive`,
@@ -14,6 +19,8 @@ export const StockPaths = {
   itemImage: (id: string) => `/v1/items/${id}/image`,
   itemThreshold: (id: string, warehouseId: string) =>
     `/v1/items/${id}/warehouses/${warehouseId}/threshold`,
+  itemLocation: (id: string, warehouseId: string) =>
+    `/v1/items/${id}/warehouses/${warehouseId}/location`,
   /** Codes-barres internes pour les articles qui n'en ont pas (D36). */
   itemBarcodes: "/v1/items/barcodes",
   /** Import du catalogue par paquets, avec le stock de départ (D36). */
@@ -55,6 +62,9 @@ export const StockLimits = {
   packagingName: 40,
   packagingsPerItem: 10,
   batch: 60,
+  /** Emplacement (D37) : code à écrire sur l'étagère, libellé en clair. */
+  locationCode: 20,
+  locationLabel: 120,
   pageSize: 50,
   /** Articles par paquet (import, codes-barres ; stock-api, StockLimits.ITEMS_PER_BATCH). */
   itemsPerBatch: 100,
@@ -145,6 +155,23 @@ export const StockState = {
 /** Dépôt où l'article est proposé, avec son seuil d'alerte en unité de base (null : aucun). */
 export type ItemPlacement = { warehouseId: string; minQuantity: number | null }
 
+/** Emplacement tel qu'on l'affiche à côté d'un article (D37). */
+export type LocationRef = { id: string; code: string; label: string | null }
+
+/** Dépôt où l'article est proposé, vu depuis l'API : avec son emplacement habituel. */
+export type PlacementView = ItemPlacement & { location: LocationRef | null }
+
+/** Emplacement d'un dépôt (D37) : où ranger et retrouver un article. */
+export type Location = LocationRef & {
+  warehouseId: string
+  status: CatalogStatus
+  /** Articles actifs rangés là. */
+  itemCount: number
+  version: number
+}
+
+export type LocationInput = { code: string; label?: string }
+
 export type Category = {
   id: string
   name: string
@@ -178,6 +205,7 @@ export type StockPermission =
   | "SET_THRESHOLDS"
   | "MANAGE_CATALOG"
   | "MANAGE_WAREHOUSES"
+  | "MANAGE_LOCATIONS"
 export const StockPermission = {
   view: "VIEW",
   recordMovements: "RECORD_MOVEMENTS",
@@ -185,6 +213,8 @@ export const StockPermission = {
   setThresholds: "SET_THRESHOLDS",
   manageCatalog: "MANAGE_CATALOG",
   manageWarehouses: "MANAGE_WAREHOUSES",
+  /** Emplacements de ses dépôts et place des articles (D37). */
+  manageLocations: "MANAGE_LOCATIONS",
 } as const satisfies Record<string, StockPermission>
 
 /** Accès Stock de la personne connectée ; role null : aucun accès à Stock. */
@@ -221,7 +251,7 @@ export type Item = {
   batchTracking: boolean
   description: string | null
   packagings: Packaging[]
-  warehouses: ItemPlacement[]
+  warehouses: PlacementView[]
   categoryId: string | null
   status: CatalogStatus
   version: number
@@ -423,6 +453,51 @@ export const stockApi = (send: ApiClient) => {
         ...scoped,
         method: "DELETE",
         path: StockPaths.itemImage(id),
+      }),
+
+    locations: (warehouseId: string) =>
+      send<Location[]>({
+        ...scoped,
+        method: "GET",
+        path: StockPaths.warehouseLocations(warehouseId),
+      }),
+    createLocation: (id: string, warehouseId: string, input: LocationInput) =>
+      send<Location>({
+        ...scoped,
+        method: "POST",
+        path: StockPaths.warehouseLocations(warehouseId),
+        body: { id, ...input },
+      }),
+    updateLocation: (id: string, version: number, input: LocationInput) =>
+      send<Location>({
+        ...scoped,
+        method: "PUT",
+        path: StockPaths.location(id),
+        body: { version, ...input },
+      }),
+    archiveLocation: (id: string) =>
+      send<Location>({
+        ...scoped,
+        method: "POST",
+        path: StockPaths.locationArchive(id),
+      }),
+    restoreLocation: (id: string) =>
+      send<Location>({
+        ...scoped,
+        method: "POST",
+        path: StockPaths.locationRestore(id),
+      }),
+    /** Emplacement habituel de l'article dans un dépôt ; null : plus d'emplacement. */
+    changeItemLocation: (
+      id: string,
+      warehouseId: string,
+      locationId: string | null
+    ) =>
+      send<Item>({
+        ...scoped,
+        method: "PUT",
+        path: StockPaths.itemLocation(id, warehouseId),
+        body: { locationId },
       }),
 
     /** Attribue un code interne aux articles qui n'en ont pas ; renvoie tous les articles demandés. */

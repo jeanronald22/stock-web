@@ -100,6 +100,9 @@ export function useVoucherPdf() {
         lines: voucher.lines.map((line) => ({
           name: line.itemName,
           reference: line.itemReference,
+          location: line.location
+            ? t("print.location", { code: line.location.code })
+            : null,
           batch: line.batch ? batchLabel(line.batch, line) : EMPTY,
           entered: line.packagingName
             ? `${format.number(line.enteredQuantity)} ${line.packagingName}`

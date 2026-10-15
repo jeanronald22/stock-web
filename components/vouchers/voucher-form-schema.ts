@@ -5,6 +5,7 @@ import {
   wholeQuantityUnits,
   type BaseUnit,
   type Item,
+  type LocationRef,
   type Packaging,
 } from "@/lib/api/stock"
 import type { CustomerKind } from "@/lib/api/customers"
@@ -46,6 +47,8 @@ const itemSnapshot = z.object({
   baseUnit: z.custom<BaseUnit>(),
   batchTracking: z.boolean(),
   packagings: z.custom<Packaging[]>(),
+  /** Emplacement habituel par dépôt (D37) : où prendre ou ranger l'article. */
+  locations: z.custom<Record<string, LocationRef>>(),
 })
 
 export function voucherFormSchema(
@@ -194,6 +197,13 @@ export function newLine(
       baseUnit: item.baseUnit,
       batchTracking: item.batchTracking,
       packagings: item.packagings,
+      locations: Object.fromEntries(
+        item.warehouses.flatMap((placement) =>
+          placement.location
+            ? [[placement.warehouseId, placement.location]]
+            : []
+        )
+      ),
     },
     quantity: preset?.quantity ?? "",
     unit: preset

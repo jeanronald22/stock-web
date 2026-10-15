@@ -16,6 +16,7 @@ import { EmptyState } from "@/components/catalog/empty-state"
 import { SearchScene } from "@/components/illustrations/search-scene"
 import { useBatchLabel, useQuantityLabel } from "@/components/items/describe"
 import { ItemThumb } from "@/components/items/item-thumb"
+import { LocationLabel } from "@/components/locations/location-label"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
@@ -266,6 +267,12 @@ export function VoucherScreen({ id }: { id: string }) {
                         <p className="font-mono text-xs text-muted-foreground">
                           {line.itemReference}
                         </p>
+                      )}
+                      {line.location && (
+                        <LocationLabel
+                          location={line.location}
+                          className="text-xs"
+                        />
                       )}
                       {line.batch && (
                         <p className="text-xs text-muted-foreground sm:hidden">

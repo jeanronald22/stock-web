@@ -342,6 +342,7 @@ function InventorySheet({ inventory }: { inventory: Inventory }) {
             <CountLine
               key={`${line.item.id}-${line.batch ?? ""}-${line.count?.first.at ?? ""}-${line.count?.recount?.at ?? ""}`}
               inventoryId={inventory.id}
+              warehouseId={inventory.warehouse.id}
               line={line}
               editable={canCount}
               flagged={moved.some(

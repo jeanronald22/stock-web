@@ -825,7 +825,8 @@
       "receivedOf": "{received} received of {expected}",
       "countedOf": "{counted} counted (book {book})",
       "witnessedBy": "Witness (name and signature)",
-      "preparedBy": "Prepared by"
+      "preparedBy": "Prepared by",
+      "location": "Loc. {code}"
     },
     "menu": {
       "open": "Actions for voucher {number}",
@@ -1150,11 +1151,11 @@
       },
       "MANAGER": {
         "label": "Manager",
-        "hint": "In charge of their warehouses: catalogue, thresholds, vouchers, corrections."
+        "hint": "In charge of their warehouses: catalogue, thresholds, locations, vouchers, corrections."
       },
       "CONTROLLER": {
         "label": "Controller",
-        "hint": "Their warehouses: receipts, issues, corrections and alert thresholds."
+        "hint": "Their warehouses: receipts, issues, corrections, alert thresholds and locations."
       },
       "STOREKEEPER": {
         "label": "Storekeeper",
@@ -1488,7 +1489,7 @@
     "gapsTitle": "Gaps",
     "closedWithAdjustment": "Closed: the gaps were recorded in stock by the adjustment voucher.",
     "closedWithoutGap": "Closed without gaps: stock was right.",
-    "searchPlaceholder": "Search for an item",
+    "searchPlaceholder": "Search for an item or a location",
     "filterLabel": "Lines",
     "filters": {
       "TO_COUNT": "To count",
@@ -1926,6 +1927,46 @@
       "batchRequired": "missing batch for a batch-tracked item",
       "quantityNotWhole": "non-whole quantity for an item counted in pieces",
       "other": "rejected by the app"
+    }
+  },
+  "locations": {
+    "title": "Locations",
+    "description": "Where items are stored: aisle, shelf, level.",
+    "empty": "Record where items are stored (aisle, shelf, level): the location then shows on vouchers and on the count sheet.",
+    "add": "Add",
+    "addFirst": "Add a location",
+    "itemCount": "{count, plural, =0 {No items} one {# item} other {# items}}",
+    "archivedBadge": "Archived",
+    "actions": "Actions on location {code}",
+    "edit": "Edit",
+    "archive": "Archive",
+    "restore": "Restore",
+    "archived": "Location {code} archived: items stored there keep it.",
+    "restored": "Location {code} restored.",
+    "showAll": "{count, plural, one {Show # more location} other {Show # more locations}}",
+    "showLess": "Show less",
+    "dialog": {
+      "newTitle": "New location",
+      "editTitle": "Edit location",
+      "description": "The code goes on the shelf; the label explains it to anyone new to the warehouse.",
+      "code": "Code",
+      "codePlaceholder": "A-03-2",
+      "codeHint": "Short and unique in this warehouse: aisle, shelf, level.",
+      "codeRequired": "Enter the location code.",
+      "label": "Label (optional)",
+      "labelPlaceholder": "Aisle A, shelf 3, level 2",
+      "create": "Add",
+      "save": "Save",
+      "created": "Location {code} added.",
+      "saved": "Location saved."
+    },
+    "picker": {
+      "trigger": "Location of {item}",
+      "none": "No location",
+      "search": "Code or label",
+      "empty": "No locations: type a code to create one.",
+      "create": "Create “{code}” and store the item there",
+      "clear": "Remove the location"
     }
   }
 }

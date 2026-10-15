@@ -16,6 +16,7 @@ import {
   type CategoryInput,
   type ItemInput,
   type ItemSearch,
+  type LocationInput,
   type WarehouseInput,
 } from "./stock"
 
@@ -41,6 +42,8 @@ export const stockKeys = {
     [...stockKeys.all(organizationId), "item-count"] as const,
   item: (organizationId: string | null, id: string) =>
     [...stockKeys.all(organizationId), "item", id] as const,
+  locations: (organizationId: string | null, warehouseId: string) =>
+    [...stockKeys.all(organizationId), "locations", warehouseId] as const,
   categories: (organizationId: string | null) =>
     [...stockKeys.all(organizationId), "categories"] as const,
   myAccess: (organizationId: string | null) =>
@@ -304,6 +307,62 @@ export function useMyStockAccess() {
 }
 
 /** Seuil d'alerte d'un dépôt, réglable aussi par un contrôleur. */
+/** Emplacements d'un dépôt (D37), actifs et archivés, par code. */
+export function useLocations(warehouseId: string | undefined) {
+  const { stock } = useApi()
+  const organizationId = useOrganizationId()
+  return useQuery({
+    queryKey: stockKeys.locations(organizationId, warehouseId ?? ""),
+    queryFn: () => stock.locations(warehouseId!),
+    enabled: !!organizationId && !!warehouseId,
+  })
+}
+
+export function useSaveLocation() {
+  const { stock } = useApi()
+  return useStockMutation(
+    ({
+      id,
+      warehouseId,
+      version,
+      input,
+    }: {
+      id: string
+      warehouseId: string
+      version?: number
+      input: LocationInput
+    }) =>
+      version === undefined
+        ? stock.createLocation(id, warehouseId, input)
+        : stock.updateLocation(id, version, input)
+  )
+}
+
+export function useLocationStatus() {
+  const { stock } = useApi()
+  return useStockMutation(
+    ({ id, status }: { id: string; status: CatalogStatus }) =>
+      status === CatalogStatus.archived
+        ? stock.archiveLocation(id)
+        : stock.restoreLocation(id)
+  )
+}
+
+export function useChangeItemLocation() {
+  const { stock } = useApi()
+  return useStockMutation(
+    ({
+      itemId,
+      warehouseId,
+      locationId,
+    }: {
+      itemId: string
+      warehouseId: string
+      locationId: string | null
+    }) => stock.changeItemLocation(itemId, warehouseId, locationId)
+  )
+}
+
 export function useAssignBarcodes() {
   const { stock } = useApi()
   return useStockMutation((itemIds: string[]) => stock.assignBarcodes(itemIds))

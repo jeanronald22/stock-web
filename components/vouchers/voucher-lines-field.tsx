@@ -12,6 +12,7 @@ import {
 
 import { useBatchLabel, useQuantityLabel } from "@/components/items/describe"
 import { ItemThumb } from "@/components/items/item-thumb"
+import { LocationLabel } from "@/components/locations/location-label"
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -323,8 +324,16 @@ function VoucherLineRow({
         <div className="flex min-h-11 items-center justify-between gap-2 md:pr-2">
           <span className="flex min-w-0 items-center gap-3">
             <ItemThumb imageUrl={line.item.imageUrl} size="sm" />
-            <span className="min-w-0 truncate font-semibold">
-              {line.item.name}
+            <span className="min-w-0">
+              <span className="block truncate font-semibold">
+                {line.item.name}
+              </span>
+              {line.item.locations[warehouseId] && (
+                <LocationLabel
+                  location={line.item.locations[warehouseId]}
+                  className="text-xs"
+                />
+              )}
             </span>
           </span>
           {/* Téléphone : le retrait à côté du nom, sans ligne à lui seul. */}
