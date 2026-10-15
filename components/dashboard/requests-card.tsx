@@ -10,6 +10,7 @@ import { useRequests } from "@/lib/api/request-queries"
 import { StockPermission } from "@/lib/api/stock"
 import { RequestStatus } from "@/lib/api/voucher-requests"
 import { RecordRoutes, Routes } from "@/lib/routes"
+import { cn } from "@/lib/utils"
 
 const MINUTE_MS = 60 * 1000
 
@@ -20,7 +21,7 @@ const PREVIEW = 5
  * Demandes de sortie en attente (D33) : à valider pour un responsable, en attente pour qui les a
  * préparées. Rien s'il n'y en a pas.
  */
-export function RequestsCard() {
+export function RequestsCard({ className }: { className?: string }) {
   const t = useTranslations("dashboard.requests")
   const format = useFormatter()
   const now = useNow({ updateInterval: MINUTE_MS })
@@ -32,7 +33,10 @@ export function RequestsCard() {
 
   return (
     <section
-      className="mt-6 rounded-2xl border border-warning/40 bg-warning-muted/40 p-5"
+      className={cn(
+        "rounded-2xl border border-warning/40 bg-warning-muted/40 p-5",
+        className
+      )}
       aria-labelledby="requests-title"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">

@@ -16,6 +16,8 @@ export type SectionTab = {
   alsoActiveOn?: readonly string[]
   /** Sous-écrans qui appartiennent à un autre onglet (/bons/demandes n'est pas « Bons »). */
   except?: readonly string[]
+  /** Paramètres gardés d'un onglet à l'autre (la période d'un rapport), sans le « ? ». */
+  query?: string
 }
 
 /**
@@ -46,7 +48,7 @@ export function SectionTabs({
         return (
           <Link
             key={tab.href}
-            href={tab.href}
+            href={tab.query ? `${tab.href}?${tab.query}` : tab.href}
             aria-current={active ? "page" : undefined}
             className={cn(
               "flex h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-medium transition-colors",

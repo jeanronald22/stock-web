@@ -26,6 +26,10 @@ export const Routes = {
   newCustomerReturn: "/bons/retour-client",
   newSupplierReturn: "/bons/retour-fournisseur",
   stock: "/stock",
+  /** Rapports (D38) : ouverts depuis l'accueil et « Stock », sans entrée de menu. */
+  reports: "/rapports",
+  reportsDamage: "/rapports/casse",
+  reportsDiscrepancies: "/rapports/ecarts",
   suppliers: "/fournisseurs",
   newSupplier: "/fournisseurs/nouveau",
   /** Clients et chantiers : second onglet de « Contacts » (D30). */

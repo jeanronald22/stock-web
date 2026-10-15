@@ -15,13 +15,14 @@ import {
   Routes,
   StockAlertParam,
 } from "@/lib/routes"
+import { cn } from "@/lib/utils"
 
 /** Articles montrés sur l'accueil ; la liste complète est sur l'écran Stock. */
 const PREVIEW_ALERTS = 5
 const ALERTS = { stockStates: [StockState.out, StockState.low] }
 
 /** Articles à commander : au seuil ou en rupture dans au moins un dépôt. Rien sans alerte. */
-export function StockAlertsCard() {
+export function StockAlertsCard({ className }: { className?: string }) {
   const t = useTranslations("dashboard.alerts")
   const quantityLabel = useQuantityLabel()
   const alerts = useStockPage(ALERTS, 0, PREVIEW_ALERTS)
@@ -30,7 +31,10 @@ export function StockAlertsCard() {
 
   return (
     <section
-      className="mt-6 rounded-2xl border border-warning/40 bg-warning-muted/30 p-5"
+      className={cn(
+        "rounded-2xl border border-warning/40 bg-warning-muted/30 p-5",
+        className
+      )}
       aria-labelledby="alerts-title"
       data-testid="stock-alerts"
     >

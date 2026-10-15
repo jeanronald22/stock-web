@@ -66,6 +66,8 @@ export const workspaceNavigation: readonly NavigationEntry[] = [
   },
   {
     href: Routes.stock,
+    // Les rapports (D38) se lisent depuis le stock : pas d'entrée à eux.
+    alsoActiveOn: [Routes.reports],
     icon: LayersIcon,
     label: "stock",
     section: "operations",

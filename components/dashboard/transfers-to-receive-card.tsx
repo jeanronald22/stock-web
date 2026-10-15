@@ -11,6 +11,7 @@ import { useVouchersPage } from "@/lib/api/voucher-queries"
 import { TransferState } from "@/lib/api/vouchers"
 import { ListQueryParams, RecordRoutes, Routes } from "@/lib/routes"
 import { VoucherKind } from "@/lib/vouchers/voucher-kinds"
+import { cn } from "@/lib/utils"
 
 /** Envois lus pour l'accueil ; ceux qui arrivent dans ses dépôts y sont listés. */
 const PREVIEW = 20
@@ -20,7 +21,7 @@ const IN_TRANSIT = { transferState: TransferState.inTransit }
  * Transferts en route vers ses dépôts (DECISIONS.md, D27) : à réceptionner à leur arrivée. Rien
  * s'il n'y en a pas, ou si le rôle ne permet pas de réceptionner.
  */
-export function TransfersToReceiveCard() {
+export function TransfersToReceiveCard({ className }: { className?: string }) {
   const t = useTranslations("dashboard.transfers")
   const format = useFormatter()
   const { can, covers } = useStockAccess()
@@ -33,7 +34,10 @@ export function TransfersToReceiveCard() {
 
   return (
     <section
-      className="mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-5"
+      className={cn(
+        "rounded-2xl border border-primary/30 bg-primary/5 p-5",
+        className
+      )}
       aria-labelledby="transfers-title"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">

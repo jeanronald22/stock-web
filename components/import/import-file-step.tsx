@@ -66,13 +66,15 @@ export function ImportFileStep({
   }
 
   const downloadTemplate = () =>
-    void downloadWorkbook(
-      TEMPLATE_FILE,
-      IMPORT_FIELDS.map((field) => tFields(`${field}.label`)),
-      (t.raw("examples") as Record<string, TableCell>[]).map((example) =>
-        IMPORT_FIELDS.map((field) => example[field] ?? null)
-      )
-    )
+    void downloadWorkbook(TEMPLATE_FILE, [
+      {
+        name: t("templateSheet"),
+        headers: IMPORT_FIELDS.map((field) => tFields(`${field}.label`)),
+        rows: (t.raw("examples") as Record<string, TableCell>[]).map(
+          (example) => IMPORT_FIELDS.map((field) => example[field] ?? null)
+        ),
+      },
+    ])
 
   const message = failure
     ? t(`errors.${failure}`, { max: MAX_IMPORT_ROWS })
