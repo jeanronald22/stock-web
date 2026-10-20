@@ -4,6 +4,7 @@ import { ClipboardCheckIcon, ScaleIcon, TruckIcon } from "lucide-react"
 import Link from "next/link"
 import { useFormatter, useTranslations } from "next-intl"
 
+import { ItemLink } from "@/components/items/item-link"
 import { Progress } from "@/components/ui/progress"
 import {
   Table,
@@ -249,12 +250,12 @@ function InventoryGaps({ report }: { report: DiscrepancyReport }) {
               className="flex items-center justify-between gap-3 px-4 py-3"
             >
               <div className="min-w-0">
-                <Link
-                  href={RecordRoutes.item(row.item.id)}
+                <ItemLink
+                  itemId={row.item.id}
                   className="truncate font-medium hover:underline"
                 >
                   {row.item.name}
-                </Link>
+                </ItemLink>
                 <p className="text-xs text-muted-foreground">
                   {t("inventories", { count: row.inventories })}
                 </p>

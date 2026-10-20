@@ -1,7 +1,6 @@
 "use client"
 
 import { ChevronRightIcon } from "lucide-react"
-import Link from "next/link"
 import { useTranslations } from "next-intl"
 
 import { Badge } from "@/components/ui/badge"
@@ -15,10 +14,10 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { CatalogStatus, type Item } from "@/lib/api/stock"
-import { RecordRoutes } from "@/lib/routes"
 import { cn } from "@/lib/utils"
 
 import { useQuantityLabel } from "./describe"
+import { ItemLink } from "./item-link"
 import { ItemThumb } from "./item-thumb"
 
 /** Noms de dépôts montrés dans une ligne ; au-delà, « +2 ». */
@@ -80,12 +79,13 @@ export function ItemsTable({
                   <ItemThumb imageUrl={item.imageUrl} />
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <Link
-                        href={RecordRoutes.item(item.id)}
-                        className="truncate font-medium after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:ring-3 focus-visible:after:ring-ring/30"
+                      <ItemLink
+                        itemId={item.id}
+                        stretched
+                        className="truncate font-medium hover:underline"
                       >
                         {item.name}
-                      </Link>
+                      </ItemLink>
                       {item.status === CatalogStatus.archived && (
                         <Badge variant="secondary">
                           {t("items.restore.badge")}

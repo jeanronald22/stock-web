@@ -12,6 +12,8 @@ import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { useMemo, useState } from "react"
 
+import { DateRangePicker } from "@/components/catalog/date-range-picker"
+import { ItemLink } from "@/components/items/item-link"
 import { ActivityChart } from "@/components/reports/activity-chart"
 import {
   changeOf,
@@ -21,22 +23,19 @@ import {
   useReportQuantity,
 } from "@/components/reports/report-parts"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { InventoryStatus } from "@/lib/api/inventories"
 import { useInventories } from "@/lib/api/inventory-queries"
 import { useActivitySummary } from "@/lib/api/report-queries"
 import type { ActivitySummary } from "@/lib/api/reports"
-import { ListQueryParams, RecordRoutes, Routes } from "@/lib/routes"
+import { useErrorMessage } from "@/lib/api/use-error-message"
+import { ListQueryParams, Routes } from "@/lib/routes"
 import { INBOUND_TYPES, OUTBOUND_TYPES, totalOf } from "@/lib/reports/activity"
 import {
   PeriodPreset,
   presetPeriod,
   previousPeriod,
+  type Period,
 } from "@/lib/reports/periods"
-
-/** Périodes proposées sur l'accueil ; les rapports en offrent d'autres. */
-const PERIODS = [PeriodPreset.last7Days, PeriodPreset.last30Days] as const
-type HomePeriod = (typeof PERIODS)[number]
 
 /** Ce que l'accueil met en avant : l'activité (gérant, manager) ou les contrôles (contrôleur). */
 export const OverviewFocus = {
@@ -46,14 +45,16 @@ export const OverviewFocus = {
 export type OverviewFocus = (typeof OverviewFocus)[keyof typeof OverviewFocus]
 
 /**
- * L'activité de ses dépôts sur 7 ou 30 jours (D38) : quatre chiffres comparés à la période
- * précédente, la courbe des bons, les articles les plus sortis et la casse par motif. Chaque
- * chiffre ouvre le rapport correspondant, sur la même période.
+ * L'activité de ses dépôts sur la période choisie, 7 jours d'abord (D38) : quatre chiffres
+ * comparés à la période précédente, la courbe des bons, les articles les plus sortis et la casse
+ * par motif. Chaque chiffre ouvre le rapport correspondant, sur la même période.
  */
 export function ActivityOverview({ focus }: { focus: OverviewFocus }) {
   const t = useTranslations("dashboard.activity")
-  const [preset, setPreset] = useState<HomePeriod>(PeriodPreset.last7Days)
-  const period = useMemo(() => presetPeriod(preset), [preset])
+  const errorMessage = useErrorMessage()
+  const [period, setPeriod] = useState<Period>(() =>
+    presetPeriod(PeriodPreset.last7Days)
+  )
   const previous = useMemo(() => previousPeriod(period), [period])
   const current = useActivitySummary(period)
   const before = useActivitySummary(previous)
@@ -69,22 +70,13 @@ export function ActivityOverview({ focus }: { focus: OverviewFocus }) {
           {focus === OverviewFocus.activity ? t("title") : t("controlTitle")}
         </h2>
         <div className="flex items-center gap-3">
-          <ToggleGroup
-            aria-label={t("period")}
-            variant="outline"
-            spacing={0}
-            value={[preset]}
-            onValueChange={(values: string[]) => {
-              const next = PERIODS.find((candidate) => candidate === values[0])
-              if (next) setPreset(next)
-            }}
-          >
-            {PERIODS.map((value) => (
-              <ToggleGroupItem key={value} value={value} className="px-3">
-                {t(`periods.${value}`)}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
+          <DateRangePicker
+            from={period.from}
+            to={period.to}
+            onChange={(from, to) => from && to && setPeriod({ from, to })}
+            label={t("period")}
+            className="h-11 sm:h-9 sm:w-64"
+          />
           <Link
             href={`${Routes.reports}?${reportQuery}`}
             className="inline-flex items-center gap-1 text-sm font-semibold text-primary"
@@ -95,7 +87,15 @@ export function ActivityOverview({ focus }: { focus: OverviewFocus }) {
         </div>
       </div>
 
-      {!current.data ? (
+      {current.isError ? (
+        // Une période de plus d'un an est refusée par l'API : son message le dit.
+        <p
+          role="alert"
+          className="rounded-2xl bg-muted/40 px-6 py-10 text-center text-sm text-muted-foreground"
+        >
+          {errorMessage(current.error)}
+        </p>
+      ) : !current.data ? (
         <Skeleton className="h-60 rounded-2xl lg:h-32" aria-hidden />
       ) : (
         <>
@@ -273,12 +273,12 @@ function TopIssued({ summary }: { summary: ActivitySummary }) {
           {top.map((row) => (
             <li key={row.item.id}>
               <div className="flex items-baseline justify-between gap-3 text-sm">
-                <Link
-                  href={RecordRoutes.item(row.item.id)}
+                <ItemLink
+                  itemId={row.item.id}
                   className="min-w-0 truncate font-medium hover:underline"
                 >
                   {row.item.name}
-                </Link>
+                </ItemLink>
                 <span className="shrink-0 num text-muted-foreground">
                   {quantity(row.item.baseUnit, row.issued)}
                 </span>

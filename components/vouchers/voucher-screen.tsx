@@ -17,6 +17,7 @@ import type { ReactNode } from "react"
 import { EmptyState } from "@/components/catalog/empty-state"
 import { SearchScene } from "@/components/illustrations/search-scene"
 import { useBatchLabel, useQuantityLabel } from "@/components/items/describe"
+import { ItemLink } from "@/components/items/item-link"
 import { ItemThumb } from "@/components/items/item-thumb"
 import { LocationLabel } from "@/components/locations/location-label"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -278,12 +279,12 @@ export function VoucherScreen({ id }: { id: string }) {
                   <div className="flex items-center gap-3">
                     <ItemThumb imageUrl={line.itemImageUrl} />
                     <div className="min-w-0">
-                      <Link
-                        href={RecordRoutes.item(line.itemId)}
+                      <ItemLink
+                        itemId={line.itemId}
                         className="font-semibold hover:underline"
                       >
                         {line.itemName}
-                      </Link>
+                      </ItemLink>
                       {line.itemReference && (
                         <p className="font-mono text-xs text-muted-foreground">
                           {line.itemReference}

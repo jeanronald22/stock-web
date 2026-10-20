@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl"
 import { useMemo } from "react"
 import { toast } from "sonner"
 
+import { ItemLink } from "@/components/items/item-link"
 import { ItemThumb } from "@/components/items/item-thumb"
 import { ContactActions } from "@/components/records/contact-actions"
 import { RecordActions } from "@/components/records/record-actions"
@@ -202,8 +203,8 @@ function SupplierCatalogPreview({ supplier }: { supplier: Supplier }) {
         <ul className="flex flex-wrap gap-2">
           {rows.map((item) => (
             <li key={item.id}>
-              <Link
-                href={RecordRoutes.item(item.id)}
+              <ItemLink
+                itemId={item.id}
                 className="inline-flex items-center gap-2 rounded-full border py-1 pr-3 pl-1 text-sm transition-colors hover:bg-muted"
               >
                 <ItemThumb
@@ -212,7 +213,7 @@ function SupplierCatalogPreview({ supplier }: { supplier: Supplier }) {
                   className="size-6 rounded-full"
                 />
                 {item.name}
-              </Link>
+              </ItemLink>
             </li>
           ))}
           {total > rows.length && (

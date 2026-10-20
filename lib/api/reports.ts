@@ -8,6 +8,7 @@ export const ReportPaths = {
   damage: "/v1/reports/damage",
   discrepancies: "/v1/reports/discrepancies",
   summary: "/v1/reports/summary",
+  itemHistory: (itemId: string) => `/v1/reports/items/${itemId}/history`,
 } as const
 
 export const ReportQueryParams = {
@@ -103,6 +104,20 @@ export type ActivitySummary = {
   receiptsWithDiscrepancy: number
 }
 
+/** Un jour d'un article : entrées et sorties en positif, stock du soir. */
+export type ItemDay = {
+  day: string
+  inbound: number
+  outbound: number
+  balance: number
+}
+
+export type ItemHistory = {
+  itemId: string
+  period: ReportPeriod
+  days: ItemDay[]
+}
+
 export const reportApi = (send: ApiClient) => {
   const scoped = { organizationScoped: true } as const
   const get =
@@ -124,5 +139,7 @@ export const reportApi = (send: ApiClient) => {
     damage: get<DamageReport>(ReportPaths.damage),
     discrepancies: get<DiscrepancyReport>(ReportPaths.discrepancies),
     summary: get<ActivitySummary>(ReportPaths.summary),
+    itemHistory: (itemId: string, search: ReportSearch) =>
+      get<ItemHistory>(ReportPaths.itemHistory(itemId))(search),
   }
 }

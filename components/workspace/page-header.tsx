@@ -9,6 +9,7 @@ import { Breadcrumbs, type Crumb } from "./breadcrumbs"
  */
 export function PageHeader({
   title,
+  visual,
   badges,
   description,
   actions,
@@ -16,6 +17,8 @@ export function PageHeader({
   className,
 }: {
   title: string
+  /** Fiches : photo ou icône à gauche du titre. */
+  visual?: React.ReactNode
   badges?: React.ReactNode
   description?: string
   actions?: React.ReactNode
@@ -26,22 +29,29 @@ export function PageHeader({
   const header = (
     <div
       className={cn(
-        "flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between",
+        "flex flex-col gap-4 sm:flex-row sm:justify-between",
+        // Avec une photo, les actions s'alignent sur le milieu du bloc, pas sous la photo.
+        visual ? "sm:items-center" : "sm:items-end",
         className
       )}
     >
-      <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-          <h1 className="animate-rise-in text-2xl font-semibold tracking-tight sm:text-3xl">
-            {title}
-          </h1>
-          {badges && (
-            <div className="flex flex-wrap items-center gap-1.5">{badges}</div>
+      <div className="flex min-w-0 items-center gap-4">
+        {visual}
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <h1 className="animate-rise-in text-2xl font-semibold tracking-tight sm:text-3xl">
+              {title}
+            </h1>
+            {badges && (
+              <div className="flex flex-wrap items-center gap-1.5">
+                {badges}
+              </div>
+            )}
+          </div>
+          {description && (
+            <p className="mt-1 text-muted-foreground">{description}</p>
           )}
         </div>
-        {description && (
-          <p className="mt-1 text-muted-foreground">{description}</p>
-        )}
       </div>
       {actions && (
         <div className="flex shrink-0 flex-wrap items-center gap-2">

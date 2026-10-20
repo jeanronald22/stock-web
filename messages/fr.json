@@ -203,10 +203,6 @@
       "title": "Activité de vos dépôts",
       "controlTitle": "À vérifier",
       "period": "Période",
-      "periods": {
-        "last7Days": "7 jours",
-        "last30Days": "30 jours"
-      },
       "reports": "Rapports",
       "chart": "Entrées et sorties",
       "chartHint": "Nombre de bons par jour.",
@@ -603,7 +599,7 @@
     "detail": {
       "edit": "Modifier",
       "editTitle": "Modifier l’article",
-      "inStock": "En stock dans vos dépôts",
+      "inStock": "En stock",
       "breakdown": "soit {breakdown}",
       "byWarehouse": "Par dépôt",
       "thresholds": "Seuils d’alerte",
@@ -616,7 +612,7 @@
       "noHistory": "Aucun bon ne porte encore cet article.",
       "unchanged": "Inchangé",
       "allHistory": "Voir ses {count} bons",
-      "facts": "Fiche",
+      "facts": "Fiche technique",
       "unit": "Compté en",
       "packagings": "Conditionnements",
       "batchTracking": "Lots",
@@ -629,13 +625,79 @@
       "issue": "Nouvelle sortie de cet article",
       "category": "Catégorie",
       "defaultFor": "{directions, select, both {par défaut en réception et en sortie} receipt {par défaut en réception} other {par défaut en sortie}}",
-      "labels": "Imprimer des étiquettes"
+      "labels": "Imprimer des étiquettes",
+      "enlargePhoto": "Agrandir la photo de {name}",
+      "sections": "Sections de la fiche",
+      "section": {
+        "general": "Informations générales",
+        "stock": "Stock par dépôt",
+        "mouvements": "Mouvements"
+      },
+      "state": "État",
+      "summary": "L’essentiel de l’article",
+      "warehouses": "Dépôts",
+      "alerts": "{count, plural, =0 {Aucune alerte} one {# en alerte} other {# en alerte}}",
+      "lastMovement": "Dernier mouvement",
+      "noMovement": "Aucun pour l’instant",
+      "byWarehouseHint": "Ce qu’il reste dans chaque dépôt, et son seuil d’alerte.",
+      "stockDetail": "Détail du stock",
+      "missing": "Non renseigné",
+      "factsHint": "Ce qui identifie l’article et comment on le compte.",
+      "createdAt": "Ajouté le",
+      "noPackaging": "Aucun : compté à l’unité",
+      "description": "Description",
+      "stockSeries": "Stock",
+      "thresholdSeries": "Seuil d’alerte",
+      "warehouseChart": "Stock et seuil d’alerte de chaque dépôt",
+      "sectionShort": {
+        "general": "Général",
+        "stock": "Stock",
+        "mouvements": "Mouvements"
+      },
+      "whereToFind": "Où le trouver",
+      "movementsChart": "Entrées et sorties",
+      "movementsChartHint": "Les quantités reçues et sorties, jour par jour, dans vos dépôts.",
+      "movementsChartSummary": "Sur la période : {inbound} entrés, {outbound} sortis.",
+      "periodLabel": "Période de la courbe",
+      "inbound": "Entrées",
+      "outbound": "Sorties"
     },
     "more": {
       "label": "Options du catalogue",
       "import": "Importer un fichier Excel",
       "importFromFile": "Ou importer un fichier Excel",
       "labels": "Imprimer des étiquettes"
+    },
+    "preview": {
+      "warehouses": "{count, plural, =0 {Aucun dépôt} one {# dépôt} other {# dépôts}}",
+      "alerts": "{count, plural, one {# en alerte} other {# en alerte}}",
+      "countedIn": "Compté en : {unit}",
+      "open": "Ouvrir la fiche"
+    },
+    "photos": {
+      "title": "Photos",
+      "hint": "{count} sur {max} · La première est la photo principale, montrée dans les listes.",
+      "count": "{count, plural, one {# photo} other {# photos}}",
+      "used": "{count} / {max}",
+      "add": "Ajouter des photos",
+      "addShort": "Ajouter",
+      "sending": "Envoi de la photo…",
+      "main": "Principale",
+      "open": "Voir la photo {index} sur {total}",
+      "photoOf": "{name}, photo {index} sur {total}",
+      "position": "{index} / {total}",
+      "previous": "Photo précédente",
+      "next": "Photo suivante",
+      "makeMain": "Définir comme principale",
+      "mainChanged": "Photo principale changée.",
+      "remove": "Supprimer",
+      "removeTitle": "Supprimer cette photo ?",
+      "removeDescription": "Elle sera retirée de la fiche de l’article.",
+      "removeMainDescription": "Elle sera retirée de la fiche ; la suivante deviendra la photo principale.",
+      "keep": "Garder",
+      "removed": "Photo supprimée.",
+      "added": "{count, plural, one {Photo ajoutée.} other {# photos ajoutées.}}",
+      "tooMany": "{max} photos au plus par article : {count, plural, =0 {aucune n’a été ajoutée} one {seule la première est ajoutée} other {seules les # premières sont ajoutées}}."
     }
   },
   "pagination": {
@@ -1752,6 +1814,11 @@
       "call": "Appeler",
       "whatsapp": "WhatsApp",
       "email": "E-mail"
+    },
+    "copy": {
+      "action": "Copier : {label}",
+      "done": "{label} copié",
+      "failed": "Copie impossible : sélectionnez le texte et copiez-le."
     }
   },
   "labels": {

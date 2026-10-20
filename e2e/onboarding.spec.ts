@@ -142,7 +142,9 @@ test("import d'un catalogue Excel, conditionnement par défaut, étiquettes", as
   await expect(
     page.getByRole("heading", { name: "Robinet mélangeur", level: 1 })
   ).toBeVisible()
-  await expect(page.getByText("En stock dans vos dépôts")).toBeVisible()
+  await expect(
+    page.getByRole("tab", { name: "Informations générales" })
+  ).toBeVisible()
   await page.getByRole("button", { name: "Autres actions" }).click()
   await page.getByRole("menuitem", { name: "Imprimer des étiquettes" }).click()
   await expect(

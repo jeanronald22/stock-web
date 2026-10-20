@@ -7,10 +7,10 @@ import {
   SearchIcon,
   SlidersHorizontalIcon,
 } from "lucide-react"
-import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { useDeferredValue, useState } from "react"
 
+import { ItemLink } from "@/components/items/item-link"
 import { Button } from "@/components/ui/button"
 import {
   InputGroup,
@@ -30,7 +30,6 @@ import { useMovementsReport } from "@/lib/api/report-queries"
 import type { ItemMovements, MovementsReport } from "@/lib/api/reports"
 import { VoucherType } from "@/lib/api/vouchers"
 import { INBOUND_TYPES, OUTBOUND_TYPES, totalOf } from "@/lib/reports/activity"
-import { RecordRoutes } from "@/lib/routes"
 import { cn } from "@/lib/utils"
 
 import { ActivityChart } from "./activity-chart"
@@ -174,12 +173,9 @@ function ItemsTable({ rows }: { rows: ItemMovements[] }) {
           <ul className="divide-y rounded-2xl border md:hidden">
             {visible.map((row) => (
               <li key={row.item.id} className="px-4 py-3">
-                <Link
-                  href={RecordRoutes.item(row.item.id)}
-                  className="font-semibold"
-                >
+                <ItemLink itemId={row.item.id} className="font-semibold">
                   {row.item.name}
-                </Link>
+                </ItemLink>
                 <p className="mt-1 num text-sm text-muted-foreground">
                   {t("compact", {
                     inbound: quantity(row.item.baseUnit, inbound(row)),
@@ -221,12 +217,12 @@ function ItemsTable({ rows }: { rows: ItemMovements[] }) {
                   return (
                     <TableRow key={row.item.id}>
                       <TableCell className="py-3 pl-4">
-                        <Link
-                          href={RecordRoutes.item(row.item.id)}
+                        <ItemLink
+                          itemId={row.item.id}
                           className="font-medium hover:underline"
                         >
                           {row.item.name}
-                        </Link>
+                        </ItemLink>
                         {row.item.reference && (
                           <p className="font-mono text-xs text-muted-foreground">
                             {row.item.reference}

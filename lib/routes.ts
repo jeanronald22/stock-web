@@ -141,6 +141,17 @@ export const CustomerKindParam = {
 export type CustomerKindParam =
   (typeof CustomerKindParam)[keyof typeof CustomerKindParam]
 
+/** Onglet d'une fiche, conservé dans l'adresse ; absent, l'onglet « Informations générales ». */
+export const RECORD_SECTION_PARAM = "onglet"
+
+/** Onglets de la fiche d'un article. */
+export const ItemSection = {
+  general: "general",
+  stock: "stock",
+  movements: "mouvements",
+} as const
+export type ItemSection = (typeof ItemSection)[keyof typeof ItemSection]
+
 /** Valeur de « ordre » pour les bons les plus anciens d'abord ; absente, les plus récents d'abord. */
 export const OLDEST_FIRST_PARAM = "anciens"
 

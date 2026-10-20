@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import { useTranslations } from "next-intl"
 
 import {
@@ -8,6 +7,7 @@ import {
   usePackagingBreakdown,
   useQuantityLabel,
 } from "@/components/items/describe"
+import { ItemLink } from "@/components/items/item-link"
 import { ItemThumb } from "@/components/items/item-thumb"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/table"
 import { StockState } from "@/lib/api/stock"
 import type { StockRow } from "@/lib/api/vouchers"
-import { RecordRoutes } from "@/lib/routes"
 import { cn } from "@/lib/utils"
 
 import { StockLevelBadge } from "./stock-state-badge"
@@ -85,12 +84,13 @@ export function StockTable({
                 <div className="flex items-center gap-3">
                   <ItemThumb imageUrl={row.item.imageUrl} />
                   <div className="min-w-0">
-                    <Link
-                      href={RecordRoutes.item(row.item.id)}
-                      className="line-clamp-1 font-medium after:absolute after:inset-0 focus-visible:outline-none"
+                    <ItemLink
+                      itemId={row.item.id}
+                      stretched
+                      className="line-clamp-1 font-medium hover:underline"
                     >
                       {row.item.name}
-                    </Link>
+                    </ItemLink>
                     {category && (
                       <p className="truncate text-xs text-muted-foreground">
                         {category}

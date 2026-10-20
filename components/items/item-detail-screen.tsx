@@ -1,71 +1,77 @@
 "use client"
 
 import {
-  ArrowDownToLineIcon,
-  ArrowUpFromLineIcon,
-  BellIcon,
-  TagIcon,
+  ArrowRightIcon,
+  ArrowRightLeftIcon,
+  CircleGaugeIcon,
+  HistoryIcon,
+  InfoIcon,
+  PackageIcon,
+  RulerIcon,
+  WarehouseIcon,
+  type LucideIcon,
 } from "lucide-react"
+import Link from "next/link"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useFormatter, useTranslations } from "next-intl"
 import { useMemo, useState } from "react"
-import { toast } from "sonner"
 
 import { useCategoryTree } from "@/components/categories/use-category-tree"
-import { ItemLocationPicker } from "@/components/locations/item-location-picker"
-import { RecordActions } from "@/components/records/record-actions"
-import {
-  RecordSummary,
-  RecordSummaryFigure,
-} from "@/components/records/record-summary"
-import { RecordFacts } from "@/components/records/record-facts"
+import { RecordSection } from "@/components/records/record-section"
 import {
   RecordNotFound,
   RecordSkeleton,
 } from "@/components/records/record-states"
+import { useDayAge } from "@/components/records/use-day-age"
 import { VoucherHistory } from "@/components/records/voucher-history"
-import { StockGauge } from "@/components/stock/stock-gauge"
-import { StockStateBadge } from "@/components/stock/stock-state-badge"
+import {
+  StockLevelBadge,
+  StockStateBadge,
+} from "@/components/stock/stock-state-badge"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import { useStockAccess } from "@/components/workspace/stock-access"
+import { useMediaQuery } from "@/hooks/use-media-query"
 import {
   CatalogStatus,
-  EntryDirection,
   StockPermission,
   StockState,
   type Item,
-  type LocationRef,
   type Warehouse,
 } from "@/lib/api/stock"
-import { useItem, useItemStatus, useWarehouses } from "@/lib/api/stock-queries"
-import { useErrorMessage } from "@/lib/api/use-error-message"
-import { useItemStock } from "@/lib/api/voucher-queries"
-import type { WarehouseStock } from "@/lib/api/vouchers"
+import { useItem, useWarehouses } from "@/lib/api/stock-queries"
+import { useItemStock, useVouchersPage } from "@/lib/api/voucher-queries"
 import {
-  EntryQueryParams,
-  LabelQueryParams,
+  ItemSection,
   ListQueryParams,
+  RECORD_SECTION_PARAM,
   RecordRoutes,
   Routes,
 } from "@/lib/routes"
 import { cn } from "@/lib/utils"
 
-import {
-  useBatchLabel,
-  usePackagingBreakdown,
-  useQuantityLabel,
-} from "./describe"
-import { ItemThresholds } from "./item-thresholds"
-import { ItemThumb } from "./item-thumb"
+import { usePackagingBreakdown, useQuantityLabel } from "./describe"
+import { ItemActions } from "./item-actions"
+import { ItemDetailPhoto } from "./item-detail-photo"
+import { usePhotoAdder } from "./item-photo-adder"
+import { ItemPhotoViewer } from "./item-photo-viewer"
+import { ItemPhotos } from "./item-photos"
+import { ItemMovementsChart } from "./item-movements-chart"
+import { ItemSpecs } from "./item-specs"
+import { ItemWarehouseStock } from "./item-warehouse-stock"
+import { useItemWarehouses, type WarehouseLine } from "./use-item-warehouses"
+
+/** Onglets à gauche à partir de cette largeur ; en dessous, en ligne au-dessus du contenu. */
+const SIDE_TABS_QUERY = "(min-width: 1024px)"
+
+const SECTION_ICONS: Record<ItemSection, LucideIcon> = {
+  [ItemSection.general]: InfoIcon,
+  [ItemSection.stock]: WarehouseIcon,
+  [ItemSection.movements]: HistoryIcon,
+}
 
 export function ItemDetailScreen({ id }: { id: string }) {
   const t = useTranslations("items")
@@ -85,26 +91,31 @@ export function ItemDetailScreen({ id }: { id: string }) {
   return <ItemDetails item={item.data} warehouses={warehouses.data ?? []} />
 }
 
-/** Un dépôt de la fiche : son stock, son seuil, et ce que cela veut dire. */
-type WarehouseLine = {
-  warehouse: { id: string; name: string }
-  stock: WarehouseStock | undefined
-  minQuantity: number | null
-  /** Emplacement habituel dans ce dépôt (D37). */
-  location: LocationRef | null
-  state: StockState
-}
-
-/** Même règle que l'API (StockState.of) : surveillé seulement avec un seuil ; zéro, c'est la rupture. */
-function stateOf(quantity: number, minQuantity: number | null): StockState {
-  if (minQuantity === null) return StockState.ok
-  if (quantity === 0) return StockState.out
-  return quantity <= minQuantity ? StockState.low : StockState.ok
+/** L'onglet ouvert, gardé dans l'adresse : un lien partagé ou un retour arrière le retrouve. */
+function useSection() {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const value = searchParams.get(RECORD_SECTION_PARAM)
+  const section =
+    Object.values(ItemSection).find((candidate) => candidate === value) ??
+    ItemSection.general
+  const open = (next: ItemSection) => {
+    const params = new URLSearchParams(searchParams)
+    if (next === ItemSection.general) params.delete(RECORD_SECTION_PARAM)
+    else params.set(RECORD_SECTION_PARAM, next)
+    const query = params.toString()
+    router.replace(query ? `${pathname}?${query}` : pathname, {
+      scroll: false,
+    })
+  }
+  return [section, open] as const
 }
 
 /**
- * Fiche d'un article, en consultation : combien il en reste et où, ce qui a bougé, ce qui le
- * décrit. La modification est un écran à part (« Modifier »).
+ * Fiche d'un article, en consultation : en tête, sa photo et ce qui le nomme, puis l'essentiel en
+ * une ligne (état, stock, dépôts, dernier mouvement). Le détail se range en onglets : la fiche
+ * technique, le stock dépôt par dépôt, les mouvements. La modification est un écran à part.
  */
 function ItemDetails({
   item,
@@ -114,52 +125,18 @@ function ItemDetails({
   warehouses: Warehouse[]
 }) {
   const t = useTranslations()
-  const { can, covers } = useStockAccess()
+  const { can } = useStockAccess()
   const manages = can(StockPermission.manageCatalog)
   const archived = item.status === CatalogStatus.archived
   const stock = useItemStock(item.id)
   const { nodes } = useCategoryTree()
   const category = nodes.find((node) => node.category.id === item.categoryId)
-
-  // Les dépôts où l'article est proposé, et ceux où il reste du stock sans y être proposé.
-  const lines: WarehouseLine[] = useMemo(() => {
-    const entries = stock.data?.warehouses ?? []
-    // Le nom vient du stock (même d'un dépôt archivé), sinon de la liste des dépôts.
-    const names = new Map([
-      ...warehouses.map((warehouse) => [warehouse.id, warehouse.name] as const),
-      ...entries.map(
-        (entry) => [entry.warehouse.id, entry.warehouse.name] as const
-      ),
-    ])
-    const ids = new Set([
-      ...item.warehouses.map((placement) => placement.warehouseId),
-      ...entries.map((entry) => entry.warehouse.id),
-    ])
-    return [...ids]
-      .filter((id) => names.has(id) && covers(id))
-      .map((id) => ({ id, name: names.get(id)! }))
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .map((warehouse) => {
-        const entry = entries.find(
-          (candidate) => candidate.warehouse.id === warehouse.id
-        )
-        const placement = item.warehouses.find(
-          (candidate) => candidate.warehouseId === warehouse.id
-        )
-        const minQuantity = placement?.minQuantity ?? null
-        return {
-          warehouse,
-          stock: entry,
-          minQuantity,
-          location: placement?.location ?? null,
-          state: stateOf(entry?.quantity ?? 0, minQuantity),
-        }
-      })
-  }, [stock.data, item.warehouses, warehouses, covers])
-  const total = lines.reduce(
-    (sum, line) => sum + (line.stock?.quantity ?? 0),
-    0
-  )
+  const summary = useItemWarehouses(item, warehouses, stock.data)
+  const [section, openSection] = useSection()
+  const sideTabs = useMediaQuery(SIDE_TABS_QUERY)
+  const photoAdder = usePhotoAdder(item)
+  const adder = manages && !archived ? photoAdder : undefined
+  const [photo, openPhoto] = useState<number | null>(null)
 
   return (
     <PageBody>
@@ -169,7 +146,17 @@ function ItemDetails({
           { label: t("items.title"), href: Routes.items },
           { label: item.name },
         ]}
-        description={category?.path}
+        visual={
+          <ItemDetailPhoto
+            item={item}
+            adder={adder}
+            onOpen={() => openPhoto(0)}
+          />
+        }
+        description={
+          [item.reference, category?.path].filter(Boolean).join(" · ") ||
+          undefined
+        }
         badges={
           archived && (
             <Badge variant="secondary">{t("items.restore.badge")}</Badge>
@@ -180,185 +167,253 @@ function ItemDetails({
         }
       />
 
-      <StockSummary item={item} total={total} loaded={stock.isSuccess} />
+      <KeyFacts item={item} loaded={stock.isSuccess} {...summary} />
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
-        <div className="min-w-0 space-y-8">
-          <WarehouseStock item={item} lines={lines} warehouses={warehouses} />
-          <ItemHistory item={item} />
-        </div>
-        <ItemFacts item={item} category={category?.path} />
-      </div>
+      <Tabs
+        value={section}
+        onValueChange={(next: ItemSection) => openSection(next)}
+        orientation={sideTabs ? "vertical" : "horizontal"}
+        className="mt-6 gap-6 lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start"
+      >
+        <TabsList
+          variant="line"
+          aria-label={t("items.detail.sections")}
+          className="w-full justify-start overflow-x-auto border-b pb-px lg:sticky lg:top-20 lg:border-b-0 lg:pb-0"
+        >
+          {Object.values(ItemSection).map((value) => {
+            const Icon = SECTION_ICONS[value]
+            return (
+              <TabsTrigger
+                key={value}
+                value={value}
+                aria-label={t(`items.detail.section.${value}`)}
+                className="h-10 flex-1 rounded-lg px-3 lg:flex-none lg:rounded-xl lg:after:hidden lg:data-active:bg-primary/10 lg:data-active:text-primary"
+              >
+                <Icon aria-hidden />
+                {/* Téléphone : trois onglets tiennent sur la largeur avec leur nom court. */}
+                <span className="lg:hidden">
+                  {t(`items.detail.sectionShort.${value}`)}
+                </span>
+                <span className="hidden lg:inline">
+                  {t(`items.detail.section.${value}`)}
+                </span>
+              </TabsTrigger>
+            )
+          })}
+        </TabsList>
+        <TabsContent value={ItemSection.general} className="min-w-0 space-y-6">
+          <ItemSpecs item={item} category={category?.path} />
+          <StockPreview
+            item={item}
+            lines={summary.lines}
+            loaded={stock.isSuccess}
+            onMore={() => openSection(ItemSection.stock)}
+          />
+          <ItemPhotos item={item} adder={adder} onOpen={openPhoto} />
+        </TabsContent>
+        <TabsContent value={ItemSection.stock} className="min-w-0">
+          <ItemWarehouseStock
+            item={item}
+            lines={summary.lines}
+            warehouses={warehouses}
+          />
+        </TabsContent>
+        <TabsContent
+          value={ItemSection.movements}
+          className="min-w-0 rounded-2xl border p-4 sm:p-5"
+        >
+          <ItemMovementsChart itemId={item.id} baseUnit={item.baseUnit} />
+          <div className="mt-8">
+            <ItemHistory item={item} />
+          </div>
+        </TabsContent>
+      </Tabs>
+      <ItemPhotoViewer
+        item={item}
+        index={photo}
+        onIndexChange={openPhoto}
+        manages={adder !== undefined}
+      />
     </PageBody>
   )
 }
 
 /**
- * Le chiffre qui compte, en grand : le stock de ses dépôts, dit aussi en conditionnements, à côté de
- * la photo qui permet de reconnaître l'article dans les rayons.
+ * L'essentiel en une ligne, comme sur toute fiche : où il en est, combien il en reste (aussi en
+ * conditionnements), dans combien de dépôts, quand il a bougé, comment on le compte.
  */
-function StockSummary({
+function KeyFacts({
   item,
-  total,
   loaded,
+  lines,
+  total,
+  state,
+  alerts,
 }: {
   item: Item
-  total: number
   loaded: boolean
+  lines: WarehouseLine[]
+  total: number
+  state: StockState
+  alerts: number
 }) {
-  const t = useTranslations("items.detail")
-  const tUnits = useTranslations("units")
-  const breakdown = usePackagingBreakdown()(item, total)
+  const t = useTranslations()
   const format = useFormatter()
+  const dayAge = useDayAge()
+  const quantityLabel = useQuantityLabel()
+  const breakdown = usePackagingBreakdown()(item, total)
+  const search = useMemo(() => ({ itemId: item.id }), [item.id])
+  const latest = useVouchersPage(search, 0, 1)
+  const last = latest.data?.items[0]
+
+  if (!loaded) return <Skeleton className="mt-6 h-16 rounded-xl" aria-hidden />
   return (
-    <RecordSummary
-      label={t("inStock")}
-      visual={
-        // Téléphone : la photo reste à côté du chiffre, qui doit se lire sans faire défiler.
-        <ItemThumb
-          imageUrl={item.imageUrl}
-          size="xl"
-          className="size-16 rounded-xl sm:size-20 [&_svg]:size-7 sm:[&_svg]:size-8"
-        />
-      }
+    <dl
+      aria-label={t("items.detail.summary")}
+      className="mt-6 grid grid-cols-2 gap-x-6 gap-y-4 sm:flex sm:flex-wrap sm:gap-x-10"
     >
-      {loaded ? (
-        <RecordSummaryFigure
-          value={format.number(total)}
-          unit={tUnits(`${item.baseUnit}.unitPlural`, { count: total })}
-        />
-      ) : (
-        <Skeleton className="mt-2 h-10 w-40" />
-      )}
-      {breakdown && (
-        <p className="mt-0.5 num text-sm text-muted-foreground">
-          {t("breakdown", { breakdown })}
-        </p>
-      )}
-    </RecordSummary>
+      <KeyFact icon={CircleGaugeIcon} label={t("items.detail.state")}>
+        <StockLevelBadge state={state} quantity={total} />
+      </KeyFact>
+      <KeyFact
+        icon={PackageIcon}
+        label={t("items.detail.inStock")}
+        hint={breakdown ? t("items.detail.breakdown", { breakdown }) : null}
+      >
+        <span
+          className={cn("num", state === StockState.out && "text-destructive")}
+        >
+          {quantityLabel(item.baseUnit, total)}
+        </span>
+      </KeyFact>
+      <KeyFact
+        icon={WarehouseIcon}
+        label={t("items.detail.warehouses")}
+        hint={t("items.detail.alerts", { count: alerts })}
+      >
+        {t("items.preview.warehouses", { count: lines.length })}
+      </KeyFact>
+      <KeyFact
+        icon={ArrowRightLeftIcon}
+        label={t("items.detail.lastMovement")}
+        hint={last ? dayAge(new Date(last.occurredAt)) : null}
+      >
+        {last ? (
+          <Link
+            href={RecordRoutes.voucher(last.id)}
+            className="hover:underline"
+          >
+            {format.dateTime(new Date(last.occurredAt), {
+              dateStyle: "medium",
+            })}
+          </Link>
+        ) : (
+          <span className="font-normal text-muted-foreground">
+            {t("items.detail.noMovement")}
+          </span>
+        )}
+      </KeyFact>
+      <KeyFact
+        icon={RulerIcon}
+        label={t("items.detail.unit")}
+        hint={item.batchTracking ? t("items.detail.byBatch") : null}
+      >
+        {t(`units.${item.baseUnit}.label`)}
+      </KeyFact>
+    </dl>
   )
 }
 
-/** Dépôt par dépôt : stock, seuil d'alerte et état ; lots avec leur nuance. */
-function WarehouseStock({
+function KeyFact({
+  icon: Icon,
+  label,
+  hint,
+  children,
+}: {
+  icon: LucideIcon
+  label: string
+  hint?: string | null
+  children: React.ReactNode
+}) {
+  return (
+    <div className="flex min-w-0 items-start gap-2">
+      <Icon
+        className="mt-0.5 size-4 shrink-0 text-muted-foreground"
+        aria-hidden
+      />
+      <div className="min-w-0">
+        <dt className="text-xs text-muted-foreground">{label}</dt>
+        <dd className="mt-0.5 font-semibold">{children}</dd>
+        {hint && <dd className="text-xs text-muted-foreground">{hint}</dd>}
+      </div>
+    </div>
+  )
+}
+
+/** Aperçu du stock dans la fiche générale : une carte par dépôt ; le détail est sous « Stock ». */
+function StockPreview({
   item,
   lines,
-  warehouses,
+  loaded,
+  onMore,
 }: {
   item: Item
   lines: WarehouseLine[]
-  warehouses: Warehouse[]
+  loaded: boolean
+  onMore: () => void
 }) {
   const t = useTranslations("items.detail")
   const quantityLabel = useQuantityLabel()
-  const batchLabel = useBatchLabel()
-  const { can, covers } = useStockAccess()
-  const canSetThresholds = can(StockPermission.setThresholds)
-  const canArrange = can(StockPermission.manageLocations)
-  const [thresholds, setThresholds] = useState(false)
-
   return (
-    <section aria-labelledby="item-warehouses-title">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 id="item-warehouses-title" className="text-lg font-semibold">
-          {t("byWarehouse")}
-        </h2>
-        {canSetThresholds && item.warehouses.length > 0 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setThresholds(true)}
-          >
-            <BellIcon />
-            {t("thresholds")}
+    <RecordSection
+      id="item-stock-preview-title"
+      title={t("byWarehouse")}
+      description={t("byWarehouseHint")}
+      actions={
+        lines.length > 0 && (
+          <Button variant="outline" size="sm" onClick={onMore}>
+            {t("stockDetail")}
+            <ArrowRightIcon />
           </Button>
-        )}
-      </div>
-      {lines.length === 0 ? (
+        )
+      }
+    >
+      {!loaded ? (
+        <Skeleton className="h-24 rounded-xl" />
+      ) : lines.length === 0 ? (
         <p className="rounded-xl border border-dashed p-5 text-sm text-muted-foreground">
           {t("noWarehouse")}
         </p>
       ) : (
-        <ul className="divide-y rounded-2xl border">
+        <ul className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
           {lines.map((line) => (
-            <li
-              key={line.warehouse.id}
-              className="flex flex-wrap items-start gap-x-4 gap-y-2 p-4"
-            >
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-semibold">{line.warehouse.name}</p>
-                  <StockStateBadge state={line.state} />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {line.minQuantity === null
-                    ? t("noThreshold")
-                    : t("threshold", {
-                        quantity: quantityLabel(
-                          item.baseUnit,
-                          line.minQuantity
-                        ),
-                      })}
+            <li key={line.warehouse.id} className="rounded-xl bg-muted/40 p-3">
+              <div className="flex items-start justify-between gap-2">
+                <p className="min-w-0 truncate font-medium">
+                  {line.warehouse.name}
                 </p>
-                {line.minQuantity !== null && (
-                  <StockGauge
-                    quantity={line.stock?.quantity ?? 0}
-                    threshold={line.minQuantity}
-                    state={line.state}
-                    className="my-2 max-w-xs"
-                  />
-                )}
-                <ItemLocationPicker
-                  itemId={item.id}
-                  itemName={item.name}
-                  warehouseId={line.warehouse.id}
-                  location={line.location}
-                  editable={
-                    canArrange &&
-                    covers(line.warehouse.id) &&
-                    item.status === CatalogStatus.active
-                  }
-                />
-                {(line.stock?.batches.length ?? 0) > 0 && (
-                  <ul
-                    className="mt-2 flex flex-wrap gap-1"
-                    aria-label={t("batches")}
-                  >
-                    {line.stock!.batches.map((batch) => (
-                      <li key={batch.batch}>
-                        <Badge variant="outline" className="font-normal">
-                          {batchLabel(batch.batch ?? "", batch)} ·{" "}
-                          {quantityLabel(item.baseUnit, batch.quantity)}
-                        </Badge>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                <StockStateBadge state={line.state} />
               </div>
               <p
                 className={cn(
-                  "num text-xl font-semibold",
+                  "mt-2 num text-xl font-semibold",
                   line.state === StockState.out && "text-destructive"
                 )}
               >
                 {quantityLabel(item.baseUnit, line.stock?.quantity ?? 0)}
               </p>
+              <p className="text-xs text-muted-foreground">
+                {line.minQuantity === null
+                  ? t("noThreshold")
+                  : t("threshold", {
+                      quantity: quantityLabel(item.baseUnit, line.minQuantity),
+                    })}
+              </p>
             </li>
           ))}
         </ul>
       )}
-      <Sheet open={thresholds} onOpenChange={setThresholds}>
-        <SheetContent className="w-full overflow-y-auto sm:max-w-md">
-          <SheetHeader className="border-b">
-            <SheetTitle>{t("thresholds")}</SheetTitle>
-            <SheetDescription>{t("thresholdsHint")}</SheetDescription>
-          </SheetHeader>
-          <div className="p-4">
-            <ItemThresholds item={item} warehouses={warehouses} bare />
-          </div>
-        </SheetContent>
-      </Sheet>
-    </section>
+    </RecordSection>
   )
 }
 
@@ -388,141 +443,6 @@ function ItemHistory({ item }: { item: Item }) {
           </span>
         )
       }}
-    />
-  )
-}
-
-/** Ce qui décrit l'article : de quoi le reconnaître et le compter. */
-function ItemFacts({ item, category }: { item: Item; category?: string }) {
-  const t = useTranslations()
-  const quantityLabel = useQuantityLabel()
-  return (
-    <RecordFacts
-      title={t("items.detail.facts")}
-      note={item.description}
-      facts={[
-        {
-          label: t("items.detail.unit"),
-          value: t(`units.${item.baseUnit}.label`),
-        },
-        item.packagings.length > 0 && {
-          label: t("items.detail.packagings"),
-          value: (
-            <ul>
-              {item.packagings.map((packaging) => (
-                <li key={packaging.name}>
-                  {packaging.name} ={" "}
-                  {quantityLabel(item.baseUnit, packaging.quantity)}
-                  {(packaging.defaultReceipt || packaging.defaultIssue) && (
-                    <span className="text-muted-foreground">
-                      {" · "}
-                      {t("items.detail.defaultFor", {
-                        directions:
-                          packaging.defaultReceipt && packaging.defaultIssue
-                            ? "both"
-                            : packaging.defaultReceipt
-                              ? EntryDirection.receipt
-                              : EntryDirection.issue,
-                      })}
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          ),
-        },
-        {
-          label: t("items.detail.batchTracking"),
-          value: item.batchTracking
-            ? t("items.detail.byBatch")
-            : t("items.detail.noBatch"),
-        },
-        category && { label: t("items.detail.category"), value: category },
-        item.reference && {
-          label: t("items.detail.reference"),
-          value: <span className="font-mono">{item.reference}</span>,
-        },
-        item.barcode && {
-          label: t("items.detail.barcode"),
-          value: <span className="font-mono">{item.barcode}</span>,
-        },
-      ]}
-    />
-  )
-}
-
-/** Modifier (catalogue), commencer un bon avec l'article, archiver ou restaurer. */
-function ItemActions({
-  item,
-  manages,
-  archived,
-}: {
-  item: Item
-  manages: boolean
-  archived: boolean
-}) {
-  const t = useTranslations()
-  const errorMessage = useErrorMessage()
-  const status = useItemStatus()
-  const records = useStockAccess().can(StockPermission.recordMovements)
-  const withItem = (route: string) =>
-    `${route}?${EntryQueryParams.item}=${item.id}`
-  const changeStatus = (target: CatalogStatus) =>
-    status.mutate(
-      { id: item.id, status: target },
-      {
-        onSuccess: () =>
-          toast.success(
-            target === CatalogStatus.archived
-              ? t("items.archive.done")
-              : t("items.restore.done")
-          ),
-        onError: (error) => toast.error(errorMessage(error)),
-      }
-    )
-  return (
-    <RecordActions
-      editHref={manages ? RecordRoutes.itemEdit(item.id) : undefined}
-      actions={
-        archived
-          ? []
-          : [
-              ...(records
-                ? [
-                    {
-                      icon: ArrowDownToLineIcon,
-                      label: t("items.detail.receive"),
-                      href: withItem(Routes.newReceipt),
-                    },
-                    {
-                      icon: ArrowUpFromLineIcon,
-                      label: t("items.detail.issue"),
-                      href: withItem(Routes.newIssue),
-                    },
-                  ]
-                : []),
-              {
-                icon: TagIcon,
-                label: t("items.detail.labels"),
-                href: `${Routes.labels}?${LabelQueryParams.items}=${item.id}`,
-              },
-            ]
-      }
-      archive={
-        manages
-          ? {
-              archived,
-              labels: {
-                action: t("items.archive.action"),
-                title: t("items.archive.title"),
-                description: t("items.archive.description"),
-                restore: t("items.restore.action"),
-              },
-              onArchive: () => changeStatus(CatalogStatus.archived),
-              onRestore: () => changeStatus(CatalogStatus.active),
-            }
-          : undefined
-      }
     />
   )
 }

@@ -261,6 +261,29 @@ export function useRemoveItemImage() {
   return useStockMutation((id: string) => stock.removeItemImage(id))
 }
 
+/** Ajoute une photo ; [imageId], tiré une fois par fichier choisi, rend un renvoi sans effet. */
+export function useAddItemImage() {
+  const { stock } = useApi()
+  return useStockMutation(
+    ({ id, imageId, file }: { id: string; imageId: string; file: File }) =>
+      stock.addItemImage(id, imageId, file)
+  )
+}
+
+export function useRemoveItemImageEntry() {
+  const { stock } = useApi()
+  return useStockMutation(({ id, imageId }: { id: string; imageId: string }) =>
+    stock.removeItemImageEntry(id, imageId)
+  )
+}
+
+export function useMakeMainItemImage() {
+  const { stock } = useApi()
+  return useStockMutation(({ id, imageId }: { id: string; imageId: string }) =>
+    stock.makeMainItemImage(id, imageId)
+  )
+}
+
 /** Toutes les catégories, à plat (voir categoryTree) : quelques dizaines au plus. */
 export function useCategories() {
   const { stock } = useApi()

@@ -1,10 +1,10 @@
 "use client"
 
 import { BoxesIcon, ListIcon, PackageXIcon } from "lucide-react"
-import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { Bar, BarChart, XAxis, YAxis } from "recharts"
 
+import { ItemLink } from "@/components/items/item-link"
 import {
   ChartContainer,
   ChartTooltip,
@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/table"
 import { useDamageReport } from "@/lib/api/report-queries"
 import type { DamageByReason } from "@/lib/api/reports"
-import { RecordRoutes } from "@/lib/routes"
 import { cn } from "@/lib/utils"
 
 import { ReportSkeleton } from "./movements-report"
@@ -117,12 +116,12 @@ export function DamageReportScreen() {
                       {data.items.map((row) => (
                         <TableRow key={row.item.id}>
                           <TableCell className="py-3 pl-4 whitespace-normal">
-                            <Link
-                              href={RecordRoutes.item(row.item.id)}
+                            <ItemLink
+                              itemId={row.item.id}
                               className="font-medium hover:underline"
                             >
                               {row.item.name}
-                            </Link>
+                            </ItemLink>
                           </TableCell>
                           <TableCell className="text-right num text-destructive">
                             {quantity(row.item.baseUnit, row.quantity)}

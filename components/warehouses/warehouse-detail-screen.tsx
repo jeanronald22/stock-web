@@ -12,6 +12,7 @@ import { toast } from "sonner"
 
 import { useQuantityLabel } from "@/components/items/describe"
 import { WarehouseLocations } from "@/components/locations/warehouse-locations"
+import { ItemLink } from "@/components/items/item-link"
 import { ItemThumb } from "@/components/items/item-thumb"
 import { RecordActions } from "@/components/records/record-actions"
 import {
@@ -226,8 +227,8 @@ function ToOrder({
           )
           return (
             <li key={row.item.id}>
-              <Link
-                href={RecordRoutes.item(row.item.id)}
+              <ItemLink
+                itemId={row.item.id}
                 className="flex items-center gap-3 p-3 transition-colors hover:bg-muted/40"
               >
                 <ItemThumb imageUrl={row.item.imageUrl} />
@@ -255,7 +256,7 @@ function ToOrder({
                 >
                   {quantityLabel(row.item.baseUnit, row.quantity)}
                 </span>
-              </Link>
+              </ItemLink>
             </li>
           )
         })}

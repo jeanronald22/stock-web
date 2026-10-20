@@ -2,7 +2,7 @@
 
 import { CheckIcon, CopyIcon, MessageCircleIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useState } from "react"
+import { useCallback } from "react"
 import { toast } from "sonner"
 
 import { buttonVariants } from "@/components/ui/button"
@@ -12,10 +12,10 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group"
+import { useCopy } from "@/hooks/use-copy"
 
 /** Partage WhatsApp sans application installée côté ordinateur : wa.me ouvre WhatsApp Web. */
 const WHATSAPP_SHARE = "https://wa.me/?text="
-const COPIED_FEEDBACK_MS = 2000
 
 /** Lien d'invitation à copier ou à envoyer par WhatsApp ; il n'est montré qu'une fois. */
 export function InvitationLink({
@@ -26,18 +26,10 @@ export function InvitationLink({
   organizationName: string
 }) {
   const t = useTranslations("team.link")
-  const [copied, setCopied] = useState(false)
+  const { copied, copy } = useCopy(
+    useCallback(() => toast.error(t("copyFailed")), [t])
+  )
   const message = t("message", { organization: organizationName, link })
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(link)
-      setCopied(true)
-      window.setTimeout(() => setCopied(false), COPIED_FEEDBACK_MS)
-    } catch {
-      toast.error(t("copyFailed"))
-    }
-  }
 
   return (
     <div className="space-y-3 rounded-xl border bg-muted/30 p-3">
@@ -51,7 +43,10 @@ export function InvitationLink({
           onFocus={(event) => event.target.select()}
         />
         <InputGroupAddon align="inline-end">
-          <InputGroupButton aria-label={t("copy")} onClick={() => void copy()}>
+          <InputGroupButton
+            aria-label={t("copy")}
+            onClick={() => void copy(link)}
+          >
             {copied ? <CheckIcon /> : <CopyIcon />}
           </InputGroupButton>
         </InputGroupAddon>
