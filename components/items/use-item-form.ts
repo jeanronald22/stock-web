@@ -22,7 +22,6 @@ import {
 
 const FIELDS = [
   "name",
-  "reference",
   "barcode",
   "description",
   "baseUnit",
@@ -81,7 +80,6 @@ export function useItemForm(
       const placed = applyProblemToField<ItemFormValues>(
         error,
         {
-          [ProblemCode.itemReferenceTaken]: "reference",
           [ProblemCode.itemBarcodeTaken]: "barcode",
           [ProblemCode.warehouseUnavailable]: "warehouses",
           [ProblemCode.categoryUnavailable]: "categoryId",

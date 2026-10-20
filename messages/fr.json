@@ -3,7 +3,7 @@
     "signIn": "Connexion",
     "welcome": "Bienvenue",
     "organizations": "Vos entreprises",
-    "dashboard": "Accueil",
+    "dashboard": "Tableau de bord",
     "items": "Articles",
     "newItem": "Nouvel article",
     "warehouses": "Dépôts",
@@ -150,7 +150,7 @@
     }
   },
   "dashboard": {
-    "greeting": "Bonjour {name}",
+    "greeting": "Bonjour {name}, voici où en sont vos dépôts.",
     "readyTitle": "Tout est en place",
     "readyDescription": "Deux étapes pour démarrer : vos lieux de stock, puis vos articles.",
     "steps": {
@@ -199,34 +199,6 @@
       "open": "Voir"
     },
     "scope": "Vos dépôts : {warehouses}",
-    "activity": {
-      "title": "Activité de vos dépôts",
-      "controlTitle": "À vérifier",
-      "period": "Période",
-      "periods": {
-        "last7Days": "7 jours",
-        "last30Days": "30 jours"
-      },
-      "reports": "Rapports",
-      "chart": "Entrées et sorties",
-      "chartHint": "Nombre de bons par jour.",
-      "topIssued": "Les plus sortis",
-      "noIssue": "Aucune sortie sur la période.",
-      "damageByReason": "Casse par motif",
-      "details": "Détail",
-      "noDamage": "Aucune casse sur la période.",
-      "share": "{share} %",
-      "tiles": {
-        "inbound": "Entrées",
-        "outbound": "Sorties",
-        "vouchers": "bons",
-        "damage": "Casse",
-        "gaps": "Écarts à la réception",
-        "gapsHint": "livraisons non conformes",
-        "inventories": "Inventaires en cours",
-        "inventoriesHint": "à compter, puis clôturer"
-      }
-    },
     "storekeeper": {
       "actions": "Vos gestes du jour",
       "receipt": {
@@ -248,6 +220,54 @@
         "outbound": "sorties",
         "damage": "casses"
       }
+    },
+    "board": {
+      "title": "Tableau de bord",
+      "domains": {
+        "label": "Domaines affichés",
+        "all": "Tout",
+        "activity": "Activité",
+        "stock": "Stock",
+        "issues": "Sorties",
+        "quality": "Qualité",
+        "team": "Équipe"
+      },
+      "alerts": {
+        "label": "À traiter",
+        "none": "Rien n’attend de décision",
+        "requests": "{count, plural, one {# sortie à valider} other {# sorties à valider}}",
+        "requestsWaiting": "{count, plural, one {# demande en attente de validation} other {# demandes en attente de validation}}",
+        "transfers": "{count, plural, one {# transfert à réceptionner} other {# transferts à réceptionner}}",
+        "out": "{count, plural, one {# article en rupture} other {# articles en rupture}}",
+        "low": "{count, plural, one {# article à commander} other {# articles à commander}}",
+        "inventories": "{count, plural, one {# inventaire en cours} other {# inventaires en cours}}",
+        "gaps": "{count, plural, one {# réception avec écart} other {# réceptions avec écart}}"
+      },
+      "stockState": {
+        "title": "État du stock",
+        "description": "Articles suivis dans ces dépôts, aujourd’hui.",
+        "seeAll": "Voir le stock",
+        "center": "{count, plural, one {article} other {articles}}",
+        "ok": "Stock suffisant",
+        "low": "À commander",
+        "out": "En rupture",
+        "share": "{share} %",
+        "empty": "Aucun article suivi dans ces dépôts."
+      },
+      "conformity": {
+        "title": "Conformité des réceptions",
+        "description": "Livraisons conformes au bon de livraison.",
+        "details": "Écarts",
+        "value": "{share} %",
+        "detail": "{conform, plural, one {# conforme} other {# conformes}} sur {count, plural, one {# réception} other {# réceptions}}",
+        "empty": "Aucune réception sur la période."
+      },
+      "vouchers": {
+        "title": "Bons de la période",
+        "description": "{count, plural, =0 {Aucun bon} one {# bon au total} other {# bons au total}}",
+        "seeAll": "Rapports",
+        "empty": "Aucun bon sur la période."
+      }
     }
   },
   "menu": {
@@ -256,7 +276,7 @@
     "currentOrganization": "Entreprise active"
   },
   "nav": {
-    "home": "Accueil",
+    "home": "Tableau de bord",
     "items": "Articles",
     "warehouses": "Dépôts",
     "vouchers": "Bons",
@@ -466,7 +486,6 @@
     },
     "detail": {
       "editTitle": "Modifier le dépôt",
-      "summary": "En bref",
       "offered": "Articles proposés ici",
       "items": "{count, plural, one {article} other {articles}}",
       "toOrderCount": "{count, plural, one {# article à commander} other {# articles à commander}}",
@@ -512,7 +531,6 @@
       "name": "Nom",
       "namePlaceholder": "Carreau 60x60 beige",
       "reference": "Référence",
-      "referencePlaceholder": "CAR-6060",
       "description": "Description",
       "descriptionPlaceholder": "Marque, couleur, usage…",
       "baseUnit": "Unité de comptage",
@@ -551,7 +569,9 @@
           "label": "Sorties et comptages en"
         },
         "hint": "Proposé d’office sur les bons ; chaque ligne reste modifiable."
-      }
+      },
+      "referenceAuto": "Attribuée à la création",
+      "referenceHint": "Numérotée automatiquement (ART-0001, ART-0002…) : les références se suivent et ne changent pas."
     },
     "created": "Article créé.",
     "saved": "Article enregistré.",
@@ -594,7 +614,9 @@
       "item": "Article",
       "unit": "Unité",
       "packagings": "Conditionnements",
-      "warehouses": "Dépôts"
+      "warehouses": "Dépôts",
+      "reference": "Référence",
+      "status": "Statut"
     },
     "moreWarehouses": "+{count}",
     "thresholdSaved": "Seuil enregistré pour {warehouse}.",
@@ -602,7 +624,7 @@
     "detail": {
       "edit": "Modifier",
       "editTitle": "Modifier l’article",
-      "inStock": "En stock dans vos dépôts",
+      "inStock": "En stock",
       "breakdown": "soit {breakdown}",
       "byWarehouse": "Par dépôt",
       "thresholds": "Seuils d’alerte",
@@ -615,7 +637,7 @@
       "noHistory": "Aucun bon ne porte encore cet article.",
       "unchanged": "Inchangé",
       "allHistory": "Voir ses {count} bons",
-      "facts": "Fiche",
+      "facts": "Fiche technique",
       "unit": "Compté en",
       "packagings": "Conditionnements",
       "batchTracking": "Lots",
@@ -628,13 +650,110 @@
       "issue": "Nouvelle sortie de cet article",
       "category": "Catégorie",
       "defaultFor": "{directions, select, both {par défaut en réception et en sortie} receipt {par défaut en réception} other {par défaut en sortie}}",
-      "labels": "Imprimer des étiquettes"
+      "labels": "Imprimer des étiquettes",
+      "enlargePhoto": "Agrandir la photo de {name}",
+      "sections": "Sections de la fiche",
+      "section": {
+        "general": "Informations générales",
+        "stock": "Stock par dépôt",
+        "mouvements": "Mouvements"
+      },
+      "state": "État",
+      "summary": "L’essentiel de l’article",
+      "warehouses": "Dépôts",
+      "alerts": "{count, plural, =0 {Aucune alerte} one {# en alerte} other {# en alerte}}",
+      "lastMovement": "Dernier mouvement",
+      "noMovement": "Aucun pour l’instant",
+      "byWarehouseHint": "Ce qu’il reste dans chaque dépôt, et son seuil d’alerte.",
+      "stockDetail": "Détail du stock",
+      "missing": "Non renseigné",
+      "factsHint": "Ce qui identifie l’article et comment on le compte.",
+      "createdAt": "Ajouté le",
+      "noPackaging": "Aucun : compté à l’unité",
+      "description": "Description",
+      "stockSeries": "Stock",
+      "thresholdSeries": "Seuil d’alerte",
+      "warehouseChart": "Stock et seuil d’alerte de chaque dépôt",
+      "sectionShort": {
+        "general": "Général",
+        "stock": "Stock",
+        "mouvements": "Mouvements"
+      },
+      "whereToFind": "Où le trouver",
+      "movementsChart": "Entrées et sorties",
+      "movementsChartHint": "Les quantités reçues et sorties, jour par jour, dans vos dépôts.",
+      "movementsChartSummary": "Sur la période : {inbound} entrés, {outbound} sortis.",
+      "periodLabel": "Période de la courbe",
+      "inbound": "Entrées",
+      "outbound": "Sorties"
     },
     "more": {
       "label": "Options du catalogue",
       "import": "Importer un fichier Excel",
       "importFromFile": "Ou importer un fichier Excel",
       "labels": "Imprimer des étiquettes"
+    },
+    "preview": {
+      "warehouses": "{count, plural, =0 {Aucun dépôt} one {# dépôt} other {# dépôts}}",
+      "alerts": "{count, plural, one {# en alerte} other {# en alerte}}",
+      "countedIn": "Compté en : {unit}",
+      "open": "Ouvrir la fiche"
+    },
+    "photos": {
+      "title": "Photos",
+      "hint": "{count} sur {max} · La première est la photo principale, montrée dans les listes.",
+      "count": "{count, plural, one {# photo} other {# photos}}",
+      "used": "{count} / {max}",
+      "add": "Ajouter des photos",
+      "addShort": "Ajouter",
+      "sending": "Envoi de la photo…",
+      "main": "Principale",
+      "open": "Voir la photo {index} sur {total}",
+      "photoOf": "{name}, photo {index} sur {total}",
+      "position": "{index} / {total}",
+      "previous": "Photo précédente",
+      "next": "Photo suivante",
+      "makeMain": "Définir comme principale",
+      "mainChanged": "Photo principale changée.",
+      "remove": "Supprimer",
+      "removeTitle": "Supprimer cette photo ?",
+      "removeDescription": "Elle sera retirée de la fiche de l’article.",
+      "removeMainDescription": "Elle sera retirée de la fiche ; la suivante deviendra la photo principale.",
+      "keep": "Garder",
+      "removed": "Photo supprimée.",
+      "added": "{count, plural, one {Photo ajoutée.} other {# photos ajoutées.}}",
+      "tooMany": "{max} photos au plus par article : {count, plural, =0 {aucune n’a été ajoutée} one {seule la première est ajoutée} other {seules les # premières sont ajoutées}}."
+    },
+    "sheet": {
+      "title": "Fiche article",
+      "identification": "Identification",
+      "availability": "Disponibilité par dépôt",
+      "warehouse": "Dépôt",
+      "location": "Empl.",
+      "quantity": "En stock",
+      "threshold": "Seuil d’alerte",
+      "state": "État",
+      "total": "Total",
+      "otherPhotos": "Autres photos",
+      "noPhoto": "Pas de photo",
+      "footer": "Fiche éditée le {date}",
+      "export": "Exporter en PDF",
+      "exportShort": "PDF",
+      "exporting": "Préparation du PDF…",
+      "done": "{count, plural, one {Fiche enregistrée en PDF.} other {# fiches enregistrées en PDF.}}"
+    },
+    "selection": {
+      "start": "Sélectionner des articles",
+      "startShort": "Sélectionner",
+      "label": "Articles sélectionnés",
+      "column": "Sélection",
+      "choose": "Sélectionner {name}",
+      "count": "{count, plural, =0 {Aucun article sélectionné} one {# article sélectionné} other {# articles sélectionnés}}",
+      "max": "{max} au plus par export",
+      "page": "Toute la page",
+      "export": "Exporter en PDF",
+      "exporting": "Préparation…",
+      "close": "Quitter la sélection"
     }
   },
   "pagination": {
@@ -642,7 +761,9 @@
     "page": "Page {page} sur {pages}",
     "perPage": "Lignes par page",
     "previous": "Page précédente",
-    "next": "Page suivante"
+    "next": "Page suivante",
+    "pages": "Pages",
+    "goTo": "Page {page}"
   },
   "images": {
     "choose": "Ajouter une photo",
@@ -669,19 +790,32 @@
     "supplierFilter": "Filtrer par fournisseur",
     "warehouseFilter": "Filtrer par dépôt",
     "warehouseCount": "{count, plural, one {# dépôt} other {# dépôts}}",
-    "clearFilters": "Effacer les filtres",
     "stockAlert": {
       "label": "Filtrer par niveau de stock",
       "all": "Tous les niveaux",
       "any": "À commander",
       "low": "Stock bas",
-      "out": "En rupture"
+      "out": "En rupture",
+      "tab": "Tous"
     },
     "view": {
       "label": "Affichage",
       "list": "Afficher en liste",
       "grid": "Afficher en grille"
-    }
+    },
+    "filters": {
+      "title": "Filtres",
+      "description": "Affinez la liste : les résultats se mettent à jour aussitôt.",
+      "open": "{count, plural, =0 {Filtres} one {Filtres, # posé} other {Filtres, # posés}}",
+      "clear": "Effacer les filtres",
+      "apply": "Voir les résultats"
+    },
+    "allItems": "Tous les articles",
+    "itemFilter": "Filtrer par article",
+    "itemFilterSearch": "Nom, référence ou code-barres",
+    "itemFilterEmpty": "Aucun article trouvé.",
+    "itemFilterLoading": "Article…",
+    "itemFilterClear": "Retirer le filtre article"
   },
   "vouchers": {
     "title": "Bons",
@@ -698,7 +832,6 @@
       "CUSTOMER_RETURN": "Retour client",
       "SUPPLIER_RETURN": "Retour fournisseur"
     },
-    "allTypes": "Tous les bons",
     "empty": {
       "title": "Aucun bon pour l’instant",
       "description": "Enregistrez votre première réception : le stock de vos dépôts se mettra à jour aussitôt."
@@ -708,8 +841,9 @@
       "date": "Date",
       "warehouse": "Dépôt",
       "counterparty": "Fournisseur ou client",
-      "lines": "Lignes",
-      "createdBy": "Validé par"
+      "lines": "Articles",
+      "createdBy": "Validé par",
+      "type": "Type"
     },
     "lineCount": "{count, plural, one {# article} other {# articles}}",
     "notFound": "Ce bon n’existe pas ou a été retiré.",
@@ -889,10 +1023,7 @@
       "download": "Télécharger le PDF"
     },
     "period": {
-      "from": "Du",
-      "to": "Au",
-      "fromLabel": "Bons à partir du",
-      "toLabel": "Bons jusqu’au",
+      "label": "Période des bons",
       "newestFirst": "Plus récents d’abord",
       "oldestFirst": "Plus anciens d’abord"
     },
@@ -1010,7 +1141,9 @@
         "CUSTOMER_RETURN": "Enregistrer un retour",
         "SUPPLIER_RETURN": "Renvoyer au fournisseur"
       }
-    }
+    },
+    "allKinds": "Tous",
+    "kindsLabel": "Type de bon"
   },
   "stock": {
     "title": "Stock",
@@ -1020,7 +1153,10 @@
     "table": {
       "item": "Article",
       "batches": "Lots",
-      "quantity": "En stock"
+      "quantity": "En stock",
+      "packagings": "Conditionnement",
+      "alerts": "Dépôts en alerte",
+      "state": "État"
     },
     "empty": {
       "title": "Rien à compter pour l’instant",
@@ -1036,11 +1172,11 @@
     "state": {
       "OK": "Stock suffisant",
       "LOW": "Stock bas",
-      "OUT": "Rupture"
+      "OUT": "Rupture",
+      "inStock": "En stock",
+      "empty": "Épuisé"
     },
     "alert": "{warehouse} : {quantity}, seuil {threshold}",
-    "batchCount": "{count, plural, one {# lot} other {# lots}}",
-    "reports": "Rapports",
     "export": {
       "file": "stock",
       "sheet": "Stock",
@@ -1053,7 +1189,8 @@
       "state": "État",
       "batches": "Lots",
       "alerts": "Dépôts en alerte"
-    }
+    },
+    "more": "Plus d’actions sur le stock"
   },
   "suppliers": {
     "title": "Fournisseurs",
@@ -1129,7 +1266,6 @@
     "notFound": "Ce fournisseur n’existe pas ou a été retiré.",
     "detail": {
       "editTitle": "Modifier le fournisseur",
-      "summary": "En bref",
       "lastReceipt": "Dernière livraison",
       "receiptCount": "{count, plural, one {# réception en tout} other {# réceptions en tout}}",
       "neverDelivered": "Aucune réception pour l’instant.",
@@ -1498,7 +1634,6 @@
     },
     "detail": {
       "editTitle": "Modifier le client",
-      "summary": "En bref",
       "lastIssue": "Dernière livraison",
       "issueCount": "{count, plural, one {# sortie en tout} other {# sorties en tout}}",
       "neverServed": "Aucune sortie pour l’instant.",
@@ -1740,6 +1875,11 @@
       "call": "Appeler",
       "whatsapp": "WhatsApp",
       "email": "E-mail"
+    },
+    "copy": {
+      "action": "Copier : {label}",
+      "done": "{label} copié",
+      "failed": "Copie impossible : sélectionnez le texte et copiez-le."
     }
   },
   "labels": {
@@ -1807,10 +1947,6 @@
         "label": "Nom",
         "hint": "Carreau 60x60 beige"
       },
-      "reference": {
-        "label": "Référence",
-        "hint": "CAR-6060"
-      },
       "barcode": {
         "label": "Code-barres",
         "hint": "EAN, UPC, Code 128…"
@@ -1874,7 +2010,6 @@
       "examples": [
         {
           "name": "Carreau 60x60 beige",
-          "reference": "CAR-6060",
           "unit": "Pièce",
           "category": "Carrelage > Sol",
           "packagingName": "Carton",
@@ -1886,7 +2021,6 @@
         },
         {
           "name": "Robinet mélangeur",
-          "reference": "ROB-MEL",
           "unit": "Pièce",
           "category": "Sanitaire",
           "batchTracking": "Non",
@@ -1950,8 +2084,6 @@
       "problems": {
         "nameMissing": "nom manquant",
         "nameTooLong": "nom trop long (120 caractères au plus)",
-        "referenceTooLong": "référence trop longue (40 caractères au plus)",
-        "referenceDuplicate": "référence déjà vue plus haut dans le fichier",
         "barcodeInvalid": "code-barres illisible (pas d’espace, 64 caractères au plus)",
         "barcodeDuplicate": "code-barres déjà vu plus haut dans le fichier",
         "unitUnknown": "unité inconnue (pièce, kg, litre, mètre, m², m³)",
@@ -1988,7 +2120,6 @@
       }
     },
     "serverReasons": {
-      "referenceTaken": "un article du catalogue a déjà cette référence",
       "barcodeTaken": "un article du catalogue a déjà ce code-barres",
       "categoryUnavailable": "catégorie introuvable",
       "warehouseUnavailable": "dépôt indisponible",
@@ -2041,8 +2172,8 @@
   },
   "reports": {
     "title": "Rapports",
-    "description": "Ce qui est entré, sorti, cassé, et où sont les écarts.",
-    "breadcrumb": "Stock",
+    "description": "Le détail de ce qui est entré, sorti, cassé, et où sont les écarts.",
+    "breadcrumb": "Tableau de bord",
     "export": {
       "item": "Article",
       "reference": "Référence",
@@ -2093,30 +2224,18 @@
       "discrepancies": "Écarts"
     },
     "period": {
-      "label": "Période",
-      "presets": {
-        "last7Days": "7 derniers jours",
-        "last30Days": "30 derniers jours",
-        "thisMonth": "Ce mois-ci",
-        "lastMonth": "Le mois dernier",
-        "last3Months": "3 derniers mois"
-      },
-      "custom": "Dates libres",
-      "from": "Du",
-      "to": "au",
-      "fromLabel": "Début de la période",
-      "toLabel": "Fin de la période"
+      "label": "Période"
     },
     "activity": {
       "inbound": "Entrées",
-      "outbound": "Sorties"
+      "outbound": "Sorties",
+      "weekOf": "Semaine du {day}"
     },
     "stat": {
       "change": "{change, number, ::+!} %"
     },
     "movements": {
       "activity": "Activité",
-      "activityHint": "Bons d’entrée et de sortie, jour par jour.",
       "byItem": "Par article",
       "byItemHint": "{count, plural, =0 {Aucun article n’a bougé} one {# article a bougé} other {# articles ont bougé}}, chacun dans son unité.",
       "search": "Rechercher un article",
@@ -2138,7 +2257,7 @@
         "outbound": "Sorties",
         "damage": "Casse",
         "adjustments": "Ajustements",
-        "vouchers": "bons"
+        "vouchers": "{count, plural, one {bon} other {bons}}"
       }
     },
     "damage": {
@@ -2196,6 +2315,101 @@
     },
     "exportButton": "Exporter"
   },
+  "analysis": {
+    "tiles": {
+      "inbound": "Entrées",
+      "outbound": "Sorties",
+      "damage": "Casse",
+      "gaps": "Écarts à la réception",
+      "vouchers": "{count, plural, one {bon} other {bons}}",
+      "gapsHint": "{count, plural, one {livraison non conforme} other {livraisons non conformes}}"
+    },
+    "chart": {
+      "title": "Entrées et sorties",
+      "day": "Nombre de bons par jour.",
+      "week": "Nombre de bons par semaine.",
+      "month": "Nombre de bons par mois.",
+      "details": "Mouvements"
+    },
+    "warehouses": {
+      "title": "Par dépôt",
+      "description": "Bons de la période, seuils d’aujourd’hui.",
+      "columns": {
+        "warehouse": "Dépôt",
+        "inbound": "Entrées",
+        "outbound": "Sorties",
+        "damage": "Casse",
+        "alerts": "À commander",
+        "out": "En rupture"
+      },
+      "compact": "{inbound, plural, one {# entrée} other {# entrées}} · {outbound, plural, one {# sortie} other {# sorties}} · {damage, plural, one {# casse} other {# casses}}",
+      "alertsCompact": "{alerts} à commander · {out} en rupture"
+    },
+    "items": {
+      "title": "Les articles",
+      "description": "Chacun dans son unité.",
+      "topIssued": "Les plus sortis",
+      "topIssuedHint": "Par nombre de bons de sortie.",
+      "issues": "{count, plural, one {# sortie} other {# sorties}}",
+      "noIssue": "Aucune sortie sur la période.",
+      "runningOut": "Bientôt en rupture",
+      "runningOutHint": "Ce que le stock tient au rythme des sorties de la période.",
+      "days": "{days, plural, =0 {En rupture} one {≈ # jour} other {≈ # jours}}",
+      "pace": "{daily} par jour · {stock} en stock",
+      "noRunningOut": "Au rythme actuel, rien ne manquera dans le mois.",
+      "dormant": "Stock qui dort",
+      "dormantHint": "En stock, sans sortie sur la période.",
+      "lastIssued": "Dernière sortie {when}",
+      "neverIssued": "Jamais sorti",
+      "noDormant": "Tout ce qui est en stock est sorti sur la période.",
+      "moreDormant": "Et {count, plural, one {# autre article} other {# autres articles}}."
+    },
+    "item": {
+      "description": "{reference} · dans les dépôts choisis.",
+      "open": "Ouvrir la fiche",
+      "stock": "En stock",
+      "stockHint": "à la fin de la période",
+      "inbound": "Entré",
+      "inboundHint": "réceptions, retours, transferts",
+      "outbound": "Sorti",
+      "outboundHint": "sorties, casse, transferts",
+      "coverage": "Tient encore",
+      "coverageHint": "au rythme de {daily} par jour",
+      "noIssue": "aucune sortie sur la période",
+      "chart": "Entrées et sorties",
+      "chartHint": "Quantités, jour par jour."
+    },
+    "damage": {
+      "title": "Casse par motif",
+      "description": "Part des lignes cassées.",
+      "details": "Détail",
+      "empty": "Aucune casse sur la période.",
+      "share": "{share} %",
+      "lines": "{count, plural, one {# ligne} other {# lignes}}"
+    },
+    "suppliers": {
+      "title": "Fournisseurs",
+      "description": "Réceptions qui ne correspondaient pas au bon de livraison.",
+      "details": "Écarts",
+      "empty": "Aucune réception sur la période.",
+      "none": "Sans fournisseur",
+      "count": "{withGap} sur {count, plural, one {# réception} other {# réceptions}}"
+    },
+    "customers": {
+      "title": "Clients",
+      "description": "Ceux qui reçoivent le plus de sorties.",
+      "empty": "Aucune sortie sur la période.",
+      "none": "Sans client renseigné",
+      "vouchers": "{count, plural, one {# sortie} other {# sorties}}"
+    },
+    "team": {
+      "title": "L’équipe",
+      "description": "Bons saisis sur la période.",
+      "empty": "Aucun bon sur la période.",
+      "vouchers": "{count, plural, one {# bon} other {# bons}}",
+      "detail": "{inbound, plural, one {# entrée} other {# entrées}} · {outbound, plural, one {# sortie} other {# sorties}} · {corrections, plural, one {# correction} other {# corrections}}"
+    }
+  },
   "offline": {
     "queued": "Bon gardé sur ce téléphone",
     "queuedHint": "Il sera enregistré dès le retour du réseau.",
@@ -2238,6 +2452,21 @@
       "title": "Pas de réseau",
       "description": "Cette page n’a pas encore été ouverte sur ce téléphone. L’accueil, le stock et la saisie des bons, eux, marchent sans réseau.",
       "home": "Aller à l’accueil"
+    }
+  },
+  "period": {
+    "label": "Période",
+    "any": "Toutes les dates",
+    "pick": "Choisissez le premier jour, puis le dernier.",
+    "apply": "Appliquer",
+    "clear": "Effacer",
+    "trigger": "{label} : {value}",
+    "presets": {
+      "last7Days": "7 derniers jours",
+      "last30Days": "30 derniers jours",
+      "thisMonth": "Ce mois-ci",
+      "lastMonth": "Le mois dernier",
+      "last3Months": "3 derniers mois"
     }
   }
 }

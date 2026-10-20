@@ -3,10 +3,13 @@ import { expect, test } from "@playwright/test"
 import {
   callApi,
   dismissTour,
+  itemCard,
+  pickPeriod,
   navigateTo,
   redirectApi,
   shot,
   signUpWithBusiness,
+  withFilters,
 } from "./support"
 
 test.beforeEach(async ({ context }) => redirectApi(context))
@@ -97,30 +100,29 @@ test("catégories, seuils d'alerte et filtres combinables", async ({
 
   // Filtre par catégorie parente : les sous-catégories sont comprises.
   await navigateTo(page, "Articles")
-  await page.getByRole("combobox", { name: "Filtrer par catégorie" }).click()
-  await page.getByRole("option", { name: "Électricité", exact: true }).click()
+  await withFilters(page, async () => {
+    await page.getByRole("combobox", { name: "Filtrer par catégorie" }).click()
+    await page.getByRole("option", { name: "Électricité", exact: true }).click()
+  })
   await expect(page.getByRole("link", { name: /Câble rigide/ })).toBeVisible()
   await expect(page.getByRole("link", { name: /Ciment/ })).toBeHidden()
   await expect(page.getByText("Électricité › Câbles")).toBeVisible()
-  await page.getByRole("button", { name: "Effacer les filtres" }).click()
+  await withFilters(page, () =>
+    page.getByRole("button", { name: "Effacer les filtres" }).click()
+  )
   await expect(page.getByRole("link", { name: /Ciment/ })).toBeVisible()
 
   // Stock : 160 m pour un seuil de 200 : stock bas ; le disjoncteur, seuil 0, est en rupture.
   await navigateTo(page, "Stock")
   await dismissTour(page, "Dépôt par dépôt")
-  await page
-    .getByRole("combobox", { name: "Filtrer par niveau de stock" })
-    .click()
-  await page.getByRole("option", { name: "À commander" }).click()
-  const cableRow = page.getByRole("row", { name: /Câble rigide/ })
-  await expect(cableRow.getByText("Stock bas")).toBeVisible()
+  await page.getByRole("button", { name: /^À commander/ }).click()
+  const cableCard = itemCard(page, /Câble rigide/)
+  await expect(cableCard.getByText("Stock bas")).toBeVisible()
   await expect(
-    cableRow.getByText(/Dépôt Bonabéri : 160 m, seuil 200 m/)
+    cableCard.getByText(/Dépôt Bonabéri : 160 m, seuil 200 m/)
   ).toBeVisible()
-  await expect(
-    page.getByRole("row", { name: /Disjoncteur/ }).getByText("Rupture")
-  ).toBeVisible()
-  await expect(page.getByRole("row", { name: /Ciment/ })).toBeHidden()
+  await expect(itemCard(page, /Disjoncteur/).getByText("Rupture")).toBeVisible()
+  await expect(itemCard(page, /Ciment/)).toBeHidden()
   await shot(page, testInfo, "02-stock-alertes")
 
   // Entreprise active dans la barre du haut ; la création d'une autre est l'action principale.
@@ -131,20 +133,22 @@ test("catégories, seuils d'alerte et filtres combinables", async ({
   await shot(page, testInfo, "02b-entreprises")
   await page.keyboard.press("Escape")
 
-  // L'accueil annonce les articles à commander.
-  await navigateTo(page, "Accueil")
-  await expect(page.getByTestId("stock-alerts")).toContainText(
-    "2 articles à commander"
-  )
+  // Le tableau de bord annonce ce qui manque, en pastilles vers le stock filtré.
+  await navigateTo(page, "Tableau de bord")
+  const alerts = page.getByRole("navigation", { name: "À traiter" })
+  await expect(alerts).toContainText("à commander")
 
   // Bons : période et ordre.
   await navigateTo(page, "Bons")
   await dismissTour(page, "Entrées et sorties")
   const rows = page.getByRole("row").filter({ hasText: "REC-" })
   await expect(rows).toHaveCount(2)
-  await page.getByLabel("Bons à partir du").fill("2026-04-01")
+  await pickPeriod(page, "Période des bons", "2026-04-01", "2026-04-30", () =>
+    shot(page, testInfo, "03a-periode")
+  )
   await expect(rows).toHaveCount(1)
-  await page.getByLabel("Bons à partir du").fill("")
+  await page.getByRole("button", { name: /^Période des bons/ }).click()
+  await page.getByRole("button", { name: "Effacer", exact: true }).click()
   await expect(rows).toHaveCount(2)
   await expect(rows.first()).toContainText("REC-2026-0002")
   await page.getByRole("button", { name: "Plus récents d’abord" }).click()

@@ -26,7 +26,7 @@ export const Routes = {
   newCustomerReturn: "/bons/retour-client",
   newSupplierReturn: "/bons/retour-fournisseur",
   stock: "/stock",
-  /** Rapports (D38) : ouverts depuis l'accueil et « Stock », sans entrée de menu. */
+  /** Rapports (D38) : le détail du tableau de bord (D43), ouvert depuis ses cartes. */
   reports: "/rapports",
   reportsDamage: "/rapports/casse",
   reportsDiscrepancies: "/rapports/ecarts",
@@ -117,12 +117,14 @@ export const ListQueryParams = {
   from: "du",
   to: "au",
   order: "ordre",
-  /** Liste (par défaut) ou grille (GRID_VIEW_PARAM) : articles et stock. */
+  /** Domaines affichés du tableau de bord (D43), séparés par des virgules ; absent, tous. */
+  domain: "domaine",
+  /** Grille (par défaut) ou liste (LIST_VIEW_PARAM) : articles et stock. */
   view: "vue",
 } as const
 
-/** Valeur de « vue » pour l'affichage en grille ; absente, la liste. */
-export const GRID_VIEW_PARAM = "grille"
+/** Valeur de « vue » pour l'affichage en liste ; absente, la grille. */
+export const LIST_VIEW_PARAM = "liste"
 
 /** Valeurs de « alerte » : articles en alerte, au seuil ou en rupture. */
 export const StockAlertParam = {
@@ -140,6 +142,17 @@ export const CustomerKindParam = {
 } as const
 export type CustomerKindParam =
   (typeof CustomerKindParam)[keyof typeof CustomerKindParam]
+
+/** Onglet d'une fiche, conservé dans l'adresse ; absent, l'onglet « Informations générales ». */
+export const RECORD_SECTION_PARAM = "onglet"
+
+/** Onglets de la fiche d'un article. */
+export const ItemSection = {
+  general: "general",
+  stock: "stock",
+  movements: "mouvements",
+} as const
+export type ItemSection = (typeof ItemSection)[keyof typeof ItemSection]
 
 /** Valeur de « ordre » pour les bons les plus anciens d'abord ; absente, les plus récents d'abord. */
 export const OLDEST_FIRST_PARAM = "anciens"

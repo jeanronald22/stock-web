@@ -2,6 +2,7 @@
 
 import {
   DownloadIcon,
+  EllipsisVerticalIcon,
   LockIcon,
   PackageCheckIcon,
   PrinterIcon,
@@ -9,15 +10,23 @@ import {
   Undo2Icon,
 } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useFormatter, useTranslations } from "next-intl"
 import type { ReactNode } from "react"
 
 import { EmptyState } from "@/components/catalog/empty-state"
 import { SearchScene } from "@/components/illustrations/search-scene"
 import { useBatchLabel, useQuantityLabel } from "@/components/items/describe"
+import { ItemLink } from "@/components/items/item-link"
 import { ItemThumb } from "@/components/items/item-thumb"
 import { LocationLabel } from "@/components/locations/location-label"
 import { Button, buttonVariants } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 import {
@@ -56,7 +65,7 @@ import {
   DiscrepancyBadge,
   TransferStateBadge,
   VoucherTypeBadge,
-} from "./vouchers-screen"
+} from "./voucher-badges"
 
 /** Bon validé : en lecture seule, une correction passe par un nouveau bon. */
 export function VoucherScreen({ id }: { id: string }) {
@@ -138,6 +147,9 @@ export function VoucherScreen({ id }: { id: string }) {
     { label: t("vouchers.detail.createdBy"), value: data.createdByName },
   ]
   const facts = candidates.filter((fact): fact is Fact => !!fact)
+  // Une colonne sans rien sur aucune ligne (pas de lot, saisie en unité de base) n'est pas montrée.
+  const showBatch = data.lines.some((line) => line.batch)
+  const showEntered = data.lines.some((line) => line.packagingName)
   const returnType = returnTypeOf(data.type)
   const canReturn =
     !!returnType &&
@@ -158,52 +170,58 @@ export function VoucherScreen({ id }: { id: string }) {
             timeStyle: "short",
           }),
         })}
-        actions={
+        badges={
           <>
             <VoucherTypeBadge type={data.type} />
             {data.transferState && (
               <TransferStateBadge state={data.transferState} />
             )}
             {data.hasDiscrepancy && <DiscrepancyBadge />}
-            <VoucherPdfActions id={data.id} />
-            {/* Marchandise arrivée : on étiquette ce qui vient d'entrer (D36). */}
-            {incomingTypes.has(data.type) && (
-              <Link
-                href={`${Routes.labels}?${LabelQueryParams.voucher}=${data.id}`}
-                className={buttonVariants({ variant: "outline" })}
-              >
-                <TagIcon />
-                {t("vouchers.detail.labels")}
-              </Link>
-            )}
+          </>
+        }
+        actions={
+          <>
             {data.transferState === TransferState.inTransit &&
               data.destination &&
               covers(data.destination.id) &&
               can(StockPermission.recordMovements) && (
                 <Link
                   href={RecordRoutes.transferReceipt(data.id)}
-                  className={buttonVariants()}
+                  className={buttonVariants({ size: "lg" })}
                 >
                   <PackageCheckIcon />
                   {t("vouchers.receive.action")}
                 </Link>
               )}
-            {canReturn && (
+            {/* Marchandise arrivée : on étiquette ce qui vient d'entrer (D36). */}
+            {incomingTypes.has(data.type) && (
               <Link
-                href={`${RETURN_ROUTES[returnType]}?${EntryQueryParams.origin}=${data.id}`}
-                className={buttonVariants({ variant: "outline" })}
+                href={`${Routes.labels}?${LabelQueryParams.voucher}=${data.id}`}
+                className={buttonVariants({ variant: "outline", size: "lg" })}
               >
-                <Undo2Icon />
-                {t(`vouchers.returns.action.${returnType}`)}
+                <TagIcon />
+                {t("vouchers.detail.labels")}
               </Link>
             )}
+            <VoucherMoreActions
+              id={data.id}
+              number={data.number}
+              returnHref={
+                canReturn
+                  ? `${RETURN_ROUTES[returnType]}?${EntryQueryParams.origin}=${data.id}`
+                  : undefined
+              }
+              returnLabel={
+                returnType && t(`vouchers.returns.action.${returnType}`)
+              }
+            />
           </>
         }
       />
       <dl className="mt-8 grid gap-4 rounded-2xl border p-5 sm:grid-cols-2 lg:grid-cols-5">
         {facts.map((fact) => (
           <div key={fact.label}>
-            <dt className="text-sm text-muted-foreground">{fact.label}</dt>
+            <dt className="label-caps">{fact.label}</dt>
             <dd className="mt-0.5 font-semibold">{fact.value}</dd>
           </div>
         ))}
@@ -239,12 +257,16 @@ export function VoucherScreen({ id }: { id: string }) {
               <TableHead className="pl-4">
                 {t("vouchers.detail.item")}
               </TableHead>
-              <TableHead className="hidden sm:table-cell">
-                {t("vouchers.detail.batch")}
-              </TableHead>
-              <TableHead className="hidden md:table-cell">
-                {t("vouchers.detail.entered")}
-              </TableHead>
+              {showBatch && (
+                <TableHead className="hidden sm:table-cell">
+                  {t("vouchers.detail.batch")}
+                </TableHead>
+              )}
+              {showEntered && (
+                <TableHead className="hidden md:table-cell">
+                  {t("vouchers.detail.entered")}
+                </TableHead>
+              )}
               <TableHead className="pr-4 text-right">
                 {t("vouchers.detail.quantity")}
               </TableHead>
@@ -257,12 +279,12 @@ export function VoucherScreen({ id }: { id: string }) {
                   <div className="flex items-center gap-3">
                     <ItemThumb imageUrl={line.itemImageUrl} />
                     <div className="min-w-0">
-                      <Link
-                        href={RecordRoutes.item(line.itemId)}
+                      <ItemLink
+                        itemId={line.itemId}
                         className="font-semibold hover:underline"
                       >
                         {line.itemName}
-                      </Link>
+                      </ItemLink>
                       {line.itemReference && (
                         <p className="font-mono text-xs text-muted-foreground">
                           {line.itemReference}
@@ -283,21 +305,25 @@ export function VoucherScreen({ id }: { id: string }) {
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="hidden sm:table-cell">
-                  {line.batch ? (
-                    batchLabel(line.batch, line)
-                  ) : (
-                    <span className="text-muted-foreground">—</span>
-                  )}
-                </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  {line.packagingName ? (
-                    `${format.number(line.enteredQuantity)} ${line.packagingName}`
-                  ) : (
-                    <span className="text-muted-foreground">—</span>
-                  )}
-                </TableCell>
-                <TableCell className="pr-4 text-right font-semibold tabular-nums">
+                {showBatch && (
+                  <TableCell className="hidden sm:table-cell">
+                    {line.batch ? (
+                      batchLabel(line.batch, line)
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                )}
+                {showEntered && (
+                  <TableCell className="hidden num md:table-cell">
+                    {line.packagingName ? (
+                      `${format.number(line.enteredQuantity)} ${line.packagingName}`
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                )}
+                <TableCell className="pr-4 text-right num font-semibold">
                   <MovementLabel
                     movement={movementOf(data.type, line)}
                     format={(quantity) =>
@@ -442,27 +468,63 @@ function MovementLabel({
   )
 }
 
-function VoucherPdfActions({ id }: { id: string }) {
-  const t = useTranslations("vouchers.print")
+/**
+ * Imprimer reste à un geste ; le PDF et le retour, plus rares, passent dans « … ». Le retour
+ * n'apparaît que pour un bon qui en admet un, et à qui peut l'enregistrer.
+ */
+function VoucherMoreActions({
+  id,
+  number,
+  returnHref,
+  returnLabel,
+}: {
+  id: string
+  number: string
+  returnHref?: string
+  returnLabel?: string | null
+}) {
+  const t = useTranslations("vouchers")
+  const router = useRouter()
   const pdf = useVoucherPdf()
   return (
     <>
       <Button
         variant="outline"
+        size="lg"
         disabled={pdf.busy}
         onClick={() => void pdf.print(id)}
       >
         {pdf.busy ? <Spinner /> : <PrinterIcon />}
-        {t("action")}
+        {t("print.action")}
       </Button>
-      <Button
-        variant="outline"
-        disabled={pdf.busy}
-        onClick={() => void pdf.download(id)}
-      >
-        <DownloadIcon />
-        {t("download")}
-      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              variant="outline"
+              size="icon-lg"
+              aria-label={t("menu.open", { number })}
+            />
+          }
+        >
+          <EllipsisVerticalIcon />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-60">
+          <DropdownMenuItem
+            disabled={pdf.busy}
+            onClick={() => void pdf.download(id)}
+          >
+            <DownloadIcon />
+            {t("print.download")}
+          </DropdownMenuItem>
+          {returnHref && returnLabel && (
+            <DropdownMenuItem onClick={() => router.push(returnHref)}>
+              <Undo2Icon />
+              {returnLabel}
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </>
   )
 }

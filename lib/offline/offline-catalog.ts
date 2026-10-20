@@ -2,6 +2,8 @@ import { createStore, get, set } from "idb-keyval"
 
 import type { Item } from "@/lib/api/stock"
 
+import { PERSISTED_CACHE_VERSION } from "./query-persister"
+
 /**
  * Catalogue actif copié sur le téléphone (D39), par entreprise : chercher et scanner un article
  * sans réseau. Gardé à part des autres lectures : il est gros et change peu.
@@ -11,6 +13,8 @@ const DATABASE = "kreskala-catalog"
 const TABLE = "catalogs"
 
 export type OfflineCatalog = { items: Item[]; syncedAt: number }
+/** Copie gardée avec la version de forme des réponses : une copie d'avant est recopiée. */
+type StoredCatalog = OfflineCatalog & { version: string }
 
 type Listener = () => void
 
@@ -35,9 +39,13 @@ export async function loadCatalog(
   organizationId: string
 ): Promise<OfflineCatalog | undefined> {
   if (catalogs.has(organizationId)) return catalogs.get(organizationId)
-  const stored = await get<OfflineCatalog>(organizationId, database()).catch(
+  const saved = await get<StoredCatalog>(organizationId, database()).catch(
     () => undefined
   )
+  const stored =
+    saved?.version === PERSISTED_CACHE_VERSION
+      ? { items: saved.items, syncedAt: saved.syncedAt }
+      : undefined
   if (stored) {
     catalogs.set(organizationId, stored)
     notify()
@@ -51,7 +59,8 @@ export async function saveCatalog(
 ): Promise<void> {
   catalogs.set(organizationId, catalog)
   notify()
-  await set(organizationId, catalog, database()).catch(() => undefined)
+  const stored: StoredCatalog = { ...catalog, version: PERSISTED_CACHE_VERSION }
+  await set(organizationId, stored, database()).catch(() => undefined)
 }
 
 /** Recherche locale, comme l'API : un morceau du nom, de la référence ou du code-barres exact. */

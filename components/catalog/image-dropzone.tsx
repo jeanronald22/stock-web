@@ -6,11 +6,9 @@ import { useId, useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
-import { ItemImageRules } from "@/lib/api/stock"
 import { cn } from "@/lib/utils"
 
-const ACCEPT = ItemImageRules.types.join(",")
-const MEGABYTE = 1024 * 1024
+import { IMAGE_ACCEPT, useImageCheck } from "./use-image-check"
 
 /**
  * Zone de dépôt d'une photo : glisser-déposer ou toucher pour choisir (appareil photo sur téléphone).
@@ -34,17 +32,13 @@ export function ImageDropzone({
   const input = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const check = useImageCheck()
 
   const accept = (file: File | undefined) => {
     if (!file) return
-    if (!(ItemImageRules.types as readonly string[]).includes(file.type))
-      return setError(t("unsupported"))
-    if (file.size > ItemImageRules.maxBytes)
-      return setError(
-        t("tooLarge", { max: ItemImageRules.maxBytes / MEGABYTE })
-      )
-    setError(null)
-    onSelect(file)
+    const problem = check(file)
+    setError(problem)
+    if (!problem) onSelect(file)
   }
 
   return (
@@ -101,7 +95,7 @@ export function ImageDropzone({
           ref={input}
           id={inputId}
           type="file"
-          accept={ACCEPT}
+          accept={IMAGE_ACCEPT}
           className="sr-only"
           disabled={busy}
           onChange={(event) => {

@@ -114,9 +114,7 @@ test("une personne invitée rejoint l'équipe comme magasinière d'un seul dép�
   await guest
     .getByRole("button", { name: "Rejoindre Quincaillerie Bello" })
     .click()
-  await expect(
-    guest.getByRole("heading", { name: "Bonjour Paul" })
-  ).toBeVisible()
+  await expect(guest.getByText("Bonjour Paul,")).toBeVisible()
   await dismissTour(guest, "Tout est ici")
 
   // Magasinier : ses réceptions et sorties, pas le catalogue ni l'équipe ; son seul dépôt.

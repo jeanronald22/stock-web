@@ -7,7 +7,6 @@ import {
   useBatchLabel,
   usePackagingBreakdown,
 } from "@/components/items/describe"
-import { ExportButton } from "@/components/reports/report-parts"
 import { useApi } from "@/lib/api/api-provider"
 import { isoDay } from "@/lib/reports/periods"
 import type { StockRow, StockSearch } from "@/lib/api/vouchers"
@@ -21,7 +20,7 @@ const EXTENSION = ".xlsx"
  * Le stock affiché, filtres compris, en classeur Excel (D38) : toutes les pages, une ligne par
  * article ; la quantité en nombre (Excel l'additionne) et en conditionnements.
  */
-export function StockExportButton({ search }: { search: StockSearch }) {
+export function useStockExport(search: StockSearch): () => Promise<void> {
   const t = useTranslations("stock.export")
   const tUnits = useTranslations("units")
   const tStates = useTranslations("stock.state")
@@ -30,7 +29,7 @@ export function StockExportButton({ search }: { search: StockSearch }) {
   const breakdown = usePackagingBreakdown()
   const batchLabel = useBatchLabel()
 
-  const exportAll = async () => {
+  return async () => {
     const rows: StockRow[] = []
     for (let page = 0; ; page++) {
       const result = await vouchers.stock(search, page, BATCH)
@@ -73,5 +72,4 @@ export function StockExportButton({ search }: { search: StockSearch }) {
       },
     ])
   }
-  return <ExportButton onExport={exportAll} />
 }

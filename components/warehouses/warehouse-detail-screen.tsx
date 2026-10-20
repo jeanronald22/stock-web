@@ -12,8 +12,14 @@ import { toast } from "sonner"
 
 import { useQuantityLabel } from "@/components/items/describe"
 import { WarehouseLocations } from "@/components/locations/warehouse-locations"
+import { ItemLink } from "@/components/items/item-link"
 import { ItemThumb } from "@/components/items/item-thumb"
 import { RecordActions } from "@/components/records/record-actions"
+import {
+  RecordSummary,
+  RecordSummaryFigure,
+  RecordSummaryIcon,
+} from "@/components/records/record-summary"
 import { RecordFacts } from "@/components/records/record-facts"
 import {
   RecordNotFound,
@@ -97,14 +103,12 @@ function WarehouseDetails({ warehouse }: { warehouse: Warehouse }) {
         ]
           .filter(Boolean)
           .join(" · ")}
-        actions={
-          <>
-            {archived && (
-              <Badge variant="secondary">{t("warehouses.restore.badge")}</Badge>
-            )}
-            <WarehouseActions warehouse={warehouse} archived={archived} />
-          </>
+        badges={
+          archived && (
+            <Badge variant="secondary">{t("warehouses.restore.badge")}</Badge>
+          )
         }
+        actions={<WarehouseActions warehouse={warehouse} archived={archived} />}
       />
 
       <WarehouseSummary warehouse={warehouse} toOrder={toOrder.data?.total} />
@@ -166,45 +170,37 @@ function WarehouseSummary({
   const format = useFormatter()
   const Icon = warehouseKindIcons[warehouse.kind]
   return (
-    <section
-      aria-label={t("summary")}
-      className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4 rounded-2xl border bg-muted/30 p-4 sm:p-5"
-    >
-      <span className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary sm:size-20 sm:rounded-2xl">
-        <Icon className="size-7 sm:size-9" aria-hidden />
-      </span>
-      <div className="min-w-0">
-        <p className="text-sm text-muted-foreground">{t("offered")}</p>
-        <p className="mt-1 flex items-baseline gap-3">
-          <span className="text-4xl font-semibold tracking-tight tabular-nums sm:text-5xl">
-            {format.number(warehouse.itemCount)}
-          </span>
-          <span className="text-lg text-muted-foreground">
-            {t("items", { count: warehouse.itemCount })}
-          </span>
-        </p>
-        {warehouse.itemCount > 0 && (
+    <RecordSummary
+      label={t("offered")}
+      visual={<RecordSummaryIcon icon={Icon} />}
+      aside={
+        toOrder === undefined ? (
+          <Skeleton className="h-10 w-40" />
+        ) : toOrder > 0 ? (
           <Link
-            href={`${Routes.items}?${ListQueryParams.warehouse}=${warehouse.id}`}
-            className="text-sm font-medium text-primary hover:underline"
+            href={`${Routes.stock}?${ListQueryParams.warehouse}=${warehouse.id}&${ListQueryParams.stockAlert}=${StockAlertParam.any}`}
+            className="rounded-xl border border-warning/40 bg-warning-muted/60 px-4 py-2 font-semibold text-warning-muted-foreground transition-colors hover:bg-warning-muted"
           >
-            {t("seeItems")}
+            {t("toOrderCount", { count: toOrder })}
           </Link>
-        )}
-      </div>
-      {toOrder === undefined ? (
-        <Skeleton className="h-10 w-40" />
-      ) : toOrder > 0 ? (
+        ) : (
+          <p className="text-sm text-muted-foreground">{t("nothingToOrder")}</p>
+        )
+      }
+    >
+      <RecordSummaryFigure
+        value={format.number(warehouse.itemCount)}
+        unit={t("items", { count: warehouse.itemCount })}
+      />
+      {warehouse.itemCount > 0 && (
         <Link
-          href={`${Routes.stock}?${ListQueryParams.warehouse}=${warehouse.id}&${ListQueryParams.stockAlert}=${StockAlertParam.any}`}
-          className="rounded-xl border border-warning/40 bg-warning-muted/60 px-4 py-2 font-semibold text-warning-muted-foreground transition-colors hover:bg-warning-muted"
+          href={`${Routes.items}?${ListQueryParams.warehouse}=${warehouse.id}`}
+          className="text-sm font-medium text-primary hover:underline"
         >
-          {t("toOrderCount", { count: toOrder })}
+          {t("seeItems")}
         </Link>
-      ) : (
-        <p className="text-sm text-muted-foreground">{t("nothingToOrder")}</p>
       )}
-    </section>
+    </RecordSummary>
   )
 }
 
@@ -231,8 +227,8 @@ function ToOrder({
           )
           return (
             <li key={row.item.id}>
-              <Link
-                href={RecordRoutes.item(row.item.id)}
+              <ItemLink
+                itemId={row.item.id}
                 className="flex items-center gap-3 p-3 transition-colors hover:bg-muted/40"
               >
                 <ItemThumb imageUrl={row.item.imageUrl} />
@@ -254,13 +250,13 @@ function ToOrder({
                 <StockStateBadge state={row.state} />
                 <span
                   className={cn(
-                    "font-semibold tabular-nums",
+                    "num font-semibold",
                     row.state === StockState.out && "text-destructive"
                   )}
                 >
                   {quantityLabel(row.item.baseUnit, row.quantity)}
                 </span>
-              </Link>
+              </ItemLink>
             </li>
           )
         })}

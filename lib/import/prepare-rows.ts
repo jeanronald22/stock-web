@@ -20,8 +20,6 @@ import { cellText, isBlank, type Table, type TableCell } from "./read-table"
 export const RowProblem = {
   nameMissing: "nameMissing",
   nameTooLong: "nameTooLong",
-  referenceTooLong: "referenceTooLong",
-  referenceDuplicate: "referenceDuplicate",
   barcodeInvalid: "barcodeInvalid",
   barcodeDuplicate: "barcodeDuplicate",
   unitUnknown: "unitUnknown",
@@ -84,7 +82,6 @@ export function prepareRows(
   mapping: ColumnMapping,
   context: PrepareContext
 ): PreparedRow[] {
-  const references = new Set<string>()
   const barcodes = new Set<string>()
   return table.rows.map((cells, index) => {
     const problems: RowProblem[] = []
@@ -99,14 +96,6 @@ export function prepareRows(
     if (!name) problems.push(RowProblem.nameMissing)
     else if (name.length > StockLimits.name)
       problems.push(RowProblem.nameTooLong)
-
-    const reference = text(ImportField.reference)
-    if (reference.length > StockLimits.reference)
-      problems.push(RowProblem.referenceTooLong)
-    const referenceKey = reference.toLocaleLowerCase()
-    if (reference && references.has(referenceKey))
-      problems.push(RowProblem.referenceDuplicate)
-    if (reference) references.add(referenceKey)
 
     const barcode = text(ImportField.barcode)
     if (barcode && !BARCODE_PATTERN.test(barcode))
@@ -179,7 +168,6 @@ export function prepareRows(
       item: {
         id: crypto.randomUUID(),
         name,
-        reference: reference || undefined,
         barcode: barcode || undefined,
         baseUnit: unit ?? DEFAULT_UNIT,
         batchTracking: batchTracking ?? false,

@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button, buttonVariants } from "@/components/ui/button"
 import type { TransferReceiptDraft } from "@/components/vouchers/transfer-receipt-screen"
-import { VoucherTypeBadge } from "@/components/vouchers/vouchers-screen"
+import { VoucherTypeBadge } from "@/components/vouchers/voucher-badges"
 import type { EntryType, VoucherType } from "@/lib/api/vouchers"
 import {
   OutboxKind,

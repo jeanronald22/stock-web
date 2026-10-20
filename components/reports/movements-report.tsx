@@ -7,10 +7,10 @@ import {
   SearchIcon,
   SlidersHorizontalIcon,
 } from "lucide-react"
-import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { useDeferredValue, useState } from "react"
 
+import { ItemLink } from "@/components/items/item-link"
 import { Button } from "@/components/ui/button"
 import {
   InputGroup,
@@ -29,8 +29,12 @@ import {
 import { useMovementsReport } from "@/lib/api/report-queries"
 import type { ItemMovements, MovementsReport } from "@/lib/api/reports"
 import { VoucherType } from "@/lib/api/vouchers"
-import { INBOUND_TYPES, OUTBOUND_TYPES, totalOf } from "@/lib/reports/activity"
-import { RecordRoutes } from "@/lib/routes"
+import {
+  activityStep,
+  INBOUND_TYPES,
+  OUTBOUND_TYPES,
+  totalOf,
+} from "@/lib/reports/activity"
 import { cn } from "@/lib/utils"
 
 import { ActivityChart } from "./activity-chart"
@@ -38,6 +42,7 @@ import {
   ExportButton,
   ReportEmpty,
   ReportSection,
+  StatGrid,
   StatTile,
   StatTone,
   useReportQuantity,
@@ -56,6 +61,7 @@ const transfers = (row: ItemMovements) => row.transferredIn - row.transferredOut
 /** Mouvements de la période (D38) : l'activité en bons, puis article par article. */
 export function MovementsReportScreen() {
   const t = useTranslations("reports.movements")
+  const tChart = useTranslations("analysis.chart")
   const { search } = useReportSearch()
   const report = useMovementsReport(search)
   const exporter = useReportExport()
@@ -78,7 +84,10 @@ export function MovementsReportScreen() {
           )}
         >
           <Totals report={report.data} />
-          <ReportSection title={t("activity")} description={t("activityHint")}>
+          <ReportSection
+            title={t("activity")}
+            description={tChart(activityStep(report.data.activity.length))}
+          >
             <div className="rounded-2xl border p-4 sm:p-5">
               <ActivityChart activity={report.data.activity} />
             </div>
@@ -92,36 +101,40 @@ export function MovementsReportScreen() {
 
 function Totals({ report }: { report: MovementsReport }) {
   const t = useTranslations("reports.movements.totals")
+  const inbound = totalOf(report.totals, INBOUND_TYPES)
+  const outbound = totalOf(report.totals, OUTBOUND_TYPES)
+  const damage = report.totals[VoucherType.damage] ?? 0
+  const adjustments = report.totals[VoucherType.adjustment] ?? 0
   return (
-    <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <StatGrid columns={4}>
       <StatTile
         label={t("inbound")}
-        value={totalOf(report.totals, INBOUND_TYPES)}
-        hint={t("vouchers")}
+        value={inbound}
+        hint={t("vouchers", { count: inbound })}
         icon={ArrowDownToLineIcon}
         tone={StatTone.good}
       />
       <StatTile
         label={t("outbound")}
-        value={totalOf(report.totals, OUTBOUND_TYPES)}
-        hint={t("vouchers")}
+        value={outbound}
+        hint={t("vouchers", { count: outbound })}
         icon={ArrowUpFromLineIcon}
       />
       <StatTile
         label={t("damage")}
-        value={report.totals[VoucherType.damage] ?? 0}
-        hint={t("vouchers")}
+        value={damage}
+        hint={t("vouchers", { count: damage })}
         icon={PackageXIcon}
         tone={StatTone.bad}
       />
       <StatTile
         label={t("adjustments")}
-        value={report.totals[VoucherType.adjustment] ?? 0}
-        hint={t("vouchers")}
+        value={adjustments}
+        hint={t("vouchers", { count: adjustments })}
         icon={SlidersHorizontalIcon}
         tone={StatTone.warning}
       />
-    </dl>
+    </StatGrid>
   )
 }
 
@@ -169,13 +182,10 @@ function ItemsTable({ rows }: { rows: ItemMovements[] }) {
           <ul className="divide-y rounded-2xl border md:hidden">
             {visible.map((row) => (
               <li key={row.item.id} className="px-4 py-3">
-                <Link
-                  href={RecordRoutes.item(row.item.id)}
-                  className="font-semibold"
-                >
+                <ItemLink itemId={row.item.id} className="font-semibold">
                   {row.item.name}
-                </Link>
-                <p className="mt-1 text-sm text-muted-foreground tabular-nums">
+                </ItemLink>
+                <p className="mt-1 num text-sm text-muted-foreground">
                   {t("compact", {
                     inbound: quantity(row.item.baseUnit, inbound(row)),
                     outbound: quantity(row.item.baseUnit, outbound(row)),
@@ -216,39 +226,39 @@ function ItemsTable({ rows }: { rows: ItemMovements[] }) {
                   return (
                     <TableRow key={row.item.id}>
                       <TableCell className="py-3 pl-4">
-                        <Link
-                          href={RecordRoutes.item(row.item.id)}
+                        <ItemLink
+                          itemId={row.item.id}
                           className="font-medium hover:underline"
                         >
                           {row.item.name}
-                        </Link>
+                        </ItemLink>
                         {row.item.reference && (
                           <p className="font-mono text-xs text-muted-foreground">
                             {row.item.reference}
                           </p>
                         )}
                       </TableCell>
-                      <TableCell className="text-right tabular-nums">
+                      <TableCell className="text-right num">
                         {quantity(unit, inbound(row))}
                       </TableCell>
-                      <TableCell className="text-right tabular-nums">
+                      <TableCell className="text-right num">
                         {quantity(unit, outbound(row))}
                       </TableCell>
-                      <TableCell className="text-right text-muted-foreground tabular-nums">
+                      <TableCell className="text-right num text-muted-foreground">
                         {quantity(unit, transfers(row), true)}
                       </TableCell>
                       <TableCell
                         className={cn(
-                          "text-right tabular-nums",
+                          "text-right num",
                           row.damaged > 0 && "text-destructive"
                         )}
                       >
                         {quantity(unit, row.damaged)}
                       </TableCell>
-                      <TableCell className="text-right text-muted-foreground tabular-nums">
+                      <TableCell className="text-right num text-muted-foreground">
                         {quantity(unit, row.adjusted, true)}
                       </TableCell>
-                      <TableCell className="pr-4 text-right font-semibold tabular-nums">
+                      <TableCell className="pr-4 text-right num font-semibold">
                         {quantity(unit, row.net, true)}
                       </TableCell>
                     </TableRow>
@@ -272,11 +282,7 @@ function ItemsTable({ rows }: { rows: ItemMovements[] }) {
 export function ReportSkeleton() {
   return (
     <div className="space-y-8" aria-hidden>
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {Array.from({ length: 4 }, (_, index) => (
-          <Skeleton key={index} className="h-28 rounded-2xl" />
-        ))}
-      </div>
+      <Skeleton className="h-56 rounded-2xl lg:h-28" />
       <Skeleton className="h-64 rounded-2xl" />
       <Skeleton className="h-72 rounded-2xl" />
     </div>

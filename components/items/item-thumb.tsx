@@ -9,8 +9,6 @@ const SIZES = {
   sm: "size-8 rounded-md [&_svg]:size-4",
   md: "size-10 rounded-lg [&_svg]:size-4",
   lg: "size-14 rounded-xl [&_svg]:size-6",
-  /** Fiche de l'article : assez grande pour le reconnaître dans les rayons. */
-  xl: "size-28 rounded-2xl [&_svg]:size-10",
 } as const
 
 /** Vignette d'un article, partout où il est listé : sa photo, ou un carton à défaut. */

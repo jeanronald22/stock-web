@@ -174,26 +174,27 @@ function MemberDetails({
         ]}
         description={member.email ?? undefined}
         className="mb-8"
+        badges={
+          disabled && <Badge variant="danger">{t("team.disabled")}</Badge>
+        }
         actions={
-          <>
-            {disabled && <Badge variant="danger">{t("team.disabled")}</Badge>}
-            {editable && !member.self && (
-              <ArchiveControl
-                archived={disabled}
-                pending={changeStatus.isPending}
-                archiveLabels={{
-                  action: t("team.disable"),
-                  title: t("team.disableConfirm.title", { name }),
-                  description: t("team.disableConfirm.description"),
-                }}
-                restoreLabel={t("team.enable")}
-                onArchive={toggleStatus}
-                onRestore={toggleStatus}
-                archiveIcon={BanIcon}
-                restoreIcon={UserCheckIcon}
-              />
-            )}
-          </>
+          editable &&
+          !member.self && (
+            <ArchiveControl
+              archived={disabled}
+              pending={changeStatus.isPending}
+              archiveLabels={{
+                action: t("team.disable"),
+                title: t("team.disableConfirm.title", { name }),
+                description: t("team.disableConfirm.description"),
+              }}
+              restoreLabel={t("team.enable")}
+              onArchive={toggleStatus}
+              onRestore={toggleStatus}
+              archiveIcon={BanIcon}
+              restoreIcon={UserCheckIcon}
+            />
+          )
         }
       />
 

@@ -201,9 +201,9 @@ function InventorySheet({ inventory }: { inventory: Inventory }) {
             }),
           }),
         ].join(" · ")}
+        badges={<InventoryStatusBadge status={inventory.status} />}
         actions={
           <>
-            <InventoryStatusBadge status={inventory.status} />
             {inventory.adjustment && (
               <Link
                 href={RecordRoutes.voucher(inventory.adjustment.id)}
@@ -229,8 +229,8 @@ function InventorySheet({ inventory }: { inventory: Inventory }) {
 
       <div className="mt-8 grid gap-4 rounded-2xl border p-5 sm:grid-cols-3">
         <div className="sm:col-span-2">
-          <p className="text-sm text-muted-foreground">{t("progressTitle")}</p>
-          <p className="mt-0.5 text-2xl font-semibold tabular-nums">
+          <p className="label-caps">{t("progressTitle")}</p>
+          <p className="mt-1 num text-2xl font-semibold">
             {t("progress", { counted, lines })}
           </p>
           <Progress
@@ -240,10 +240,10 @@ function InventorySheet({ inventory }: { inventory: Inventory }) {
           />
         </div>
         <div>
-          <p className="text-sm text-muted-foreground">{t("gapsTitle")}</p>
+          <p className="label-caps">{t("gapsTitle")}</p>
           <p
             className={cn(
-              "mt-0.5 text-2xl font-semibold tabular-nums",
+              "mt-1 num text-2xl font-semibold",
               gaps > 0 && "text-warning-muted-foreground"
             )}
           >

@@ -6,9 +6,14 @@ import { useTranslations } from "next-intl"
 import { useMemo } from "react"
 import { toast } from "sonner"
 
+import { ItemLink } from "@/components/items/item-link"
 import { ItemThumb } from "@/components/items/item-thumb"
 import { ContactActions } from "@/components/records/contact-actions"
 import { RecordActions } from "@/components/records/record-actions"
+import {
+  RecordSummary,
+  RecordSummaryIcon,
+} from "@/components/records/record-summary"
 import { RecordFacts } from "@/components/records/record-facts"
 import {
   RecordNotFound,
@@ -70,14 +75,12 @@ function SupplierDetails({ supplier }: { supplier: Supplier }) {
           { label: supplier.name },
         ]}
         description={supplier.address ?? undefined}
-        actions={
-          <>
-            {archived && (
-              <Badge variant="secondary">{t("suppliers.restore.badge")}</Badge>
-            )}
-            <SupplierActions supplier={supplier} archived={archived} />
-          </>
+        badges={
+          archived && (
+            <Badge variant="secondary">{t("suppliers.restore.badge")}</Badge>
+          )
         }
+        actions={<SupplierActions supplier={supplier} archived={archived} />}
       />
 
       <SupplierSummary supplier={supplier} />
@@ -144,40 +147,34 @@ function SupplierSummary({ supplier }: { supplier: Supplier }) {
   const gapCount = gaps.data?.total ?? 0
 
   return (
-    <section
-      aria-label={t("summary")}
-      className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4 rounded-2xl border bg-muted/30 p-4 sm:p-5"
+    <RecordSummary
+      label={t("lastReceipt")}
+      visual={<RecordSummaryIcon icon={TruckIcon} />}
+      aside={<ContactActions phone={supplier.phone} email={supplier.email} />}
     >
-      <span className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary sm:size-20 sm:rounded-2xl">
-        <TruckIcon className="size-7 sm:size-9" aria-hidden />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm text-muted-foreground">{t("lastReceipt")}</p>
-        {receipts.isPending ? (
-          <Skeleton className="mt-2 h-9 w-48" />
-        ) : last ? (
-          <>
-            <p className="mt-1 text-3xl font-semibold tracking-tight first-letter:uppercase sm:text-4xl">
-              {dayAge(new Date(last.occurredAt))}
-            </p>
-            <p className="text-muted-foreground">
-              {t("receiptCount", { count })}
-            </p>
-          </>
-        ) : (
-          <p className="mt-1 text-lg">{t("neverDelivered")}</p>
-        )}
-        {gapCount > 0 && (
-          <Link
-            href={`${Routes.vouchers}?${ListQueryParams.voucherType}=${VoucherKind.discrepancies}&${ListQueryParams.supplier}=${supplier.id}`}
-            className="mt-3 inline-flex rounded-xl border border-warning/40 bg-warning-muted/60 px-3 py-1.5 text-sm font-semibold text-warning-muted-foreground transition-colors hover:bg-warning-muted"
-          >
-            {t("gaps", { count: gapCount })}
-          </Link>
-        )}
-      </div>
-      <ContactActions phone={supplier.phone} email={supplier.email} />
-    </section>
+      {receipts.isPending ? (
+        <Skeleton className="mt-2 h-9 w-48" />
+      ) : last ? (
+        <>
+          <p className="mt-1 text-2xl font-semibold tracking-tight first-letter:uppercase sm:text-3xl">
+            {dayAge(new Date(last.occurredAt))}
+          </p>
+          <p className="text-muted-foreground">
+            {t("receiptCount", { count })}
+          </p>
+        </>
+      ) : (
+        <p className="mt-1 text-lg">{t("neverDelivered")}</p>
+      )}
+      {gapCount > 0 && (
+        <Link
+          href={`${Routes.vouchers}?${ListQueryParams.voucherType}=${VoucherKind.discrepancies}&${ListQueryParams.supplier}=${supplier.id}`}
+          className="mt-3 inline-flex rounded-xl border border-warning/40 bg-warning-muted/60 px-3 py-1.5 text-sm font-semibold text-warning-muted-foreground transition-colors hover:bg-warning-muted"
+        >
+          {t("gaps", { count: gapCount })}
+        </Link>
+      )}
+    </RecordSummary>
   )
 }
 
@@ -206,8 +203,8 @@ function SupplierCatalogPreview({ supplier }: { supplier: Supplier }) {
         <ul className="flex flex-wrap gap-2">
           {rows.map((item) => (
             <li key={item.id}>
-              <Link
-                href={RecordRoutes.item(item.id)}
+              <ItemLink
+                itemId={item.id}
                 className="inline-flex items-center gap-2 rounded-full border py-1 pr-3 pl-1 text-sm transition-colors hover:bg-muted"
               >
                 <ItemThumb
@@ -216,7 +213,7 @@ function SupplierCatalogPreview({ supplier }: { supplier: Supplier }) {
                   className="size-6 rounded-full"
                 />
                 {item.name}
-              </Link>
+              </ItemLink>
             </li>
           ))}
           {total > rows.length && (

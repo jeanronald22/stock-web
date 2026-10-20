@@ -5,10 +5,12 @@ import { expect, test, type Page } from "@playwright/test"
 import {
   callApi,
   dismissTour,
+  itemCard,
   navigateTo,
   redirectApi,
   shot,
   signUpWithBusiness,
+  withFilters,
 } from "./support"
 
 test.beforeEach(async ({ context }) => redirectApi(context))
@@ -63,7 +65,10 @@ test("articles et dépôts : un article proposé dans un dépôt et pas dans l'a
     page.getByRole("heading", { name: "Quel article ajoutez-vous ?" })
   ).toBeVisible()
   await page.getByLabel("Nom", { exact: true }).fill("Carreau 60x60 beige")
-  await page.getByLabel(/Référence/).fill("CAR-6060")
+  // La référence n'est pas saisie : elle est numérotée à la création (D41).
+  await expect(page.getByLabel("Référence")).toHaveValue(
+    "Attribuée à la création"
+  )
   await shot(page, testInfo, "03-assistant-article")
   await next(page)
   await expect(
@@ -109,9 +114,7 @@ test("articles et dépôts : un article proposé dans un dépôt et pas dans l'a
     page.getByRole("link", { name: /Ciment CPJ 42,5/ })
   ).toBeVisible()
   // La photo du carreau s'affiche en vignette, chargée par son lien signé.
-  const thumbnail = page
-    .getByRole("row", { name: /Carreau 60x60 beige/ })
-    .locator("img")
+  const thumbnail = itemCard(page, /Carreau 60x60 beige/).locator("img")
   await expect(thumbnail).toHaveAttribute("src", /\/v1\/files\//)
   await expect
     .poll(() =>
@@ -120,37 +123,24 @@ test("articles et dépôts : un article proposé dans un dépôt et pas dans l'a
     .toBeGreaterThan(0)
   await shot(page, testInfo, "05-articles")
 
-  // Référence déjà prise : refusée par l'API à la fin, l'assistant revient à la première étape.
-  await page.getByRole("link", { name: "Nouvel article" }).click()
-  await page.getByLabel("Nom", { exact: true }).fill("Autre carreau")
-  await page.getByLabel(/Référence/).fill("car-6060")
-  for (let step = 0; step < 4; step++) await next(page)
-  await page.getByRole("button", { name: "Créer l’article" }).click()
-  await expect(
-    page.getByRole("heading", { name: "Quel article ajoutez-vous ?" })
-  ).toBeVisible()
-  await expect(
-    page.getByText("Un autre article porte déjà cette référence.")
-  ).toBeVisible()
-  await page.getByRole("button", { name: "Annuler" }).click()
-
   // Filtre par dépôt : chaque article n'apparaît que là où il est proposé ; deux dépôts cochés,
   // les articles de l'un ou de l'autre.
   const warehouseFilter = page.getByRole("button", {
     name: "Filtrer par dépôt",
   })
-  const pickWarehouse = async (name: string) => {
-    await warehouseFilter.click()
-    await page.getByRole("menuitemcheckbox", { name }).click()
-    await page.keyboard.press("Escape")
-  }
+  const pickWarehouse = (name: string, label?: string) =>
+    withFilters(page, async () => {
+      await warehouseFilter.click()
+      await page.getByRole("menuitemcheckbox", { name }).click()
+      await page.keyboard.press("Escape")
+      if (label) await expect(warehouseFilter).toContainText(label)
+    })
   await pickWarehouse("Dépôt Bonabéri")
   await expect(
     page.getByRole("link", { name: /Carreau 60x60 beige/ })
   ).toBeVisible()
   await expect(page.getByRole("link", { name: /Ciment/ })).toBeHidden()
-  await pickWarehouse("Boutique Akwa")
-  await expect(warehouseFilter).toContainText("2 dépôts")
+  await pickWarehouse("Boutique Akwa", "2 dépôts")
   await expect(
     page.getByRole("link", { name: /Ciment CPJ 42,5/ })
   ).toBeVisible()
@@ -159,7 +149,9 @@ test("articles et dépôts : un article proposé dans un dépôt et pas dans l'a
   await expect(page.getByRole("link", { name: /Carreau/ })).toBeHidden()
 
   // Recherche par un morceau du nom.
-  await page.getByRole("button", { name: "Effacer les filtres" }).click()
+  await withFilters(page, () =>
+    page.getByRole("button", { name: "Effacer les filtres" }).click()
+  )
   await page.getByRole("searchbox").fill("carr")
   await expect(
     page.getByRole("link", { name: /Carreau 60x60 beige/ })
@@ -197,8 +189,7 @@ test("articles et dépôts : un article proposé dans un dépôt et pas dans l'a
     page.getByRole("link", { name: /Carreau 60x60 beige/ })
   ).toBeVisible()
   await expect(page.getByRole("link", { name: /Ciment/ })).toBeHidden()
-  await page.getByRole("combobox", { name: "Statut" }).click()
-  await page.getByRole("option", { name: "Archivés" }).click()
+  await page.getByRole("button", { name: /^Archivés/ }).click()
   await expect(
     page.getByRole("link", { name: /Ciment CPJ 42,5/ })
   ).toBeVisible()

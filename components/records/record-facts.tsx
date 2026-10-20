@@ -24,11 +24,11 @@ export function RecordFacts({
       aria-label={title}
       className="rounded-2xl border p-5 lg:sticky lg:top-20"
     >
-      <h2 className="text-lg font-semibold">{title}</h2>
-      <dl className="mt-3 space-y-3">
+      <h2 className="label-caps">{title}</h2>
+      <dl className="mt-4 space-y-3">
         {shown.map((fact) => (
           <div key={fact.label}>
-            <dt className="text-sm text-muted-foreground">{fact.label}</dt>
+            <dt className="label-caps">{fact.label}</dt>
             <dd className="mt-0.5 font-medium break-words">{fact.value}</dd>
           </div>
         ))}

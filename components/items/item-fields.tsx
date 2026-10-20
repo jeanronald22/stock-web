@@ -42,11 +42,16 @@ type ItemFormProps = { form: UseFormReturn<ItemFormValues> }
 /** Valeur « Sans catégorie » : aucun identifiant ne peut la prendre. */
 const NO_CATEGORY = "none"
 
-/** Nom, référence, catégorie et description. */
+/** Nom, référence (lecture seule), catégorie et description. */
 export function ItemIdentityFields({
   form,
+  reference,
   autoFocus,
-}: ItemFormProps & { autoFocus?: boolean }) {
+}: ItemFormProps & {
+  /** Celle de l'article modifié ; absente à la création. */
+  reference?: string
+  autoFocus?: boolean
+}) {
   const t = useTranslations()
   const errors = form.formState.errors
   const optional = (
@@ -72,23 +77,24 @@ export function ItemIdentityFields({
         </InputGroup>
         <FieldError errors={[errors.name]} />
       </Field>
-      <Field data-invalid={!!errors.reference}>
-        <FieldLabel htmlFor="reference">
-          {t("items.form.reference")} {optional}
-        </FieldLabel>
-        <InputGroup>
+      {/* Attribuée par l'API à la création, dans l'ordre (D41) : on la montre, sans la saisir. */}
+      <Field>
+        <FieldLabel htmlFor="reference">{t("items.form.reference")}</FieldLabel>
+        <InputGroup className="bg-muted/40">
           <InputGroupInput
             id="reference"
-            className="font-mono"
-            placeholder={t("items.form.referencePlaceholder")}
-            aria-invalid={!!errors.reference}
-            {...form.register("reference")}
+            className={cn(reference ? "font-mono" : "text-muted-foreground")}
+            readOnly
+            value={reference ?? t("items.form.referenceAuto")}
+            aria-describedby="reference-hint"
           />
           <InputGroupAddon>
             <HashIcon />
           </InputGroupAddon>
         </InputGroup>
-        <FieldError errors={[errors.reference]} />
+        <FieldDescription id="reference-hint">
+          {t("items.form.referenceHint")}
+        </FieldDescription>
       </Field>
       <ItemBarcodeField form={form} />
       <ItemCategoryField form={form} />

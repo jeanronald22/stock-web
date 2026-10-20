@@ -9,14 +9,14 @@ import { VoucherOrder } from "@/lib/api/vouchers"
 import {
   ARCHIVED_STATUS_PARAM,
   CustomerKindParam,
-  GRID_VIEW_PARAM,
+  LIST_VIEW_PARAM,
   ListQueryParams,
   OLDEST_FIRST_PARAM,
   StockAlertParam,
 } from "@/lib/routes"
 import { VoucherKind } from "@/lib/vouchers/voucher-kinds"
 
-/** Affichage d'une liste : tableau dense, ou grille de cartes avec les photos. */
+/** Affichage d'une liste : grille de cartes avec les photos (par défaut), ou tableau dense. */
 export const ListView = { list: "list", grid: "grid" } as const
 export type ListView = (typeof ListView)[keyof typeof ListView]
 
@@ -75,6 +75,22 @@ const FILTER_KEYS = [
   "to",
   "order",
 ] as const satisfies readonly (keyof typeof ListQueryParams)[]
+
+export type ListParamKey = keyof typeof ListQueryParams
+
+/**
+ * Filtres comptés sur le bouton « Filtres » : la période (du, au) en vaut un seul ; le statut
+ * (archivés) en est un, même s'il ne compte pas pour dire la liste filtrée.
+ */
+const COUNTED_FILTERS: readonly (readonly ListParamKey[])[] = [
+  ...FILTER_KEYS.filter((key) => key !== "search" && key !== "to").map(
+    (key): ListParamKey[] => (key === "from" ? ["from", "to"] : [key])
+  ),
+  ["status"],
+]
+
+/** « Effacer les filtres » remet aussi la liste sur les fiches actives. */
+const RESET_KEYS: readonly ListParamKey[] = [...FILTER_KEYS, "status"]
 
 type Change = string | number | readonly string[] | undefined
 
@@ -135,9 +151,9 @@ export function useListParams() {
         ? VoucherOrder.oldestFirst
         : VoucherOrder.newestFirst,
     view:
-      searchParams.get(ListQueryParams.view) === GRID_VIEW_PARAM
-        ? ListView.grid
-        : ListView.list,
+      searchParams.get(ListQueryParams.view) === LIST_VIEW_PARAM
+        ? ListView.list
+        : ListView.grid,
   }
 
   const update = useCallback(
@@ -163,11 +179,22 @@ export function useListParams() {
   const filtered = FILTER_KEYS.some(
     (key) => searchParams.get(ListQueryParams[key]) !== null
   )
+  const countFilters = (shownElsewhere: readonly ListParamKey[] = []) =>
+    COUNTED_FILTERS.filter(
+      (keys) =>
+        !keys.some((key) => shownElsewhere.includes(key)) &&
+        keys.some((key) => searchParams.get(ListQueryParams[key]) !== null)
+    ).length
 
   return {
     params,
     /** Au moins un filtre posé : la liste n'est pas la vue complète. */
     filtered,
+    /**
+     * Filtres posés hors recherche, pour le bouton « Filtres ». [shownElsewhere] : ceux que l'écran
+     * montre ailleurs (en onglets), qui ne se comptent pas dans le menu.
+     */
+    countFilters,
     setText: (text: string) => update({ search: text.trim() || undefined }),
     setWarehouses: (warehouseIds: string[]) =>
       update({ warehouse: warehouseIds }),
@@ -175,6 +202,10 @@ export function useListParams() {
       update({ category: categoryId }),
     setSupplier: (supplierId: string | undefined) =>
       update({ supplier: supplierId }),
+    setItem: (itemId: string | undefined) => update({ item: itemId }),
+    /** Domaines du tableau de bord ; undefined : tous. */
+    setDomains: (domains: readonly string[] | undefined) =>
+      update({ domain: domains?.join(",") }),
     setCustomerKind: (kind: CustomerKind | undefined) =>
       update({
         customerKind: (Object.keys(CUSTOMER_KINDS) as CustomerKindParam[]).find(
@@ -197,7 +228,7 @@ export function useListParams() {
     // L'affichage n'est pas un filtre : il garde la page en cours.
     setView: (view: ListView) =>
       update({
-        view: view === ListView.grid ? GRID_VIEW_PARAM : undefined,
+        view: view === ListView.list ? LIST_VIEW_PARAM : undefined,
         page: searchParams.get(ListQueryParams.page) ?? undefined,
       }),
     setPeriod: (from: string | undefined, to: string | undefined) =>
@@ -208,6 +239,6 @@ export function useListParams() {
           order === VoucherOrder.oldestFirst ? OLDEST_FIRST_PARAM : undefined,
       }),
     reset: () =>
-      update(Object.fromEntries(FILTER_KEYS.map((key) => [key, undefined]))),
+      update(Object.fromEntries(RESET_KEYS.map((key) => [key, undefined]))),
   }
 }

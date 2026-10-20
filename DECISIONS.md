@@ -180,6 +180,7 @@ Côté utilisateur, ce sont les écrans de « Mon compte » : créer son entrepr
 ## D20. Photos d'articles et stockage de fichiers (2026-10-14)
 
 - Une photo par article (JPEG, PNG ou WebP, 5 Mo au plus, format reconnu au contenu), ajoutée dans l'assistant de création ou depuis la fiche.
+- **Révisé le 2026-10-20 : jusqu'à cinq photos par article** (de quoi le montrer sous plusieurs angles, sans en faire une galerie). La première est la principale : celle des listes et de l'aperçu. Chaque photo a son identifiant, choisi par l'application (renvoyer le même dépôt n'en ajoute pas une seconde) ; positions 0 à 4 sans trou, uniques par article (contrainte différée, pour réordonner dans une transaction) ; l'article est verrouillé pendant l'enregistrement. Ajout, choix de la principale et suppression depuis la fiche, sans ouvrir le formulaire ; le formulaire ne remplace que la principale.
 - **Stockage derrière une interface** (`FileStorage`) : Cloudflare R2 en production (API compatible S3, compartiment privé), disque en local. Choix par configuration (`STORAGE_PROVIDER`) ; démarrage refusé si R2 est incomplet.
 - **Accès** : les photos sont servies par l'API sur un lien signé (HMAC, `STORAGE_SIGNING_SECRET`), stable pendant une heure pour le cache du navigateur, valable deux heures au plus. Même comportement quel que soit le stockage ; un CDN pourra être ajouté plus tard sans changer l'application.
 - Clé de fichier unique à chaque dépôt (jamais réécrite) ; ancienne photo effacée après validation ; table `item_image` séparée de l'article, pour qu'une photo ne crée pas de conflit de version avec une modification en cours.
@@ -407,7 +408,7 @@ Questionnaire : rapports au gérant (Q1) ; produits à écarts (Q33) ; casse, qu
   - magasinier : ses gestes du jour (réception, sortie, transfert à réceptionner), ses demandes en attente ou refusées, l'activité du jour dans ses dépôts, les alertes.
   Les premiers pas (dépôt, article, réception, équipe) ne s'affichent plus une fois faits.
 - **Quantités** : un total qui mélange des pièces et des kilos ne veut rien dire. Les chiffres d'ensemble comptent des bons et des lignes ; les quantités restent par article, dans son unité.
-- **Rapports**, sans entrée de menu : depuis l'accueil et « Stock ». Période (raccourcis 7 jours, ce mois, mois dernier, 3 mois, ou dates libres) et dépôts. Trois vues :
+- **Rapports**, sans entrée de menu : depuis l'accueil et « Stock » (depuis D43 : depuis les cartes du tableau de bord). Période (raccourcis 7 jours, ce mois, mois dernier, 3 mois, ou dates libres) et dépôts. Trois vues :
   - mouvements par article : entrées, sorties, transferts, retours, casse, ajustements, solde ;
   - casse par motif et par article ;
   - écarts : réceptions qui ne correspondent pas au bon de livraison, par fournisseur et ligne par ligne (pour le recours), et écarts d'inventaire par article.
@@ -426,6 +427,57 @@ Questionnaire : réseau moyen ou coupé souvent au dépôt, coupures d'électric
 - **Données** : les lectures sont gardées sur le téléphone (7 jours) ; le catalogue actif est copié en entier pour chercher et scanner un article sans réseau.
 - **Session** : hors ligne, la session gardée sur le téléphone suffit, même si le jeton d'accès a expiré ; il est renouvelé (jeton de rafraîchissement, `offline_access`) avant le premier envoi au retour du réseau. Se déconnecter vide la file : l'écran prévient s'il reste des bons à envoyer.
 - **Application installable** (manifeste) et **service worker** (Serwist) : les fichiers de l'application sont gardés à l'installation ; les pages visitées le sont aussi ; une page jamais ouverte affiche un écran « hors ligne » qui renvoie à l'accueil. Les appels à l'API ne passent jamais par le cache du service worker.
+
+## D40. Interface : la charte appliquée, des écrans plus directs (2026-10-20)
+
+Constat après les lots précédents : l'application ressemblait à des composants shadcn par défaut, sans la charte (D12) ; sur téléphone, cinq ou six rangées de boutons et de filtres avant la liste.
+
+- **Listes** : une seule barre (`FilterBar`), compacte à partir de la tablette (contrôles de 36 px ; 44 px sur téléphone, cibles tactiles). Recherche et affichage toujours visibles. Deux filtres au plus : sur la même ligne ; au-delà, dans le menu « Filtres », comme les outils SaaS courants. Sur téléphone, toujours dans un panneau du bas. Le bouton « Filtres » dit combien sont posés. « Effacer les filtres » remet aussi les fiches actives. Sous une grille, la pagination est une simple ligne, sans cadre.
+- **Actions** : sur un écran, l'action fréquente en bouton, le reste dans « … » (Stock : inventaire, inventaires passés, rapports, export ; bon : PDF, retour). Sur téléphone, « Réception » et « Sortie » tiennent sur une ligne, les autres opérations derrière « + ».
+- **En-tête** : les états (type de bon, en cours, archivé) suivent le titre (`PageHeader.badges`) ; ce ne sont pas des actions.
+- **Fiches** (article, dépôt, fournisseur, client) : même bandeau (`RecordSummary`) : de quoi la reconnaître, le chiffre qui la résume, ce qui demande d'agir.
+- **Typographie de la charte** : chiffres, quantités, références et numéros en Geist Mono à chasse fixe (`num`) ; libellés de faits, de chiffres et en-têtes de tableaux en étiquette mono capitales (`label-caps`).
+- **Jauge de stock** de la charte (`StockGauge`) : articles à commander de l'accueil. Sur la fiche article, un graphique Recharts la remplace.
+- **Chiffres** de l'accueil et des rapports en un seul bloc à filets (`StatGrid`) ; l'accueil montre ce qui demande un geste (articles à commander) avant l'activité.
+- **Premier tri en onglets, avec leur nombre** (`StatusTabs`) : Stock par niveau (tous, à commander, stock bas, rupture), Articles par statut (actifs, archivés), Bons par sorte. Pour les bons, seuls « en route » et « avec écart » sont comptés : ce sont ceux qu'il reste à traiter. Les nombres suivent les autres filtres. Ils viennent de l'API existante (une page d'une ligne par onglet), sans point d'accès dédié tant que le coût reste faible.
+- **Période** : un sélecteur unique (`DateRangePicker`, calendrier shadcn sur react-day-picker). Raccourcis à gauche, appliqués aussitôt ; deux mois sur ordinateur, un sur téléphone ; « Appliquer » pour des dates libres. Pas de jour futur. Le même sert aux bons (toujours visible dans la barre), aux rapports, à l'activité de l'accueil et à la courbe de la fiche article. Plus d'un an : l'API refuse, le graphique affiche son message.
+- **Tableaux** : une colonne par information, chiffres en mono alignés à droite. Un état toujours écrit sur chaque ligne de stock (« En stock », « Stock bas », « Rupture », « Épuisé »). Pagination numérotée.
+- **Cartes** : l'essentiel seulement (photo, nom, catégorie, quantité, état). La référence reste au tableau, où elle se cherche.
+- **Articles et Stock en grille par défaut** : on reconnaît un article à sa photo. La liste reste au choix (`vue=liste` dans l'adresse). Cartes de taille fixe (environ 11 rem) : un grand écran en montre davantage, sans les agrandir.
+- **Fiche article** : en tête, la photo principale (un clic ouvre toutes les photos en grand ; sans photo, « Ajouter » pour qui gère le catalogue), le nom, la référence et la catégorie ; dessous, l'essentiel en une ligne (état, stock et conditionnements, dépôts en alerte, dernier mouvement, unité). Le détail en onglets, à gauche sur ordinateur, en ligne sur téléphone, gardés dans l'adresse (`onglet`) : informations générales (fiche technique sans cadres, « Non renseigné » pour ce qui manque, code-barres et référence copiables ; un aperçu par dépôt ; les photos, cinq au plus), stock par dépôt (colonnes stock et seuil, couleur de l'état, légende des états présents ; puis où le trouver : emplacement et lots, sans répéter les quantités), mouvements (courbe des entrées et sorties sur la période choisie au calendrier, 30 jours d'abord, puis les derniers bons). Graphiques par la bibliothèque (Recharts via `components/ui/chart`), pas de SVG fait main. La courbe vient de l'API (`/v1/reports/items/{id}/history`) : la liste des bons, paginée, ne suffit pas à la reconstituer.
+- **Aperçu d'un article partout** (`ItemLink`, hover card shadcn) : survoler le nom d'un article (tableaux, bons, rapports, accueil, fiches dépôt et fournisseur) montre sa photo, son état, son stock, ses dépôts, son code-barres et « Ouvrir la fiche ». Chargé à l'ouverture seulement. Au toucher, le lien ouvre la fiche. Sur une ligne cliquable, seule la ligne ouvre la fiche et seul le nom ouvre l'aperçu.
+- **Colonnes** vides sur toute la page (lot, saisie) : non affichées.
+- **Notifications** (toasts) : gardées en haut, sous la barre. Essayées en bas : elles couvraient les panneaux du bas et les barres d'action, plus gênant que le titre caché quelques secondes.
+
+## D41. Références d'articles automatiques (2026-10-20)
+
+- **ART-0001, ART-0002…** : attribuées par l'API à la création, par entreprise, dans l'ordre, sans trou ni doublon (compteur `item_sequence` verrouillé jusqu'à la fin de la transaction, comme les numéros de bons). Elles ne suivent plus le nom (« CAR-6060 ») : un catalogue garde des références homogènes, qui se suivent.
+- **Ne se saisissent ni ne se modifient** : le formulaire les montre en lecture seule ; une référence envoyée par une ancienne version de l'application est ignorée. L'import Excel ne lit plus de colonne « Référence » (le code-barres reste importé). Le code-barres reste le moyen d'identifier un article à la caisse ou chez le fournisseur.
+- **Reprise** : les articles sans référence en reçoivent une dans l'ordre de création ; celles déjà saisies restent, leur numéro est sauté s'il a la forme ART-n.
+
+## D42. Fiche article en PDF (2026-10-20)
+
+- **Une page A4 par article**, générée dans l'application (@react-pdf/renderer, chargé au premier export), aux couleurs de Kreskala : bandeau vert de la charte avec le logo, l'entreprise et sa ville ; photo principale, nom, référence, état, stock total et conditionnements, code-barres dessiné ; identification (référence, code-barres, unité, lots, conditionnements, date d'ajout), description ; disponibilité par dépôt (stock, seuil, état, emplacement), total ; jusqu'à quatre autres photos. Pied de page : date d'édition, numéro de page, kreskala.
+- **Depuis la fiche** : « Exporter en PDF », à côté de « Modifier ». **Depuis le catalogue** : « Sélectionner », des cases sur les cartes et les lignes (toute la carte coche, elle n'ouvre plus la fiche), « Toute la page », puis un seul PDF. Le choix survit au changement de page, de filtre et de vue. Cinquante articles au plus par export (temps de génération sur un téléphone).
+- **Photos** redessinées en JPEG avant la mise en page (react-pdf ne lit pas le WebP), réduites à 1 200 px ; une photo qui ne se charge pas est laissée de côté plutôt que de faire échouer l'export. Seuls les dépôts de la personne apparaissent, comme sur la fiche.
+
+## D43. Tableau de bord du gérant (2026-10-20)
+
+Questionnaire : rapports au gérant (Q1) ; produits à écarts (Q33) ; casse (Q34, Q36). Prolonge D38. L'accueil et une analyse à part disaient presque la même chose : ils ne font plus qu'un écran.
+
+- **L'accueil devient le « Tableau de bord »**, sans entrée de menu en plus, pour le gérant, le manager et le contrôleur. Le magasinier garde ses gestes du jour. « Stock » perd son accès aux rapports et garde l'inventaire et l'export.
+- **En tête, ce qui attend un geste**, en pastilles qui ouvrent la liste concernée, seulement s'il y a quelque chose : sorties à valider, transferts à réceptionner, articles en rupture, articles à commander, inventaires en cours, réceptions avec écart. Sinon : « Rien n'attend de décision ».
+- **Domaines** (Activité, Stock, Sorties, Qualité, Équipe) en puces : « Tout » par défaut. Choisir un domaine ne garde que ses cartes, et les suivants s'ajoutent.
+- **Filtres** : dépôts, un article (par nom, référence ou code-barres) et la période (raccourcis ou calendrier, 30 derniers jours par défaut, un an au plus). Domaines et filtres sont gardés dans l'adresse.
+- **Cartes**, chacune à la hauteur de son contenu (aucune n'impose sa taille à sa voisine), en colonnes équilibrées par le navigateur :
+  - activité : quatre chiffres comparés à la période précédente de même durée (bons d'entrée, de sortie, de casse, réceptions avec écart), la courbe des bons (par jour jusqu'à 31 jours, par semaine jusqu'à 4 mois, puis par mois) et les bons par type ;
+  - stock : l'état du stock en anneau (suffisant, à commander, en rupture, chacun vers « Stock » filtré), ceux qui vont manquer (stock d'aujourd'hui divisé par le rythme des sorties de la période, sous 30 jours), le stock qui dort (en stock, sans sortie sur la période), et dépôt par dépôt ;
+  - sorties : les articles les plus sortis (en nombre de sorties) et les clients qui en reçoivent le plus ;
+  - qualité : casse par motif, conformité des réceptions en jauge, fournisseurs avec écarts ;
+  - équipe : les bons saisis par personne.
+- **Un article choisi** : sa fiche en tête, avec ses quantités dans son unité (en stock, entré, sorti, ce que le stock tient encore) et sa courbe jour par jour, qui remplace celle des bons. Les classements d'articles disparaissent, et le reste ne compte que les bons qui le portent.
+- **Détail** : chaque carte ouvre l'un des trois rapports de D38 (« Rapports », `/rapports` : mouvements, casse, écarts), qui reprend les mêmes filtres et s'exporte en Excel. Son fil d'Ariane ramène au tableau de bord.
+- **Calcul** : en SQL sur le registre et les bons, comme D38, dans les dépôts de la personne, en un seul appel. Les états de stock reprennent la règle des alertes (D24).
 
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).

@@ -5,16 +5,13 @@ import Link from "next/link"
 import { useTranslations } from "next-intl"
 
 import { useQuantityLabel } from "@/components/items/describe"
+import { ItemLink } from "@/components/items/item-link"
 import { ItemThumb } from "@/components/items/item-thumb"
+import { StockGauge } from "@/components/stock/stock-gauge"
 import { StockStateBadge } from "@/components/stock/stock-state-badge"
 import { StockState } from "@/lib/api/stock"
 import { useStockPage } from "@/lib/api/voucher-queries"
-import {
-  ListQueryParams,
-  RecordRoutes,
-  Routes,
-  StockAlertParam,
-} from "@/lib/routes"
+import { ListQueryParams, Routes, StockAlertParam } from "@/lib/routes"
 import { cn } from "@/lib/utils"
 
 /** Articles montrés sur l'accueil ; la liste complète est sur l'écran Stock. */
@@ -62,12 +59,13 @@ export function StockAlertsCard({ className }: { className?: string }) {
           >
             <ItemThumb imageUrl={row.item.imageUrl} />
             <div className="min-w-0 flex-1">
-              <Link
-                href={RecordRoutes.item(row.item.id)}
-                className="truncate font-medium after:absolute after:inset-0"
+              <ItemLink
+                itemId={row.item.id}
+                stretched
+                className="block truncate font-medium hover:underline"
               >
                 {row.item.name}
-              </Link>
+              </ItemLink>
               <p className="truncate text-xs text-muted-foreground">
                 {row.alerts
                   .map((alert) =>
@@ -81,6 +79,15 @@ export function StockAlertsCard({ className }: { className?: string }) {
                   )
                   .join(" · ")}
               </p>
+              {/* Un seul dépôt en alerte : sa jauge dit d'un coup d'œil l'écart au seuil. */}
+              {row.alerts.length === 1 && (
+                <StockGauge
+                  quantity={row.alerts[0].quantity}
+                  threshold={row.alerts[0].minQuantity}
+                  state={row.alerts[0].state}
+                  className="mt-2 max-w-56"
+                />
+              )}
             </div>
             <StockStateBadge state={row.state} />
           </li>

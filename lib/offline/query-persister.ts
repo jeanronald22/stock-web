@@ -16,8 +16,11 @@ const WRITE_DELAY_MS = 1_000
 
 /** Lectures gardées sept jours au plus : au-delà, elles tromperaient plus qu'elles n'aideraient. */
 export const PERSISTED_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1_000
-/** À changer quand la forme des réponses de l'API change : les lectures gardées sont alors oubliées. */
-export const PERSISTED_CACHE_VERSION = "2026-10-15"
+/**
+ * À changer quand la forme des réponses de l'API change : les lectures gardées (et le catalogue
+ * copié) sont alors oubliées. 2026-10-20 : photos d'un article (images), référence toujours là.
+ */
+export const PERSISTED_CACHE_VERSION = "2026-10-20"
 
 let idb: ReturnType<typeof createStore> | null = null
 const database = () => (idb ??= createStore(DATABASE, TABLE))

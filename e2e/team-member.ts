@@ -50,9 +50,7 @@ export async function joinTeam(
   await member.getByLabel("Prénom").fill(name.first)
   await member.getByLabel("Nom", { exact: true }).fill(name.last)
   await member.getByRole("button", { name: /^Rejoindre / }).click()
-  await expect(
-    member.getByRole("heading", { name: `Bonjour ${name.first}` })
-  ).toBeVisible()
+  await expect(member.getByText(`Bonjour ${name.first},`)).toBeVisible()
   await dismissTour(member, "Tout est ici")
   return member
 }

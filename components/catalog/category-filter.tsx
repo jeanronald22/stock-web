@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 
+import { FILTER_CONTROL } from "./filter-bar"
+
 /** Valeur « Toutes les catégories » : aucun identifiant ne peut la prendre. */
 const ALL_CATEGORIES = "all"
 
@@ -45,7 +47,7 @@ export function CategoryFilter({
     >
       <SelectTrigger
         className={cn(
-          "w-full sm:w-56",
+          FILTER_CONTROL,
           value && "border-primary/50 bg-primary/5",
           className
         )}

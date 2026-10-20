@@ -9,9 +9,9 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("reports") }
 }
 
-export default function ReportsPage() {
+export default function MovementsReportPage() {
   return (
-    // Période et dépôts lus dans l'adresse.
+    // Période, dépôts et article lus dans l'adresse.
     <Suspense>
       <MovementsReportScreen />
     </Suspense>

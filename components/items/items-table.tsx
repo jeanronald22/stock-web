@@ -1,10 +1,10 @@
 "use client"
 
 import { ChevronRightIcon } from "lucide-react"
-import Link from "next/link"
 import { useTranslations } from "next-intl"
 
 import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -15,18 +15,19 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { CatalogStatus, type Item } from "@/lib/api/stock"
-import { RecordRoutes } from "@/lib/routes"
 import { cn } from "@/lib/utils"
 
 import { useQuantityLabel } from "./describe"
+import { ItemLink } from "./item-link"
+import type { ItemSelection } from "./item-selection"
 import { ItemThumb } from "./item-thumb"
 
 /** Noms de dépôts montrés dans une ligne ; au-delà, « +2 ». */
 const VISIBLE_WAREHOUSES = 2
 
 /**
- * Tableau des articles. Sur téléphone, seule la colonne « Article » reste, avec l'unité et le nombre
- * de dépôts en dessous ; les autres colonnes apparaissent quand la place le permet. Toute la ligne
+ * Tableau des articles : nom et catégorie, référence, unité, conditionnements, dépôts. Sur
+ * téléphone, seule la colonne « Article » reste, avec l'unité et le nombre de dépôts en dessous ; les autres colonnes apparaissent quand la place le permet. Toute la ligne
  * ouvre la fiche (le lien du nom couvre la ligne).
  */
 export function ItemsTable({
@@ -34,6 +35,7 @@ export function ItemsTable({
   warehouseNames,
   categoryPaths,
   stale,
+  selection,
 }: {
   items: Item[]
   warehouseNames: ReadonlyMap<string, string>
@@ -41,6 +43,8 @@ export function ItemsTable({
   categoryPaths: ReadonlyMap<string, string>
   /** Page précédente affichée pendant le chargement de la suivante. */
   stale: boolean
+  /** Mode sélection : une case par ligne, la ligne coche au lieu d'ouvrir la fiche. */
+  selection: ItemSelection | null
 }) {
   const t = useTranslations()
   const quantity = useQuantityLabel()
@@ -49,11 +53,21 @@ export function ItemsTable({
     <Table className={cn("transition-opacity", stale && "opacity-60")}>
       <TableHeader className="bg-muted/40">
         <TableRow className="hover:bg-transparent">
-          <TableHead className="pl-4">{t("items.table.item")}</TableHead>
+          {selection && (
+            <TableHead className="w-10 pl-4">
+              <span className="sr-only">{t("items.selection.column")}</span>
+            </TableHead>
+          )}
+          <TableHead className={cn(!selection && "pl-4")}>
+            {t("items.table.item")}
+          </TableHead>
+          <TableHead className="hidden lg:table-cell">
+            {t("items.table.reference")}
+          </TableHead>
           <TableHead className="hidden md:table-cell">
             {t("items.table.unit")}
           </TableHead>
-          <TableHead className="hidden lg:table-cell">
+          <TableHead className="hidden xl:table-cell">
             {t("items.table.packagings")}
           </TableHead>
           <TableHead className="hidden md:table-cell">
@@ -71,30 +85,54 @@ export function ItemsTable({
             ? categoryPaths.get(item.categoryId)
             : undefined
           return (
-            <TableRow key={item.id} className="relative cursor-pointer">
-              <TableCell className="py-3 pl-4 whitespace-normal">
+            <TableRow
+              key={item.id}
+              className="relative cursor-pointer"
+              data-state={
+                selection?.isSelected(item.id) ? "selected" : undefined
+              }
+              onClick={selection ? () => selection.toggle(item) : undefined}
+            >
+              {selection && (
+                <TableCell className="pl-4">
+                  <Checkbox
+                    checked={selection.isSelected(item.id)}
+                    onCheckedChange={() => selection.toggle(item)}
+                    onClick={(event) => event.stopPropagation()}
+                    aria-label={t("items.selection.choose", {
+                      name: item.name,
+                    })}
+                  />
+                </TableCell>
+              )}
+              <TableCell
+                className={cn("py-2.5 whitespace-normal", !selection && "pl-4")}
+              >
                 <div className="flex items-center gap-3">
                   <ItemThumb imageUrl={item.imageUrl} />
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <Link
-                        href={RecordRoutes.item(item.id)}
-                        className="truncate font-semibold after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:ring-3 focus-visible:after:ring-ring/30"
-                      >
-                        {item.name}
-                      </Link>
+                      {selection ? (
+                        <span className="truncate font-medium">
+                          {item.name}
+                        </span>
+                      ) : (
+                        <ItemLink
+                          itemId={item.id}
+                          stretched
+                          className="truncate font-medium hover:underline"
+                        >
+                          {item.name}
+                        </ItemLink>
+                      )}
                       {item.status === CatalogStatus.archived && (
                         <Badge variant="secondary">
                           {t("items.restore.badge")}
                         </Badge>
                       )}
                     </div>
-                    {(item.reference || category) && (
+                    {category && (
                       <p className="truncate text-xs text-muted-foreground">
-                        {item.reference && (
-                          <span className="font-mono">{item.reference}</span>
-                        )}
-                        {item.reference && category && " · "}
                         {category}
                       </p>
                     )}
@@ -107,10 +145,15 @@ export function ItemsTable({
                   </div>
                 </div>
               </TableCell>
+              <TableCell className="hidden num text-xs lg:table-cell">
+                {item.reference ?? (
+                  <span className="text-muted-foreground">—</span>
+                )}
+              </TableCell>
               <TableCell className="hidden md:table-cell">
                 {t(`units.${item.baseUnit}.label`)}
               </TableCell>
-              <TableCell className="hidden lg:table-cell">
+              <TableCell className="hidden xl:table-cell">
                 {item.packagings.length === 0 ? (
                   <span className="text-muted-foreground">—</span>
                 ) : (
@@ -153,7 +196,9 @@ export function ItemsTable({
                 )}
               </TableCell>
               <TableCell className="pr-4 text-muted-foreground">
-                <ChevronRightIcon className="size-4" aria-hidden />
+                {!selection && (
+                  <ChevronRightIcon className="size-4" aria-hidden />
+                )}
               </TableCell>
             </TableRow>
           )

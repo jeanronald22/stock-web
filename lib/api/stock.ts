@@ -16,7 +16,13 @@ export const StockPaths = {
   item: (id: string) => `/v1/items/${id}`,
   itemArchive: (id: string) => `/v1/items/${id}/archive`,
   itemRestore: (id: string) => `/v1/items/${id}/restore`,
+  /** Photo principale (formulaire de l'article). */
   itemImage: (id: string) => `/v1/items/${id}/image`,
+  /** Une photo parmi cinq, sous l'identifiant choisi par l'application. */
+  itemImageEntry: (id: string, imageId: string) =>
+    `/v1/items/${id}/images/${imageId}`,
+  itemImageMain: (id: string, imageId: string) =>
+    `/v1/items/${id}/images/${imageId}/main`,
   itemThreshold: (id: string, warehouseId: string) =>
     `/v1/items/${id}/warehouses/${warehouseId}/threshold`,
   itemLocation: (id: string, warehouseId: string) =>
@@ -53,7 +59,6 @@ export const BARCODE_PATTERN = /^[!-~]{1,64}$/
 /** Mêmes limites que l'API (stock-api, StockLimits), pour signaler l'erreur avant l'envoi. */
 export const StockLimits = {
   name: 120,
-  reference: 40,
   /** Code-barres : caractères imprimables sans espace (stock-api, StockLimits.BARCODE_PATTERN). */
   barcode: 64,
   city: 80,
@@ -244,7 +249,8 @@ export type StockGrantInput = { role: StockRole; warehouseIds: string[] }
 export type Item = {
   id: string
   name: string
-  reference: string | null
+  /** ART-0001… attribuée par l'API à la création (D41). */
+  reference: string
   /** Code-barres (D34), scanné à la caméra ou à la douchette. */
   barcode: string | null
   baseUnit: BaseUnit
@@ -257,13 +263,17 @@ export type Item = {
   version: number
   createdAt: string
   updatedAt: string
-  /** Lien signé vers la photo, relatif à l'API (voir useFileUrl) ; null sans photo. */
+  /** Lien signé vers la photo principale, relatif à l'API (voir useFileUrl) ; null sans photo. */
   imageUrl: string | null
+  /** Toutes les photos, la principale d'abord. */
+  images: ItemImage[]
 }
+
+/** Une photo d'article ; [url] est un lien signé, relatif à l'API. */
+export type ItemImage = { id: string; url: string }
 
 export type ItemInput = {
   name: string
-  reference?: string
   barcode?: string
   baseUnit: BaseUnit
   batchTracking: boolean
@@ -318,6 +328,8 @@ export type ItemSearch = {
 export const ItemImageRules = {
   types: ["image/jpeg", "image/png", "image/webp"],
   maxBytes: 5 * 1024 * 1024,
+  /** Photos par article (stock-api, ItemImageService.MAX_IMAGES). */
+  maxCount: 5,
   /** Nom de la partie du formulaire multipart (stock-api, StockApi.IMAGE_PART). */
   part: "file",
 } as const
@@ -453,6 +465,28 @@ export const stockApi = (send: ApiClient) => {
         ...scoped,
         method: "DELETE",
         path: StockPaths.itemImage(id),
+      }),
+    addItemImage: (id: string, imageId: string, file: File) => {
+      const body = new FormData()
+      body.append(ItemImageRules.part, file)
+      return send<Item>({
+        ...scoped,
+        method: "PUT",
+        path: StockPaths.itemImageEntry(id, imageId),
+        body,
+      })
+    },
+    removeItemImageEntry: (id: string, imageId: string) =>
+      send<Item>({
+        ...scoped,
+        method: "DELETE",
+        path: StockPaths.itemImageEntry(id, imageId),
+      }),
+    makeMainItemImage: (id: string, imageId: string) =>
+      send<Item>({
+        ...scoped,
+        method: "PUT",
+        path: StockPaths.itemImageMain(id, imageId),
       }),
 
     locations: (warehouseId: string) =>

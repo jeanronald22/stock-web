@@ -18,19 +18,27 @@ const PREVIEW = 20
 const IN_TRANSIT = { transferState: TransferState.inTransit }
 
 /**
+ * Transferts en route vers les dépôts de la personne, qu'elle peut réceptionner (D27) ; aucun si son
+ * rôle ne le permet pas.
+ */
+export function useArrivingTransfers() {
+  const { can, covers } = useStockAccess()
+  const transfers = useVouchersPage(IN_TRANSIT, 0, PREVIEW)
+  if (!can(StockPermission.recordMovements)) return []
+  return (transfers.data?.items ?? []).filter(
+    (transfer) => transfer.destination && covers(transfer.destination.id)
+  )
+}
+
+/**
  * Transferts en route vers ses dépôts (DECISIONS.md, D27) : à réceptionner à leur arrivée. Rien
  * s'il n'y en a pas, ou si le rôle ne permet pas de réceptionner.
  */
 export function TransfersToReceiveCard({ className }: { className?: string }) {
   const t = useTranslations("dashboard.transfers")
   const format = useFormatter()
-  const { can, covers } = useStockAccess()
-  const transfers = useVouchersPage(IN_TRANSIT, 0, PREVIEW)
-  const arriving = (transfers.data?.items ?? []).filter(
-    (transfer) => transfer.destination && covers(transfer.destination.id)
-  )
-  if (!can(StockPermission.recordMovements) || arriving.length === 0)
-    return null
+  const arriving = useArrivingTransfers()
+  if (arriving.length === 0) return null
 
   return (
     <section

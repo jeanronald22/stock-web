@@ -83,7 +83,8 @@ test("un chantier se crée dans Contacts, reçoit une sortie, puis rapporte une 
 
   // Retour depuis la sortie : la ligne est proposée avec ce qui reste.
   await page.getByRole("button", { name: "Voir le bon" }).click()
-  await page.getByRole("link", { name: "Enregistrer un retour" }).click()
+  await page.getByRole("button", { name: /^Actions du bon SOR-/ }).click()
+  await page.getByRole("menuitem", { name: "Enregistrer un retour" }).click()
   await expect(
     page
       .getByText("Retour du bon")
@@ -131,7 +132,10 @@ test("inventaire : comptage à l'aveugle, écart, second comptage, clôture par 
 
   await navigateTo(page, "Stock")
   await dismissTour(page, "Dépôt par dépôt")
-  await page.getByRole("button", { name: "Faire un inventaire" }).click()
+  await page
+    .getByRole("button", { name: "Plus d’actions sur le stock" })
+    .click()
+  await page.getByRole("menuitem", { name: "Faire un inventaire" }).click()
   await page
     .getByRole("button", { name: "Ouvrir la feuille de comptage" })
     .click()

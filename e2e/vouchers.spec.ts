@@ -6,6 +6,7 @@ import {
   callApi,
   uploadItemPhoto,
   dismissTour,
+  itemCard,
   navigateTo,
   redirectApi,
   shot,
@@ -141,7 +142,10 @@ test("réception puis sortie : le stock suit, une sortie trop forte est refusée
   await page.emulateMedia({ colorScheme: "light" })
   // PDF téléchargé sans passer par l'impression : nom du bon, vrai fichier PDF.
   const pdfDownload = page.waitForEvent("download")
-  await page.getByRole("button", { name: "Télécharger le PDF" }).click()
+  await page
+    .getByRole("button", { name: `Actions du bon REC-${year}-0001` })
+    .click()
+  await page.getByRole("menuitem", { name: "Télécharger le PDF" }).click()
   const pdfFile = await pdfDownload
   expect(pdfFile.suggestedFilename()).toBe(`REC-${year}-0001.pdf`)
   const pdfPath = testInfo.outputPath(pdfFile.suggestedFilename())
@@ -194,12 +198,8 @@ test("réception puis sortie : le stock suit, une sortie trop forte est refusée
   // Stock : 50 sacs de ciment, 14,4 m² de carreaux du lot N12.
   await navigateTo(page, "Stock")
   await dismissTour(page, "Dépôt par dépôt")
-  await expect(
-    page.getByRole("row", { name: /Ciment CPJ 42,5.*50 pièces/ })
-  ).toBeVisible()
-  await expect(
-    page.getByRole("row", { name: /Carreau 60x60 beige.*14,4 m²/ })
-  ).toBeVisible()
+  await expect(itemCard(page, /Ciment CPJ 42,5/)).toContainText("50 pièces")
+  await expect(itemCard(page, /Carreau 60x60 beige/)).toContainText("14,4 m²")
   await shot(page, testInfo, "04-stock")
 
   await navigateTo(page, "Bons")

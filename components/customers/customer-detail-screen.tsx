@@ -7,6 +7,7 @@ import { toast } from "sonner"
 
 import { ContactActions } from "@/components/records/contact-actions"
 import { RecordActions } from "@/components/records/record-actions"
+import { RecordSummary } from "@/components/records/record-summary"
 import { RecordFacts } from "@/components/records/record-facts"
 import {
   RecordNotFound,
@@ -77,46 +78,46 @@ function CustomerDetails({ customer }: { customer: Customer }) {
           { label: customer.name },
         ]}
         description={customer.address ?? undefined}
-        actions={
-          <>
-            {archived && (
-              <Badge variant="secondary">{t("customers.restore.badge")}</Badge>
-            )}
-            <CustomerActions customer={customer} archived={archived} />
-          </>
+        badges={
+          archived && (
+            <Badge variant="secondary">{t("customers.restore.badge")}</Badge>
+          )
         }
+        actions={<CustomerActions customer={customer} archived={archived} />}
       />
 
-      <section
-        aria-label={t("customers.detail.summary")}
-        className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4 rounded-2xl border bg-muted/30 p-4 sm:p-5"
+      <RecordSummary
+        label={t("customers.detail.lastIssue")}
+        visual={
+          <span
+            className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary sm:size-20"
+            aria-hidden
+          >
+            <CustomerKindIcon
+              kind={customer.kind}
+              className="size-7 sm:size-8"
+            />
+          </span>
+        }
+        aside={<ContactActions phone={customer.phone} />}
       >
-        <span className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary sm:size-20 sm:rounded-2xl">
-          <CustomerKindIcon kind={customer.kind} className="size-7 sm:size-9" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm text-muted-foreground">
-            {t("customers.detail.lastIssue")}
-          </p>
-          {issues.isPending ? (
-            <Skeleton className="mt-2 h-9 w-48" />
-          ) : last ? (
-            <>
-              <p className="mt-1 text-3xl font-semibold tracking-tight first-letter:uppercase sm:text-4xl">
-                {dayAge(new Date(last.occurredAt))}
-              </p>
-              <p className="text-muted-foreground">
-                {t("customers.detail.issueCount", {
-                  count: issues.data?.total ?? 0,
-                })}
-              </p>
-            </>
-          ) : (
-            <p className="mt-1 text-lg">{t("customers.detail.neverServed")}</p>
-          )}
-        </div>
-        <ContactActions phone={customer.phone} />
-      </section>
+        {issues.isPending ? (
+          <Skeleton className="mt-2 h-9 w-48" />
+        ) : last ? (
+          <>
+            <p className="mt-1 text-2xl font-semibold tracking-tight first-letter:uppercase sm:text-3xl">
+              {dayAge(new Date(last.occurredAt))}
+            </p>
+            <p className="text-muted-foreground">
+              {t("customers.detail.issueCount", {
+                count: issues.data?.total ?? 0,
+              })}
+            </p>
+          </>
+        ) : (
+          <p className="mt-1 text-lg">{t("customers.detail.neverServed")}</p>
+        )}
+      </RecordSummary>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
         <div className="min-w-0">

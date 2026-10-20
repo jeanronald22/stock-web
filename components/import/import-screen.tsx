@@ -56,7 +56,6 @@ const REJECTED_FILE = "articles-refuses.xlsx"
 
 /** Refus de l'API rapporté au bilan d'import : son message (import.serverReasons). */
 const ServerReason = {
-  referenceTaken: "referenceTaken",
   barcodeTaken: "barcodeTaken",
   categoryUnavailable: "categoryUnavailable",
   warehouseUnavailable: "warehouseUnavailable",
@@ -68,7 +67,6 @@ const ServerReason = {
 type ServerReason = (typeof ServerReason)[keyof typeof ServerReason]
 
 const SERVER_REASONS: Record<string, ServerReason> = {
-  [ProblemCode.itemReferenceTaken]: ServerReason.referenceTaken,
   [ProblemCode.itemBarcodeTaken]: ServerReason.barcodeTaken,
   [ProblemCode.categoryUnavailable]: ServerReason.categoryUnavailable,
   [ProblemCode.warehouseUnavailable]: ServerReason.warehouseUnavailable,

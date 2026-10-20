@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react"
 
 import { EmptyState } from "@/components/catalog/empty-state"
 import { ContactsTabs } from "@/components/customers/contacts-tabs"
+import { FilterBar } from "@/components/catalog/filter-bar"
 import { StatusFilter } from "@/components/catalog/status-filter"
 import { TablePagination } from "@/components/catalog/table-pagination"
 import { SearchScene } from "@/components/illustrations/search-scene"
@@ -92,21 +93,29 @@ export function SuppliersScreen() {
         />
       ) : (
         <>
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <InputGroup className="sm:max-w-md sm:flex-1">
-              <InputGroupInput
-                type="search"
-                value={typed}
-                onChange={(event) => setTyped(event.target.value)}
-                placeholder={t("searchPlaceholder")}
-                aria-label={t("searchPlaceholder")}
-              />
-              <InputGroupAddon>
-                {suppliers.isFetching ? <Spinner /> : <SearchIcon />}
-              </InputGroupAddon>
-            </InputGroup>
+          <FilterBar
+            activeCount={list.countFilters()}
+            onClear={() => {
+              setTyped("")
+              list.reset()
+            }}
+            lead={
+              <InputGroup>
+                <InputGroupInput
+                  type="search"
+                  value={typed}
+                  onChange={(event) => setTyped(event.target.value)}
+                  placeholder={t("searchPlaceholder")}
+                  aria-label={t("searchPlaceholder")}
+                />
+                <InputGroupAddon>
+                  {suppliers.isFetching ? <Spinner /> : <SearchIcon />}
+                </InputGroupAddon>
+              </InputGroup>
+            }
+          >
             <StatusFilter value={status} onChange={list.setStatus} />
-          </div>
+          </FilterBar>
           <div className="mt-6 overflow-hidden rounded-2xl border">
             {suppliers.isPending ? (
               <ItemsTableSkeleton rows={SKELETON_ROWS} />

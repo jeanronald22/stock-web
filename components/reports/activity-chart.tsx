@@ -12,15 +12,16 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart"
 import type { DayActivity } from "@/lib/api/reports"
-import { activitySeries } from "@/lib/reports/activity"
+import {
+  ActivityStep,
+  activitySeries,
+  activityStep,
+} from "@/lib/reports/activity"
 import { cn } from "@/lib/utils"
 
-/** Au-delà, une barre par jour devient illisible : les étiquettes s'espacent. */
-const LABELS_PER_AXIS = 8
-
 /**
- * Bons d'entrée et de sortie jour par jour (D38) : on compte des bons, pas des quantités, qui ne
- * s'additionnent pas d'un article à l'autre.
+ * Bons d'entrée et de sortie (D38), par jour, par semaine ou par mois selon la longueur de la
+ * période : on compte des bons, pas des quantités, qui ne s'additionnent pas d'un article à l'autre.
  */
 export function ActivityChart({
   activity,
@@ -31,16 +32,24 @@ export function ActivityChart({
 }) {
   const t = useTranslations("reports.activity")
   const format = useFormatter()
-  const data = activitySeries(activity)
+  const step = activityStep(activity.length)
+  const data = activitySeries(activity, step)
   const config = {
     inbound: { label: t("inbound"), color: "var(--chart-2)" },
     outbound: { label: t("outbound"), color: "var(--chart-5)" },
   } satisfies ChartConfig
-  const day = (value: string) =>
-    format.dateTime(new Date(`${value}T12:00:00`), {
-      day: "numeric",
-      month: "short",
-    })
+  // Midi : un changement d'heure ne fait jamais glisser le jour.
+  const date = (value: string) => new Date(`${value}T12:00:00`)
+  const tick = (value: string) =>
+    step === ActivityStep.month
+      ? format.dateTime(date(value), { month: "short" })
+      : format.dateTime(date(value), { day: "numeric", month: "short" })
+  const label = (value: string) =>
+    step === ActivityStep.month
+      ? format.dateTime(date(value), { month: "long", year: "numeric" })
+      : step === ActivityStep.week
+        ? t("weekOf", { day: tick(value) })
+        : tick(value)
   return (
     <ChartContainer
       config={config}
@@ -53,15 +62,17 @@ export function ActivityChart({
           tickLine={false}
           axisLine={false}
           tickMargin={8}
-          interval={Math.max(0, Math.ceil(data.length / LABELS_PER_AXIS) - 1)}
-          tickFormatter={day}
+          // Recharts n'écrit que les dates qui tiennent : moins sur téléphone.
+          minTickGap={24}
+          interval="preserveStartEnd"
+          tickFormatter={tick}
         />
         <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
         <ChartTooltip
           cursor={false}
           content={
             <ChartTooltipContent
-              labelFormatter={(value) => day(String(value))}
+              labelFormatter={(value) => label(String(value))}
             />
           }
         />

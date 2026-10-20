@@ -50,6 +50,7 @@ test("emplacements : créés sur la fiche du dépôt, choisis sur la fiche artic
   await navigateTo(page, "Articles")
   await dismissTour(page, "Votre catalogue")
   await page.getByRole("link", { name: "Robinet mélangeur" }).click()
+  await page.getByRole("tab", { name: "Stock par dépôt" }).click()
   await page
     .getByRole("button", { name: "Emplacement de Robinet mélangeur" })
     .click()
@@ -59,6 +60,7 @@ test("emplacements : créés sur la fiche du dépôt, choisis sur la fiche artic
 
   await navigateTo(page, "Articles")
   await page.getByRole("link", { name: "Ciment 50 kg" }).click()
+  await page.getByRole("tab", { name: "Stock par dépôt" }).click()
   await page
     .getByRole("button", { name: "Emplacement de Ciment 50 kg" })
     .click()
@@ -75,7 +77,9 @@ test("emplacements : créés sur la fiche du dépôt, choisis sur la fiche artic
   await expect(
     page.getByRole("heading", { name: "Robinet mélangeur", level: 1 })
   ).toBeVisible()
-  await expect(page.getByText("En stock dans vos dépôts")).toBeVisible()
+  await expect(
+    page.getByRole("tab", { name: "Informations générales" })
+  ).toBeVisible()
   await page.getByRole("button", { name: "Autres actions" }).click()
   await page
     .getByRole("menuitem", { name: "Nouvelle sortie de cet article" })

@@ -74,12 +74,11 @@ test("transfert : envoyé d'un dépôt, en route, réceptionné à l'arrivée av
     page.getByText(`Transfert TRS-${year}-0001 envoyé.`)
   ).toBeVisible()
 
-  // En route : visible dans les bons et sur l'accueil.
-  await navigateTo(page, "Accueil")
+  // En route : visible dans les bons et sur le tableau de bord.
+  await navigateTo(page, "Tableau de bord")
   await expect(page.getByText("1 transfert à réceptionner")).toBeVisible()
   await navigateTo(page, "Bons")
-  await page.getByRole("combobox", { name: "Tous les bons" }).click()
-  await page.getByRole("option", { name: "Transferts en route" }).click()
+  await page.getByRole("button", { name: /^Transferts en route/ }).click()
   const row = page.getByRole("row").filter({ hasText: `TRS-${year}-0001` })
   await expect(row).toContainText("Dépôt Bonabéri → Boutique Akwa")
   await expect(row).toContainText("En route")

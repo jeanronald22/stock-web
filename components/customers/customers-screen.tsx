@@ -11,6 +11,7 @@ import { useTranslations } from "next-intl"
 import { useEffect, useMemo, useState } from "react"
 
 import { EmptyState } from "@/components/catalog/empty-state"
+import { FILTER_CONTROL, FilterBar } from "@/components/catalog/filter-bar"
 import { StatusFilter } from "@/components/catalog/status-filter"
 import { TablePagination } from "@/components/catalog/table-pagination"
 import { SearchScene } from "@/components/illustrations/search-scene"
@@ -106,19 +107,27 @@ export function CustomersScreen() {
         />
       ) : (
         <>
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <InputGroup className="sm:max-w-md sm:flex-1">
-              <InputGroupInput
-                type="search"
-                value={typed}
-                onChange={(event) => setTyped(event.target.value)}
-                placeholder={t("searchPlaceholder")}
-                aria-label={t("searchPlaceholder")}
-              />
-              <InputGroupAddon>
-                {customers.isFetching ? <Spinner /> : <SearchIcon />}
-              </InputGroupAddon>
-            </InputGroup>
+          <FilterBar
+            activeCount={list.countFilters()}
+            onClear={() => {
+              setTyped("")
+              list.reset()
+            }}
+            lead={
+              <InputGroup>
+                <InputGroupInput
+                  type="search"
+                  value={typed}
+                  onChange={(event) => setTyped(event.target.value)}
+                  placeholder={t("searchPlaceholder")}
+                  aria-label={t("searchPlaceholder")}
+                />
+                <InputGroupAddon>
+                  {customers.isFetching ? <Spinner /> : <SearchIcon />}
+                </InputGroupAddon>
+              </InputGroup>
+            }
+          >
             <Select
               items={kindItems}
               value={customerKind ?? ALL_KINDS}
@@ -128,7 +137,10 @@ export function CustomersScreen() {
                 )
               }
             >
-              <SelectTrigger className="sm:w-48" aria-label={t("kindFilter")}>
+              <SelectTrigger
+                className={FILTER_CONTROL}
+                aria-label={t("kindFilter")}
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -140,7 +152,7 @@ export function CustomersScreen() {
               </SelectContent>
             </Select>
             <StatusFilter value={status} onChange={list.setStatus} />
-          </div>
+          </FilterBar>
           <div className="mt-6 overflow-hidden rounded-2xl border">
             {customers.isPending ? (
               <ItemsTableSkeleton rows={SKELETON_ROWS} />

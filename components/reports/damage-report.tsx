@@ -1,10 +1,10 @@
 "use client"
 
 import { BoxesIcon, ListIcon, PackageXIcon } from "lucide-react"
-import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { Bar, BarChart, XAxis, YAxis } from "recharts"
 
+import { ItemLink } from "@/components/items/item-link"
 import {
   ChartContainer,
   ChartTooltip,
@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/table"
 import { useDamageReport } from "@/lib/api/report-queries"
 import type { DamageByReason } from "@/lib/api/reports"
-import { RecordRoutes } from "@/lib/routes"
 import { cn } from "@/lib/utils"
 
 import { ReportSkeleton } from "./movements-report"
@@ -29,6 +28,7 @@ import {
   ExportButton,
   ReportEmpty,
   ReportSection,
+  StatGrid,
   StatTile,
   StatTone,
   useReportQuantity,
@@ -66,7 +66,7 @@ export function DamageReportScreen() {
             report.isPlaceholderData && "opacity-60"
           )}
         >
-          <dl className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+          <StatGrid columns={3}>
             <StatTile
               label={t("vouchers")}
               value={data.vouchers}
@@ -83,7 +83,7 @@ export function DamageReportScreen() {
               value={data.items.length}
               icon={BoxesIcon}
             />
-          </dl>
+          </StatGrid>
           {data.vouchers === 0 ? (
             <ReportEmpty>{t("empty")}</ReportEmpty>
           ) : (
@@ -116,17 +116,17 @@ export function DamageReportScreen() {
                       {data.items.map((row) => (
                         <TableRow key={row.item.id}>
                           <TableCell className="py-3 pl-4 whitespace-normal">
-                            <Link
-                              href={RecordRoutes.item(row.item.id)}
+                            <ItemLink
+                              itemId={row.item.id}
                               className="font-medium hover:underline"
                             >
                               {row.item.name}
-                            </Link>
+                            </ItemLink>
                           </TableCell>
-                          <TableCell className="text-right text-destructive tabular-nums">
+                          <TableCell className="text-right num text-destructive">
                             {quantity(row.item.baseUnit, row.quantity)}
                           </TableCell>
-                          <TableCell className="pr-4 text-right tabular-nums">
+                          <TableCell className="pr-4 text-right num">
                             {t("times", { count: row.vouchers })}
                           </TableCell>
                         </TableRow>

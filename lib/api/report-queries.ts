@@ -15,6 +15,18 @@ export const reportKeys = {
     kind: ReportKind,
     search: ReportSearch
   ) => [...stockKeys.all(organizationId), "report", kind, search] as const,
+  itemHistory: (
+    organizationId: string | null,
+    itemId: string,
+    search: ReportSearch
+  ) =>
+    [
+      ...stockKeys.all(organizationId),
+      "report",
+      "itemHistory",
+      itemId,
+      search,
+    ] as const,
 }
 
 export const ReportKind = {
@@ -22,6 +34,7 @@ export const ReportKind = {
   damage: "damage",
   discrepancies: "discrepancies",
   summary: "summary",
+  analysis: "analysis",
 } as const
 export type ReportKind = (typeof ReportKind)[keyof typeof ReportKind]
 
@@ -50,3 +63,18 @@ export const useDiscrepancyReport = (search: ReportSearch) =>
   useReport(ReportKind.discrepancies, search)
 export const useActivitySummary = (search: ReportSearch) =>
   useReport(ReportKind.summary, search)
+export const useActivityAnalysis = (search: ReportSearch) =>
+  useReport(ReportKind.analysis, search)
+
+/** Entrées et sorties d'un article jour par jour, pour sa fiche ; relues comme les rapports. */
+export function useItemHistory(itemId: string, search: ReportSearch) {
+  const { reports } = useApi()
+  const organizationId = useActiveOrganization().activeOrganizationId
+  return useQuery({
+    queryKey: reportKeys.itemHistory(organizationId, itemId, search),
+    queryFn: () => reports.itemHistory(itemId, search),
+    enabled: !!organizationId,
+    staleTime: 0,
+    placeholderData: keepPreviousData,
+  })
+}

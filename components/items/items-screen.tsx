@@ -2,6 +2,7 @@
 
 import {
   FileSpreadsheetIcon,
+  ListChecksIcon,
   PlusIcon,
   SearchIcon,
   TagIcon,
@@ -14,9 +15,8 @@ import { CategoriesSheet } from "@/components/categories/categories-sheet"
 import { useCategoryTree } from "@/components/categories/use-category-tree"
 import { CategoryFilter } from "@/components/catalog/category-filter"
 import { ViewToggle } from "@/components/catalog/view-toggle"
-import { ClearFilters } from "@/components/catalog/clear-filters"
+import { FilterBar } from "@/components/catalog/filter-bar"
 import { EmptyState } from "@/components/catalog/empty-state"
-import { StatusFilter } from "@/components/catalog/status-filter"
 import { StockAlertFilter } from "@/components/catalog/stock-alert-filter"
 import { SupplierFilter } from "@/components/catalog/supplier-filter"
 import { TablePagination } from "@/components/catalog/table-pagination"
@@ -38,6 +38,7 @@ import {
   ListView,
   STOCK_ALERT_STATES,
   useListParams,
+  type ListParamKey,
 } from "@/lib/list/use-list-params"
 import { ListQueryParams, Routes } from "@/lib/routes"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
@@ -45,13 +46,17 @@ import { cn } from "@/lib/utils"
 import { useStockAccess } from "@/components/workspace/stock-access"
 
 import { ItemGridSkeleton } from "./item-card"
+import { ItemSelectionBar, useItemSelection } from "./item-selection"
 import { ItemsGrid } from "./items-grid"
+import { ItemStatusTabs } from "./item-status-tabs"
 import { ItemsMoreMenu } from "./items-more-menu"
 import { ItemsTable, ItemsTableSkeleton } from "./items-table"
 
 /** La recherche part quand la frappe se pose, pas à chaque lettre. */
 const SEARCH_DELAY_MS = 300
 const SKELETON_ROWS = 8
+/** Le statut (actifs, archivés) est en onglets : il ne compte pas dans « Filtres ». */
+const OUTSIDE_MENU: readonly ListParamKey[] = ["status"]
 
 export function ItemsScreen() {
   const t = useTranslations("items")
@@ -80,17 +85,17 @@ export function ItemsScreen() {
 
   const warehouses = useWarehouses()
   const categories = useCategoryTree()
-  const search = useMemo(
+  const scope = useMemo(
     () => ({
       text: text || undefined,
       warehouseIds,
       categoryId,
       supplierId,
       stockStates: stockAlert && STOCK_ALERT_STATES[stockAlert],
-      status,
     }),
-    [text, warehouseIds, categoryId, supplierId, stockAlert, status]
+    [text, warehouseIds, categoryId, supplierId, stockAlert]
   )
+  const search = useMemo(() => ({ ...scope, status }), [scope, status])
   const items = useItemsPage(search, page, size)
   const total = items.data?.total ?? 0
   const filtered = list.filtered
@@ -121,6 +126,8 @@ export function ItemsScreen() {
       ? `${Routes.newItem}?${ListQueryParams.warehouse}=${warehouseIds[0]}`
       : Routes.newItem
   const manages = useStockAccess().can(StockPermission.manageCatalog)
+  const choice = useItemSelection()
+  const pageItems = items.data?.items ?? []
   const newButton = manages && (
     <Link
       href={newHref}
@@ -180,13 +187,21 @@ export function ItemsScreen() {
         />
       ) : (
         <>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            {/* Téléphone : la recherche et l'affichage partagent une ligne ; ailleurs, l'affichage ferme la barre. */}
-            <div className="flex gap-2 sm:contents">
-              <InputGroup
-                className="flex-1 sm:max-w-md sm:min-w-64"
-                {...tourAnchor(TourAnchors.itemSearch)}
-              >
+          <ItemStatusTabs
+            search={scope}
+            value={status}
+            onChange={list.setStatus}
+          />
+          <FilterBar
+            {...tourAnchor(TourAnchors.itemFilters)}
+            className="mt-3"
+            activeCount={list.countFilters(OUTSIDE_MENU)}
+            onClear={() => {
+              setTyped("")
+              list.reset()
+            }}
+            lead={
+              <InputGroup {...tourAnchor(TourAnchors.itemSearch)}>
                 <InputGroupInput
                   type="search"
                   value={typed}
@@ -198,12 +213,29 @@ export function ItemsScreen() {
                   {items.isFetching ? <Spinner /> : <SearchIcon />}
                 </InputGroupAddon>
               </InputGroup>
-              <ViewToggle value={view} onChange={list.setView} />
-            </div>
+            }
+            trailing={
+              <div className="flex shrink-0 gap-2 sm:order-last sm:ml-auto">
+                {/* Choisir des articles pour exporter leurs fiches en PDF. */}
+                <Button
+                  variant="outline"
+                  className="h-11 aria-pressed:border-primary/50 aria-pressed:bg-primary/5 aria-pressed:text-primary sm:h-9"
+                  aria-pressed={!!choice.selection}
+                  aria-label={t("selection.start")}
+                  onClick={choice.selection ? choice.stop : choice.start}
+                >
+                  <ListChecksIcon />
+                  <span className="hidden sm:inline">
+                    {t("selection.startShort")}
+                  </span>
+                </Button>
+                <ViewToggle value={view} onChange={list.setView} />
+              </div>
+            }
+          >
             <WarehouseFilter
               value={warehouseIds}
               onChange={list.setWarehouses}
-              {...tourAnchor(TourAnchors.itemWarehouseFilter)}
             />
             <CategoryFilter value={categoryId} onChange={list.setCategory} />
             <SupplierFilter value={supplierId} onChange={list.setSupplier} />
@@ -211,21 +243,10 @@ export function ItemsScreen() {
               value={stockAlert}
               onChange={list.setStockAlert}
             />
-            <StatusFilter value={status} onChange={list.setStatus} />
-            <ClearFilters
-              visible={filtered}
-              onClear={() => {
-                setTyped("")
-                list.reset()
-              }}
-            />
-          </div>
+          </FilterBar>
 
           <div
-            className={cn(
-              "mt-6",
-              !grid && "overflow-hidden rounded-2xl border"
-            )}
+            className={cn("mt-4", !grid && "overflow-hidden rounded-xl border")}
           >
             {items.isPending ? (
               grid ? (
@@ -256,16 +277,18 @@ export function ItemsScreen() {
               <>
                 {grid ? (
                   <ItemsGrid
-                    items={items.data?.items ?? []}
+                    items={pageItems}
                     categoryPaths={categories.paths}
                     stale={items.isPlaceholderData}
+                    selection={choice.selection}
                   />
                 ) : (
                   <ItemsTable
-                    items={items.data?.items ?? []}
+                    items={pageItems}
                     warehouseNames={warehouseNames}
                     categoryPaths={categories.paths}
                     stale={items.isPlaceholderData}
+                    selection={choice.selection}
                   />
                 )}
                 <TablePagination
@@ -279,6 +302,18 @@ export function ItemsScreen() {
               </>
             )}
           </div>
+        </>
+      )}
+      {choice.selection && (
+        <>
+          {/* La barre ne couvre pas la pagination. */}
+          <div className="h-24" aria-hidden />
+          <ItemSelectionBar
+            items={choice.items}
+            page={pageItems}
+            onAddPage={() => choice.addAll(pageItems)}
+            onClose={choice.stop}
+          />
         </>
       )}
     </PageBody>

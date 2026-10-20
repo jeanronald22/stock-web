@@ -15,7 +15,7 @@ import { StockStateBadge } from "./stock-state-badge"
 
 /**
  * Grille du stock : la quantité en grand, dite aussi en conditionnements ; l'état sur la photo ; le
- * premier dépôt en alerte et le nombre de lots en dessous.
+ * premier dépôt en alerte en dessous. Les lots sont sur la fiche et au tableau.
  */
 export function StockGrid({
   rows,
@@ -46,16 +46,14 @@ export function StockGrid({
           >
             <p
               className={cn(
-                "text-xl font-semibold tabular-nums",
+                "num text-lg font-semibold",
                 row.state === StockState.out && "text-destructive"
               )}
             >
               {quantityLabel(row.item.baseUnit, row.quantity)}
             </p>
             {packs && (
-              <p className="text-xs text-muted-foreground tabular-nums">
-                {packs}
-              </p>
+              <p className="num text-xs text-muted-foreground">{packs}</p>
             )}
             {alert && (
               <p
@@ -74,11 +72,6 @@ export function StockGrid({
                     alert.minQuantity
                   ),
                 })}
-              </p>
-            )}
-            {row.batches.length > 0 && (
-              <p className="mt-1 text-xs text-muted-foreground">
-                {t("batchCount", { count: row.batches.length })}
               </p>
             )}
           </ItemCard>

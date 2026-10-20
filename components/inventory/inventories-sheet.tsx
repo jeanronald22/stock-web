@@ -1,6 +1,5 @@
 "use client"
 
-import { HistoryIcon } from "lucide-react"
 import Link from "next/link"
 import { useFormatter, useTranslations } from "next-intl"
 import { useState } from "react"
@@ -12,7 +11,6 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet"
 import { Spinner } from "@/components/ui/spinner"
 import { useInventories } from "@/lib/api/inventory-queries"
@@ -23,20 +21,21 @@ import { InventoryStatusBadge } from "./inventory-status-badge"
 const PAGE_SIZE = 25
 
 /** Historique des inventaires, sans quitter « Stock » : date, dépôt, état, bon des écarts. */
-export function InventoriesSheet() {
+export function InventoriesSheet({
+  open,
+  onOpenChange,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
   const t = useTranslations("inventory")
   const format = useFormatter()
-  const [open, setOpen] = useState(false)
   const [page, setPage] = useState(0)
   const inventories = useInventories(undefined, page, PAGE_SIZE)
   const rows = inventories.data?.items ?? []
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger render={<Button variant="ghost" size="lg" />}>
-        <HistoryIcon />
-        {t("history.open")}
-      </SheetTrigger>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full gap-0 sm:max-w-md">
         <SheetHeader className="border-b">
           <SheetTitle>{t("history.title")}</SheetTitle>
@@ -57,7 +56,7 @@ export function InventoriesSheet() {
                 <li key={inventory.id}>
                   <Link
                     href={RecordRoutes.inventory(inventory.id)}
-                    onClick={() => setOpen(false)}
+                    onClick={() => onOpenChange(false)}
                     className="flex items-center gap-3 rounded-lg p-3 hover:bg-muted/50"
                   >
                     <div className="min-w-0 flex-1">

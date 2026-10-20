@@ -320,8 +320,9 @@ function VoucherLineRow({
 
   return (
     <li className="animate-rise-in rounded-xl border p-3">
-      <div className="grid gap-2 md:grid-cols-[minmax(0,1.2fr)_6.5rem_minmax(11rem,1.2fr)_minmax(0,1fr)_auto] md:items-start">
-        <div className="flex min-h-11 items-center justify-between gap-2 md:pr-2">
+      {/* Téléphone : l'article sur une ligne, puis la quantité et son unité côte à côte. */}
+      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] gap-2 md:grid-cols-[minmax(0,1.2fr)_6.5rem_minmax(11rem,1.2fr)_minmax(0,1fr)_auto] md:items-start">
+        <div className="col-span-2 flex min-h-11 items-center justify-between gap-2 md:col-span-1 md:pr-2">
           <span className="flex min-w-0 items-center gap-3">
             <ItemThumb imageUrl={line.item.imageUrl} size="sm" />
             <span className="min-w-0">
@@ -398,7 +399,7 @@ function VoucherLineRow({
             {unitItems[0].label}
           </div>
         )}
-        <div>
+        <div className="col-span-2 empty:hidden md:col-span-1 md:empty:block">
           {line.item.batchTracking &&
             (fixedBatch ? (
               <div className="flex h-11 items-center rounded-lg border bg-muted/40 px-3.5 text-muted-foreground">

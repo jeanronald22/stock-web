@@ -7,7 +7,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { ListView } from "@/lib/list/use-list-params"
 import { cn } from "@/lib/utils"
 
-/** Liste dense ou grille de cartes (photos en grand) : le même contenu, deux façons de le parcourir. */
+/** Grille de cartes (les photos) ou liste dense : le même contenu, deux façons de le parcourir. */
 export function ViewToggle({
   value,
   onChange,
@@ -31,18 +31,18 @@ export function ViewToggle({
       }}
     >
       <ToggleGroupItem
-        value={ListView.list}
-        aria-label={t("list")}
-        className="h-11 px-3"
-      >
-        <ListIcon />
-      </ToggleGroupItem>
-      <ToggleGroupItem
         value={ListView.grid}
         aria-label={t("grid")}
-        className="h-11 px-3"
+        className="h-11 px-3 sm:h-9 sm:px-2.5"
       >
         <LayoutGridIcon />
+      </ToggleGroupItem>
+      <ToggleGroupItem
+        value={ListView.list}
+        aria-label={t("list")}
+        className="h-11 px-3 sm:h-9 sm:px-2.5"
+      >
+        <ListIcon />
       </ToggleGroupItem>
     </ToggleGroup>
   )
