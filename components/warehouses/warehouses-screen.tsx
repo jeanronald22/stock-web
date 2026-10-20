@@ -60,7 +60,11 @@ export function WarehousesScreen() {
       {/* Filtre visible dès qu'il y a de quoi filtrer : sinon, l'écran vide suffit. */}
       {(!empty || !!archivedWarehouses.data?.length) && (
         <div className="mt-8 flex">
-          <StatusFilter value={status} onChange={list.setStatus} />
+          <StatusFilter
+            value={status}
+            onChange={list.setStatus}
+            className="sm:w-44"
+          />
         </div>
       )}
 

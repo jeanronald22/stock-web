@@ -94,12 +94,12 @@ export function SuppliersScreen() {
       ) : (
         <>
           <FilterBar
-            activeCount={list.filterCount}
+            activeCount={list.countFilters()}
             onClear={() => {
               setTyped("")
               list.reset()
             }}
-            search={
+            lead={
               <InputGroup>
                 <InputGroupInput
                   type="search"

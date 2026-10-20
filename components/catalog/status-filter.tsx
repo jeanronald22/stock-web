@@ -13,6 +13,8 @@ import {
 import { catalogStatuses, CatalogStatus } from "@/lib/api/stock"
 import { cn } from "@/lib/utils"
 
+import { FILTER_CONTROL } from "./filter-bar"
+
 /** Fiches actives ou archivées : même filtre pour les articles et les dépôts. */
 export function StatusFilter({
   value,
@@ -37,7 +39,7 @@ export function StatusFilter({
       onValueChange={(next) => next && onChange(next as CatalogStatus)}
     >
       <SelectTrigger
-        className={cn("w-full sm:w-44", className)}
+        className={cn(FILTER_CONTROL, className)}
         aria-label={t("label")}
       >
         <Icon className="size-5 text-muted-foreground" aria-hidden />

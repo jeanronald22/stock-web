@@ -64,7 +64,7 @@ import {
   DiscrepancyBadge,
   TransferStateBadge,
   VoucherTypeBadge,
-} from "./vouchers-screen"
+} from "./voucher-badges"
 
 /** Bon validé : en lecture seule, une correction passe par un nouveau bon. */
 export function VoucherScreen({ id }: { id: string }) {

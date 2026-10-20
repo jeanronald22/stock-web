@@ -1,6 +1,6 @@
 "use client"
 
-import { WarehouseIcon } from "lucide-react"
+import { ChevronDownIcon, WarehouseIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useWarehouses } from "@/lib/api/stock-queries"
 import { cn } from "@/lib/utils"
+
+import { FILTER_CONTROL } from "./filter-bar"
 
 /** Filtre par dépôts actifs, commun aux articles, au stock et aux bons : aucun coché, tous. */
 export function WarehouseFilter({
@@ -50,7 +52,8 @@ export function WarehouseFilter({
             variant="outline"
             size="lg"
             className={cn(
-              "h-11 w-full justify-start px-3.5 text-base font-normal sm:w-60",
+              FILTER_CONTROL,
+              "h-11 justify-start px-3.5 text-base font-normal",
               value.length > 0 && "border-primary/50 bg-primary/5",
               className
             )}
@@ -61,6 +64,10 @@ export function WarehouseFilter({
       >
         <WarehouseIcon className="size-5 text-muted-foreground" aria-hidden />
         <span className="truncate">{label}</span>
+        <ChevronDownIcon
+          className="ml-auto size-4 text-muted-foreground"
+          aria-hidden
+        />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64">
         <DropdownMenuItem

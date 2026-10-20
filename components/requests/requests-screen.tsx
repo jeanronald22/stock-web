@@ -18,10 +18,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import {
-  NewVoucherButtons,
-  VoucherTypeBadge,
-} from "@/components/vouchers/vouchers-screen"
+import { NewVoucherButtons } from "@/components/vouchers/new-voucher-buttons"
+import { VoucherTypeBadge } from "@/components/vouchers/voucher-badges"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import { useRequests } from "@/lib/api/request-queries"
 import { RequestStatus, requestStatuses } from "@/lib/api/voucher-requests"

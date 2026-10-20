@@ -2,10 +2,15 @@
 
 import { FilterXIcon, SlidersHorizontalIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useState } from "react"
+import { Children, useState } from "react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import {
   Sheet,
   SheetContent,
@@ -17,13 +22,23 @@ import {
 import { cn } from "@/lib/utils"
 
 /**
- * Barre des listes : la recherche et l'affichage toujours à portée ; les filtres sur la même ligne
- * à partir de la tablette, dans un panneau du bas sur téléphone, pour que la liste commence en
- * haut de l'écran. Les filtres sont contrôlés par l'adresse : les deux emplacements restent
- * d'accord.
+ * Contrôle d'un filtre : pleine largeur dans le panneau, compact à partir de la tablette. Sur
+ * téléphone, la hauteur reste celle d'une cible tactile.
+ */
+export const FILTER_CONTROL =
+  "w-full sm:h-9 sm:text-sm sm:data-[size=default]:h-9"
+
+/** Au-delà, les filtres passent dans le menu « Filtres » : la barre reste une seule ligne courte. */
+const INLINE_FILTERS_MAX = 2
+
+/**
+ * Barre des listes : la recherche (ou la période) et l'affichage toujours à portée. Peu de filtres : sur la même
+ * ligne à partir de la tablette. Davantage : derrière « Filtres », qui dit combien sont posés. Sur
+ * téléphone, toujours dans un panneau du bas, pour que la liste commence en haut de l'écran. Les
+ * filtres sont contrôlés par l'adresse : leurs emplacements restent d'accord.
  */
 export function FilterBar({
-  search,
+  lead,
   trailing,
   activeCount,
   onClear,
@@ -31,8 +46,9 @@ export function FilterBar({
   className,
   ...props
 }: {
-  search?: React.ReactNode
-  /** Toujours visible, en fin de barre : le choix liste ou grille. */
+  /** Toujours visible, en tête : la recherche, ou la période des bons. */
+  lead?: React.ReactNode
+  /** Toujours visible, en fin de barre : l'ordre, le choix grille ou liste. */
   trailing?: React.ReactNode
   /** Filtres posés hors recherche. */
   activeCount: number
@@ -42,48 +58,93 @@ export function FilterBar({
   className?: string
 } & Record<`data-${string}`, string>) {
   const t = useTranslations("catalog.filters")
-  const [open, setOpen] = useState(false)
-  const clear = onClear && activeCount > 0 && (
-    <Button variant="ghost" size="lg" className="h-11" onClick={onClear}>
-      <FilterXIcon />
-      {t("clear")}
-    </Button>
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const inline = Children.toArray(children).length <= INLINE_FILTERS_MAX
+  const active = activeCount > 0
+
+  const trigger = (extra: string) => ({
+    variant: "outline" as const,
+    className: cn(extra, active && "border-primary/50 bg-primary/5"),
+    "aria-label": t("open", { count: activeCount }),
+  })
+  const count = active && (
+    <Badge className="h-5 min-w-5 px-1.5 tabular-nums">{activeCount}</Badge>
   )
 
   return (
     <div
+      data-slot="filter-bar"
       className={cn("mt-6 flex flex-wrap items-center gap-2", className)}
       {...props}
     >
-      {search && (
-        <div className="min-w-0 flex-1 sm:max-w-md sm:min-w-64">{search}</div>
+      {lead && (
+        <div className="min-w-0 flex-1 sm:max-w-xs sm:min-w-56 sm:*:h-9 sm:[&_input]:text-sm">
+          {lead}
+        </div>
       )}
+
       <Button
-        variant="outline"
         size="lg"
-        className={cn(
-          "h-11 px-3 sm:hidden",
-          activeCount > 0 && "border-primary/50 bg-primary/5"
-        )}
-        aria-label={t("open", { count: activeCount })}
-        onClick={() => setOpen(true)}
+        {...trigger("h-11 px-3 sm:hidden")}
+        onClick={() => setSheetOpen(true)}
       >
         <SlidersHorizontalIcon />
-        {/* Sans recherche à côté, la place ne manque pas : le mot accompagne l'icône. */}
-        {!search && t("title")}
-        {activeCount > 0 && (
-          <Badge className="h-5 min-w-5 px-1.5 tabular-nums">
-            {activeCount}
-          </Badge>
-        )}
+        {/* Seul en tête de barre, le bouton a la place d'écrire son nom. */}
+        {!lead && t("title")}
+        {count}
       </Button>
-      <div className="hidden flex-wrap items-center gap-2 sm:contents">
-        {children}
-        {clear}
-      </div>
-      {trailing && <div className="shrink-0 sm:ml-auto">{trailing}</div>}
 
-      <Sheet open={open} onOpenChange={setOpen}>
+      {inline ? (
+        <div className="hidden sm:contents sm:*:w-52">{children}</div>
+      ) : (
+        <Popover>
+          <PopoverTrigger
+            render={<Button {...trigger("hidden h-9 sm:inline-flex")} />}
+          >
+            <SlidersHorizontalIcon />
+            {t("title")}
+            {count}
+          </PopoverTrigger>
+          <PopoverContent
+            align="start"
+            className="w-96 gap-3 rounded-xl p-3"
+            aria-label={t("title")}
+          >
+            <p className="px-1 label-caps">{t("title")}</p>
+            <div className="flex flex-col gap-2">{children}</div>
+            {onClear && active && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="self-start"
+                onClick={onClear}
+              >
+                <FilterXIcon />
+                {t("clear")}
+              </Button>
+            )}
+          </PopoverContent>
+        </Popover>
+      )}
+
+      {/* Dans le menu, « Effacer » y est déjà. */}
+      {inline && onClear && active && (
+        <Button
+          variant="ghost"
+          className="hidden h-9 sm:inline-flex"
+          onClick={onClear}
+        >
+          <FilterXIcon />
+          {t("clear")}
+        </Button>
+      )}
+      {trailing && (
+        <div className="flex shrink-0 items-center gap-2 sm:ml-auto">
+          {trailing}
+        </div>
+      )}
+
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent
           side="bottom"
           className="max-h-[85dvh] gap-0 rounded-t-2xl sm:hidden"
@@ -94,7 +155,7 @@ export function FilterBar({
               {t("description")}
             </SheetDescription>
           </SheetHeader>
-          <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-4 [&>*]:w-full">
+          <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-4">
             {children}
           </div>
           <SheetFooter className="flex-row border-t">
@@ -103,13 +164,17 @@ export function FilterBar({
                 variant="outline"
                 size="lg"
                 className="flex-1"
-                disabled={activeCount === 0}
+                disabled={!active}
                 onClick={onClear}
               >
                 {t("clear")}
               </Button>
             )}
-            <Button size="lg" className="flex-1" onClick={() => setOpen(false)}>
+            <Button
+              size="lg"
+              className="flex-1"
+              onClick={() => setSheetOpen(false)}
+            >
               {t("apply")}
             </Button>
           </SheetFooter>

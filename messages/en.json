@@ -593,7 +593,9 @@
       "item": "Item",
       "unit": "Unit",
       "packagings": "Packagings",
-      "warehouses": "Depots"
+      "warehouses": "Depots",
+      "reference": "Reference",
+      "status": "Status"
     },
     "moreWarehouses": "+{count}",
     "thresholdSaved": "Threshold saved for {warehouse}.",
@@ -641,7 +643,9 @@
     "page": "Page {page} of {pages}",
     "perPage": "Rows per page",
     "previous": "Previous page",
-    "next": "Next page"
+    "next": "Next page",
+    "pages": "Pages",
+    "goTo": "Page {page}"
   },
   "images": {
     "choose": "Add a photo",
@@ -673,7 +677,8 @@
       "all": "All levels",
       "any": "To reorder",
       "low": "Low stock",
-      "out": "Out of stock"
+      "out": "Out of stock",
+      "tab": "All"
     },
     "view": {
       "label": "Display",
@@ -703,7 +708,6 @@
       "CUSTOMER_RETURN": "Customer return",
       "SUPPLIER_RETURN": "Supplier return"
     },
-    "allTypes": "All vouchers",
     "empty": {
       "title": "No vouchers yet",
       "description": "Record your first receipt: your depots’ stock updates straight away."
@@ -713,8 +717,9 @@
       "date": "Date",
       "warehouse": "Depot",
       "counterparty": "Supplier or customer",
-      "lines": "Lines",
-      "createdBy": "Approved by"
+      "lines": "Items",
+      "createdBy": "Approved by",
+      "type": "Type"
     },
     "lineCount": "{count, plural, one {# item} other {# items}}",
     "notFound": "This voucher does not exist or was removed.",
@@ -894,10 +899,7 @@
       "download": "Download PDF"
     },
     "period": {
-      "from": "From",
-      "to": "To",
-      "fromLabel": "Vouchers from",
-      "toLabel": "Vouchers until",
+      "label": "Voucher period",
       "newestFirst": "Newest first",
       "oldestFirst": "Oldest first"
     },
@@ -1015,7 +1017,9 @@
         "CUSTOMER_RETURN": "Record a return",
         "SUPPLIER_RETURN": "Send back to supplier"
       }
-    }
+    },
+    "allKinds": "All",
+    "kindsLabel": "Voucher type"
   },
   "stock": {
     "title": "Stock",
@@ -1025,7 +1029,10 @@
     "table": {
       "item": "Item",
       "batches": "Batches",
-      "quantity": "In stock"
+      "quantity": "In stock",
+      "packagings": "Packaging",
+      "alerts": "Warehouses on alert",
+      "state": "Status"
     },
     "empty": {
       "title": "Nothing to count yet",
@@ -1041,10 +1048,11 @@
     "state": {
       "OK": "Enough stock",
       "LOW": "Low stock",
-      "OUT": "Out of stock"
+      "OUT": "Out of stock",
+      "inStock": "In stock",
+      "empty": "Empty"
     },
     "alert": "{warehouse}: {quantity}, threshold {threshold}",
-    "batchCount": "{count, plural, one {# batch} other {# batches}}",
     "reports": "Reports",
     "export": {
       "file": "stock",
@@ -2097,19 +2105,7 @@
       "discrepancies": "Discrepancies"
     },
     "period": {
-      "label": "Period",
-      "presets": {
-        "last7Days": "Last 7 days",
-        "last30Days": "Last 30 days",
-        "thisMonth": "This month",
-        "lastMonth": "Last month",
-        "last3Months": "Last 3 months"
-      },
-      "custom": "Custom dates",
-      "from": "From",
-      "to": "to",
-      "fromLabel": "Start of period",
-      "toLabel": "End of period"
+      "label": "Period"
     },
     "activity": {
       "inbound": "Ins",
@@ -2242,6 +2238,21 @@
       "title": "No network",
       "description": "This page has not been opened on this phone yet. The home page, stock and voucher entry work without a network.",
       "home": "Go to the home page"
+    }
+  },
+  "period": {
+    "label": "Period",
+    "any": "All dates",
+    "pick": "Pick the first day, then the last.",
+    "apply": "Apply",
+    "clear": "Clear",
+    "trigger": "{label}: {value}",
+    "presets": {
+      "last7Days": "Last 7 days",
+      "last30Days": "Last 30 days",
+      "thisMonth": "This month",
+      "lastMonth": "Last month",
+      "last3Months": "Last 3 months"
     }
   }
 }

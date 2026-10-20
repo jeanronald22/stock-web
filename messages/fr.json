@@ -593,7 +593,9 @@
       "item": "Article",
       "unit": "Unité",
       "packagings": "Conditionnements",
-      "warehouses": "Dépôts"
+      "warehouses": "Dépôts",
+      "reference": "Référence",
+      "status": "Statut"
     },
     "moreWarehouses": "+{count}",
     "thresholdSaved": "Seuil enregistré pour {warehouse}.",
@@ -641,7 +643,9 @@
     "page": "Page {page} sur {pages}",
     "perPage": "Lignes par page",
     "previous": "Page précédente",
-    "next": "Page suivante"
+    "next": "Page suivante",
+    "pages": "Pages",
+    "goTo": "Page {page}"
   },
   "images": {
     "choose": "Ajouter une photo",
@@ -673,7 +677,8 @@
       "all": "Tous les niveaux",
       "any": "À commander",
       "low": "Stock bas",
-      "out": "En rupture"
+      "out": "En rupture",
+      "tab": "Tous"
     },
     "view": {
       "label": "Affichage",
@@ -703,7 +708,6 @@
       "CUSTOMER_RETURN": "Retour client",
       "SUPPLIER_RETURN": "Retour fournisseur"
     },
-    "allTypes": "Tous les bons",
     "empty": {
       "title": "Aucun bon pour l’instant",
       "description": "Enregistrez votre première réception : le stock de vos dépôts se mettra à jour aussitôt."
@@ -713,8 +717,9 @@
       "date": "Date",
       "warehouse": "Dépôt",
       "counterparty": "Fournisseur ou client",
-      "lines": "Lignes",
-      "createdBy": "Validé par"
+      "lines": "Articles",
+      "createdBy": "Validé par",
+      "type": "Type"
     },
     "lineCount": "{count, plural, one {# article} other {# articles}}",
     "notFound": "Ce bon n’existe pas ou a été retiré.",
@@ -894,10 +899,7 @@
       "download": "Télécharger le PDF"
     },
     "period": {
-      "from": "Du",
-      "to": "Au",
-      "fromLabel": "Bons à partir du",
-      "toLabel": "Bons jusqu’au",
+      "label": "Période des bons",
       "newestFirst": "Plus récents d’abord",
       "oldestFirst": "Plus anciens d’abord"
     },
@@ -1015,7 +1017,9 @@
         "CUSTOMER_RETURN": "Enregistrer un retour",
         "SUPPLIER_RETURN": "Renvoyer au fournisseur"
       }
-    }
+    },
+    "allKinds": "Tous",
+    "kindsLabel": "Type de bon"
   },
   "stock": {
     "title": "Stock",
@@ -1025,7 +1029,10 @@
     "table": {
       "item": "Article",
       "batches": "Lots",
-      "quantity": "En stock"
+      "quantity": "En stock",
+      "packagings": "Conditionnement",
+      "alerts": "Dépôts en alerte",
+      "state": "État"
     },
     "empty": {
       "title": "Rien à compter pour l’instant",
@@ -1041,10 +1048,11 @@
     "state": {
       "OK": "Stock suffisant",
       "LOW": "Stock bas",
-      "OUT": "Rupture"
+      "OUT": "Rupture",
+      "inStock": "En stock",
+      "empty": "Épuisé"
     },
     "alert": "{warehouse} : {quantity}, seuil {threshold}",
-    "batchCount": "{count, plural, one {# lot} other {# lots}}",
     "reports": "Rapports",
     "export": {
       "file": "stock",
@@ -2097,19 +2105,7 @@
       "discrepancies": "Écarts"
     },
     "period": {
-      "label": "Période",
-      "presets": {
-        "last7Days": "7 derniers jours",
-        "last30Days": "30 derniers jours",
-        "thisMonth": "Ce mois-ci",
-        "lastMonth": "Le mois dernier",
-        "last3Months": "3 derniers mois"
-      },
-      "custom": "Dates libres",
-      "from": "Du",
-      "to": "au",
-      "fromLabel": "Début de la période",
-      "toLabel": "Fin de la période"
+      "label": "Période"
     },
     "activity": {
       "inbound": "Entrées",
@@ -2242,6 +2238,21 @@
       "title": "Pas de réseau",
       "description": "Cette page n’a pas encore été ouverte sur ce téléphone. L’accueil, le stock et la saisie des bons, eux, marchent sans réseau.",
       "home": "Aller à l’accueil"
+    }
+  },
+  "period": {
+    "label": "Période",
+    "any": "Toutes les dates",
+    "pick": "Choisissez le premier jour, puis le dernier.",
+    "apply": "Appliquer",
+    "clear": "Effacer",
+    "trigger": "{label} : {value}",
+    "presets": {
+      "last7Days": "7 derniers jours",
+      "last30Days": "30 derniers jours",
+      "thisMonth": "Ce mois-ci",
+      "lastMonth": "Le mois dernier",
+      "last3Months": "3 derniers mois"
     }
   }
 }

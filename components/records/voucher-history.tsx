@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import {
   DiscrepancyBadge,
   VoucherTypeBadge,
-} from "@/components/vouchers/vouchers-screen"
+} from "@/components/vouchers/voucher-badges"
 import { useVouchersPage } from "@/lib/api/voucher-queries"
 import type { VoucherSearch, VoucherSummary } from "@/lib/api/vouchers"
 import { RecordRoutes } from "@/lib/routes"

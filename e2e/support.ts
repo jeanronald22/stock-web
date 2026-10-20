@@ -66,15 +66,76 @@ export async function openNavigation(page: Page) {
 }
 
 /**
- * Sur téléphone, les filtres d'une liste sont rangés dans un panneau : on l'ouvre, on agit, puis on
- * revient à la liste. Ailleurs, l'action se fait directement dans la barre.
+ * Sur téléphone, les filtres d'une liste sont rangés dans un panneau du bas : on l'ouvre, on agit,
+ * puis on revient à la liste. Ailleurs, au-delà de deux filtres, ils sont dans le menu « Filtres » ;
+ * sinon, l'action se fait directement dans la barre.
  */
 export async function withFilters(page: Page, action: () => Promise<void>) {
-  const folded = (page.viewportSize()?.width ?? 0) <= FILTERS_FOLDED_MAX_WIDTH
-  if (folded) await page.getByRole("button", { name: /^Filtres/ }).click()
-  await action()
-  if (folded)
+  const opener = page.getByRole("button", { name: /^Filtres/ })
+  if ((page.viewportSize()?.width ?? 0) <= FILTERS_FOLDED_MAX_WIDTH) {
+    await opener.click()
+    await action()
     await page.getByRole("button", { name: "Voir les résultats" }).click()
+    return
+  }
+  // La barre s'affiche d'un bloc : visible, elle dit si ses filtres sont dans un menu.
+  await expect(page.locator('[data-slot="filter-bar"]')).toBeVisible()
+  const menu = await opener.isVisible()
+  if (menu) await opener.click()
+  await action()
+  if (menu) {
+    const panel = page.getByRole("dialog", { name: "Filtres" })
+    if (await panel.isVisible()) await page.keyboard.press("Escape")
+    await expect(panel).toBeHidden()
+  }
+}
+
+/** Carte d'un article dans la grille (affichage par défaut d'« Articles » et « Stock »). */
+export function itemCard(page: Page, name: RegExp | string) {
+  return page
+    .getByRole("listitem")
+    .filter({ has: page.getByRole("link", { name }) })
+}
+
+/** Jour tel que le calendrier le marque (data-day, format de la langue française). */
+function calendarDay(day: string) {
+  return new Date(`${day}T12:00:00`).toLocaleDateString("fr")
+}
+
+/** Mois parcourus au plus pour trouver un jour dans le calendrier. */
+const CALENDAR_MAX_STEPS = 24
+
+/**
+ * Choisit une période sur le calendrier ([from] et [to] en AAAA-MM-JJ, dans le passé) : on recule
+ * de mois en mois jusqu'au premier jour, puis on avance jusqu'au dernier, et on applique.
+ * [beforeApply] : pour photographier le calendrier ouvert.
+ */
+export async function pickPeriod(
+  page: Page,
+  label: string,
+  from: string,
+  to: string,
+  beforeApply?: () => Promise<void>
+) {
+  await page.getByRole("button", { name: new RegExp(`^${label}`) }).click()
+  const calendar = page.locator('[data-slot="calendar"]')
+  const day = (value: string) =>
+    calendar.locator(
+      `td:not(.rdp-outside) > button[data-day="${calendarDay(value)}"]`
+    )
+  for (const [value, step] of [
+    [from, ".rdp-button_previous"],
+    [to, ".rdp-button_next"],
+  ] as const) {
+    for (let moves = 0; !(await day(value).isVisible()); moves++) {
+      if (moves === CALENDAR_MAX_STEPS)
+        throw new Error(`Jour ${value} introuvable dans le calendrier`)
+      await calendar.locator(step).click()
+    }
+    await day(value).click()
+  }
+  await beforeApply?.()
+  await page.getByRole("button", { name: "Appliquer" }).click()
 }
 
 export async function navigateTo(page: Page, entry: string) {

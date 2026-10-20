@@ -4,12 +4,14 @@ import { ArrowLeftRightIcon, ScaleIcon, TriangleAlertIcon } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 
+import { DateRangePicker } from "@/components/catalog/date-range-picker"
+import { FILTER_CONTROL } from "@/components/catalog/filter-bar"
 import { WarehouseFilter } from "@/components/catalog/warehouse-filter"
 import { SectionTabs } from "@/components/workspace/section-tabs"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import { Routes } from "@/lib/routes"
+import { cn } from "@/lib/utils"
 
-import { PeriodPicker } from "./period-picker"
 import { useReportSearch } from "./use-report-search"
 
 /**
@@ -63,8 +65,18 @@ export function ReportsShell({
         ]}
       />
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-        <PeriodPicker period={period} onChange={setPeriod} />
-        <WarehouseFilter value={warehouseIds} onChange={setWarehouses} />
+        <DateRangePicker
+          from={period.from}
+          to={period.to}
+          onChange={(from, to) => from && to && setPeriod({ from, to })}
+          label={t("period.label")}
+          className={cn(FILTER_CONTROL, "h-11 sm:w-64")}
+        />
+        <WarehouseFilter
+          value={warehouseIds}
+          onChange={setWarehouses}
+          className="sm:w-60"
+        />
       </div>
       <div className="mt-8">{children}</div>
     </PageBody>

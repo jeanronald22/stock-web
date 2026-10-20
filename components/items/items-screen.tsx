@@ -16,7 +16,6 @@ import { CategoryFilter } from "@/components/catalog/category-filter"
 import { ViewToggle } from "@/components/catalog/view-toggle"
 import { FilterBar } from "@/components/catalog/filter-bar"
 import { EmptyState } from "@/components/catalog/empty-state"
-import { StatusFilter } from "@/components/catalog/status-filter"
 import { StockAlertFilter } from "@/components/catalog/stock-alert-filter"
 import { SupplierFilter } from "@/components/catalog/supplier-filter"
 import { TablePagination } from "@/components/catalog/table-pagination"
@@ -38,6 +37,7 @@ import {
   ListView,
   STOCK_ALERT_STATES,
   useListParams,
+  type ListParamKey,
 } from "@/lib/list/use-list-params"
 import { ListQueryParams, Routes } from "@/lib/routes"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
@@ -46,12 +46,15 @@ import { useStockAccess } from "@/components/workspace/stock-access"
 
 import { ItemGridSkeleton } from "./item-card"
 import { ItemsGrid } from "./items-grid"
+import { ItemStatusTabs } from "./item-status-tabs"
 import { ItemsMoreMenu } from "./items-more-menu"
 import { ItemsTable, ItemsTableSkeleton } from "./items-table"
 
 /** La recherche part quand la frappe se pose, pas à chaque lettre. */
 const SEARCH_DELAY_MS = 300
 const SKELETON_ROWS = 8
+/** Le statut (actifs, archivés) est en onglets : il ne compte pas dans « Filtres ». */
+const OUTSIDE_MENU: readonly ListParamKey[] = ["status"]
 
 export function ItemsScreen() {
   const t = useTranslations("items")
@@ -80,17 +83,17 @@ export function ItemsScreen() {
 
   const warehouses = useWarehouses()
   const categories = useCategoryTree()
-  const search = useMemo(
+  const scope = useMemo(
     () => ({
       text: text || undefined,
       warehouseIds,
       categoryId,
       supplierId,
       stockStates: stockAlert && STOCK_ALERT_STATES[stockAlert],
-      status,
     }),
-    [text, warehouseIds, categoryId, supplierId, stockAlert, status]
+    [text, warehouseIds, categoryId, supplierId, stockAlert]
   )
+  const search = useMemo(() => ({ ...scope, status }), [scope, status])
   const items = useItemsPage(search, page, size)
   const total = items.data?.total ?? 0
   const filtered = list.filtered
@@ -180,14 +183,20 @@ export function ItemsScreen() {
         />
       ) : (
         <>
+          <ItemStatusTabs
+            search={scope}
+            value={status}
+            onChange={list.setStatus}
+          />
           <FilterBar
             {...tourAnchor(TourAnchors.itemFilters)}
-            activeCount={list.filterCount}
+            className="mt-3"
+            activeCount={list.countFilters(OUTSIDE_MENU)}
             onClear={() => {
               setTyped("")
               list.reset()
             }}
-            search={
+            lead={
               <InputGroup {...tourAnchor(TourAnchors.itemSearch)}>
                 <InputGroupInput
                   type="search"
@@ -213,14 +222,10 @@ export function ItemsScreen() {
               value={stockAlert}
               onChange={list.setStockAlert}
             />
-            <StatusFilter value={status} onChange={list.setStatus} />
           </FilterBar>
 
           <div
-            className={cn(
-              "mt-6",
-              !grid && "overflow-hidden rounded-2xl border"
-            )}
+            className={cn("mt-4", !grid && "overflow-hidden rounded-xl border")}
           >
             {items.isPending ? (
               grid ? (

@@ -5,6 +5,7 @@ import { expect, test } from "@playwright/test"
 import {
   callApi,
   dismissTour,
+  itemCard,
   navigateTo,
   redirectApi,
   shot,
@@ -14,7 +15,7 @@ import {
 
 test.beforeEach(async ({ context }) => redirectApi(context))
 
-test("articles et stock en grille : photos, quantités, état ; le choix reste dans l'adresse", async ({
+test("articles et stock en grille par défaut, en liste au choix ; le choix reste dans l'adresse", async ({
   page,
 }, testInfo) => {
   await signUpWithBusiness(page, testInfo, "grille")
@@ -55,27 +56,37 @@ test("articles et stock en grille : photos, quantités, état ; le choix reste d
 
   await navigateTo(page, "Articles")
   await dismissTour(page, "Votre catalogue")
-  await page.getByRole("button", { name: "Afficher en grille" }).click()
-  await expect(page).toHaveURL(/vue=grille/)
+  await expect(
+    page.getByRole("button", { name: "Afficher en grille" })
+  ).toHaveAttribute("aria-pressed", "true")
   await expect(
     page.getByRole("link", { name: "Carreau 60x60 beige" })
   ).toBeVisible()
-  await expect(page.getByText("CAR-6060")).toBeVisible()
+  // La carte dit l'essentiel : la référence reste au tableau, où elle se cherche.
+  await expect(itemCard(page, "Carreau 60x60 beige")).not.toContainText(
+    "CAR-6060"
+  )
   await shot(page, testInfo, "01-articles-grille")
 
   await navigateTo(page, "Stock")
   await dismissTour(page, "Dépôt par dépôt")
-  await page.getByRole("button", { name: "Afficher en grille" }).click()
   await expect(page.getByText("25 × Carton + 2 pièces")).toBeVisible()
-  await expect(page.getByText("Rupture")).toBeVisible()
+  await expect(itemCard(page, "Robinet mélangeur")).toContainText("Rupture")
   await shot(page, testInfo, "02-stock-grille")
 
-  // Rechargée, la page garde la grille ; une carte ouvre la fiche.
+  // La liste se choisit, et la page rechargée la garde.
+  await page.getByRole("button", { name: "Afficher en liste" }).click()
+  await expect(page).toHaveURL(/vue=liste/)
   await page.reload()
   await expect(
-    page.getByRole("button", { name: "Afficher en grille" })
-  ).toHaveAttribute("aria-pressed", "true")
-  await page.getByRole("link", { name: "Robinet mélangeur" }).click()
+    page.getByRole("row", { name: /Robinet mélangeur/ })
+  ).toContainText("Rupture")
+  await shot(page, testInfo, "03-stock-liste")
+
+  // Revenue à la grille, l'adresse ne porte plus de choix ; une carte ouvre la fiche.
+  await page.getByRole("button", { name: "Afficher en grille" }).click()
+  await expect(page).not.toHaveURL(/vue=/)
+  await itemCard(page, "Robinet mélangeur").getByRole("link").click()
   await expect(
     page.getByRole("heading", { name: "Robinet mélangeur", level: 1 })
   ).toBeVisible()

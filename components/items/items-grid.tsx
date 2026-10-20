@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 
 import { ITEM_GRID, ItemCard } from "./item-card"
 
-/** Grille des articles : photo, nom, référence et catégorie, puis unité et dépôts. */
+/** Grille des articles : photo, nom et catégorie, puis unité et dépôts. La référence reste au tableau. */
 export function ItemsGrid({
   items,
   categoryPaths,
@@ -36,17 +36,7 @@ export function ItemsGrid({
                 <Badge variant="secondary">{t("items.restore.badge")}</Badge>
               )
             }
-            subtitle={
-              (item.reference || category) && (
-                <>
-                  {item.reference && (
-                    <span className="font-mono">{item.reference}</span>
-                  )}
-                  {item.reference && category && " · "}
-                  {category}
-                </>
-              )
-            }
+            subtitle={category}
           >
             <p className="text-sm text-muted-foreground">
               {t(`units.${item.baseUnit}.label`)} ·{" "}

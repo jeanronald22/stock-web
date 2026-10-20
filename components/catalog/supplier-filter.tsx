@@ -14,6 +14,8 @@ import { CatalogStatus } from "@/lib/api/stock"
 import { useSupplier, useSuppliersPage } from "@/lib/api/supplier-queries"
 import { cn } from "@/lib/utils"
 
+import { FILTER_CONTROL } from "./filter-bar"
+
 const ALL_SUPPLIERS = "all"
 /** Une page de l'API au plus (PageParams.MAX_SIZE) : au-delà, la fiche fournisseur reste le chemin. */
 const LISTED_SUPPLIERS = 100
@@ -54,7 +56,7 @@ export function SupplierFilter({
     >
       <SelectTrigger
         className={cn(
-          "w-full sm:w-56",
+          FILTER_CONTROL,
           value && "border-primary/50 bg-primary/5",
           className
         )}

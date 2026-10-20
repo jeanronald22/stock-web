@@ -14,7 +14,25 @@ import {
 import { PAGE_SIZES } from "@/lib/list/use-list-params"
 import { cn } from "@/lib/utils"
 
-/** Bas de tableau : « 51–100 sur 230 », lignes par page, page précédente et suivante. */
+/** Pages voisines de la page en cours montrées de chaque côté ; au-delà, « … ». */
+const NEIGHBOURS = 1
+const GAP = "gap"
+
+/** Numéros affichés : la première, la dernière, la page en cours et ses voisines (à partir de 0). */
+function pageNumbers(page: number, pages: number): (number | typeof GAP)[] {
+  const shown = new Set([0, pages - 1])
+  for (let offset = -NEIGHBOURS; offset <= NEIGHBOURS; offset++)
+    if (page + offset >= 0 && page + offset < pages) shown.add(page + offset)
+  const sorted = [...shown].sort((a, b) => a - b)
+  return sorted.flatMap((number, index) =>
+    index > 0 && number - sorted[index - 1] > 1 ? [GAP, number] : [number]
+  )
+}
+
+/**
+ * Bas de liste : « 51–100 sur 230 », lignes par page, numéros de page. Sur téléphone, « Page 2 sur
+ * 5 » et les flèches suffisent.
+ */
 export function TablePagination({
   page,
   size,
@@ -28,7 +46,7 @@ export function TablePagination({
   total: number
   onPageChange: (page: number) => void
   onSizeChange: (size: number) => void
-  /** Sous une grille de cartes : un encadré à part, pas le bas d'un tableau. */
+  /** Sous une grille de cartes : une simple ligne, pas le bas d'un tableau. */
   detached?: boolean
 }) {
   const t = useTranslations("pagination")
@@ -43,8 +61,8 @@ export function TablePagination({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between",
-        detached ? "mt-4 rounded-2xl border" : "border-t"
+        "flex flex-col gap-3 py-3 text-sm sm:flex-row sm:items-center sm:justify-between",
+        detached ? "mt-2" : "border-t px-4"
       )}
     >
       <p className="text-muted-foreground" aria-live="polite">
@@ -72,8 +90,8 @@ export function TablePagination({
             </SelectContent>
           </Select>
         </div>
-        <div className="flex items-center gap-1">
-          <span className="mr-2 text-muted-foreground tabular-nums">
+        <nav aria-label={t("pages")} className="flex items-center gap-1">
+          <span className="mr-2 text-muted-foreground tabular-nums sm:hidden">
             {t("page", { page: page + 1, pages })}
           </span>
           <Button
@@ -85,6 +103,29 @@ export function TablePagination({
           >
             <ChevronLeftIcon />
           </Button>
+          {pageNumbers(page, pages).map((number, index) =>
+            number === GAP ? (
+              <span
+                key={`${GAP}-${index}`}
+                className="hidden w-8 text-center text-muted-foreground sm:inline"
+                aria-hidden
+              >
+                …
+              </span>
+            ) : (
+              <Button
+                key={number}
+                variant={number === page ? "default" : "ghost"}
+                size="icon-sm"
+                className="hidden num sm:inline-flex"
+                aria-label={t("goTo", { page: number + 1 })}
+                aria-current={number === page ? "page" : undefined}
+                onClick={() => onPageChange(number)}
+              >
+                {number + 1}
+              </Button>
+            )
+          )}
           <Button
             variant="outline"
             size="icon-sm"
@@ -94,7 +135,7 @@ export function TablePagination({
           >
             <ChevronRightIcon />
           </Button>
-        </div>
+        </nav>
       </div>
     </div>
   )

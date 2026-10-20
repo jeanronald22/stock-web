@@ -5,6 +5,7 @@ import { expect, test, type Page } from "@playwright/test"
 import {
   callApi,
   dismissTour,
+  itemCard,
   navigateTo,
   redirectApi,
   shot,
@@ -110,9 +111,7 @@ test("articles et dépôts : un article proposé dans un dépôt et pas dans l'a
     page.getByRole("link", { name: /Ciment CPJ 42,5/ })
   ).toBeVisible()
   // La photo du carreau s'affiche en vignette, chargée par son lien signé.
-  const thumbnail = page
-    .getByRole("row", { name: /Carreau 60x60 beige/ })
-    .locator("img")
+  const thumbnail = itemCard(page, /Carreau 60x60 beige/).locator("img")
   await expect(thumbnail).toHaveAttribute("src", /\/v1\/files\//)
   await expect
     .poll(() =>
@@ -201,10 +200,7 @@ test("articles et dépôts : un article proposé dans un dépôt et pas dans l'a
     page.getByRole("link", { name: /Carreau 60x60 beige/ })
   ).toBeVisible()
   await expect(page.getByRole("link", { name: /Ciment/ })).toBeHidden()
-  await withFilters(page, async () => {
-    await page.getByRole("combobox", { name: "Statut" }).click()
-    await page.getByRole("option", { name: "Archivés" }).click()
-  })
+  await page.getByRole("button", { name: /^Archivés/ }).click()
   await expect(
     page.getByRole("link", { name: /Ciment CPJ 42,5/ })
   ).toBeVisible()

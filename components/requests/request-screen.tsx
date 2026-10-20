@@ -41,7 +41,7 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
-import { VoucherTypeBadge } from "@/components/vouchers/vouchers-screen"
+import { VoucherTypeBadge } from "@/components/vouchers/voucher-badges"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import {
   useApproveRequest,

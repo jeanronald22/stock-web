@@ -11,7 +11,7 @@ import { useTranslations } from "next-intl"
 import { useEffect, useMemo, useState } from "react"
 
 import { EmptyState } from "@/components/catalog/empty-state"
-import { FilterBar } from "@/components/catalog/filter-bar"
+import { FILTER_CONTROL, FilterBar } from "@/components/catalog/filter-bar"
 import { StatusFilter } from "@/components/catalog/status-filter"
 import { TablePagination } from "@/components/catalog/table-pagination"
 import { SearchScene } from "@/components/illustrations/search-scene"
@@ -108,12 +108,12 @@ export function CustomersScreen() {
       ) : (
         <>
           <FilterBar
-            activeCount={list.filterCount}
+            activeCount={list.countFilters()}
             onClear={() => {
               setTyped("")
               list.reset()
             }}
-            search={
+            lead={
               <InputGroup>
                 <InputGroupInput
                   type="search"
@@ -137,7 +137,10 @@ export function CustomersScreen() {
                 )
               }
             >
-              <SelectTrigger className="sm:w-48" aria-label={t("kindFilter")}>
+              <SelectTrigger
+                className={FILTER_CONTROL}
+                aria-label={t("kindFilter")}
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

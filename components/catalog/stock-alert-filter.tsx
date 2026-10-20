@@ -13,6 +13,8 @@ import {
 import { StockAlertParam } from "@/lib/routes"
 import { cn } from "@/lib/utils"
 
+import { FILTER_CONTROL } from "./filter-bar"
+
 /** Valeur « Tous les articles » : distincte de toute valeur d'alerte. */
 const ALL_LEVELS = "all"
 
@@ -44,7 +46,7 @@ export function StockAlertFilter({
     >
       <SelectTrigger
         className={cn(
-          "w-full sm:w-48",
+          FILTER_CONTROL,
           value && "border-primary/50 bg-primary/5",
           className
         )}

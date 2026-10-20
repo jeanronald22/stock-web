@@ -145,7 +145,7 @@ export function StartInventorySheet({
               <CategoryFilter
                 value={categoryId}
                 onChange={setCategoryId}
-                className="mt-3 sm:w-full"
+                className="mt-3"
               />
             )}
           </fieldset>

@@ -3,6 +3,8 @@ import { expect, test } from "@playwright/test"
 import {
   callApi,
   dismissTour,
+  itemCard,
+  pickPeriod,
   navigateTo,
   redirectApi,
   shot,
@@ -113,21 +115,14 @@ test("catégories, seuils d'alerte et filtres combinables", async ({
   // Stock : 160 m pour un seuil de 200 : stock bas ; le disjoncteur, seuil 0, est en rupture.
   await navigateTo(page, "Stock")
   await dismissTour(page, "Dépôt par dépôt")
-  await withFilters(page, async () => {
-    await page
-      .getByRole("combobox", { name: "Filtrer par niveau de stock" })
-      .click()
-    await page.getByRole("option", { name: "À commander" }).click()
-  })
-  const cableRow = page.getByRole("row", { name: /Câble rigide/ })
-  await expect(cableRow.getByText("Stock bas")).toBeVisible()
+  await page.getByRole("button", { name: /^À commander/ }).click()
+  const cableCard = itemCard(page, /Câble rigide/)
+  await expect(cableCard.getByText("Stock bas")).toBeVisible()
   await expect(
-    cableRow.getByText(/Dépôt Bonabéri : 160 m, seuil 200 m/)
+    cableCard.getByText(/Dépôt Bonabéri : 160 m, seuil 200 m/)
   ).toBeVisible()
-  await expect(
-    page.getByRole("row", { name: /Disjoncteur/ }).getByText("Rupture")
-  ).toBeVisible()
-  await expect(page.getByRole("row", { name: /Ciment/ })).toBeHidden()
+  await expect(itemCard(page, /Disjoncteur/).getByText("Rupture")).toBeVisible()
+  await expect(itemCard(page, /Ciment/)).toBeHidden()
   await shot(page, testInfo, "02-stock-alertes")
 
   // Entreprise active dans la barre du haut ; la création d'une autre est l'action principale.
@@ -149,21 +144,15 @@ test("catégories, seuils d'alerte et filtres combinables", async ({
   await dismissTour(page, "Entrées et sorties")
   const rows = page.getByRole("row").filter({ hasText: "REC-" })
   await expect(rows).toHaveCount(2)
-  await withFilters(page, async () => {
-    await page
-      .getByRole("textbox", { name: "Bons à partir du" })
-      .fill("2026-04-01")
-    await shot(page, testInfo, "03a-filtres")
-  })
-  await expect(rows).toHaveCount(1)
-  await withFilters(page, () =>
-    page.getByRole("textbox", { name: "Bons à partir du" }).fill("")
+  await pickPeriod(page, "Période des bons", "2026-04-01", "2026-04-30", () =>
+    shot(page, testInfo, "03a-periode")
   )
+  await expect(rows).toHaveCount(1)
+  await page.getByRole("button", { name: /^Période des bons/ }).click()
+  await page.getByRole("button", { name: "Effacer", exact: true }).click()
   await expect(rows).toHaveCount(2)
   await expect(rows.first()).toContainText("REC-2026-0002")
-  await withFilters(page, () =>
-    page.getByRole("button", { name: "Plus récents d’abord" }).click()
-  )
+  await page.getByRole("button", { name: "Plus récents d’abord" }).click()
   await expect(rows.first()).toContainText("REC-2026-0001")
   await shot(page, testInfo, "03-bons-periode")
 })
