@@ -1586,7 +1586,7 @@
         "name": "Casse anormale",
         "when": "Pour le propriétaire et les gérants : quand la casse d’un article dépasse la part admise sur 30 jours.",
         "title": "Casse anormale : {count, plural, one {# article} other {# articles}}",
-        "line": "{name} ({warehouse}) : {damaged} cassés, {percent} % de ce qui est parti"
+        "line": "{name} ({warehouse}) : {damaged} de casse, {percent} % de ce qui est parti"
       },
       "UNRELIABLE_SUPPLIER": {
         "name": "Fournisseur peu fiable",
