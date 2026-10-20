@@ -7,6 +7,7 @@ import {
   redirectApi,
   shot,
   signUpWithBusiness,
+  withFilters,
 } from "./support"
 
 test.beforeEach(async ({ context }) => redirectApi(context))
@@ -171,8 +172,10 @@ test("réception comparée au bon de livraison : l'écart se voit et se retrouve
   ).toBeVisible()
 
   await navigateTo(page, "Bons")
-  await page.getByRole("combobox", { name: "Tous les bons" }).click()
-  await page.getByRole("option", { name: "Réceptions avec écart" }).click()
+  await withFilters(page, async () => {
+    await page.getByRole("combobox", { name: "Tous les bons" }).click()
+    await page.getByRole("option", { name: "Réceptions avec écart" }).click()
+  })
   const rows = page.getByRole("row").filter({ hasText: `REC-${year}-` })
   await expect(rows).toHaveCount(1)
   await expect(rows).toContainText("Écart")

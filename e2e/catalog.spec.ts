@@ -9,6 +9,7 @@ import {
   redirectApi,
   shot,
   signUpWithBusiness,
+  withFilters,
 } from "./support"
 
 test.beforeEach(async ({ context }) => redirectApi(context))
@@ -139,18 +140,19 @@ test("articles et dépôts : un article proposé dans un dépôt et pas dans l'a
   const warehouseFilter = page.getByRole("button", {
     name: "Filtrer par dépôt",
   })
-  const pickWarehouse = async (name: string) => {
-    await warehouseFilter.click()
-    await page.getByRole("menuitemcheckbox", { name }).click()
-    await page.keyboard.press("Escape")
-  }
+  const pickWarehouse = (name: string, label?: string) =>
+    withFilters(page, async () => {
+      await warehouseFilter.click()
+      await page.getByRole("menuitemcheckbox", { name }).click()
+      await page.keyboard.press("Escape")
+      if (label) await expect(warehouseFilter).toContainText(label)
+    })
   await pickWarehouse("Dépôt Bonabéri")
   await expect(
     page.getByRole("link", { name: /Carreau 60x60 beige/ })
   ).toBeVisible()
   await expect(page.getByRole("link", { name: /Ciment/ })).toBeHidden()
-  await pickWarehouse("Boutique Akwa")
-  await expect(warehouseFilter).toContainText("2 dépôts")
+  await pickWarehouse("Boutique Akwa", "2 dépôts")
   await expect(
     page.getByRole("link", { name: /Ciment CPJ 42,5/ })
   ).toBeVisible()
@@ -159,7 +161,9 @@ test("articles et dépôts : un article proposé dans un dépôt et pas dans l'a
   await expect(page.getByRole("link", { name: /Carreau/ })).toBeHidden()
 
   // Recherche par un morceau du nom.
-  await page.getByRole("button", { name: "Effacer les filtres" }).click()
+  await withFilters(page, () =>
+    page.getByRole("button", { name: "Effacer les filtres" }).click()
+  )
   await page.getByRole("searchbox").fill("carr")
   await expect(
     page.getByRole("link", { name: /Carreau 60x60 beige/ })
@@ -197,8 +201,10 @@ test("articles et dépôts : un article proposé dans un dépôt et pas dans l'a
     page.getByRole("link", { name: /Carreau 60x60 beige/ })
   ).toBeVisible()
   await expect(page.getByRole("link", { name: /Ciment/ })).toBeHidden()
-  await page.getByRole("combobox", { name: "Statut" }).click()
-  await page.getByRole("option", { name: "Archivés" }).click()
+  await withFilters(page, async () => {
+    await page.getByRole("combobox", { name: "Statut" }).click()
+    await page.getByRole("option", { name: "Archivés" }).click()
+  })
   await expect(
     page.getByRole("link", { name: /Ciment CPJ 42,5/ })
   ).toBeVisible()

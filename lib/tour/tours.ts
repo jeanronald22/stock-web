@@ -14,12 +14,13 @@ export const TourAnchors = {
   warehouseKind: "warehouse-kind",
   newItem: "new-item",
   itemSearch: "item-search",
-  itemWarehouseFilter: "item-warehouse-filter",
+  itemFilters: "item-filters",
   itemBaseUnit: "item-base-unit",
   itemPackagings: "item-packagings",
   itemWarehouses: "item-warehouses",
   newVoucher: "new-voucher",
-  stockWarehouseFilter: "stock-warehouse-filter",
+  /** Barres de filtres entières : sur téléphone, les filtres eux-mêmes sont rangés dans un panneau. */
+  stockFilters: "stock-filters",
   newSupplier: "new-supplier",
 } as const
 export type TourAnchor = (typeof TourAnchors)[keyof typeof TourAnchors]
@@ -50,10 +51,10 @@ export const tours = {
   items: [
     { anchor: TourAnchors.newItem, key: "create" },
     { anchor: TourAnchors.itemSearch, key: "search" },
-    { anchor: TourAnchors.itemWarehouseFilter, key: "filter" },
+    { anchor: TourAnchors.itemFilters, key: "filter" },
   ],
   vouchers: [{ anchor: TourAnchors.newVoucher, key: "create" }],
-  stock: [{ anchor: TourAnchors.stockWarehouseFilter, key: "filter" }],
+  stock: [{ anchor: TourAnchors.stockFilters, key: "filter" }],
   suppliers: [{ anchor: TourAnchors.newSupplier, key: "create" }],
   itemForm: [
     { anchor: TourAnchors.itemBaseUnit, key: "baseUnit" },

@@ -7,6 +7,7 @@ import {
   redirectApi,
   shot,
   signUpWithBusiness,
+  withFilters,
 } from "./support"
 
 test.beforeEach(async ({ context }) => redirectApi(context))
@@ -97,21 +98,27 @@ test("catégories, seuils d'alerte et filtres combinables", async ({
 
   // Filtre par catégorie parente : les sous-catégories sont comprises.
   await navigateTo(page, "Articles")
-  await page.getByRole("combobox", { name: "Filtrer par catégorie" }).click()
-  await page.getByRole("option", { name: "Électricité", exact: true }).click()
+  await withFilters(page, async () => {
+    await page.getByRole("combobox", { name: "Filtrer par catégorie" }).click()
+    await page.getByRole("option", { name: "Électricité", exact: true }).click()
+  })
   await expect(page.getByRole("link", { name: /Câble rigide/ })).toBeVisible()
   await expect(page.getByRole("link", { name: /Ciment/ })).toBeHidden()
   await expect(page.getByText("Électricité › Câbles")).toBeVisible()
-  await page.getByRole("button", { name: "Effacer les filtres" }).click()
+  await withFilters(page, () =>
+    page.getByRole("button", { name: "Effacer les filtres" }).click()
+  )
   await expect(page.getByRole("link", { name: /Ciment/ })).toBeVisible()
 
   // Stock : 160 m pour un seuil de 200 : stock bas ; le disjoncteur, seuil 0, est en rupture.
   await navigateTo(page, "Stock")
   await dismissTour(page, "Dépôt par dépôt")
-  await page
-    .getByRole("combobox", { name: "Filtrer par niveau de stock" })
-    .click()
-  await page.getByRole("option", { name: "À commander" }).click()
+  await withFilters(page, async () => {
+    await page
+      .getByRole("combobox", { name: "Filtrer par niveau de stock" })
+      .click()
+    await page.getByRole("option", { name: "À commander" }).click()
+  })
   const cableRow = page.getByRole("row", { name: /Câble rigide/ })
   await expect(cableRow.getByText("Stock bas")).toBeVisible()
   await expect(
@@ -142,12 +149,21 @@ test("catégories, seuils d'alerte et filtres combinables", async ({
   await dismissTour(page, "Entrées et sorties")
   const rows = page.getByRole("row").filter({ hasText: "REC-" })
   await expect(rows).toHaveCount(2)
-  await page.getByLabel("Bons à partir du").fill("2026-04-01")
+  await withFilters(page, async () => {
+    await page
+      .getByRole("textbox", { name: "Bons à partir du" })
+      .fill("2026-04-01")
+    await shot(page, testInfo, "03a-filtres")
+  })
   await expect(rows).toHaveCount(1)
-  await page.getByLabel("Bons à partir du").fill("")
+  await withFilters(page, () =>
+    page.getByRole("textbox", { name: "Bons à partir du" }).fill("")
+  )
   await expect(rows).toHaveCount(2)
   await expect(rows.first()).toContainText("REC-2026-0002")
-  await page.getByRole("button", { name: "Plus récents d’abord" }).click()
+  await withFilters(page, () =>
+    page.getByRole("button", { name: "Plus récents d’abord" }).click()
+  )
   await expect(rows.first()).toContainText("REC-2026-0001")
   await shot(page, testInfo, "03-bons-periode")
 })

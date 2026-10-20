@@ -2,15 +2,21 @@ import { cn } from "@/lib/utils"
 
 import { Breadcrumbs, type Crumb } from "./breadcrumbs"
 
-/** Titre d'écran : une ligne d'explication au plus, actions à droite (en dessous sur téléphone). */
+/**
+ * Titre d'écran : une ligne d'explication au plus, actions à droite (en dessous sur téléphone).
+ * Les états (type de bon, « En cours », « Archivé ») suivent le titre : ils décrivent la fiche, ce
+ * ne sont pas des actions.
+ */
 export function PageHeader({
   title,
+  badges,
   description,
   actions,
   breadcrumbs,
   className,
 }: {
   title: string
+  badges?: React.ReactNode
   description?: string
   actions?: React.ReactNode
   /** Fiches et saisies : chemin depuis la liste, avec retour. */
@@ -25,9 +31,14 @@ export function PageHeader({
       )}
     >
       <div className="min-w-0">
-        <h1 className="animate-rise-in text-2xl font-semibold tracking-tight sm:text-3xl">
-          {title}
-        </h1>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <h1 className="animate-rise-in text-2xl font-semibold tracking-tight sm:text-3xl">
+            {title}
+          </h1>
+          {badges && (
+            <div className="flex flex-wrap items-center gap-1.5">{badges}</div>
+          )}
+        </div>
         {description && (
           <p className="mt-1 text-muted-foreground">{description}</p>
         )}

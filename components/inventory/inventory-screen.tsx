@@ -201,9 +201,9 @@ function InventorySheet({ inventory }: { inventory: Inventory }) {
             }),
           }),
         ].join(" · ")}
+        badges={<InventoryStatusBadge status={inventory.status} />}
         actions={
           <>
-            <InventoryStatusBadge status={inventory.status} />
             {inventory.adjustment && (
               <Link
                 href={RecordRoutes.voucher(inventory.adjustment.id)}

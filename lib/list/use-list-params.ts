@@ -76,6 +76,22 @@ const FILTER_KEYS = [
   "order",
 ] as const satisfies readonly (keyof typeof ListQueryParams)[]
 
+type ListParamKey = keyof typeof ListQueryParams
+
+/**
+ * Filtres comptés sur le bouton « Filtres » : la période (du, au) en vaut un seul ; le statut
+ * (archivés) en est un, même s'il ne compte pas pour dire la liste filtrée.
+ */
+const COUNTED_FILTERS: readonly (readonly ListParamKey[])[] = [
+  ...FILTER_KEYS.filter((key) => key !== "search" && key !== "to").map(
+    (key): ListParamKey[] => (key === "from" ? ["from", "to"] : [key])
+  ),
+  ["status"],
+]
+
+/** « Effacer les filtres » remet aussi la liste sur les fiches actives. */
+const RESET_KEYS: readonly ListParamKey[] = [...FILTER_KEYS, "status"]
+
 type Change = string | number | readonly string[] | undefined
 
 function positiveInteger(value: string | null): number | null {
@@ -163,11 +179,16 @@ export function useListParams() {
   const filtered = FILTER_KEYS.some(
     (key) => searchParams.get(ListQueryParams[key]) !== null
   )
+  const filterCount = COUNTED_FILTERS.filter((keys) =>
+    keys.some((key) => searchParams.get(ListQueryParams[key]) !== null)
+  ).length
 
   return {
     params,
     /** Au moins un filtre posé : la liste n'est pas la vue complète. */
     filtered,
+    /** Filtres posés hors recherche, pour le bouton « Filtres » du téléphone. */
+    filterCount,
     setText: (text: string) => update({ search: text.trim() || undefined }),
     setWarehouses: (warehouseIds: string[]) =>
       update({ warehouse: warehouseIds }),
@@ -208,6 +229,6 @@ export function useListParams() {
           order === VoucherOrder.oldestFirst ? OLDEST_FIRST_PARAM : undefined,
       }),
     reset: () =>
-      update(Object.fromEntries(FILTER_KEYS.map((key) => [key, undefined]))),
+      update(Object.fromEntries(RESET_KEYS.map((key) => [key, undefined]))),
   }
 }

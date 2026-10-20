@@ -9,6 +9,8 @@ import { waitForActionLink } from "./mailbox"
 
 export const PASSWORD = "un carton bien rangé"
 const MOBILE_MAX_WIDTH = 767
+/** En dessous du point « sm » (640 px), les filtres des listes passent dans un panneau (FilterBar). */
+const FILTERS_FOLDED_MAX_WIDTH = 639
 
 /**
  * API à tester à la place de celle de l'application (E2E_API_URL) : permet de vérifier une
@@ -61,6 +63,18 @@ export async function openNavigation(page: Page) {
       .getByRole("button", { name: "Afficher ou masquer le menu" })
       .click()
   }
+}
+
+/**
+ * Sur téléphone, les filtres d'une liste sont rangés dans un panneau : on l'ouvre, on agit, puis on
+ * revient à la liste. Ailleurs, l'action se fait directement dans la barre.
+ */
+export async function withFilters(page: Page, action: () => Promise<void>) {
+  const folded = (page.viewportSize()?.width ?? 0) <= FILTERS_FOLDED_MAX_WIDTH
+  if (folded) await page.getByRole("button", { name: /^Filtres/ }).click()
+  await action()
+  if (folded)
+    await page.getByRole("button", { name: "Voir les résultats" }).click()
 }
 
 export async function navigateTo(page: Page, entry: string) {

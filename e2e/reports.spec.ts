@@ -124,7 +124,10 @@ test("accueil par rôle, rapports de mouvements, casse et écarts, exports Excel
   await navigateTo(page, "Stock")
   await dismissTour(page, "Dépôt par dépôt")
   const stock = page.waitForEvent("download")
-  await page.getByRole("button", { name: "Exporter" }).click()
+  await page
+    .getByRole("button", { name: "Plus d’actions sur le stock" })
+    .click()
+  await page.getByRole("menuitem", { name: "Exporter" }).click()
   expect((await stock).suggestedFilename()).toMatch(/^stock-.*\.xlsx$/)
 
   // Magasinier : ses gestes du jour, ce qui s'est fait aujourd'hui.

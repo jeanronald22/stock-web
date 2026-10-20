@@ -141,7 +141,10 @@ test("réception puis sortie : le stock suit, une sortie trop forte est refusée
   await page.emulateMedia({ colorScheme: "light" })
   // PDF téléchargé sans passer par l'impression : nom du bon, vrai fichier PDF.
   const pdfDownload = page.waitForEvent("download")
-  await page.getByRole("button", { name: "Télécharger le PDF" }).click()
+  await page
+    .getByRole("button", { name: `Actions du bon REC-${year}-0001` })
+    .click()
+  await page.getByRole("menuitem", { name: "Télécharger le PDF" }).click()
   const pdfFile = await pdfDownload
   expect(pdfFile.suggestedFilename()).toBe(`REC-${year}-0001.pdf`)
   const pdfPath = testInfo.outputPath(pdfFile.suggestedFilename())

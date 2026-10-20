@@ -669,7 +669,6 @@
     "supplierFilter": "Filtrer par fournisseur",
     "warehouseFilter": "Filtrer par dépôt",
     "warehouseCount": "{count, plural, one {# dépôt} other {# dépôts}}",
-    "clearFilters": "Effacer les filtres",
     "stockAlert": {
       "label": "Filtrer par niveau de stock",
       "all": "Tous les niveaux",
@@ -681,6 +680,13 @@
       "label": "Affichage",
       "list": "Afficher en liste",
       "grid": "Afficher en grille"
+    },
+    "filters": {
+      "title": "Filtres",
+      "description": "Affinez la liste : les résultats se mettent à jour aussitôt.",
+      "open": "{count, plural, =0 {Filtres} one {Filtres, # posé} other {Filtres, # posés}}",
+      "clear": "Effacer les filtres",
+      "apply": "Voir les résultats"
     }
   },
   "vouchers": {
@@ -1053,7 +1059,8 @@
       "state": "État",
       "batches": "Lots",
       "alerts": "Dépôts en alerte"
-    }
+    },
+    "more": "Plus d’actions sur le stock"
   },
   "suppliers": {
     "title": "Fournisseurs",

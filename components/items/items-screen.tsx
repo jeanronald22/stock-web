@@ -14,7 +14,7 @@ import { CategoriesSheet } from "@/components/categories/categories-sheet"
 import { useCategoryTree } from "@/components/categories/use-category-tree"
 import { CategoryFilter } from "@/components/catalog/category-filter"
 import { ViewToggle } from "@/components/catalog/view-toggle"
-import { ClearFilters } from "@/components/catalog/clear-filters"
+import { FilterBar } from "@/components/catalog/filter-bar"
 import { EmptyState } from "@/components/catalog/empty-state"
 import { StatusFilter } from "@/components/catalog/status-filter"
 import { StockAlertFilter } from "@/components/catalog/stock-alert-filter"
@@ -180,13 +180,15 @@ export function ItemsScreen() {
         />
       ) : (
         <>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            {/* Téléphone : la recherche et l'affichage partagent une ligne ; ailleurs, l'affichage ferme la barre. */}
-            <div className="flex gap-2 sm:contents">
-              <InputGroup
-                className="flex-1 sm:max-w-md sm:min-w-64"
-                {...tourAnchor(TourAnchors.itemSearch)}
-              >
+          <FilterBar
+            {...tourAnchor(TourAnchors.itemFilters)}
+            activeCount={list.filterCount}
+            onClear={() => {
+              setTyped("")
+              list.reset()
+            }}
+            search={
+              <InputGroup {...tourAnchor(TourAnchors.itemSearch)}>
                 <InputGroupInput
                   type="search"
                   value={typed}
@@ -198,12 +200,12 @@ export function ItemsScreen() {
                   {items.isFetching ? <Spinner /> : <SearchIcon />}
                 </InputGroupAddon>
               </InputGroup>
-              <ViewToggle value={view} onChange={list.setView} />
-            </div>
+            }
+            trailing={<ViewToggle value={view} onChange={list.setView} />}
+          >
             <WarehouseFilter
               value={warehouseIds}
               onChange={list.setWarehouses}
-              {...tourAnchor(TourAnchors.itemWarehouseFilter)}
             />
             <CategoryFilter value={categoryId} onChange={list.setCategory} />
             <SupplierFilter value={supplierId} onChange={list.setSupplier} />
@@ -212,14 +214,7 @@ export function ItemsScreen() {
               onChange={list.setStockAlert}
             />
             <StatusFilter value={status} onChange={list.setStatus} />
-            <ClearFilters
-              visible={filtered}
-              onClear={() => {
-                setTyped("")
-                list.reset()
-              }}
-            />
-          </div>
+          </FilterBar>
 
           <div
             className={cn(

@@ -669,7 +669,6 @@
     "supplierFilter": "Filter by supplier",
     "warehouseFilter": "Filter by warehouse",
     "warehouseCount": "{count, plural, one {# warehouse} other {# warehouses}}",
-    "clearFilters": "Clear filters",
     "stockAlert": {
       "label": "Filter by stock level",
       "all": "All levels",
@@ -681,6 +680,13 @@
       "label": "Display",
       "list": "Show as a list",
       "grid": "Show as a grid"
+    },
+    "filters": {
+      "title": "Filters",
+      "description": "Narrow the list: results update right away.",
+      "open": "{count, plural, =0 {Filters} one {Filters, # set} other {Filters, # set}}",
+      "clear": "Clear filters",
+      "apply": "Show results"
     }
   },
   "vouchers": {
@@ -1053,7 +1059,8 @@
       "state": "Status",
       "batches": "Batches",
       "alerts": "Warehouses on alert"
-    }
+    },
+    "more": "More stock actions"
   },
   "suppliers": {
     "title": "Suppliers",

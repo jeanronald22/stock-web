@@ -171,6 +171,23 @@ export function useReportQuantity() {
 }
 
 /** Export Excel du rapport ouvert ; la bibliothèque n'est chargée qu'au premier export. */
+/** Un export à la fois ; un échec s'affiche en message, jamais en silence. */
+export function useExport(onExport: () => Promise<void>) {
+  const errorMessage = useErrorMessage()
+  const [busy, setBusy] = useState(false)
+  const run = async () => {
+    setBusy(true)
+    try {
+      await onExport()
+    } catch (failure) {
+      toast.error(errorMessage(failure))
+    } finally {
+      setBusy(false)
+    }
+  }
+  return { busy, run }
+}
+
 export function ExportButton({
   onExport,
   disabled,
@@ -179,25 +196,15 @@ export function ExportButton({
   disabled?: boolean
 }) {
   const t = useTranslations("reports")
-  const errorMessage = useErrorMessage()
-  const [busy, setBusy] = useState(false)
+  const exporter = useExport(onExport)
   return (
     <Button
       variant="outline"
       size="lg"
-      disabled={disabled || busy}
-      onClick={async () => {
-        setBusy(true)
-        try {
-          await onExport()
-        } catch (failure) {
-          toast.error(errorMessage(failure))
-        } finally {
-          setBusy(false)
-        }
-      }}
+      disabled={disabled || exporter.busy}
+      onClick={() => void exporter.run()}
     >
-      {busy ? <Spinner /> : <DownloadIcon />}
+      {exporter.busy ? <Spinner /> : <DownloadIcon />}
       {t("exportButton")}
     </Button>
   )

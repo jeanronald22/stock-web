@@ -1,6 +1,5 @@
 "use client"
 
-import { ClipboardListIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
@@ -25,7 +24,6 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet"
 import { Spinner } from "@/components/ui/spinner"
 import { useStockAccess } from "@/components/workspace/stock-access"
@@ -42,7 +40,13 @@ type Scope = (typeof Scope)[keyof typeof Scope]
  * Ouvrir un inventaire (D32) : un dépôt, et tout le dépôt ou une catégorie (inventaire tournant).
  * Réservé au droit de correction ; la feuille s'ouvre aussitôt.
  */
-export function StartInventorySheet() {
+export function StartInventorySheet({
+  open,
+  onOpenChange,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
   const t = useTranslations("inventory.start")
   const router = useRouter()
   const errorMessage = useErrorMessage()
@@ -54,7 +58,6 @@ export function StartInventorySheet() {
   const start = useStartInventory()
   // Inventaire tournant : par catégorie ; sans catégorie, il n'a pas de sens.
   const hasCategories = useCategoryTree().nodes.length > 0
-  const [open, setOpen] = useState(false)
   const [warehouseId, setWarehouseId] = useState("")
   const [scope, setScope] = useState<Scope>(Scope.full)
   const [categoryId, setCategoryId] = useState<string | undefined>()
@@ -76,7 +79,7 @@ export function StartInventorySheet() {
       },
       {
         onSuccess: (inventory) => {
-          setOpen(false)
+          onOpenChange(false)
           setId(crypto.randomUUID())
           router.push(RecordRoutes.inventory(inventory.id))
         },
@@ -85,11 +88,7 @@ export function StartInventorySheet() {
     )
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger render={<Button variant="outline" size="lg" />}>
-        <ClipboardListIcon />
-        {t("open")}
-      </SheetTrigger>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full gap-0 sm:max-w-md">
         <SheetHeader className="border-b">
           <SheetTitle>{t("title")}</SheetTitle>

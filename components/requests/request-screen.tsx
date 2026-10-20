@@ -135,7 +135,7 @@ function RequestDetails({ request }: { request: VoucherRequest }) {
         description={t("detail.preparedOn", {
           date: date(request.requestedAt),
         })}
-        actions={
+        badges={
           <>
             <VoucherTypeBadge type={request.type} />
             <RequestStatusBadge status={request.status} />

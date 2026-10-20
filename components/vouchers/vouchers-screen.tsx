@@ -12,6 +12,7 @@ import {
   DownloadIcon,
   EllipsisVerticalIcon,
   FileTextIcon,
+  PlusIcon,
   PrinterIcon,
   type LucideIcon,
 } from "lucide-react"
@@ -20,7 +21,7 @@ import { useRouter } from "next/navigation"
 import { useFormatter, useTranslations } from "next-intl"
 import { useMemo } from "react"
 
-import { ClearFilters } from "@/components/catalog/clear-filters"
+import { FilterBar } from "@/components/catalog/filter-bar"
 import { EmptyState } from "@/components/catalog/empty-state"
 import { OutboxPanel } from "@/components/offline/outbox-panel"
 import { VouchersTabs } from "@/components/requests/vouchers-tabs"
@@ -146,24 +147,49 @@ export function NewVoucherButtons({ className }: { className?: string }) {
   const corrects = can(StockPermission.correctStock)
   return (
     <div
-      className={cn("flex flex-wrap gap-2", className)}
+      className={cn("flex w-full gap-2 sm:w-auto sm:flex-wrap", className)}
       {...tourAnchor(TourAnchors.newVoucher)}
     >
-      <Link href={Routes.newReceipt} className={buttonVariants({ size: "lg" })}>
+      {/* Téléphone : les deux opérations du quotidien tiennent sur une ligne, les autres derrière « + ». */}
+      <Link
+        href={Routes.newReceipt}
+        aria-label={t("newReceipt")}
+        className={buttonVariants({
+          size: "lg",
+          className: "flex-1 sm:flex-none",
+        })}
+      >
         <ArrowDownToLineIcon />
-        {t("newReceipt")}
+        <span className="sm:hidden">{t("types.RECEIPT")}</span>
+        <span className="hidden sm:inline">{t("newReceipt")}</span>
       </Link>
       <Link
         href={Routes.newIssue}
-        className={buttonVariants({ size: "lg", variant: "outline" })}
+        aria-label={t("newIssue")}
+        className={buttonVariants({
+          size: "lg",
+          variant: "outline",
+          className: "flex-1 sm:flex-none",
+        })}
       >
         <ArrowUpFromLineIcon />
-        {t("newIssue")}
+        <span className="sm:hidden">{t("types.ISSUE")}</span>
+        <span className="hidden sm:inline">{t("newIssue")}</span>
       </Link>
       <DropdownMenu>
-        <DropdownMenuTrigger render={<Button size="lg" variant="outline" />}>
-          {t("otherOperation")}
-          <ChevronDownIcon />
+        <DropdownMenuTrigger
+          render={
+            <Button
+              size="lg"
+              variant="outline"
+              aria-label={t("otherOperation")}
+              className="px-3 sm:px-4"
+            />
+          }
+        >
+          <PlusIcon className="sm:hidden" />
+          <span className="hidden sm:inline">{t("otherOperation")}</span>
+          <ChevronDownIcon className="hidden sm:block" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-64">
           <DropdownMenuItem onClick={() => router.push(Routes.newTransfer)}>
@@ -287,7 +313,7 @@ export function VouchersScreen() {
         />
       ) : (
         <>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <FilterBar activeCount={list.filterCount} onClear={list.reset}>
             <Select
               items={typeOptions}
               value={voucherKind ?? ALL_TYPES}
@@ -323,8 +349,7 @@ export function VouchersScreen() {
               onPeriodChange={list.setPeriod}
               onOrderChange={list.setOrder}
             />
-            <ClearFilters visible={list.filtered} onClear={list.reset} />
-          </div>
+          </FilterBar>
           <div className="mt-6 overflow-hidden rounded-2xl border">
             {vouchers.isPending ? (
               <ItemsTableSkeleton rows={SKELETON_ROWS} />

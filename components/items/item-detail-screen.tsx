@@ -165,13 +165,13 @@ function ItemDetails({
           { label: item.name },
         ]}
         description={category?.path}
+        badges={
+          archived && (
+            <Badge variant="secondary">{t("items.restore.badge")}</Badge>
+          )
+        }
         actions={
-          <>
-            {archived && (
-              <Badge variant="secondary">{t("items.restore.badge")}</Badge>
-            )}
-            <ItemActions item={item} manages={manages} archived={archived} />
-          </>
+          <ItemActions item={item} manages={manages} archived={archived} />
         }
       />
 

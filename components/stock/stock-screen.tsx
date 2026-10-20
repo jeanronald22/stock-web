@@ -1,13 +1,13 @@
 "use client"
 
-import { ChartColumnIcon, SearchIcon } from "lucide-react"
+import { SearchIcon } from "lucide-react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { useEffect, useMemo, useState } from "react"
 
 import { useCategoryTree } from "@/components/categories/use-category-tree"
 import { CategoryFilter } from "@/components/catalog/category-filter"
-import { ClearFilters } from "@/components/catalog/clear-filters"
+import { FilterBar } from "@/components/catalog/filter-bar"
 import { ViewToggle } from "@/components/catalog/view-toggle"
 import { EmptyState } from "@/components/catalog/empty-state"
 import { StockAlertFilter } from "@/components/catalog/stock-alert-filter"
@@ -21,7 +21,7 @@ import { useBatchLabel, useQuantityLabel } from "@/components/items/describe"
 import { ItemsTableSkeleton } from "@/components/items/items-table"
 import { usePageTour } from "@/components/tour/tour-provider"
 import { Badge } from "@/components/ui/badge"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import {
   InputGroup,
   InputGroupAddon,
@@ -38,10 +38,10 @@ import {
 } from "@/components/ui/table"
 import { NewVoucherButtons } from "@/components/vouchers/vouchers-screen"
 
-import { StockExportButton } from "./stock-export-button"
 import { StockGrid } from "./stock-grid"
+import { StockMoreMenu } from "./stock-more-menu"
 import { StockStateBadge } from "./stock-state-badge"
-import { InventoryBar } from "@/components/inventory/inventory-bar"
+import { OpenInventories } from "@/components/inventory/open-inventories"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import { StockState } from "@/lib/api/stock"
 import { useStockPage } from "@/lib/api/voucher-queries"
@@ -51,7 +51,7 @@ import {
   STOCK_ALERT_STATES,
   useListParams,
 } from "@/lib/list/use-list-params"
-import { RecordRoutes, Routes } from "@/lib/routes"
+import { RecordRoutes } from "@/lib/routes"
 import { tourAnchor, TourAnchors } from "@/lib/tour/tours"
 import { cn } from "@/lib/utils"
 
@@ -98,22 +98,14 @@ export function StockScreen() {
       <PageHeader
         title={t("title")}
         description={t("description")}
-        actions={<NewVoucherButtons />}
-      />
-      <InventoryBar
-        extra={
-          <>
-            <Link
-              href={Routes.reports}
-              className={buttonVariants({ variant: "ghost", size: "lg" })}
-            >
-              <ChartColumnIcon />
-              {t("reports")}
-            </Link>
-            {!empty && <StockExportButton search={search} />}
-          </>
+        actions={
+          <div className="flex w-full gap-2 sm:w-auto">
+            <NewVoucherButtons />
+            <StockMoreMenu search={search} canExport={!empty} />
+          </div>
         }
       />
+      <OpenInventories />
       {empty ? (
         <EmptyState
           illustration={<ShelfScene />}
@@ -122,10 +114,15 @@ export function StockScreen() {
         />
       ) : (
         <>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            {/* Téléphone : la recherche et l'affichage partagent une ligne ; ailleurs, l'affichage ferme la barre. */}
-            <div className="flex gap-2 sm:contents">
-              <InputGroup className="flex-1 sm:max-w-md sm:min-w-64">
+          <FilterBar
+            {...tourAnchor(TourAnchors.stockFilters)}
+            activeCount={list.filterCount}
+            onClear={() => {
+              setTyped("")
+              list.reset()
+            }}
+            search={
+              <InputGroup>
                 <InputGroupInput
                   type="search"
                   value={typed}
@@ -137,26 +134,19 @@ export function StockScreen() {
                   {stock.isFetching ? <Spinner /> : <SearchIcon />}
                 </InputGroupAddon>
               </InputGroup>
-              <ViewToggle value={view} onChange={list.setView} />
-            </div>
+            }
+            trailing={<ViewToggle value={view} onChange={list.setView} />}
+          >
             <WarehouseFilter
               value={warehouseIds}
               onChange={list.setWarehouses}
-              {...tourAnchor(TourAnchors.stockWarehouseFilter)}
             />
             <CategoryFilter value={categoryId} onChange={list.setCategory} />
             <StockAlertFilter
               value={stockAlert}
               onChange={list.setStockAlert}
             />
-            <ClearFilters
-              visible={list.filtered}
-              onClear={() => {
-                setTyped("")
-                list.reset()
-              }}
-            />
-          </div>
+          </FilterBar>
           <div
             className={cn(
               "mt-6",
