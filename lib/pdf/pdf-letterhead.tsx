@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     textAlign: "right",
     marginTop: 4,
   },
-  rule: { height: 1.25, backgroundColor: PdfColors.ink, marginTop: 16 },
+  rule: { height: 0.75, backgroundColor: PdfColors.rule, marginTop: 16 },
   footer: {
     position: "absolute",
     left: PdfMetrics.margin,
@@ -59,9 +59,6 @@ const styles = StyleSheet.create({
     bottom: PdfMetrics.margin / 2,
     flexDirection: "row",
     alignItems: "center",
-    borderTopWidth: 0.5,
-    borderTopColor: PdfColors.rule,
-    paddingTop: 8,
     fontSize: PdfMetrics.caption,
     color: PdfColors.muted,
   },
@@ -80,7 +77,7 @@ function logoSize(logo: PdfPicture) {
 
 /**
  * En-tête d'un document A4 : l'entreprise à gauche, logo d'abord ; à droite, la nature du document
- * et son numéro. Un trait le sépare du contenu.
+ * et son numéro. Un filet clair le sépare du contenu : le seul trait du document hors tableaux.
  */
 export function Letterhead({
   letterhead,
