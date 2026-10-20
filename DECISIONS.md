@@ -1,7 +1,7 @@
 # Journal des décisions
 
 Projet : SaaS de gestion de stock pour PME (premier produit d'une famille de logiciels).
-Dernière mise à jour : 2026-10-14
+Dernière mise à jour : 2026-10-20
 
 ---
 
@@ -35,7 +35,7 @@ Dernière mise à jour : 2026-10-14
 - **Identité** : Keycloak 26 (voir D8). Un seul realm `kreskala` pour toute la famille, versionné dans `stock-api/docker/keycloak`. Les jetons destinés à l'API portent l'audience `stock-api`.
 - **Frontend** (dépôt `stock-web`) : **Next.js 16** (React 19), shadcn/ui (preset `b2D0xPGXT`, style base-luma), Tailwind 4. Application installable (PWA), **hors ligne d'abord**, avec synchronisation (identifiants créés côté client, envoi sans doublon).
 - **Threads virtuels** (2026-10-13) : activés dans l'API (Java 25). Le pool de connexions PostgreSQL borne la charge ; un pool saturé répond 503 réessayable plutôt que de faire patienter les requêtes.
-- **Nom de package provisoire** : `com.monsaas`, à renommer quand la marque sera choisie.
+- **Nom de package** (2026-10-20) : `com.kreskala` (groupId Maven compris), la marque Kreskala étant retenue. Remplace le nom provisoire `com.monsaas`.
 
 ## D5. Module d'IA dans le MVP
 - **MVP** : saisie de mouvements en langage naturel ou vocal → mouvement pré-rempli → **validation humaine obligatoire**.
