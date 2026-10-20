@@ -3,12 +3,14 @@
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 
+import { FormSection } from "@/components/catalog/form-section"
 import {
   Field,
   FieldContent,
   FieldDescription,
   FieldLabel,
 } from "@/components/ui/field"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import {
   useSaveStockSettings,
@@ -18,24 +20,24 @@ import { useErrorMessage } from "@/lib/api/use-error-message"
 
 /**
  * Règles de travail de l'équipe (D33), réglées par le propriétaire et les administrateurs : elles
- * disent qui peut faire quoi, à côté des rôles.
+ * disent qui peut faire quoi, à côté des rôles. Chaque règle s'enregistre aussitôt.
  */
 export function StockRules() {
-  const t = useTranslations("team.rules")
+  const t = useTranslations("settings.rules")
   const errorMessage = useErrorMessage()
   const settings = useStockSettings()
   const save = useSaveStockSettings()
-  if (!settings.data) return null
+  if (!settings.data) return <Skeleton className="h-32 w-full rounded-2xl" />
 
   return (
-    <section className="mt-10" aria-labelledby="stock-rules-title">
-      <h2 id="stock-rules-title" className="mb-3 text-lg font-semibold">
-        {t("title")}
-      </h2>
-      <Field orientation="horizontal" className="rounded-2xl border p-5">
+    <FormSection
+      title={t("issueApprovalTitle")}
+      description={t("issueApprovalHint")}
+    >
+      <Field orientation="horizontal">
         <FieldContent>
           <FieldLabel htmlFor="issue-approval">{t("issueApproval")}</FieldLabel>
-          <FieldDescription>{t("issueApprovalHint")}</FieldDescription>
+          <FieldDescription>{t("issueApprovalWho")}</FieldDescription>
         </FieldContent>
         <Switch
           id="issue-approval"
@@ -53,6 +55,6 @@ export function StockRules() {
           }
         />
       </Field>
-    </section>
+    </FormSection>
   )
 }

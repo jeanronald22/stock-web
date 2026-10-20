@@ -17,10 +17,15 @@ const StandardHeaders = {
 
 const PROBLEM_JSON = "application/problem+json"
 const JSON_TYPE = "application/json"
+const ANY_TYPE = "*/*"
 const BEARER = "Bearer"
 const NO_CONTENT = 204
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
+
+/** Ce que la réponse porte : du JSON, ou un fichier (pièce du KYB) lu tel quel. */
+export const ResponseKind = { json: "json", file: "file" } as const
+export type ResponseKind = (typeof ResponseKind)[keyof typeof ResponseKind]
 
 export type ApiRequest = {
   method: HttpMethod
@@ -34,6 +39,8 @@ export type ApiRequest = {
    * doit pas empêcher la personne de retrouver son compte.
    */
   organizationScoped?: boolean
+  /** JSON par défaut ; un fichier est rendu en Blob. */
+  responseKind?: ResponseKind
 }
 
 export type ApiClientDependencies = {
@@ -50,8 +57,12 @@ export type ApiClient = <T>(request: ApiRequest) => Promise<T>
 
 export function createApiClient(deps: ApiClientDependencies): ApiClient {
   return async function send<T>(request: ApiRequest): Promise<T> {
+    const file = request.responseKind === ResponseKind.file
     const headers = new Headers({
-      [StandardHeaders.accept]: `${JSON_TYPE}, ${PROBLEM_JSON}`,
+      // Un fichier a son propre type (photo, PDF) : l'API refuserait de le servir comme JSON.
+      [StandardHeaders.accept]: file
+        ? ANY_TYPE
+        : `${JSON_TYPE}, ${PROBLEM_JSON}`,
       [StandardHeaders.acceptLanguage]: deps.getLocale(),
     })
     const token = deps.getAccessToken()
@@ -86,9 +97,8 @@ export function createApiClient(deps: ApiClientDependencies): ApiClient {
     deps.onNetworkResponse?.()
 
     if (response.ok) {
-      return (
-        response.status === NO_CONTENT ? undefined : await response.json()
-      ) as T
+      if (response.status === NO_CONTENT) return undefined as T
+      return (file ? await response.blob() : await response.json()) as T
     }
     throw await toApiError(response)
   }

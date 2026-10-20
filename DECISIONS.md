@@ -288,7 +288,7 @@ Ajout au modèle D10, qui n'en prévoyait pas. Répond à « alerte avant ruptur
 | Invitation reçue | une personne déjà inscrite est invitée | elle (l'e-mail d'invitation part déjà) | oui | non |
 | Accès Stock modifié | rôle ou dépôts changés | la personne concernée | oui | oui |
 
-- **Préférences** : l'e-mail se désactive type par type (« Mon compte › Notifications ») ; l'avis dans l'application reste toujours.
+- **Préférences** : l'e-mail se désactive type par type (« Paramètres › Notifications », D45) ; l'avis dans l'application reste toujours.
 - **Lecture** : cloche dans l'en-tête avec le nombre de non lues, liste des dernières, « tout marquer comme lu » ; seules les notifications de l'entreprise active, et celles qui ne dépendent d'aucune entreprise (invitation reçue). Relues toutes les minutes.
 - **Envoi** : après l'enregistrement de l'opération, hors de la requête : un e-mail lent ou refusé ne retarde ni n'annule un bon. Conservation : 90 jours.
 
@@ -496,8 +496,24 @@ Questionnaire : « alerte avant rupture » (Q44), fins de série (Q21), casse et
 
 - **Écarts au modèle D10** : `item_warehouse.max_quantity` (stock maximum) et `batch_attributes.expires_on` (date limite du lot) n'y figuraient pas. La date limite se saisit à la première réception du lot, comme la nuance et le calibre (D35).
 - **Veille** : une tâche de fond passe chaque heure sur chaque entreprise active. Une alerte reste enregistrée (`stock.alert_state`) tant que sa condition dure. On n'est prévenu qu'à son apparition, et de nouveau seulement si elle disparaît puis revient. Couper une règle oublie ses alertes. Plusieurs instances de l'API peuvent tourner : seule celle qui enregistre l'alerte prévient.
-- **Qui est prévenu** : le propriétaire et les gérants, dans l'application et par e-mail. Un avis par règle et par passage liste les articles, lots ou fournisseurs concernés. L'e-mail se coupe type par type dans « Mon compte › Notifications » (D26).
-- **Où se règle** : « Régler les alertes » sur le tableau de bord, à côté de ce qui attend un geste (pas d'entrée de menu). Le maximum se saisit à côté du seuil, sur la fiche article.
+- **Qui est prévenu** : le propriétaire et les gérants, dans l'application et par e-mail. Un avis par règle et par passage liste les articles, lots ou fournisseurs concernés. L'e-mail se coupe type par type dans « Paramètres › Notifications » (D26, D45).
+- **Où se règle** : l'onglet « Alertes » de « Paramètres » (D45). Un premier bouton sur le tableau de bord a été jugé incohérent : le tableau montre les alertes, il ne les règle pas. Le maximum se saisit à côté du seuil, sur la fiche article.
+
+## D45. Paramètres de l'entreprise et KYB déclaratif (2026-10-20)
+
+Prolonge D6 (KYB), D26 (notifications), D33 (règles de travail) et D44 (alertes). Un réglage posé sur l'écran qui en montre l'effet s'est révélé incohérent : les réglages ont leur entrée de menu.
+
+- **« Paramètres »** (`/parametres`), dans le compartiment Administration, ouvert à tous. Ses onglets suivent les mêmes droits que l'API, et un onglet hors des droits n'est ni proposé ni affiché :
+  - **Entreprise** : la fiche et le KYB, au propriétaire et aux administrateurs (le module Plateforme ne connaît pas les rôles Stock) ;
+  - **Alertes** (D44) : au propriétaire, aux administrateurs et aux gérants ;
+  - **Règles de travail** (D33), sorties de l'écran « Équipe » : au propriétaire et aux administrateurs ;
+  - **Notifications** (D26), anciennement `/notifications` : à chacun, pour soi.
+- **La fiche** : nom, secteur, ville, nom du responsable, téléphone (normalisé au format international, l'indicatif du pays est ajouté s'il manque), adresse, et les identifiants du pays. Les types d'identifiants viennent du référentiel des pays (`platform.country.business_id_types` : RCCM et NIU au Cameroun) et sont rangés dans `platform.organization_business_id`, pas en colonnes. La fiche porte une version : une modification faite ailleurs entre-temps est refusée.
+- **Les pièces**, une par sorte : pièce d'identité du gérant, photo du local, et un justificatif par identifiant. Photo (JPEG, PNG, WebP) ou PDF, reconnus à leur contenu, 5 Mo au plus. Déposée, une pièce remplace la précédente, qui est effacée du stockage.
+- **Niveaux, calculés par l'API** : 0 à l'inscription ; 1 (« Déclarée ») avec le nom du responsable, la pièce du gérant, et l'adresse ou la photo du local ; 2 (« Vérifiée ») quand Kreskala approuve. La demande de vérification s'envoie quand chaque identifiant et son justificatif sont là ; elle passe « En attente de vérification ». Changer un identifiant ou un justificatif remet la vérification à zéro : la décision portait sur ce qui avait été déposé.
+- **Sécurité des pièces** (D6) : chiffrées par l'API (AES-GCM, clé `KYB_ENCRYPTION_KEY`) avant le stockage, qui ne voit que des octets ; jamais de lien signé : elles ne se lisent que par l'API, sans cache, et chaque dépôt, lecture ou retrait est inscrit dans `platform.kyb_document_access`, qui survit à la pièce.
+- **Pas encore de back-office** : la demande se repère dans les journaux et en base ; l'approbation (statut `APPROVED`, niveau 2) et le refus viendront avec lui.
+- **Écart au modèle D10** : la fiche (`responsible_name`, `kyb_requested_at`, `version`), les identifiants et les pièces n'y figuraient pas.
 
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).

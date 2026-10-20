@@ -57,35 +57,31 @@ test("alertes du gérant : réglage, stock maximum, date limite, avis et e-mail"
     lines: [{ itemId: paint, quantity: 30 }],
   })
 
-  // Le gérant règle ses alertes depuis le tableau de bord : le stock qui dort à 60 jours, sans casse.
-  await navigateTo(page, "Tableau de bord")
-  await page.getByRole("button", { name: "Régler les alertes" }).click()
-  const sheet = page.getByRole("dialog", { name: "Alertes du gérant" })
+  // Le gérant règle ses alertes dans « Paramètres » (D45) : le stock qui dort à 60 jours, sans casse.
+  await navigateTo(page, "Paramètres")
+  await page.getByRole("link", { name: "Alertes" }).click()
   await expect(
-    sheet.getByRole("textbox", { name: "Rupture prévue" })
+    page.getByRole("textbox", { name: "Stock pour moins de" })
   ).toHaveValue("15")
-  await sheet.getByRole("textbox", { name: "Stock qui dort" }).fill("60")
-  await sheet.getByRole("switch", { name: "Casse anormale" }).click()
+  await page.getByRole("textbox", { name: "Sans sortie depuis" }).fill("60")
+  await page.getByRole("switch", { name: "Casse anormale" }).click()
   await expect(
-    sheet.getByRole("textbox", { name: "Casse anormale" })
+    page.getByRole("textbox", { name: "Casse au-delà de" })
   ).toBeHidden()
-  await sheet.getByRole("textbox", { name: "Lots qui périment" }).fill("0")
-  await sheet.getByRole("button", { name: "Enregistrer" }).click()
-  await expect(
-    sheet.getByText("Un nombre entier entre 1 et 365.")
-  ).toBeVisible()
-  await sheet.getByRole("textbox", { name: "Lots qui périment" }).fill("45")
+  await page.getByRole("textbox", { name: "Date limite dans" }).fill("0")
+  await page.getByRole("button", { name: "Enregistrer les alertes" }).click()
+  await expect(page.getByText("Un nombre entier entre 1 et 365.")).toBeVisible()
+  await page.getByRole("textbox", { name: "Date limite dans" }).fill("45")
   await shot(page, testInfo, "01-reglage-alertes")
-  await sheet.getByRole("button", { name: "Enregistrer" }).click()
+  await page.getByRole("button", { name: "Enregistrer les alertes" }).click()
   await expect(page.getByText(/^Alertes enregistrées/)).toBeVisible()
-  await page.getByRole("button", { name: "Régler les alertes" }).click()
+  await page.reload()
   await expect(
-    sheet.getByRole("textbox", { name: "Stock qui dort" })
+    page.getByRole("textbox", { name: "Sans sortie depuis" })
   ).toHaveValue("60")
   await expect(
-    sheet.getByRole("switch", { name: "Casse anormale" })
+    page.getByRole("switch", { name: "Casse anormale" })
   ).not.toBeChecked()
-  await page.keyboard.press("Escape")
 
   // Stock maximum sur la fiche : au-dessus du seuil, sinon refusé ; 30 en stock pour 20 : surstock.
   await navigateTo(page, "Articles")

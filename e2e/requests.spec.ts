@@ -41,8 +41,9 @@ test("sortie à valider : préparée par le magasinier, refusée avec motif, ref
     lines: [{ itemId: tile, quantity: 100 }],
   })
 
-  // La règle se règle dans « Équipe ».
-  await navigateTo(page, "Équipe")
+  // La règle se règle dans « Paramètres › Règles de travail » (D45).
+  await navigateTo(page, "Paramètres")
+  await page.getByRole("link", { name: "Règles de travail" }).click()
   await page
     .getByRole("switch", {
       name: "Les sorties des magasiniers passent par une validation",
