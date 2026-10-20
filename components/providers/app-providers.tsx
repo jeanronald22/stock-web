@@ -21,6 +21,7 @@ import {
   PERSISTED_CACHE_VERSION,
   PERSISTED_MAX_AGE_MS,
 } from "@/lib/offline/query-persister"
+import { recordAccountActionStatus } from "@/lib/auth/account-action"
 import {
   clearSigninParams,
   userManagerSettings,
@@ -78,7 +79,10 @@ function OidcProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider
       userManager={userManager}
-      onSigninCallback={clearSigninParams}
+      onSigninCallback={() => {
+        recordAccountActionStatus()
+        clearSigninParams()
+      }}
     >
       <TokenRenewalContext value={renew}>{children}</TokenRenewalContext>
     </AuthProvider>

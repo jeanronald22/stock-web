@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl"
 import { useEffect } from "react"
 
 import { useMe } from "@/lib/api/platform-queries"
+import { accountActionReturn } from "@/lib/auth/account-action"
 import { ApiError, ProblemCode } from "@/lib/api/problem"
 import { readPendingInvitation } from "@/lib/onboarding/pending-invitation"
 import { resolveHome } from "@/lib/onboarding/resolve-home"
@@ -29,6 +30,12 @@ export function HomeRedirect() {
     const invitation = readPendingInvitation()
     if (invitation) {
       router.replace(RecordRoutes.invitation(invitation))
+      return
+    }
+    // Retour d'une action de compte (mot de passe) : à l'écran d'où elle est partie.
+    const accountReturn = accountActionReturn()
+    if (accountReturn) {
+      router.replace(accountReturn)
       return
     }
     const decision = resolveHome(me.data, activeOrganizationId)

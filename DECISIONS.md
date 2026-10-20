@@ -517,6 +517,18 @@ Prolonge D6 (KYB), D26 (notifications), D33 (règles de travail) et D44 (alertes
 - **Pas encore de back-office** : la demande se repère dans les journaux et en base ; l'approbation (statut `APPROVED`, niveau 2) et le refus viendront avec lui.
 - **Écart au modèle D10** : la fiche (`responsible_name`, `kyb_requested_at`, `version`, `logo_key`), les identifiants et les pièces n'y figuraient pas.
 
+## D46. « Mon profil » de la personne connectée (2026-10-20)
+
+Prolonge D17 (comptes Keycloak) et D45 (paramètres). Les réglages de l'entreprise sont dans « Paramètres » ; ceux de la personne, valables dans toutes ses entreprises, ont leur page.
+
+- **« Mon profil »** (`/profil`), ouvert depuis le menu du compte (en bas de la barre latérale), à chacun et quel que soit son rôle.
+- **Photo de profil** : enregistrée dès le dépôt, une image (JPEG, PNG, WebP, 5 Mo au plus) reconnue à son contenu. Elle remplace les initiales dans le menu du compte et dans l'écran « Équipe ». Elle se montre aux membres par lien signé, comme le logo (`platform.user_account.photo_key`). Remplacée ou retirée, l'ancienne est effacée du stockage.
+- **Prénom et nom** : modifiables, ils signent les bons et les inventaires.
+- **L'adresse e-mail** ne se modifie pas : c'est l'identifiant de connexion, et la changer demande une vérification que Keycloak gère seul. Elle se lit sur la page.
+- **Langue** : enregistrée par l'API (`PUT /v1/me/locale`, français ou anglais), parce que les e-mails et les avis partent dans la langue de la personne ; le cookie change aussi la langue de l'écran tout de suite. Le menu du compte fait de même.
+- **Mot de passe** : jamais envoyé à l'API Kreskala. Le bouton lance l'action Keycloak `UPDATE_PASSWORD` (« application-initiated action ») sur les pages de connexion de Kreskala. Keycloak demande d'abord le mot de passe actuel, l'adresse étant pré-remplie (`login_hint`) : avec le jeton hors ligne (`offline_access`), il ne garde pas de session de connexion, et c'est aussi la preuve que la personne connaît l'actuel. Le retour sur « Mon profil » et le résultat (`kc_action_status`) passent par la session du navigateur.
+- **Écart au modèle D10** : `photo_key` n'y figurait pas.
+
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
 - [ ] Nom de la marque et nom du produit de stock (voir D7). Pistes : Kreskala, Kreskio, Tissero, NarvalWorks, FourmiLabs.

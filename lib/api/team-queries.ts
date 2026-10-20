@@ -12,7 +12,10 @@ import type { StockGrantInput } from "./stock"
 
 /** Équipe de l'entreprise active, et rôles Stock rattachés : relus ensemble après chaque changement. */
 export const teamKeys = {
-  all: (organizationId: string | null) => ["team", organizationId] as const,
+  /** Les équipes de toutes les entreprises : un changement de profil s'y voit partout. */
+  root: ["team"] as const,
+  all: (organizationId: string | null) =>
+    [...teamKeys.root, organizationId] as const,
   team: (organizationId: string | null) =>
     [...teamKeys.all(organizationId), "members"] as const,
   grants: (organizationId: string | null) =>

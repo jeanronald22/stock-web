@@ -36,7 +36,10 @@ export function FormSection({
 /** Actions du formulaire, toujours visibles en bas de l'écran. */
 export function FormActions({ children }: { children: React.ReactNode }) {
   return (
-    <div className="sticky bottom-0 z-10 -mx-4 mt-4 flex items-center justify-end gap-2 border-t bg-background/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-10 lg:px-10">
+    <div
+      data-slot="form-actions"
+      className="sticky bottom-0 z-10 -mx-4 mt-4 flex items-center justify-end gap-2 border-t bg-background/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-10 lg:px-10"
+    >
       {children}
     </div>
   )

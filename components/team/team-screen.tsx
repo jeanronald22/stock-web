@@ -19,6 +19,7 @@ import { EmptyState } from "@/components/catalog/empty-state"
 import { InvitationScene } from "@/components/illustrations/invitation-scene"
 import { TeamScene } from "@/components/illustrations/team-scene"
 import { ItemsTableSkeleton } from "@/components/items/items-table"
+import { PersonAvatar } from "@/components/profile/person-avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import {
@@ -284,12 +285,12 @@ function MemberRow({
     <TableRow className="relative cursor-pointer">
       <TableCell className="py-3 pl-4 whitespace-normal">
         <div className="flex items-center gap-3">
-          <span
-            className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary"
-            aria-hidden
-          >
-            {name.slice(0, 1).toUpperCase()}
-          </span>
+          <PersonAvatar
+            name={name}
+            photoUrl={member.photoUrl}
+            className="size-10"
+            fallbackClassName="text-sm"
+          />
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <Link

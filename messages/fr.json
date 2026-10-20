@@ -40,7 +40,8 @@
     "settings": "Paramètres",
     "settingsCompany": "Paramètres · Entreprise",
     "settingsAlerts": "Paramètres · Alertes",
-    "settingsRules": "Paramètres · Règles de travail"
+    "settingsRules": "Paramètres · Règles de travail",
+    "profile": "Mon profil"
   },
   "common": {
     "retry": "Réessayer",
@@ -277,7 +278,8 @@
   "menu": {
     "open": "Ouvrir le menu du compte",
     "switchOrganization": "Changer d’entreprise",
-    "currentOrganization": "Entreprise active"
+    "currentOrganization": "Entreprise active",
+    "profile": "Mon profil"
   },
   "nav": {
     "home": "Tableau de bord",
@@ -2689,6 +2691,40 @@
         "unsupported": "Choisissez une image JPEG, PNG ou WebP.",
         "tooLarge": "Cette image dépasse 5 Mo : choisissez-en une plus légère."
       }
+    }
+  },
+  "profile": {
+    "title": "Mon profil",
+    "description": "Votre photo, votre nom, votre langue et votre mot de passe, dans toutes vos entreprises.",
+    "photo": {
+      "title": "Photo de profil",
+      "description": "Elle s’affiche à côté de votre nom pour les membres de vos entreprises.",
+      "upload": "Ajouter une photo",
+      "replace": "Remplacer",
+      "remove": "Retirer",
+      "uploaded": "Photo enregistrée.",
+      "removed": "Photo retirée.",
+      "unsupported": "Déposez une photo JPEG, PNG ou WebP.",
+      "tooLarge": "La photo dépasse 5 Mo."
+    },
+    "identity": {
+      "title": "Identité",
+      "description": "Votre nom signe les bons que vous validez et les inventaires que vous comptez.",
+      "email": "Adresse e-mail",
+      "emailHint": "C’est votre identifiant de connexion : elle ne se modifie pas ici.",
+      "save": "Enregistrer",
+      "saved": "Nom enregistré."
+    },
+    "language": {
+      "title": "Langue",
+      "description": "Celle de l’application, des e-mails et des notifications que vous recevez."
+    },
+    "password": {
+      "title": "Mot de passe",
+      "description": "Kreskala vous demande d’abord votre mot de passe actuel, puis le nouveau, et vous ramène ici.",
+      "change": "Changer le mot de passe",
+      "changed": "Mot de passe changé.",
+      "failed": "Le mot de passe n’a pas pu être changé. Réessayez."
     }
   }
 }

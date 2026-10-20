@@ -42,7 +42,7 @@ export const privacyPolicyFr: PrivacyPolicyContent = {
         {
           kind: "list",
           items: [
-            "Votre compte : adresse e-mail, mot de passe, prénom, nom et langue préférée. Votre mot de passe n’est jamais conservé en clair : nous n’en gardons qu’une empreinte irréversible.",
+            "Votre compte : adresse e-mail, mot de passe, prénom, nom, langue préférée et, si vous en déposez une, votre photo de profil. Votre mot de passe n’est jamais conservé en clair : nous n’en gardons qu’une empreinte irréversible.",
             "Votre entreprise : nom, ville, pays, activité, votre rôle dans l’équipe (propriétaire, administrateur ou membre) et votre rôle dans Stock (gérant, manager, contrôleur ou magasinier), avec les dépôts qui vous sont attribués.",
             "La fiche et la vérification de votre entreprise, renseignées par son propriétaire ou ses administrateurs : nom du responsable, téléphone, adresse du local, identifiants officiels (RCCM et NIU au Cameroun), et les pièces déposées : pièce d’identité du gérant, photo du local, justificatifs des identifiants. Kreskala est responsable de ce traitement.",
             "Les invitations : l’adresse e-mail de la personne invitée, le nom de la personne qui invite et l’état de l’invitation. Le lien d’invitation n’est jamais conservé : nous n’en gardons qu’une empreinte irréversible.",
@@ -116,9 +116,10 @@ export const privacyPolicyFr: PrivacyPolicyContent = {
           kind: "list",
           items: [
             "Les membres de votre entreprise voient les données de cette entreprise, selon leur rôle. Ils ne voient jamais celles d’une autre entreprise.",
+            "Votre photo de profil est visible des membres des entreprises dont vous faites partie, à côté de votre nom.",
             "Les équipes de Kreskala n’y accèdent que lorsque c’est nécessaire : assistance que vous avez demandée, correction d’une erreur, sécurité.",
             "Les pièces de vérification ne sont visibles que du propriétaire et des administrateurs de l’entreprise, et des équipes de Kreskala chargées de la vérification. Elles ne s’ouvrent jamais par un lien : chaque consultation passe par Kreskala, qui enregistre qui a ouvert quelle pièce, et quand.",
-            "Nos prestataires techniques n’agissent que sur nos instructions et sont tenus à la confidentialité. Les photos d’articles et de casse sont conservées chez Cloudflare (service R2), dans un espace privé : elles ne s’affichent que par des liens temporaires, donnés aux seuls membres de votre entreprise. Les pièces de vérification y sont conservées chiffrées : Cloudflare n’en voit que des octets illisibles. La liste complète (hébergement, envoi des e-mails) sera publiée ici avant l’ouverture du service.",
+            "Nos prestataires techniques n’agissent que sur nos instructions et sont tenus à la confidentialité. Les photos d’articles et de casse, et les photos de profil, sont conservées chez Cloudflare (service R2), dans un espace privé : elles ne s’affichent que par des liens temporaires, donnés aux seuls membres de votre entreprise. Les pièces de vérification y sont conservées chiffrées : Cloudflare n’en voit que des octets illisibles. La liste complète (hébergement, envoi des e-mails) sera publiée ici avant l’ouverture du service.",
           ],
         },
         {
@@ -150,6 +151,7 @@ export const privacyPolicyFr: PrivacyPolicyContent = {
             "Les liens envoyés par e-mail : trente minutes.",
             "Les notifications : quatre-vingt-dix jours, puis elles sont supprimées.",
             "Les invitations : le lien est valable sept jours. L’invitation reste ensuite dans l’historique de l’équipe tant que le compte de l’entreprise est ouvert.",
+            "Votre photo de profil : tant que vous la gardez. Remplacée ou retirée, l’ancienne photo est effacée aussitôt.",
             "Les photos d’articles : tant que l’article a cette photo. Remplacée ou retirée, l’ancienne photo est effacée aussitôt.",
             "Les pièces de vérification : tant que l’entreprise les garde. Remplacée ou retirée, l’ancienne pièce est effacée aussitôt. Le registre des consultations, qui ne contient aucune image, est gardé tant que le compte de l’entreprise est ouvert.",
             "Les photos de casse : aussi longtemps que le bon qu’elles prouvent, c’est-à-dire tant que le compte de l’entreprise est ouvert. Elles ne peuvent pas être retirées une à une.",

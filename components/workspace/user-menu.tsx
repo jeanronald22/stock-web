@@ -1,11 +1,17 @@
 "use client"
 
-import { BellIcon, ChevronsUpDownIcon, LanguagesIcon } from "lucide-react"
+import {
+  BellIcon,
+  ChevronsUpDownIcon,
+  LanguagesIcon,
+  UserRoundIcon,
+} from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
 
 import { SignOutItem } from "@/components/offline/sign-out-item"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { PersonAvatar } from "@/components/profile/person-avatar"
+import { useSwitchLocale } from "@/components/profile/use-switch-locale"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,10 +30,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import { isAppLocale, locales } from "@/i18n/locales"
-import { initials } from "@/lib/format"
-import { rememberLocale } from "@/lib/locale-preference"
 import { Routes } from "@/lib/routes"
 
 import { useWorkspace } from "./workspace-context"
@@ -37,6 +42,13 @@ export function UserMenu() {
   const locale = useLocale()
   const router = useRouter()
   const { user } = useWorkspace()
+  const switchLocale = useSwitchLocale()
+  const { setOpenMobile } = useSidebar()
+  // Sur téléphone, le menu est dans le panneau latéral : il se ferme avec la navigation.
+  const go = (route: string) => {
+    setOpenMobile(false)
+    router.push(route)
+  }
   const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ")
   const contact = user.email ?? user.phone ?? ""
 
@@ -48,11 +60,12 @@ export function UserMenu() {
             aria-label={t("menu.open")}
             render={<SidebarMenuButton size="lg" />}
           >
-            <Avatar className="size-8 shrink-0">
-              <AvatarFallback className="bg-foreground text-xs font-semibold text-background">
-                {initials(fullName || contact)}
-              </AvatarFallback>
-            </Avatar>
+            <PersonAvatar
+              name={fullName || contact}
+              photoUrl={user.photoUrl}
+              className="size-8"
+              fallbackClassName="bg-foreground text-xs text-background"
+            />
             <span className="grid min-w-0 flex-1 text-left leading-tight">
               <span className="truncate text-sm font-semibold">{fullName}</span>
               <span className="truncate text-xs text-muted-foreground">
@@ -74,9 +87,11 @@ export function UserMenu() {
               </DropdownMenuLabel>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => router.push(Routes.notificationSettings)}
-            >
+            <DropdownMenuItem onClick={() => go(Routes.profile)}>
+              <UserRoundIcon />
+              {t("menu.profile")}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => go(Routes.notificationSettings)}>
               <BellIcon />
               {t("notifications.settingsTitle")}
             </DropdownMenuItem>
@@ -89,9 +104,8 @@ export function UserMenu() {
                 <DropdownMenuRadioGroup
                   value={locale}
                   onValueChange={(value: string) => {
-                    if (!isAppLocale(value)) return
-                    rememberLocale(value)
-                    router.refresh()
+                    if (isAppLocale(value) && value !== locale)
+                      switchLocale(value)
                   }}
                 >
                   {locales.map((option) => (

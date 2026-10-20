@@ -11,6 +11,7 @@ import { ArchiveControl } from "@/components/catalog/archive-control"
 import { EmptyState } from "@/components/catalog/empty-state"
 import { FormActions, FormSection } from "@/components/catalog/form-section"
 import { SearchScene } from "@/components/illustrations/search-scene"
+import { PersonAvatar } from "@/components/profile/person-avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { FieldError } from "@/components/ui/field"
@@ -168,6 +169,14 @@ function MemberDetails({
     <PageBody>
       <PageHeader
         title={name}
+        visual={
+          <PersonAvatar
+            name={name}
+            photoUrl={member.photoUrl}
+            className="size-14"
+            fallbackClassName="text-lg"
+          />
+        }
         breadcrumbs={[
           { label: t("team.title"), href: Routes.team },
           { label: name },

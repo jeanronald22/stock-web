@@ -40,7 +40,8 @@
     "settings": "Settings",
     "settingsCompany": "Settings · Business",
     "settingsAlerts": "Settings · Alerts",
-    "settingsRules": "Settings · Work rules"
+    "settingsRules": "Settings · Work rules",
+    "profile": "My profile"
   },
   "common": {
     "retry": "Try again",
@@ -277,7 +278,8 @@
   "menu": {
     "open": "Open account menu",
     "switchOrganization": "Switch business",
-    "currentOrganization": "Active business"
+    "currentOrganization": "Active business",
+    "profile": "My profile"
   },
   "nav": {
     "home": "Dashboard",
@@ -2689,6 +2691,40 @@
         "unsupported": "Choose a JPEG, PNG or WebP image.",
         "tooLarge": "This image is over 5 MB: choose a lighter one."
       }
+    }
+  },
+  "profile": {
+    "title": "My profile",
+    "description": "Your picture, name, language and password, across all your businesses.",
+    "photo": {
+      "title": "Profile picture",
+      "description": "It appears next to your name for the members of your businesses.",
+      "upload": "Add a picture",
+      "replace": "Replace",
+      "remove": "Remove",
+      "uploaded": "Picture saved.",
+      "removed": "Picture removed.",
+      "unsupported": "Upload a JPEG, PNG or WebP picture.",
+      "tooLarge": "The picture is larger than 5 MB."
+    },
+    "identity": {
+      "title": "Identity",
+      "description": "Your name signs the vouchers you approve and the counts you make.",
+      "email": "Email address",
+      "emailHint": "It is your sign-in identifier: it cannot be changed here.",
+      "save": "Save",
+      "saved": "Name saved."
+    },
+    "language": {
+      "title": "Language",
+      "description": "Used for the app, and for the emails and notifications you receive."
+    },
+    "password": {
+      "title": "Password",
+      "description": "Kreskala first asks for your current password, then the new one, and brings you back here.",
+      "change": "Change password",
+      "changed": "Password changed.",
+      "failed": "The password could not be changed. Please try again."
     }
   }
 }

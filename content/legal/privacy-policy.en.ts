@@ -35,7 +35,7 @@ export const privacyPolicyEn: PrivacyPolicyContent = {
         {
           kind: "list",
           items: [
-            "Your account: email address, password, first name, last name and preferred language. Your password is never stored in clear text: we only keep an irreversible fingerprint of it.",
+            "Your account: email address, password, first name, last name, preferred language and, if you upload one, your profile picture. Your password is never stored in clear text: we only keep an irreversible fingerprint of it.",
             "Your business: name, city, country, line of business, your team role (owner, administrator or member) and your Stock role (general manager, manager, controller or storekeeper), with the warehouses assigned to you.",
             "Your business’s record and verification, filled in by its owner or administrators: name of the person in charge, phone, premises address, official identifiers (RCCM and NIU in Cameroon), and the documents uploaded: the manager’s ID document, a photo of the premises, proofs of the identifiers. Kreskala is the controller for this processing.",
             "Invitations: the invited person’s email address, the name of the person who invites, and the invitation status. The invitation link is never stored: we only keep an irreversible fingerprint of it.",
@@ -109,9 +109,10 @@ export const privacyPolicyEn: PrivacyPolicyContent = {
           kind: "list",
           items: [
             "Members of your business see that business’s data, according to their role. They never see another business’s data.",
+            "Your profile picture is visible to the members of the businesses you belong to, next to your name.",
             "Kreskala’s teams only access it when needed: support you asked for, fixing an error, security.",
             "Verification documents are only visible to the business’s owner and administrators, and to the Kreskala teams in charge of verification. They never open through a link: every viewing goes through Kreskala, which records who opened which document, and when.",
-            "Our technical providers act only on our instructions and are bound by confidentiality. Item and damage photos are kept at Cloudflare (R2 service), in a private space: they are only shown through temporary links, given only to members of your business. Verification documents are kept there encrypted: Cloudflare only sees unreadable bytes. The full list (hosting, email delivery) will be published here before the service opens.",
+            "Our technical providers act only on our instructions and are bound by confidentiality. Item and damage photos, and profile pictures, are kept at Cloudflare (R2 service), in a private space: they are only shown through temporary links, given only to members of your business. Verification documents are kept there encrypted: Cloudflare only sees unreadable bytes. The full list (hosting, email delivery) will be published here before the service opens.",
           ],
         },
         {
@@ -143,6 +144,7 @@ export const privacyPolicyEn: PrivacyPolicyContent = {
             "Links sent by email: thirty minutes.",
             "Notifications: ninety days, after which they are deleted.",
             "Invitations: the link is valid for seven days. The invitation then stays in the team history as long as the business account is open.",
+            "Your profile picture: as long as you keep it. Once replaced or removed, the previous picture is erased straight away.",
             "Item photos: as long as the item has that photo. Once replaced or removed, the previous photo is erased straight away.",
             "Verification documents: as long as the business keeps them. Once replaced or removed, the previous document is erased at once. The record of viewings, which holds no image, is kept while the business account is open.",
             "Damage photos: as long as the voucher they prove, that is while the business account is open. They cannot be removed one by one.",
