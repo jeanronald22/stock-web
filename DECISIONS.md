@@ -455,6 +455,12 @@ Constat après les lots précédents : l'application ressemblait à des composan
 - **Ne se saisissent ni ne se modifient** : le formulaire les montre en lecture seule ; une référence envoyée par une ancienne version de l'application est ignorée. L'import Excel ne lit plus de colonne « Référence » (le code-barres reste importé). Le code-barres reste le moyen d'identifier un article à la caisse ou chez le fournisseur.
 - **Reprise** : les articles sans référence en reçoivent une dans l'ordre de création ; celles déjà saisies restent, leur numéro est sauté s'il a la forme ART-n.
 
+## D42. Fiche article en PDF (2026-10-20)
+
+- **Une page A4 par article**, générée dans l'application (@react-pdf/renderer, chargé au premier export), aux couleurs de Kreskala : bandeau vert de la charte avec le logo, l'entreprise et sa ville ; photo principale, nom, référence, état, stock total et conditionnements, code-barres dessiné ; identification (référence, code-barres, unité, lots, conditionnements, date d'ajout), description ; disponibilité par dépôt (stock, seuil, état, emplacement), total ; jusqu'à quatre autres photos. Pied de page : date d'édition, numéro de page, kreskala.
+- **Depuis la fiche** : « Exporter en PDF », à côté de « Modifier ». **Depuis le catalogue** : « Sélectionner », des cases sur les cartes et les lignes (toute la carte coche, elle n'ouvre plus la fiche), « Toute la page », puis un seul PDF. Le choix survit au changement de page, de filtre et de vue. Cinquante articles au plus par export (temps de génération sur un téléphone).
+- **Photos** redessinées en JPEG avant la mise en page (react-pdf ne lit pas le WebP), réduites à 1 200 px ; une photo qui ne se charge pas est laissée de côté plutôt que de faire échouer l'export. Seuls les dépôts de la personne apparaissent, comme sur la fiche.
+
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
 - [ ] Nom de la marque et nom du produit de stock (voir D7). Pistes : Kreskala, Kreskio, Tissero, NarvalWorks, FourmiLabs.

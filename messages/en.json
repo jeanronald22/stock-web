@@ -699,6 +699,37 @@
       "removed": "Photo deleted.",
       "added": "{count, plural, one {Photo added.} other {# photos added.}}",
       "tooMany": "{max} photos at most per item: {count, plural, =0 {none was added} one {only the first one is added} other {only the first # are added}}."
+    },
+    "sheet": {
+      "title": "Item sheet",
+      "identification": "Identification",
+      "availability": "Availability by warehouse",
+      "warehouse": "Warehouse",
+      "location": "Loc.",
+      "quantity": "In stock",
+      "threshold": "Alert threshold",
+      "state": "Status",
+      "total": "Total",
+      "otherPhotos": "Other photos",
+      "noPhoto": "No photo",
+      "footer": "Sheet issued on {date}",
+      "export": "Export as PDF",
+      "exportShort": "PDF",
+      "exporting": "Preparing the PDF…",
+      "done": "{count, plural, one {Sheet saved as PDF.} other {# sheets saved as PDF.}}"
+    },
+    "selection": {
+      "start": "Select items",
+      "startShort": "Select",
+      "label": "Selected items",
+      "column": "Selection",
+      "choose": "Select {name}",
+      "count": "{count, plural, =0 {No item selected} one {# item selected} other {# items selected}}",
+      "max": "{max} at most per export",
+      "page": "Whole page",
+      "export": "Export as PDF",
+      "exporting": "Preparing…",
+      "close": "Leave selection"
     }
   },
   "pagination": {

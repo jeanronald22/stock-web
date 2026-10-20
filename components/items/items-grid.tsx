@@ -7,16 +7,19 @@ import { CatalogStatus, type Item } from "@/lib/api/stock"
 import { cn } from "@/lib/utils"
 
 import { ITEM_GRID, ItemCard } from "./item-card"
+import type { ItemSelection } from "./item-selection"
 
 /** Grille des articles : photo, nom et catégorie, puis unité et dépôts. La référence reste au tableau. */
 export function ItemsGrid({
   items,
   categoryPaths,
   stale,
+  selection,
 }: {
   items: Item[]
   categoryPaths: ReadonlyMap<string, string>
   stale: boolean
+  selection: ItemSelection | null
 }) {
   const t = useTranslations()
   return (
@@ -37,6 +40,15 @@ export function ItemsGrid({
               )
             }
             subtitle={category}
+            selection={
+              selection
+                ? {
+                    selected: selection.isSelected(item.id),
+                    onToggle: () => selection.toggle(item),
+                    label: t("items.selection.choose", { name: item.name }),
+                  }
+                : undefined
+            }
           >
             <p className="text-sm text-muted-foreground">
               {t(`units.${item.baseUnit}.label`)} ·{" "}

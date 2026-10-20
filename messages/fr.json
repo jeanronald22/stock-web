@@ -699,6 +699,37 @@
       "removed": "Photo supprimée.",
       "added": "{count, plural, one {Photo ajoutée.} other {# photos ajoutées.}}",
       "tooMany": "{max} photos au plus par article : {count, plural, =0 {aucune n’a été ajoutée} one {seule la première est ajoutée} other {seules les # premières sont ajoutées}}."
+    },
+    "sheet": {
+      "title": "Fiche article",
+      "identification": "Identification",
+      "availability": "Disponibilité par dépôt",
+      "warehouse": "Dépôt",
+      "location": "Empl.",
+      "quantity": "En stock",
+      "threshold": "Seuil d’alerte",
+      "state": "État",
+      "total": "Total",
+      "otherPhotos": "Autres photos",
+      "noPhoto": "Pas de photo",
+      "footer": "Fiche éditée le {date}",
+      "export": "Exporter en PDF",
+      "exportShort": "PDF",
+      "exporting": "Préparation du PDF…",
+      "done": "{count, plural, one {Fiche enregistrée en PDF.} other {# fiches enregistrées en PDF.}}"
+    },
+    "selection": {
+      "start": "Sélectionner des articles",
+      "startShort": "Sélectionner",
+      "label": "Articles sélectionnés",
+      "column": "Sélection",
+      "choose": "Sélectionner {name}",
+      "count": "{count, plural, =0 {Aucun article sélectionné} one {# article sélectionné} other {# articles sélectionnés}}",
+      "max": "{max} au plus par export",
+      "page": "Toute la page",
+      "export": "Exporter en PDF",
+      "exporting": "Préparation…",
+      "close": "Quitter la sélection"
     }
   },
   "pagination": {

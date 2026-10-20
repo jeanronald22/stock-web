@@ -172,11 +172,36 @@ test("photos d'un article : ajoutées depuis la fiche, cinq au plus, la principa
 }, testInfo) => {
   await signUpWithBusiness(page, testInfo, "photos-article")
   await dismissTour(page, "Tout est ici")
+  const depot = crypto.randomUUID()
+  await callApi(page, "POST", "/v1/warehouses", {
+    id: depot,
+    name: "Dépôt Bonabéri",
+    kind: "WAREHOUSE",
+  })
+  const shop = crypto.randomUUID()
+  await callApi(page, "POST", "/v1/warehouses", {
+    id: shop,
+    name: "Magasin Akwa",
+    kind: "SHOP",
+  })
   const tile = crypto.randomUUID()
   await callApi(page, "POST", "/v1/items", {
     id: tile,
     name: "Carreau 30x30",
     baseUnit: "PIECE",
+    barcode: "6181234567890",
+    description: "Grès cérame émaillé, usage intérieur.",
+    packagings: [{ name: "Carton", quantity: 10 }],
+    warehouses: [
+      { warehouseId: depot, minQuantity: 50 },
+      { warehouseId: shop, minQuantity: 20 },
+    ],
+  })
+  await callApi(page, "POST", "/v1/vouchers", {
+    id: crypto.randomUUID(),
+    type: "RECEIPT",
+    warehouseId: depot,
+    lines: [{ itemId: tile, quantity: 245 }],
   })
   await page.goto(`/articles/${tile}`)
   const photos = page.getByRole("region", { name: "Photos" })
@@ -224,4 +249,55 @@ test("photos d'un article : ajoutées depuis la fiche, cinq au plus, la principa
   await page.keyboard.press("Escape")
   await expect(photos.getByText("4 sur 5")).toBeVisible()
   await expect(photos.getByLabel("Ajouter des photos")).toHaveCount(1)
+
+  // Sa fiche en PDF, aux couleurs de Kreskala : photo, identification, stock par dépôt.
+  const download = page.waitForEvent("download")
+  await page.getByRole("button", { name: "Exporter en PDF" }).click()
+  const file = await download
+  expect(file.suggestedFilename()).toBe("fiche-ART-0001.pdf")
+  await file.saveAs(testInfo.outputPath("fiche.pdf"))
+  await expect(page.getByText("Fiche enregistrée en PDF.")).toBeVisible()
+})
+
+test("fiches PDF depuis le catalogue : des articles cochés, un seul PDF", async ({
+  page,
+}, testInfo) => {
+  await signUpWithBusiness(page, testInfo, "fiches-catalogue")
+  await dismissTour(page, "Tout est ici")
+  for (const name of ["Ciment CPJ 42,5", "Fer à béton 8 mm", "Sable fin"])
+    await callApi(page, "POST", "/v1/items", {
+      id: crypto.randomUUID(),
+      name,
+      baseUnit: "PIECE",
+    })
+
+  await navigateTo(page, "Articles")
+  await dismissTour(page, "Votre catalogue")
+  await page.getByRole("button", { name: "Sélectionner des articles" }).click()
+  const bar = page.getByRole("region", { name: "Articles sélectionnés" })
+  await expect(bar.getByText("Aucun article sélectionné")).toBeVisible()
+  // Toute la carte coche l'article ; elle n'ouvre plus la fiche.
+  await page
+    .getByRole("checkbox", { name: "Sélectionner Ciment CPJ 42,5" })
+    .click()
+  await page.getByRole("listitem").filter({ hasText: "Sable fin" }).click()
+  await expect(bar.getByText("2 articles sélectionnés")).toBeVisible()
+  await expect(page).toHaveURL(/\/articles(\?|$)/)
+  await shot(page, testInfo, "01-selection-grille")
+
+  // En liste aussi ; le choix est gardé d'une vue à l'autre.
+  await page.getByRole("button", { name: "Afficher en liste" }).click()
+  await page
+    .getByRole("checkbox", { name: "Sélectionner Fer à béton 8 mm" })
+    .click()
+  await expect(bar.getByText("3 articles sélectionnés")).toBeVisible()
+  await shot(page, testInfo, "02-selection-liste")
+
+  const download = page.waitForEvent("download")
+  await bar.getByRole("button", { name: "Exporter en PDF" }).click()
+  const file = await download
+  expect(file.suggestedFilename()).toBe("fiches-articles.pdf")
+  await file.saveAs(testInfo.outputPath("fiches.pdf"))
+  await expect(page.getByText("3 fiches enregistrées en PDF.")).toBeVisible()
+  await expect(bar).toBeHidden()
 })

@@ -4,6 +4,7 @@ import { ChevronRightIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -18,6 +19,7 @@ import { cn } from "@/lib/utils"
 
 import { useQuantityLabel } from "./describe"
 import { ItemLink } from "./item-link"
+import type { ItemSelection } from "./item-selection"
 import { ItemThumb } from "./item-thumb"
 
 /** Noms de dépôts montrés dans une ligne ; au-delà, « +2 ». */
@@ -33,6 +35,7 @@ export function ItemsTable({
   warehouseNames,
   categoryPaths,
   stale,
+  selection,
 }: {
   items: Item[]
   warehouseNames: ReadonlyMap<string, string>
@@ -40,6 +43,8 @@ export function ItemsTable({
   categoryPaths: ReadonlyMap<string, string>
   /** Page précédente affichée pendant le chargement de la suivante. */
   stale: boolean
+  /** Mode sélection : une case par ligne, la ligne coche au lieu d'ouvrir la fiche. */
+  selection: ItemSelection | null
 }) {
   const t = useTranslations()
   const quantity = useQuantityLabel()
@@ -48,7 +53,14 @@ export function ItemsTable({
     <Table className={cn("transition-opacity", stale && "opacity-60")}>
       <TableHeader className="bg-muted/40">
         <TableRow className="hover:bg-transparent">
-          <TableHead className="pl-4">{t("items.table.item")}</TableHead>
+          {selection && (
+            <TableHead className="w-10 pl-4">
+              <span className="sr-only">{t("items.selection.column")}</span>
+            </TableHead>
+          )}
+          <TableHead className={cn(!selection && "pl-4")}>
+            {t("items.table.item")}
+          </TableHead>
           <TableHead className="hidden lg:table-cell">
             {t("items.table.reference")}
           </TableHead>
@@ -73,19 +85,46 @@ export function ItemsTable({
             ? categoryPaths.get(item.categoryId)
             : undefined
           return (
-            <TableRow key={item.id} className="relative cursor-pointer">
-              <TableCell className="py-2.5 pl-4 whitespace-normal">
+            <TableRow
+              key={item.id}
+              className="relative cursor-pointer"
+              data-state={
+                selection?.isSelected(item.id) ? "selected" : undefined
+              }
+              onClick={selection ? () => selection.toggle(item) : undefined}
+            >
+              {selection && (
+                <TableCell className="pl-4">
+                  <Checkbox
+                    checked={selection.isSelected(item.id)}
+                    onCheckedChange={() => selection.toggle(item)}
+                    onClick={(event) => event.stopPropagation()}
+                    aria-label={t("items.selection.choose", {
+                      name: item.name,
+                    })}
+                  />
+                </TableCell>
+              )}
+              <TableCell
+                className={cn("py-2.5 whitespace-normal", !selection && "pl-4")}
+              >
                 <div className="flex items-center gap-3">
                   <ItemThumb imageUrl={item.imageUrl} />
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <ItemLink
-                        itemId={item.id}
-                        stretched
-                        className="truncate font-medium hover:underline"
-                      >
-                        {item.name}
-                      </ItemLink>
+                      {selection ? (
+                        <span className="truncate font-medium">
+                          {item.name}
+                        </span>
+                      ) : (
+                        <ItemLink
+                          itemId={item.id}
+                          stretched
+                          className="truncate font-medium hover:underline"
+                        >
+                          {item.name}
+                        </ItemLink>
+                      )}
                       {item.status === CatalogStatus.archived && (
                         <Badge variant="secondary">
                           {t("items.restore.badge")}
@@ -157,7 +196,9 @@ export function ItemsTable({
                 )}
               </TableCell>
               <TableCell className="pr-4 text-muted-foreground">
-                <ChevronRightIcon className="size-4" aria-hidden />
+                {!selection && (
+                  <ChevronRightIcon className="size-4" aria-hidden />
+                )}
               </TableCell>
             </TableRow>
           )

@@ -2,6 +2,7 @@
 
 import {
   FileSpreadsheetIcon,
+  ListChecksIcon,
   PlusIcon,
   SearchIcon,
   TagIcon,
@@ -45,6 +46,7 @@ import { cn } from "@/lib/utils"
 import { useStockAccess } from "@/components/workspace/stock-access"
 
 import { ItemGridSkeleton } from "./item-card"
+import { ItemSelectionBar, useItemSelection } from "./item-selection"
 import { ItemsGrid } from "./items-grid"
 import { ItemStatusTabs } from "./item-status-tabs"
 import { ItemsMoreMenu } from "./items-more-menu"
@@ -124,6 +126,8 @@ export function ItemsScreen() {
       ? `${Routes.newItem}?${ListQueryParams.warehouse}=${warehouseIds[0]}`
       : Routes.newItem
   const manages = useStockAccess().can(StockPermission.manageCatalog)
+  const choice = useItemSelection()
+  const pageItems = items.data?.items ?? []
   const newButton = manages && (
     <Link
       href={newHref}
@@ -210,7 +214,24 @@ export function ItemsScreen() {
                 </InputGroupAddon>
               </InputGroup>
             }
-            trailing={<ViewToggle value={view} onChange={list.setView} />}
+            trailing={
+              <div className="flex shrink-0 gap-2 sm:order-last sm:ml-auto">
+                {/* Choisir des articles pour exporter leurs fiches en PDF. */}
+                <Button
+                  variant="outline"
+                  className="h-11 aria-pressed:border-primary/50 aria-pressed:bg-primary/5 aria-pressed:text-primary sm:h-9"
+                  aria-pressed={!!choice.selection}
+                  aria-label={t("selection.start")}
+                  onClick={choice.selection ? choice.stop : choice.start}
+                >
+                  <ListChecksIcon />
+                  <span className="hidden sm:inline">
+                    {t("selection.startShort")}
+                  </span>
+                </Button>
+                <ViewToggle value={view} onChange={list.setView} />
+              </div>
+            }
           >
             <WarehouseFilter
               value={warehouseIds}
@@ -256,16 +277,18 @@ export function ItemsScreen() {
               <>
                 {grid ? (
                   <ItemsGrid
-                    items={items.data?.items ?? []}
+                    items={pageItems}
                     categoryPaths={categories.paths}
                     stale={items.isPlaceholderData}
+                    selection={choice.selection}
                   />
                 ) : (
                   <ItemsTable
-                    items={items.data?.items ?? []}
+                    items={pageItems}
                     warehouseNames={warehouseNames}
                     categoryPaths={categories.paths}
                     stale={items.isPlaceholderData}
+                    selection={choice.selection}
                   />
                 )}
                 <TablePagination
@@ -279,6 +302,18 @@ export function ItemsScreen() {
               </>
             )}
           </div>
+        </>
+      )}
+      {choice.selection && (
+        <>
+          {/* La barre ne couvre pas la pagination. */}
+          <div className="h-24" aria-hidden />
+          <ItemSelectionBar
+            items={choice.items}
+            page={pageItems}
+            onAddPage={() => choice.addAll(pageItems)}
+            onClose={choice.stop}
+          />
         </>
       )}
     </PageBody>

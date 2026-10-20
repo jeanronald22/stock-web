@@ -3,6 +3,7 @@
 import Link from "next/link"
 import type { ReactNode } from "react"
 
+import { Checkbox } from "@/components/ui/checkbox"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { Item } from "@/lib/api/stock"
 import { RecordRoutes } from "@/lib/routes"
@@ -27,6 +28,7 @@ export function ItemCard({
   subtitle,
   children,
   muted = false,
+  selection,
 }: {
   item: Item
   /** Posé sur la photo, en haut : un état (rupture, archivé). */
@@ -35,9 +37,34 @@ export function ItemCard({
   children?: ReactNode
   /** Rien en stock, archivé : la carte s'efface un peu. */
   muted?: boolean
+  /** Mode sélection : la carte coche l'article au lieu d'ouvrir sa fiche. */
+  selection?: { selected: boolean; onToggle: () => void; label: string }
 }) {
   return (
-    <li className="relative flex flex-col overflow-hidden rounded-xl border bg-card transition-colors focus-within:ring-3 focus-within:ring-ring/30 hover:border-foreground/25">
+    <li
+      className={cn(
+        "relative flex flex-col overflow-hidden rounded-xl border bg-card transition-colors focus-within:ring-3 focus-within:ring-ring/30 hover:border-foreground/25",
+        selection?.selected && "border-primary ring-2 ring-primary/40"
+      )}
+    >
+      {selection && (
+        <>
+          {/* Toute la carte coche ; la case porte le nom pour le clavier et les lecteurs d'écran. */}
+          <button
+            type="button"
+            aria-hidden
+            tabIndex={-1}
+            className="absolute inset-0 z-10 cursor-pointer"
+            onClick={selection.onToggle}
+          />
+          <Checkbox
+            checked={selection.selected}
+            onCheckedChange={selection.onToggle}
+            aria-label={selection.label}
+            className="absolute top-2 right-2 z-20 size-5 bg-background shadow-sm"
+          />
+        </>
+      )}
       <div className="relative">
         <ItemThumb
           imageUrl={item.imageUrl}
@@ -53,12 +80,18 @@ export function ItemCard({
         )}
       </div>
       <div className="flex flex-1 flex-col gap-0.5 p-2.5">
-        <Link
-          href={RecordRoutes.item(item.id)}
-          className="line-clamp-2 text-sm leading-snug font-semibold after:absolute after:inset-0 focus-visible:outline-none"
-        >
-          {item.name}
-        </Link>
+        {selection ? (
+          <span className="line-clamp-2 text-sm leading-snug font-semibold">
+            {item.name}
+          </span>
+        ) : (
+          <Link
+            href={RecordRoutes.item(item.id)}
+            className="line-clamp-2 text-sm leading-snug font-semibold after:absolute after:inset-0 focus-visible:outline-none"
+          >
+            {item.name}
+          </Link>
+        )}
         {subtitle && (
           <div className="truncate text-xs text-muted-foreground">
             {subtitle}
