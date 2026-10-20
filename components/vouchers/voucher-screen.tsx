@@ -146,6 +146,9 @@ export function VoucherScreen({ id }: { id: string }) {
     { label: t("vouchers.detail.createdBy"), value: data.createdByName },
   ]
   const facts = candidates.filter((fact): fact is Fact => !!fact)
+  // Une colonne sans rien sur aucune ligne (pas de lot, saisie en unité de base) n'est pas montrée.
+  const showBatch = data.lines.some((line) => line.batch)
+  const showEntered = data.lines.some((line) => line.packagingName)
   const returnType = returnTypeOf(data.type)
   const canReturn =
     !!returnType &&
@@ -253,12 +256,16 @@ export function VoucherScreen({ id }: { id: string }) {
               <TableHead className="pl-4">
                 {t("vouchers.detail.item")}
               </TableHead>
-              <TableHead className="hidden sm:table-cell">
-                {t("vouchers.detail.batch")}
-              </TableHead>
-              <TableHead className="hidden md:table-cell">
-                {t("vouchers.detail.entered")}
-              </TableHead>
+              {showBatch && (
+                <TableHead className="hidden sm:table-cell">
+                  {t("vouchers.detail.batch")}
+                </TableHead>
+              )}
+              {showEntered && (
+                <TableHead className="hidden md:table-cell">
+                  {t("vouchers.detail.entered")}
+                </TableHead>
+              )}
               <TableHead className="pr-4 text-right">
                 {t("vouchers.detail.quantity")}
               </TableHead>
@@ -297,20 +304,24 @@ export function VoucherScreen({ id }: { id: string }) {
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="hidden sm:table-cell">
-                  {line.batch ? (
-                    batchLabel(line.batch, line)
-                  ) : (
-                    <span className="text-muted-foreground">—</span>
-                  )}
-                </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  {line.packagingName ? (
-                    `${format.number(line.enteredQuantity)} ${line.packagingName}`
-                  ) : (
-                    <span className="text-muted-foreground">—</span>
-                  )}
-                </TableCell>
+                {showBatch && (
+                  <TableCell className="hidden sm:table-cell">
+                    {line.batch ? (
+                      batchLabel(line.batch, line)
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                )}
+                {showEntered && (
+                  <TableCell className="hidden num md:table-cell">
+                    {line.packagingName ? (
+                      `${format.number(line.enteredQuantity)} ${line.packagingName}`
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                )}
                 <TableCell className="pr-4 text-right num font-semibold">
                   <MovementLabel
                     movement={movementOf(data.type, line)}

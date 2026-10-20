@@ -90,6 +90,10 @@ export function StockScreen() {
   )
   const stock = useStockPage(search, page, size)
   const total = stock.data?.total ?? 0
+  // Aucun article suivi par lot sur la page : la colonne « Lots » resterait vide.
+  const showBatches = (stock.data?.items ?? []).some(
+    (row) => row.batches.length > 0
+  )
   const empty = stock.isSuccess && total === 0 && !list.filtered
   usePageTour("stock", { ready: stock.isSuccess })
 
@@ -203,9 +207,11 @@ export function StockScreen() {
                   <TableHeader className="bg-muted/40">
                     <TableRow className="hover:bg-transparent">
                       <TableHead className="pl-4">{t("table.item")}</TableHead>
-                      <TableHead className="hidden md:table-cell">
-                        {t("table.batches")}
-                      </TableHead>
+                      {showBatches && (
+                        <TableHead className="hidden md:table-cell">
+                          {t("table.batches")}
+                        </TableHead>
+                      )}
                       <TableHead className="pr-4 text-right">
                         {t("table.quantity")}
                       </TableHead>
@@ -238,23 +244,25 @@ export function StockScreen() {
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          <div className="flex flex-wrap gap-1">
-                            {row.batches.map((batch) => (
-                              <Badge
-                                key={batch.batch}
-                                variant="outline"
-                                className="font-normal"
-                              >
-                                {batchLabel(batch.batch ?? "", batch)} ·{" "}
-                                {quantityLabel(
-                                  row.item.baseUnit,
-                                  batch.quantity
-                                )}
-                              </Badge>
-                            ))}
-                          </div>
-                        </TableCell>
+                        {showBatches && (
+                          <TableCell className="hidden md:table-cell">
+                            <div className="flex flex-wrap gap-1">
+                              {row.batches.map((batch) => (
+                                <Badge
+                                  key={batch.batch}
+                                  variant="outline"
+                                  className="font-normal"
+                                >
+                                  {batchLabel(batch.batch ?? "", batch)} ·{" "}
+                                  {quantityLabel(
+                                    row.item.baseUnit,
+                                    batch.quantity
+                                  )}
+                                </Badge>
+                              ))}
+                            </div>
+                          </TableCell>
+                        )}
                         <TableCell className="pr-4 text-right">
                           <div className="flex flex-col items-end gap-1">
                             <span
