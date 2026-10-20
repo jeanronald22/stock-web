@@ -1439,12 +1439,12 @@
         "description": "Un administrateur peut à son tour inviter et gérer les membres."
       },
       "stockRole": {
-        "title": "Que fera-t-elle dans Stock ?",
+        "title": "Que fera cette personne dans Stock ?",
         "description": "Le rôle décide de ce qu’elle peut faire. Vous pourrez le changer à tout moment."
       },
       "warehouses": {
         "title": "Dans quels dépôts ?",
-        "description": "Elle ne verra et ne mouvementera que le stock de ces dépôts.",
+        "description": "Cette personne ne verra et ne mouvementera que le stock de ces dépôts.",
         "required": "Choisissez au moins un dépôt."
       }
     },
