@@ -7,6 +7,8 @@ export const CompanyPaths = {
     `/v1/company/documents/${encodeURIComponent(kind)}`,
   verification: "/v1/company/verification",
   logo: "/v1/company/logo",
+  /** En-tête des documents : lisible par chaque membre. */
+  letterhead: "/v1/company/letterhead",
 } as const
 
 /** Nom de la partie du formulaire multipart (stock-api, PlatformApi.DOCUMENT_PART). */
@@ -119,6 +121,22 @@ export type Company = {
   version: number
 }
 
+/**
+ * En-tête des documents (bons, fiches) : ce que l'entreprise imprime d'elle-même. Les identifiants
+ * sont ceux renseignés, dans l'ordre du pays (RCCM, NIU).
+ */
+export type Letterhead = {
+  name: string
+  city: string
+  address: string | null
+  /** Au format international (+237699123456). */
+  phone: string | null
+  phonePrefix: string
+  businessIds: { type: string; value: string }[]
+  /** Lien signé vers le logo, relatif à l'API ; null sans logo. */
+  logoUrl: string | null
+}
+
 export type CompanyInput = {
   version: number
   name: string
@@ -135,6 +153,12 @@ export const companyApi = (send: ApiClient) => {
   return {
     company: () =>
       send<Company>({ ...scoped, method: "GET", path: CompanyPaths.company }),
+    letterhead: () =>
+      send<Letterhead>({
+        ...scoped,
+        method: "GET",
+        path: CompanyPaths.letterhead,
+      }),
     update: (input: CompanyInput) =>
       send<Company>({
         ...scoped,

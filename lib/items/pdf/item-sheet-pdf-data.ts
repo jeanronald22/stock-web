@@ -1,4 +1,5 @@
 import type { BarcodeShape } from "@/lib/labels/barcode"
+import type { PdfFooter, PdfLetterhead } from "@/lib/pdf/pdf-letterhead"
 
 /** Ton d'un état de stock, pour sa pastille : en stock, bas, rupture, épuisé. */
 export const SheetTone = {
@@ -41,9 +42,7 @@ export type ItemSheet = {
 
 export type ItemSheetPdfData = {
   fileName: string
-  organization: { name: string; city: string }
-  /** Adresse absolue du logo blanc, posé sur le bandeau vert. */
-  logo: string
+  letterhead: PdfLetterhead
   labels: {
     title: string
     identification: string
@@ -59,6 +58,6 @@ export type ItemSheetPdfData = {
     otherPhotos: string
     noPhoto: string
   }
-  footer: string
+  footer: PdfFooter
   sheets: ItemSheet[]
 }

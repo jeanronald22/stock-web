@@ -6,7 +6,7 @@ import { useCallback, useState } from "react"
 import { toast } from "sonner"
 
 import { useBatchLabel, useQuantityLabel } from "@/components/items/describe"
-import { useWorkspace } from "@/components/workspace/workspace-context"
+import { usePdfLetterhead } from "@/components/pdf/use-pdf-letterhead"
 import { useApi } from "@/lib/api/api-provider"
 import { useErrorMessage } from "@/lib/api/use-error-message"
 import { voucherKeys } from "@/lib/api/voucher-queries"
@@ -17,6 +17,7 @@ import {
   type Voucher,
 } from "@/lib/api/vouchers"
 import { useActiveOrganization } from "@/lib/organization/active-organization"
+import type { PdfLetterhead } from "@/lib/pdf/pdf-letterhead"
 import { downloadBlob, printBlob } from "@/lib/pdf/pdf-output"
 import type { VoucherPdfData } from "@/lib/vouchers/pdf/voucher-pdf-data"
 
@@ -36,11 +37,11 @@ export function useVoucherPdf() {
   const queryClient = useQueryClient()
   const { vouchers } = useApi()
   const { activeOrganizationId } = useActiveOrganization()
-  const { organization } = useWorkspace()
+  const pdf = usePdfLetterhead()
   const [busy, setBusy] = useState(false)
 
   const toData = useCallback(
-    (voucher: Voucher): VoucherPdfData => {
+    (voucher: Voucher, letterhead: PdfLetterhead): VoucherPdfData => {
       // La marchandise arrive (réception, retour client) : on signe qui l'a livrée.
       const incoming = incomingTypes.has(voucher.type)
       // Transfert : départ et arrivée ; l'autre bout n'est ni un fournisseur ni un client.
@@ -74,7 +75,7 @@ export function useVoucherPdf() {
             ]
       return {
         fileName: voucher.number + PDF_EXTENSION,
-        organization: { name: organization.name, city: organization.city },
+        letterhead,
         title: t(`print.titles.${voucher.type}`),
         number: voucher.number,
         facts: [
@@ -145,34 +146,38 @@ export function useVoucherPdf() {
             name: "",
           },
         ],
-        footer: t("print.footer", {
-          date: format.dateTime(new Date(voucher.recordedAt), {
-            dateStyle: "long",
-            timeStyle: "short",
-          }),
-        }),
+        footer: pdf.footer(
+          t("print.footer", {
+            date: format.dateTime(new Date(voucher.recordedAt), {
+              dateStyle: "long",
+              timeStyle: "short",
+            }),
+          })
+        ),
       }
     },
-    [t, format, quantityLabel, batchLabel, organization]
+    [t, format, quantityLabel, batchLabel, pdf]
   )
 
   const render = useCallback(
     async (voucherId: string) => {
-      const voucher = await queryClient.fetchQuery({
-        queryKey: voucherKeys.voucher(activeOrganizationId, voucherId),
-        queryFn: () => vouchers.voucher(voucherId),
-      })
-      const [{ pdf }, { VoucherPdfDocument }] = await Promise.all([
-        import("@react-pdf/renderer"),
-        import("@/lib/vouchers/pdf/voucher-pdf-document"),
-      ])
-      const data = toData(voucher)
+      const [voucher, letterhead, { pdf: render }, { VoucherPdfDocument }] =
+        await Promise.all([
+          queryClient.fetchQuery({
+            queryKey: voucherKeys.voucher(activeOrganizationId, voucherId),
+            queryFn: () => vouchers.voucher(voucherId),
+          }),
+          pdf.letterhead(),
+          import("@react-pdf/renderer"),
+          import("@/lib/vouchers/pdf/voucher-pdf-document"),
+        ])
+      const data = toData(voucher, letterhead)
       return {
-        blob: await pdf(<VoucherPdfDocument data={data} />).toBlob(),
+        blob: await render(<VoucherPdfDocument data={data} />).toBlob(),
         fileName: data.fileName,
       }
     },
-    [queryClient, activeOrganizationId, vouchers, toData]
+    [queryClient, activeOrganizationId, vouchers, pdf, toData]
   )
 
   const run = useCallback(

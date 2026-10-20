@@ -2726,5 +2726,9 @@
       "changed": "Mot de passe changé.",
       "failed": "Le mot de passe n’a pas pu être changé. Réessayez."
     }
+  },
+  "pdf": {
+    "credit": "Édité avec Kreskala",
+    "phone": "Tél. {phone}"
   }
 }

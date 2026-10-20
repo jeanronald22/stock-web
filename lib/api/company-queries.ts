@@ -11,6 +11,8 @@ import { platformKeys } from "./platform-queries"
 export const companyKeys = {
   company: (organizationId: string | null) =>
     ["platform", "company", organizationId] as const,
+  letterhead: (organizationId: string | null) =>
+    ["platform", "company", organizationId, "letterhead"] as const,
 }
 
 export function useCompany() {
@@ -25,7 +27,7 @@ export function useCompany() {
 
 /**
  * Chaque changement renvoie la fiche à jour. Le nom, la ville et le niveau du KYB paraissent aussi
- * dans le sélecteur d'entreprise : la liste du compte est relue.
+ * dans le sélecteur d'entreprise, et la fiche dans l'en-tête des documents : tous deux sont relus.
  */
 function useCompanyMutation<T>(action: (variables: T) => Promise<Company>) {
   const queryClient = useQueryClient()
@@ -35,6 +37,9 @@ function useCompanyMutation<T>(action: (variables: T) => Promise<Company>) {
     onSuccess: (company) => {
       queryClient.setQueryData(companyKeys.company(organizationId), company)
       void queryClient.invalidateQueries({ queryKey: platformKeys.me })
+      void queryClient.invalidateQueries({
+        queryKey: companyKeys.letterhead(organizationId),
+      })
     },
   })
 }

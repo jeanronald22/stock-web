@@ -6,8 +6,8 @@ import { useCallback, useState } from "react"
 import { toast } from "sonner"
 
 import { useCategoryTree } from "@/components/categories/use-category-tree"
+import { usePdfLetterhead } from "@/components/pdf/use-pdf-letterhead"
 import { useStockAccess } from "@/components/workspace/stock-access"
-import { useWorkspace } from "@/components/workspace/workspace-context"
 import { useApi } from "@/lib/api/api-provider"
 import {
   CatalogStatus,
@@ -35,12 +35,11 @@ import { itemWarehouses } from "./use-item-warehouses"
 
 /** Au-delà, le PDF devient long à produire sur un téléphone : on exporte en plusieurs fois. */
 export const MAX_ITEM_SHEETS = 50
-const LOGO = "/brand/png/kreskala-logo-on-brand.png"
 const SINGLE_FILE = (reference: string) => `fiche-${reference}.pdf`
 const MANY_FILE = "fiches-articles.pdf"
 
 /**
- * Fiches d'articles en PDF, aux couleurs de Kreskala : une page par article, téléchargée. Les
+ * Fiches d'articles en PDF, au nom de l'entreprise : une page par article, téléchargée. Les
  * stocks et les dépôts viennent du cache quand ils y sont ; la bibliothèque PDF n'est chargée qu'au
  * premier export.
  */
@@ -54,7 +53,7 @@ export function useItemSheetPdf() {
   const queryClient = useQueryClient()
   const { stock, vouchers } = useApi()
   const { activeOrganizationId } = useActiveOrganization()
-  const { organization } = useWorkspace()
+  const pdf = usePdfLetterhead()
   const { covers } = useStockAccess()
   const { paths } = useCategoryTree()
   const [busy, setBusy] = useState(false)
@@ -107,8 +106,8 @@ export function useItemSheetPdf() {
         state: stateOf(state, total),
         total: quantityLabel(item.baseUnit, total),
         packs: breakdown && t("items.detail.breakdown", { breakdown }),
+        // La référence est le numéro de la fiche, en tête : elle n'est pas répétée ici.
         facts: [
-          { label: t("items.detail.reference"), value: item.reference },
           {
             label: t("items.detail.barcode"),
             value: item.barcode ?? missing,
@@ -195,8 +194,7 @@ export function useItemSheetPdf() {
         const data: ItemSheetPdfData = {
           fileName:
             sheets.length === 1 ? SINGLE_FILE(sheets[0].reference) : MANY_FILE,
-          organization: { name: organization.name, city: organization.city },
-          logo: new URL(LOGO, window.location.origin).toString(),
+          letterhead: await pdf.letterhead(),
           labels: {
             title: t("items.sheet.title"),
             identification: t("items.sheet.identification"),
@@ -212,20 +210,22 @@ export function useItemSheetPdf() {
             otherPhotos: t("items.sheet.otherPhotos"),
             noPhoto: t("items.sheet.noPhoto"),
           },
-          footer: t("items.sheet.footer", {
-            date: format.dateTime(new Date(), {
-              dateStyle: "long",
-              timeStyle: "short",
-            }),
-          }),
+          footer: pdf.footer(
+            t("items.sheet.footer", {
+              date: format.dateTime(new Date(), {
+                dateStyle: "long",
+                timeStyle: "short",
+              }),
+            })
+          ),
           sheets,
         }
-        const [{ pdf }, { ItemSheetPdfDocument }] = await Promise.all([
+        const [{ pdf: render }, { ItemSheetPdfDocument }] = await Promise.all([
           import("@react-pdf/renderer"),
           import("@/lib/items/pdf/item-sheet-pdf-document"),
         ])
         downloadBlob(
-          await pdf(<ItemSheetPdfDocument data={data} />).toBlob(),
+          await render(<ItemSheetPdfDocument data={data} />).toBlob(),
           data.fileName
         )
         toast.success(t("items.sheet.done", { count: sheets.length }))
@@ -242,7 +242,7 @@ export function useItemSheetPdf() {
       activeOrganizationId,
       stock,
       sheetOf,
-      organization,
+      pdf,
       t,
       format,
       errorMessage,

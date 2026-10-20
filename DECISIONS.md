@@ -529,6 +529,16 @@ Prolonge D17 (comptes Keycloak) et D45 (paramètres). Les réglages de l'entrepr
 - **Mot de passe** : jamais envoyé à l'API Kreskala. Le bouton lance l'action Keycloak `UPDATE_PASSWORD` (« application-initiated action ») sur les pages de connexion de Kreskala. Keycloak demande d'abord le mot de passe actuel, l'adresse étant pré-remplie (`login_hint`) : avec le jeton hors ligne (`offline_access`), il ne garde pas de session de connexion, et c'est aussi la preuve que la personne connaît l'actuel. Le retour sur « Mon profil » et le résultat (`kc_action_status`) passent par la session du navigateur.
 - **Écart au modèle D10** : `photo_key` n'y figurait pas.
 
+## D47. Documents PDF au nom de l'entreprise (2026-10-20)
+
+Prolonge D36 (étiquettes), D45 (fiche et logo) et les bons et fiches d'articles en PDF. Un document imprimé est celui de l'entreprise : c'est elle qui le remet à un fournisseur, un client ou un chauffeur.
+
+- **En-tête commun** aux documents A4 (bons, fiches d'articles) : le logo de l'entreprise en premier (proportions gardées, PNG net et transparent), son nom, puis ses coordonnées et identifiants (adresse et ville, téléphone, RCCM et NIU renseignés) ; à droite, la nature du document et son numéro. Sans logo, le nom prend sa place.
+- **Charte sobre** : encre, gris et filets, sans les couleurs de Kreskala ; seuls les états du stock gardent leur couleur, parce qu'elle a un sens.
+- **Kreskala en mention** : « Édité avec Kreskala », discret, en bas à droite de chaque page.
+- **En-tête lisible par chaque membre** (`GET /v1/company/letterhead`) : un magasinier imprime aussi des bons. Il ne porte que ce qui s'imprime ; la fiche complète et les pièces restent aux gérants (D45). Hors connexion, le document part avec le nom et la ville connus.
+- **Étiquettes** : inchangées dans leur principe (code, nom, référence), plus aérées.
+
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
 - [ ] Nom de la marque et nom du produit de stock (voir D7). Pistes : Kreskala, Kreskio, Tissero, NarvalWorks, FourmiLabs.

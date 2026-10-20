@@ -1,130 +1,104 @@
 import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer"
 
 import { PDF_FONT as FONT } from "@/lib/pdf/pdf-fonts"
+import { DocumentFooter, Letterhead } from "@/lib/pdf/pdf-letterhead"
+import { PdfColors, PdfMetrics } from "@/lib/pdf/pdf-theme"
 
 import type { VoucherPdfData } from "./voucher-pdf-data"
 
-const INK = "#171717"
-const MUTED = "#737373"
-const RULE = "#d4d4d4"
-const BRAND = "#007A55"
-const MARGIN = 40
-const FOOTER_HEIGHT = 28
+const { margin: MARGIN, footerHeight: FOOTER_HEIGHT } = PdfMetrics
 
 const styles = StyleSheet.create({
   page: {
     fontFamily: FONT,
-    fontSize: 10,
-    color: INK,
+    fontSize: PdfMetrics.body,
+    color: PdfColors.ink,
     padding: MARGIN,
     paddingBottom: MARGIN + FOOTER_HEIGHT,
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    borderBottomWidth: 1.5,
-    borderBottomColor: INK,
-    paddingBottom: 14,
-  },
-  organization: { fontSize: 15, fontWeight: 700 },
-  muted: { color: MUTED },
-  eyebrow: {
-    fontSize: 8,
-    fontWeight: 600,
-    letterSpacing: 1,
-    color: MUTED,
-    textTransform: "uppercase",
-    textAlign: "right",
-  },
-  number: { fontSize: 18, fontWeight: 700, textAlign: "right", marginTop: 3 },
+  muted: { color: PdfColors.muted },
   facts: { flexDirection: "row", flexWrap: "wrap", marginTop: 18 },
-  fact: { width: "50%", marginBottom: 10 },
-  factLabel: { fontSize: 8, color: MUTED },
-  factValue: { fontWeight: 600, marginTop: 2 },
-  table: { marginTop: 14 },
+  fact: { width: "33.33%", marginBottom: 12, paddingRight: 12 },
+  label: {
+    fontSize: PdfMetrics.caption,
+    fontWeight: 600,
+    letterSpacing: 0.6,
+    color: PdfColors.muted,
+    textTransform: "uppercase",
+  },
+  factValue: { fontWeight: 600, marginTop: 3 },
+  table: { marginTop: 8 },
+  headRow: {
+    flexDirection: "row",
+    backgroundColor: PdfColors.surface,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+  },
   row: {
     flexDirection: "row",
     borderBottomWidth: 0.5,
-    borderBottomColor: RULE,
-    paddingVertical: 7,
+    borderBottomColor: PdfColors.rule,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
   },
-  headRow: {
-    flexDirection: "row",
-    borderBottomWidth: 0.5,
-    borderBottomColor: RULE,
-    paddingBottom: 6,
+  colIndex: { width: 20 },
+  colItem: { flex: 1, paddingRight: 10 },
+  colBatch: { width: 70, paddingRight: 10 },
+  colEntered: { width: 85, paddingRight: 10 },
+  colQuantity: { width: 95, textAlign: "right" },
+  strong: { fontWeight: 600 },
+  detail: { fontSize: PdfMetrics.small, color: PdfColors.muted, marginTop: 2 },
+  lineCount: {
+    marginTop: 8,
+    paddingRight: 8,
+    textAlign: "right",
+    fontSize: PdfMetrics.small,
+    color: PdfColors.muted,
   },
-  head: { fontSize: 8, color: MUTED },
-  colIndex: { width: 22 },
-  colItem: { flex: 1, paddingRight: 8 },
-  colBatch: { width: 70, paddingRight: 8 },
-  colEntered: { width: 90, paddingRight: 8 },
-  colQuantity: { width: 90, textAlign: "right" },
-  itemName: { fontWeight: 600 },
-  reference: { fontSize: 8, color: MUTED, marginTop: 1 },
-  lineCount: { marginTop: 8, textAlign: "right", color: MUTED },
   note: {
     marginTop: 16,
-    borderWidth: 0.5,
-    borderColor: RULE,
-    borderRadius: 6,
-    padding: 10,
+    borderLeftWidth: 2,
+    borderLeftColor: PdfColors.ink,
+    backgroundColor: PdfColors.surface,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
   },
-  signatures: { flexDirection: "row", marginTop: 32, gap: 24 },
+  noteText: { marginTop: 4, lineHeight: 1.4 },
+  signatures: { flexDirection: "row", marginTop: 32, gap: 16 },
   signature: { flex: 1 },
-  signatureName: { fontWeight: 600, minHeight: 14, marginTop: 2 },
+  signatureName: { fontWeight: 600, minHeight: 13, marginTop: 3 },
   signatureBox: {
     marginTop: 6,
     height: 64,
     borderWidth: 0.75,
-    borderStyle: "dashed",
-    borderColor: MUTED,
-    borderRadius: 6,
+    borderColor: PdfColors.rule,
+    borderRadius: 4,
   },
-  footer: {
-    position: "absolute",
-    left: MARGIN,
-    right: MARGIN,
-    bottom: MARGIN / 2,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    borderTopWidth: 0.5,
-    borderTopColor: RULE,
-    paddingTop: 6,
-    fontSize: 8,
-    color: MUTED,
-  },
-  brand: { color: BRAND, fontWeight: 700 },
 })
 
 /**
- * Bon au format A4. Le pied de page est fixe : il se répète en bas de chaque page ; les cases de
- * signature restent ensemble, sur la dernière page.
+ * Bon au format A4, au nom de l'entreprise. Le pied de page se répète en bas de chaque page ; les
+ * cases de signature restent ensemble, sur la dernière.
  */
 export function VoucherPdfDocument({ data }: { data: VoucherPdfData }) {
   return (
     <Document
       title={`${data.title} ${data.number}`}
-      author={data.organization.name}
+      author={data.letterhead.name}
       creator="Kreskala"
       producer="Kreskala"
     >
       <Page size="A4" style={styles.page}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.organization}>{data.organization.name}</Text>
-            <Text style={styles.muted}>{data.organization.city}</Text>
-          </View>
-          <View>
-            <Text style={styles.eyebrow}>{data.title}</Text>
-            <Text style={styles.number}>{data.number}</Text>
-          </View>
-        </View>
+        <Letterhead
+          letterhead={data.letterhead}
+          title={data.title}
+          number={data.number}
+        />
 
         <View style={styles.facts}>
           {data.facts.map((fact) => (
             <View key={fact.label} style={styles.fact}>
-              <Text style={styles.factLabel}>{fact.label}</Text>
+              <Text style={styles.label}>{fact.label}</Text>
               <Text style={styles.factValue}>{fact.value}</Text>
             </View>
           ))}
@@ -132,17 +106,17 @@ export function VoucherPdfDocument({ data }: { data: VoucherPdfData }) {
 
         <View style={styles.table}>
           <View style={styles.headRow}>
-            <Text style={[styles.head, styles.colIndex]}>#</Text>
-            <Text style={[styles.head, styles.colItem]}>
+            <Text style={[styles.label, styles.colIndex]}>#</Text>
+            <Text style={[styles.label, styles.colItem]}>
               {data.columns.item}
             </Text>
-            <Text style={[styles.head, styles.colBatch]}>
+            <Text style={[styles.label, styles.colBatch]}>
               {data.columns.batch}
             </Text>
-            <Text style={[styles.head, styles.colEntered]}>
+            <Text style={[styles.label, styles.colEntered]}>
               {data.columns.entered}
             </Text>
-            <Text style={[styles.head, styles.colQuantity]}>
+            <Text style={[styles.label, styles.colQuantity]}>
               {data.columns.quantity}
             </Text>
           </View>
@@ -150,17 +124,17 @@ export function VoucherPdfDocument({ data }: { data: VoucherPdfData }) {
             <View key={`${line.name}-${index}`} style={styles.row} wrap={false}>
               <Text style={[styles.colIndex, styles.muted]}>{index + 1}</Text>
               <View style={styles.colItem}>
-                <Text style={styles.itemName}>{line.name}</Text>
+                <Text style={styles.strong}>{line.name}</Text>
                 {line.reference && (
-                  <Text style={styles.reference}>{line.reference}</Text>
+                  <Text style={styles.detail}>{line.reference}</Text>
                 )}
                 {line.location && (
-                  <Text style={styles.reference}>{line.location}</Text>
+                  <Text style={styles.detail}>{line.location}</Text>
                 )}
               </View>
               <Text style={styles.colBatch}>{line.batch}</Text>
               <Text style={styles.colEntered}>{line.entered}</Text>
-              <Text style={[styles.colQuantity, styles.itemName]}>
+              <Text style={[styles.colQuantity, styles.strong]}>
                 {line.quantity}
               </Text>
             </View>
@@ -170,30 +144,22 @@ export function VoucherPdfDocument({ data }: { data: VoucherPdfData }) {
 
         {data.note && (
           <View style={styles.note} wrap={false}>
-            <Text style={styles.factLabel}>{data.note.label}</Text>
-            <Text style={{ marginTop: 3 }}>{data.note.text}</Text>
+            <Text style={styles.label}>{data.note.label}</Text>
+            <Text style={styles.noteText}>{data.note.text}</Text>
           </View>
         )}
 
         <View style={styles.signatures} wrap={false}>
           {data.signatures.map((signature) => (
             <View key={signature.label} style={styles.signature}>
-              <Text style={styles.factLabel}>{signature.label}</Text>
+              <Text style={styles.label}>{signature.label}</Text>
               <Text style={styles.signatureName}>{signature.name}</Text>
               <View style={styles.signatureBox} />
             </View>
           ))}
         </View>
 
-        <View style={styles.footer} fixed>
-          <Text>{data.footer}</Text>
-          <Text
-            render={({ pageNumber, totalPages }) =>
-              `${pageNumber} / ${totalPages}`
-            }
-          />
-          <Text style={styles.brand}>kreskala</Text>
-        </View>
+        <DocumentFooter footer={data.footer} />
       </Page>
     </Document>
   )
