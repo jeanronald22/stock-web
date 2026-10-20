@@ -398,10 +398,12 @@ export function useChangeThreshold() {
       itemId,
       warehouseId,
       minQuantity,
+      maxQuantity,
     }: {
       itemId: string
       warehouseId: string
       minQuantity: number | null
-    }) => stock.changeThreshold(itemId, warehouseId, minQuantity)
+      maxQuantity: number | null
+    }) => stock.changeThreshold(itemId, warehouseId, minQuantity, maxQuantity)
   )
 }

@@ -203,9 +203,10 @@ export type VoucherLine = {
   batch: string | null
   /** Attendu : envoyé (transfert), annoncé (bon de livraison) ou théorique (ajustement). */
   expectedQuantity: number | null
-  /** Caractéristiques du lot (D35). */
+  /** Caractéristiques du lot (D35) et sa date limite, AAAA-MM-JJ (D44). */
   shade: string | null
   caliber: string | null
+  expiresOn: string | null
   /** Emplacement actuel de l'article dans le dépôt du bon (D37). */
   location: LocationRef | null
 }
@@ -240,9 +241,10 @@ export type VoucherLineInput = {
   batch?: string
   /** Réception : quantité annoncée par le bon de livraison, dans la même unité. */
   expectedQuantity?: number
-  /** Réception d'un article suivi par lot : nuance et calibre du lot (D35). */
+  /** Réception d'un article suivi par lot : nuance et calibre du lot (D35), date limite AAAA-MM-JJ (D44). */
   shade?: string
   caliber?: string
+  expiresOn?: string
 }
 
 export type VoucherInput = {
@@ -306,12 +308,14 @@ export function shortagesOf(error: unknown): Shortage[] {
   return Array.isArray(shortages) ? (shortages as Shortage[]) : []
 }
 
-/** Stock d'un lot, avec sa nuance et son calibre (D35) pour choisir le bon. */
+/** Stock d'un lot, avec sa nuance et son calibre (D35) pour choisir le bon, et sa date limite (D44). */
 export type BatchQuantity = {
   batch: string | null
   quantity: number
   shade: string | null
   caliber: string | null
+  /** AAAA-MM-JJ ; null : le lot ne périme pas, ou sa date n'a pas été saisie. */
+  expiresOn: string | null
 }
 /** Dépôt où l'article est au seuil ou en dessous, ou en rupture. */
 export type StockAlert = {

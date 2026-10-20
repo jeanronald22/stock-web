@@ -12,6 +12,7 @@ import {
   reportNetworkSuccess,
 } from "@/lib/offline/connectivity"
 
+import { alertApi } from "./alerts"
 import { createApiClient, type ApiClient } from "./http"
 import { notificationApi } from "./notifications"
 import { platformApi } from "./platform"
@@ -35,6 +36,7 @@ type Api = {
   requests: ReturnType<typeof requestApi>
   reports: ReturnType<typeof reportApi>
   notifications: ReturnType<typeof notificationApi>
+  alerts: ReturnType<typeof alertApi>
 }
 
 const ApiContext = createContext<Api | null>(null)
@@ -66,6 +68,7 @@ export function ApiProvider({ children }: { children: React.ReactNode }) {
       requests: requestApi(send),
       reports: reportApi(send),
       notifications: notificationApi(send),
+      alerts: alertApi(send),
     }
   }, [apiUrl, token, locale, activeOrganizationId])
 

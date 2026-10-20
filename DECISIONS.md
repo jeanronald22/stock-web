@@ -479,6 +479,26 @@ Questionnaire : rapports au gérant (Q1) ; produits à écarts (Q33) ; casse (Q3
 - **Détail** : chaque carte ouvre l'un des trois rapports de D38 (« Rapports », `/rapports` : mouvements, casse, écarts), qui reprend les mêmes filtres et s'exporte en Excel. Son fil d'Ariane ramène au tableau de bord.
 - **Calcul** : en SQL sur le registre et les bons, comme D38, dans les dépôts de la personne, en un seul appel. Les états de stock reprennent la règle des alertes (D24).
 
+## D44. Alertes paramétrables, par e-mail et dans l'application (2026-10-20)
+
+Questionnaire : « alerte avant rupture » (Q44), fins de série (Q21), casse et pertes anormales (Q34 à Q37), recours auprès du fournisseur (Q11, Q12). Prolonge D24 (seuils) et D26 (notifications).
+
+- **Six règles en plus du seuil d'alerte** (D24), réglées pour toute l'entreprise par le propriétaire, les administrateurs et le gérant. Chacune peut être coupée :
+
+| Règle | Réglage (par défaut) | Se déclenche quand |
+|---|---|---|
+| Rupture prévue | N jours (15) | au rythme des sorties des 30 derniers jours, le stock d'un article dans un dépôt tient moins de N jours |
+| Stock qui dort | N jours (90) | un article a du stock dans un dépôt et n'en est pas sorti depuis N jours (ni depuis son arrivée, s'il n'est jamais sorti) |
+| Surstock | stock maximum par article et par dépôt, sur la fiche (vide : pas d'alerte) | le stock dépasse ce maximum |
+| Casse anormale | N % (5) | sur 30 jours, la casse d'un article dans un dépôt dépasse N % de ce qui en est parti (sorties et casse) |
+| Fournisseur peu fiable | N % (20) | sur 90 jours, un fournisseur a livré au moins 3 réceptions, dont N % avec un écart au bon de livraison |
+| Péremption | N jours (30) | un lot en stock atteint sa date limite dans N jours, ou l'a dépassée |
+
+- **Écarts au modèle D10** : `item_warehouse.max_quantity` (stock maximum) et `batch_attributes.expires_on` (date limite du lot) n'y figuraient pas. La date limite se saisit à la première réception du lot, comme la nuance et le calibre (D35).
+- **Veille** : une tâche de fond passe chaque heure sur chaque entreprise active. Une alerte reste enregistrée (`stock.alert_state`) tant que sa condition dure. On n'est prévenu qu'à son apparition, et de nouveau seulement si elle disparaît puis revient. Couper une règle oublie ses alertes. Plusieurs instances de l'API peuvent tourner : seule celle qui enregistre l'alerte prévient.
+- **Qui est prévenu** : le propriétaire et les gérants, dans l'application et par e-mail. Un avis par règle et par passage liste les articles, lots ou fournisseurs concernés. L'e-mail se coupe type par type dans « Mon compte › Notifications » (D26).
+- **Où se règle** : « Régler les alertes » sur le tableau de bord, à côté de ce qui attend un geste (pas d'entrée de menu). Le maximum se saisit à côté du seuil, sur la fiche article.
+
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
 - [ ] Nom de la marque et nom du produit de stock (voir D7). Pistes : Kreskala, Kreskio, Tissero, NarvalWorks, FourmiLabs.

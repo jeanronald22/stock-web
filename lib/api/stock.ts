@@ -157,8 +157,15 @@ export const StockState = {
   out: "OUT",
 } as const satisfies Record<string, StockState>
 
-/** Dépôt où l'article est proposé, avec son seuil d'alerte en unité de base (null : aucun). */
-export type ItemPlacement = { warehouseId: string; minQuantity: number | null }
+/**
+ * Dépôt où l'article est proposé, avec son seuil d'alerte et son stock maximum (D44), en unité de
+ * base (null : aucun).
+ */
+export type ItemPlacement = {
+  warehouseId: string
+  minQuantity: number | null
+  maxQuantity: number | null
+}
 
 /** Emplacement tel qu'on l'affiche à côté d'un article (D37). */
 export type LocationRef = { id: string; code: string; label: string | null }
@@ -553,13 +560,14 @@ export const stockApi = (send: ApiClient) => {
     changeThreshold: (
       id: string,
       warehouseId: string,
-      minQuantity: number | null
+      minQuantity: number | null,
+      maxQuantity: number | null
     ) =>
       send<Item>({
         ...scoped,
         method: "PUT",
         path: StockPaths.itemThreshold(id, warehouseId),
-        body: { minQuantity },
+        body: { minQuantity, maxQuantity },
       }),
     myAccess: () =>
       send<MyStockAccess>({

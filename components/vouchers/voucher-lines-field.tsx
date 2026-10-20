@@ -21,7 +21,12 @@ import {
   FieldError,
   FieldLabel,
 } from "@/components/ui/field"
-import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from "@/components/ui/input-group"
 import {
   Select,
   SelectContent,
@@ -291,7 +296,7 @@ function VoucherLineRow({
           .find(
             (batch) =>
               batch.batch?.toLowerCase() === line.batch.trim().toLowerCase() &&
-              (batch.shade || batch.caliber)
+              (batch.shade || batch.caliber || batch.expiresOn)
           )
       : undefined
   const traitsInput =
@@ -457,7 +462,7 @@ function VoucherLineRow({
         </Button>
       </div>
       {traitsInput && (
-        <div className="mt-2 grid grid-cols-2 gap-2 md:max-w-sm">
+        <div className="mt-2 grid grid-cols-2 gap-2 md:max-w-xl md:grid-cols-[1fr_1fr_1.4fr]">
           {(["shade", "caliber"] as const).map((trait) => (
             <InputGroupInputBox key={trait}>
               <InputGroupInput
@@ -468,6 +473,17 @@ function VoucherLineRow({
               />
             </InputGroupInputBox>
           ))}
+          {/* Un champ de date n'affiche pas d'indication : son nom est écrit devant. */}
+          <InputGroup className="col-span-2 md:col-span-1">
+            <InputGroupAddon align="inline-start">
+              <InputGroupText>{t("vouchers.form.expiresOn")}</InputGroupText>
+            </InputGroupAddon>
+            <InputGroupInput
+              type="date"
+              aria-label={`${t("vouchers.form.expiresOn")} · ${line.item.name}`}
+              {...form.register(`lines.${index}.expiresOn`)}
+            />
+          </InputGroup>
         </div>
       )}
       {knownBatch && (

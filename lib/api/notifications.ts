@@ -20,6 +20,12 @@ export const notificationTypes = [
   "RECEIPT_DISCREPANCY",
   "VOUCHER_PENDING",
   "VOUCHER_DECIDED",
+  "RUNNING_OUT",
+  "DORMANT_STOCK",
+  "OVERSTOCK",
+  "ABNORMAL_DAMAGE",
+  "UNRELIABLE_SUPPLIER",
+  "EXPIRING_BATCHES",
 ] as const
 export type NotificationType = (typeof notificationTypes)[number]
 export const NotificationType = {
@@ -32,6 +38,12 @@ export const NotificationType = {
   receiptDiscrepancy: "RECEIPT_DISCREPANCY",
   voucherPending: "VOUCHER_PENDING",
   voucherDecided: "VOUCHER_DECIDED",
+  runningOut: "RUNNING_OUT",
+  dormantStock: "DORMANT_STOCK",
+  overstock: "OVERSTOCK",
+  abnormalDamage: "ABNORMAL_DAMAGE",
+  unreliableSupplier: "UNRELIABLE_SUPPLIER",
+  expiringBatches: "EXPIRING_BATCHES",
 } as const satisfies Record<string, NotificationType>
 
 /** Paramètres de chaque type (stock-api, NotificationParams). */
@@ -49,12 +61,40 @@ export type TransferGap = {
   received: string
   baseUnit: BaseUnit
 }
+/**
+ * Article d'une alerte paramétrable (D44), dans un dépôt ; selon la règle, [days] (que le stock
+ * tient encore, depuis la dernière sortie, ou avant la date limite : négatif si elle est passée),
+ * [maximum], [damaged] et [percent], [batch] et [expiresOn] (AAAA-MM-JJ).
+ */
+export type RuleAlertLine = {
+  name: string
+  warehouseName: string
+  quantity: string
+  baseUnit: BaseUnit
+  days?: number
+  maximum?: string
+  damaged?: string
+  percent?: number
+  batch?: string
+  expiresOn?: string
+}
+/** Fournisseur peu fiable (D44) : réceptions de la période, dont avec écart. */
+export type SupplierAlertLine = {
+  name: string
+  receipts: number
+  withGap: number
+  percent: number
+}
 export type NotificationParams = {
   warehouseId?: string
   warehouseName?: string
   voucherId?: string
   voucherNumber?: string
-  items?: StockAlertLine[]
+  /** Avis de stock : StockAlertLine ; alerte paramétrable sur des articles : RuleAlertLine. */
+  items?: StockAlertLine[] | RuleAlertLine[]
+  /** Alerte paramétrable : nombre d'alertes apparues ; la liste n'en détaille que les premières. */
+  total?: number
+  suppliers?: SupplierAlertLine[]
   memberName?: string
   memberUserId?: string
   organizationName?: string

@@ -268,6 +268,28 @@
         "seeAll": "Rapports",
         "empty": "Aucun bon sur la période."
       }
+    },
+    "alertSettings": {
+      "open": "Régler les alertes",
+      "title": "Alertes du gérant",
+      "description": "Vérifiées chaque heure. Quand une alerte apparaît, le propriétaire et les gérants sont prévenus dans l’application et par e-mail, une seule fois.",
+      "rules": {
+        "forecastDays": "Prévenir quand le stock d’un article ne tient plus que ce nombre de jours, au rythme des sorties des 30 derniers jours.",
+        "dormantDays": "Prévenir quand un article en stock n’est pas sorti depuis ce nombre de jours.",
+        "damagePercent": "Prévenir quand la casse d’un article dépasse cette part de ce qui est parti (sorties et casse) sur 30 jours.",
+        "supplierGapPercent": "Prévenir quand cette part des réceptions d’un fournisseur arrive avec écart sur 90 jours (3 réceptions au moins).",
+        "expiryDays": "Prévenir quand un lot en stock atteint sa date limite dans ce nombre de jours, ou l’a dépassée."
+      },
+      "units": {
+        "days": "jours",
+        "percent": "%"
+      },
+      "between": "Un nombre entier entre {min} et {max}.",
+      "overstock": "Se règle sur la fiche de chaque article : le stock maximum, dépôt par dépôt, à côté du seuil d’alerte.",
+      "email": "Chacun peut couper l’e-mail d’une alerte et garder l’avis dans l’application :",
+      "emailLink": "préférences de notification",
+      "save": "Enregistrer",
+      "saved": "Alertes enregistrées. Elles s’appliquent dès la prochaine vérification."
     }
   },
   "menu": {
@@ -571,7 +593,11 @@
         "hint": "Proposé d’office sur les bons ; chaque ligne reste modifiable."
       },
       "referenceAuto": "Attribuée à la création",
-      "referenceHint": "Numérotée automatiquement (ART-0001, ART-0002…) : les références se suivent et ne changent pas."
+      "referenceHint": "Numérotée automatiquement (ART-0001, ART-0002…) : les références se suivent et ne changent pas.",
+      "maxQuantity": "Stock maximum",
+      "maxQuantityPlaceholder": "Aucun",
+      "maxQuantityHint": "Stock maximum : au-dessus, le propriétaire et les gérants sont prévenus d’un surstock. Vide : pas de maximum.",
+      "maxQuantityAboveMin": "Le stock maximum doit dépasser le seuil d’alerte."
     },
     "created": "Article créé.",
     "saved": "Article enregistré.",
@@ -627,8 +653,8 @@
       "inStock": "En stock",
       "breakdown": "soit {breakdown}",
       "byWarehouse": "Par dépôt",
-      "thresholds": "Seuils d’alerte",
-      "thresholdsHint": "Sous ce seuil, l’article passe « à commander » et les responsables du dépôt sont prévenus. Vide : pas d’alerte.",
+      "thresholds": "Seuils et maximums",
+      "thresholdsHint": "Sous le seuil, l’article passe « à commander » et les responsables du dépôt sont prévenus. Au-dessus du maximum, le propriétaire et les gérants sont prévenus d’un surstock. Vide : pas d’alerte.",
       "noWarehouse": "Cet article n’est proposé dans aucun de vos dépôts.",
       "threshold": "Seuil d’alerte : {quantity}",
       "noThreshold": "Pas de seuil d’alerte",
@@ -685,7 +711,8 @@
       "movementsChartSummary": "Sur la période : {inbound} entrés, {outbound} sortis.",
       "periodLabel": "Période de la courbe",
       "inbound": "Entrées",
-      "outbound": "Sorties"
+      "outbound": "Sorties",
+      "maximum": "maximum {quantity}"
     },
     "more": {
       "label": "Options du catalogue",
@@ -945,7 +972,8 @@
       "batchMismatchToast": "Un lot ne correspond pas à ce qui est déjà connu : voir la ligne signalée.",
       "mixedShades": "{name} : {count} nuances différentes sur ce bon.",
       "mixedCalibers": "{name} : {count} calibres différents sur ce bon.",
-      "mixedConsequence": "Le client risque de le voir à la pose : préférez un seul lot si possible."
+      "mixedConsequence": "Le client risque de le voir à la pose : préférez un seul lot si possible.",
+      "expiresOn": "Périme le"
     },
     "entry": {
       "see": "Voir le bon",
@@ -1557,6 +1585,43 @@
         "approved": "Votre sortie est validée : {number}",
         "by": "Par {name}.",
         "rejected": "Votre sortie est refusée · {warehouse}"
+      },
+      "RUNNING_OUT": {
+        "name": "Rupture prévue",
+        "when": "Pour le propriétaire et les gérants : quand, au rythme des sorties, le stock d’un article ne tiendra plus longtemps.",
+        "title": "{count, plural, one {# article va manquer} other {# articles vont manquer}}",
+        "line": "{name} ({warehouse}) : encore {days, plural, =0 {moins d’un jour} one {# jour} other {# jours}}"
+      },
+      "DORMANT_STOCK": {
+        "name": "Stock qui dort",
+        "when": "Pour le propriétaire et les gérants : quand un article en stock n’est pas sorti depuis longtemps.",
+        "title": "{count, plural, one {# article dort en stock} other {# articles dorment en stock}}",
+        "line": "{name} ({warehouse}) : {quantity}, sans sortie depuis {days, plural, one {# jour} other {# jours}}"
+      },
+      "OVERSTOCK": {
+        "name": "Surstock",
+        "when": "Pour le propriétaire et les gérants : quand un article dépasse le stock maximum de sa fiche.",
+        "title": "{count, plural, one {# article en surstock} other {# articles en surstock}}",
+        "line": "{name} ({warehouse}) : {quantity}, maximum {maximum}"
+      },
+      "ABNORMAL_DAMAGE": {
+        "name": "Casse anormale",
+        "when": "Pour le propriétaire et les gérants : quand la casse d’un article dépasse la part admise sur 30 jours.",
+        "title": "Casse anormale : {count, plural, one {# article} other {# articles}}",
+        "line": "{name} ({warehouse}) : {damaged} cassés, {percent} % de ce qui est parti"
+      },
+      "UNRELIABLE_SUPPLIER": {
+        "name": "Fournisseur peu fiable",
+        "when": "Pour le propriétaire et les gérants : quand trop de livraisons d’un fournisseur arrivent avec écart sur 90 jours.",
+        "title": "{count, plural, one {# fournisseur livre souvent avec écart} other {# fournisseurs livrent souvent avec écart}}",
+        "line": "{name} : {withGap} réceptions sur {receipts} avec écart"
+      },
+      "EXPIRING_BATCHES": {
+        "name": "Lots qui périment",
+        "when": "Pour le propriétaire et les gérants : quand un lot en stock approche de sa date limite.",
+        "title": "{count, plural, one {# lot proche de sa date limite} other {# lots proches de leur date limite}}",
+        "line": "{name}, lot {batch} ({warehouse}) : périme le {date}",
+        "expired": "{name}, lot {batch} ({warehouse}) : périmé depuis le {date}"
       }
     }
   },
@@ -1864,7 +1929,8 @@
   },
   "batches": {
     "shade": "nuance {shade}",
-    "caliber": "cal. {caliber}"
+    "caliber": "cal. {caliber}",
+    "expiresOn": "périme le {date}"
   },
   "records": {
     "edit": "Modifier",

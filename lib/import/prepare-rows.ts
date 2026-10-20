@@ -187,6 +187,7 @@ export function prepareRows(
         warehouses: context.warehouseIds.map((warehouseId) => ({
           warehouseId,
           minQuantity,
+          maxQuantity: null,
         })),
         categoryId: null,
       },

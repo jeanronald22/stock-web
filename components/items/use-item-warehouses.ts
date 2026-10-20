@@ -11,11 +11,12 @@ import {
 } from "@/lib/api/stock"
 import type { ItemStock, WarehouseStock } from "@/lib/api/vouchers"
 
-/** Un dépôt d'un article : son stock, son seuil, et ce que cela veut dire. */
+/** Un dépôt d'un article : son stock, son seuil et son maximum (D44), et ce que cela veut dire. */
 export type WarehouseLine = {
   warehouse: { id: string; name: string }
   stock: WarehouseStock | undefined
   minQuantity: number | null
+  maxQuantity: number | null
   /** Emplacement habituel dans ce dépôt (D37). */
   location: LocationRef | null
   state: StockState
@@ -73,6 +74,7 @@ export function itemWarehouses(
         warehouse,
         stock: entry,
         minQuantity,
+        maxQuantity: placement?.maxQuantity ?? null,
         location: placement?.location ?? null,
         state: stateOf(entry?.quantity ?? 0, minQuantity),
       }

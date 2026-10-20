@@ -268,6 +268,28 @@
         "seeAll": "Reports",
         "empty": "No voucher over the period."
       }
+    },
+    "alertSettings": {
+      "open": "Set up alerts",
+      "title": "Manager alerts",
+      "description": "Checked every hour. When an alert appears, the owner and general managers are told in the app and by email, once.",
+      "rules": {
+        "forecastDays": "Warn when an item’s stock will only last this many days, at the pace of issues over the last 30 days.",
+        "dormantDays": "Warn when an item in stock has not gone out for this many days.",
+        "damagePercent": "Warn when an item’s damage exceeds this share of what went out (issues and damage) over 30 days.",
+        "supplierGapPercent": "Warn when this share of a supplier’s receipts arrives with a gap over 90 days (at least 3 receipts).",
+        "expiryDays": "Warn when a batch in stock reaches its expiry date within this many days, or has passed it."
+      },
+      "units": {
+        "days": "days",
+        "percent": "%"
+      },
+      "between": "A whole number between {min} and {max}.",
+      "overstock": "Set on each item’s record: the maximum stock, warehouse by warehouse, next to the alert threshold.",
+      "email": "Everyone can turn off an alert’s email and keep the in-app notice:",
+      "emailLink": "notification preferences",
+      "save": "Save",
+      "saved": "Alerts saved. They apply from the next check."
     }
   },
   "menu": {
@@ -571,7 +593,11 @@
         "hint": "Suggested on every voucher; each line can still be changed."
       },
       "referenceAuto": "Assigned on creation",
-      "referenceHint": "Numbered automatically (ART-0001, ART-0002…): references follow on and never change."
+      "referenceHint": "Numbered automatically (ART-0001, ART-0002…): references follow on and never change.",
+      "maxQuantity": "Maximum stock",
+      "maxQuantityPlaceholder": "None",
+      "maxQuantityHint": "Maximum stock: above it, the owner and general managers are told about overstock. Empty: no maximum.",
+      "maxQuantityAboveMin": "The maximum stock must be above the alert threshold."
     },
     "created": "Item created.",
     "saved": "Item saved.",
@@ -627,8 +653,8 @@
       "inStock": "In stock",
       "breakdown": "that is {breakdown}",
       "byWarehouse": "By warehouse",
-      "thresholds": "Alert thresholds",
-      "thresholdsHint": "Below this threshold, the item becomes “to order” and the warehouse managers are notified. Empty: no alert.",
+      "thresholds": "Thresholds and maximums",
+      "thresholdsHint": "Below the threshold, the item becomes “to order” and the warehouse managers are notified. Above the maximum, the owner and general managers are told about overstock. Empty: no alert.",
       "noWarehouse": "This item is not offered in any of your warehouses.",
       "threshold": "Alert threshold: {quantity}",
       "noThreshold": "No alert threshold",
@@ -685,7 +711,8 @@
       "movementsChartSummary": "Over the period: {inbound} in, {outbound} out.",
       "periodLabel": "Period shown",
       "inbound": "Ins",
-      "outbound": "Outs"
+      "outbound": "Outs",
+      "maximum": "maximum {quantity}"
     },
     "more": {
       "label": "Catalogue options",
@@ -945,7 +972,8 @@
       "batchMismatchToast": "A batch does not match what is already known: see the flagged line.",
       "mixedShades": "{name}: {count} different shades on this voucher.",
       "mixedCalibers": "{name}: {count} different calibers on this voucher.",
-      "mixedConsequence": "The customer may notice when laying them: prefer a single batch if possible."
+      "mixedConsequence": "The customer may notice when laying them: prefer a single batch if possible.",
+      "expiresOn": "Expires"
     },
     "entry": {
       "see": "See voucher",
@@ -1557,6 +1585,43 @@
         "approved": "Your issue is approved: {number}",
         "by": "By {name}.",
         "rejected": "Your issue is rejected · {warehouse}"
+      },
+      "RUNNING_OUT": {
+        "name": "Expected stockout",
+        "when": "For the owner and general managers: when, at the current pace of issues, an item’s stock will not last long.",
+        "title": "{count, plural, one {# item will run out} other {# items will run out}}",
+        "line": "{name} ({warehouse}): {days, plural, =0 {less than a day} one {# day} other {# days}} left"
+      },
+      "DORMANT_STOCK": {
+        "name": "Dormant stock",
+        "when": "For the owner and general managers: when an item in stock has not gone out for a long time.",
+        "title": "{count, plural, one {# item is dormant} other {# items are dormant}}",
+        "line": "{name} ({warehouse}): {quantity}, no issue for {days, plural, one {# day} other {# days}}"
+      },
+      "OVERSTOCK": {
+        "name": "Overstock",
+        "when": "For the owner and general managers: when an item goes above the maximum stock on its record.",
+        "title": "{count, plural, one {# item overstocked} other {# items overstocked}}",
+        "line": "{name} ({warehouse}): {quantity}, maximum {maximum}"
+      },
+      "ABNORMAL_DAMAGE": {
+        "name": "Abnormal damage",
+        "when": "For the owner and general managers: when an item’s damage goes beyond the accepted share over 30 days.",
+        "title": "Abnormal damage: {count, plural, one {# item} other {# items}}",
+        "line": "{name} ({warehouse}): {damaged} damaged, {percent}% of what went out"
+      },
+      "UNRELIABLE_SUPPLIER": {
+        "name": "Unreliable supplier",
+        "when": "For the owner and general managers: when too many of a supplier’s deliveries arrive with a gap over 90 days.",
+        "title": "{count, plural, one {# supplier often delivers with gaps} other {# suppliers often deliver with gaps}}",
+        "line": "{name}: {withGap} of {receipts} receipts with a gap"
+      },
+      "EXPIRING_BATCHES": {
+        "name": "Expiring batches",
+        "when": "For the owner and general managers: when a batch in stock nears its expiry date.",
+        "title": "{count, plural, one {# batch near its expiry date} other {# batches near their expiry date}}",
+        "line": "{name}, batch {batch} ({warehouse}): expires {date}",
+        "expired": "{name}, batch {batch} ({warehouse}): expired since {date}"
       }
     }
   },
@@ -1864,7 +1929,8 @@
   },
   "batches": {
     "shade": "shade {shade}",
-    "caliber": "cal. {caliber}"
+    "caliber": "cal. {caliber}",
+    "expiresOn": "expires {date}"
   },
   "records": {
     "edit": "Edit",

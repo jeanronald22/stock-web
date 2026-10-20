@@ -1,6 +1,6 @@
 "use client"
 
-import { useTranslations } from "next-intl"
+import { useFormatter, useTranslations } from "next-intl"
 import { useCallback } from "react"
 
 import type { BaseUnit } from "@/lib/api/stock"
@@ -14,22 +14,45 @@ export function useQuantityLabel() {
   )
 }
 
-/** Caractéristiques d'un lot (D35) : nuance et calibre, quand on les connaît. */
-export type BatchTraits = { shade?: string | null; caliber?: string | null }
+/**
+ * Caractéristiques d'un lot, quand on les connaît : nuance et calibre (D35), date limite AAAA-MM-JJ
+ * (D44).
+ */
+export type BatchTraits = {
+  shade?: string | null
+  caliber?: string | null
+  expiresOn?: string | null
+}
 
-/** « L2409 · nuance B2 · cal. 9 » : le lot et ce qui le distingue à l'œil (D35). */
+/** « 12 nov. 2026 » : un jour AAAA-MM-JJ, lu à midi pour qu'aucun fuseau ne le décale. */
+export function useDayLabel() {
+  const format = useFormatter()
+  return useCallback(
+    (day: string) =>
+      format.dateTime(new Date(`${day}T12:00:00`), { dateStyle: "medium" }),
+    [format]
+  )
+}
+
+/**
+ * « L2409 · nuance B2 · cal. 9 · périme le 12 nov. 2026 » : le lot, ce qui le distingue à l'œil
+ * (D35) et sa date limite (D44).
+ */
 export function useBatchLabel() {
   const t = useTranslations("batches")
+  const dayLabel = useDayLabel()
   return useCallback(
     (batch: string, traits?: BatchTraits) =>
       [
         batch,
         traits?.shade && t("shade", { shade: traits.shade }),
         traits?.caliber && t("caliber", { caliber: traits.caliber }),
+        traits?.expiresOn &&
+          t("expiresOn", { date: dayLabel(traits.expiresOn) }),
       ]
         .filter(Boolean)
         .join(" · "),
-    [t]
+    [t, dayLabel]
   )
 }
 

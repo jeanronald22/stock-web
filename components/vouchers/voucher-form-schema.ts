@@ -90,9 +90,11 @@ export function voucherFormSchema(
             expected: z.string(),
             // Retour depuis un bon : ce qui reste à retourner, en unité de base (D31).
             limit: z.number().nullable(),
-            // Réception d'un article suivi par lot : nuance et calibre du lot (D35).
+            // Réception d'un article suivi par lot : nuance et calibre du lot (D35), date limite
+            // AAAA-MM-JJ, vide si le lot ne périme pas (D44).
             shade: text(VoucherLimits.batchTrait),
             caliber: text(VoucherLimits.batchTrait),
+            expiresOn: z.string(),
           })
         )
         .min(1, messages.linesRequired)
@@ -218,6 +220,7 @@ export function newLine(
     limit: preset?.limit ?? null,
     shade: "",
     caliber: "",
+    expiresOn: "",
   }
 }
 
@@ -275,6 +278,7 @@ export function toVoucherInput(
         ? {
             shade: line.shade.trim() || undefined,
             caliber: line.caliber.trim() || undefined,
+            expiresOn: line.expiresOn || undefined,
           }
         : {}),
     })),

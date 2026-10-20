@@ -57,6 +57,7 @@ export function useItemForm(
         invalidNumber: t("validation.invalidNumber"),
         positive: t("validation.positive"),
         wholeNumber: t("validation.wholeNumber"),
+        maximumAboveMinimum: t("items.form.maxQuantityAboveMin"),
         duplicateName: t("validation.duplicateName"),
         invalidBarcode: t("items.form.barcodeInvalid"),
       })

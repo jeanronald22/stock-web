@@ -32,6 +32,7 @@ import {
 } from "@/lib/reports/activity"
 import { ListQueryParams, Routes } from "@/lib/routes"
 
+import { AlertSettingsSheet, useCanSetAlerts } from "./alert-settings-sheet"
 import { BoardAlerts } from "./board-alerts"
 import {
   ReceiptConformityCard,
@@ -60,6 +61,7 @@ export function ManagerBoard() {
   const domains = useBoardDomains()
   const params = useSearchParams()
   const analysis = useActivityAnalysis(report.search)
+  const setsAlerts = useCanSetAlerts()
 
   // Les rapports et le stock reprennent les filtres du tableau ; la période y est toujours écrite.
   const reportParams = new URLSearchParams(params)
@@ -73,7 +75,12 @@ export function ManagerBoard() {
 
   return (
     <div className="space-y-6">
-      <BoardAlerts analysis={analysis.data} reportQuery={reportQuery} />
+      <div className="flex flex-wrap items-start gap-2">
+        <div className="min-w-0 flex-1">
+          <BoardAlerts analysis={analysis.data} reportQuery={reportQuery} />
+        </div>
+        {setsAlerts && <AlertSettingsSheet />}
+      </div>
 
       <div className="space-y-3">
         <BoardDomainChips domains={domains} />

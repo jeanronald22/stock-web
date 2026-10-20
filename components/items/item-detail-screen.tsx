@@ -408,6 +408,10 @@ function StockPreview({
                   : t("threshold", {
                       quantity: quantityLabel(item.baseUnit, line.minQuantity),
                     })}
+                {line.maxQuantity !== null &&
+                  ` · ${t("maximum", {
+                    quantity: quantityLabel(item.baseUnit, line.maxQuantity),
+                  })}`}
               </p>
             </li>
           ))}
