@@ -39,6 +39,7 @@ import {
   VoucherTypesCard,
 } from "./board-charts"
 import { BoardDomain, BoardDomainChips, useBoardDomains } from "./board-domains"
+import { BoardMasonry } from "./board-masonry"
 import { Dormant, ItemFocus, RunningOut, TopIssued } from "./board-items"
 import {
   CustomersCard,
@@ -130,64 +131,56 @@ function Board({
   // Un article choisi : sa fiche en tête, avec sa courbe en quantités, qui remplace celle des bons ;
   // les classements d'articles n'ont plus d'objet.
   const ranksItems = itemId === undefined
+  const activity = shows(BoardDomain.activity)
+  const stock = shows(BoardDomain.stock)
+  const issues = shows(BoardDomain.issues)
+  const quality = shows(BoardDomain.quality)
   return (
-    <div className="space-y-6">
-      {itemId && <ItemFocus itemId={itemId} analysis={analysis} />}
-      <div className="grid gap-4 lg:grid-cols-3">
-        {shows(BoardDomain.activity) && (
-          <>
-            <ActivityTiles
-              analysis={analysis}
-              query={reportQuery}
-              className="lg:col-span-3"
-            />
-            {ranksItems && (
-              <BoardCard
-                title={t("chart.title")}
-                description={t(
-                  `chart.${activityStep(analysis.activity.length)}`
-                )}
-                link={{
-                  href: `${Routes.reports}?${reportQuery}`,
-                  label: t("chart.details"),
-                }}
-                className="lg:col-span-2"
-              >
-                <ActivityChart activity={analysis.activity} />
-              </BoardCard>
-            )}
-            <VoucherTypesCard analysis={analysis} query={reportQuery} />
-          </>
+    <div className="space-y-4">
+      {itemId && (
+        <div className="pb-2">
+          <ItemFocus itemId={itemId} analysis={analysis} />
+        </div>
+      )}
+      {activity && <ActivityTiles analysis={analysis} query={reportQuery} />}
+      {activity && ranksItems && (
+        <div className="grid gap-4 lg:grid-cols-3 lg:items-start">
+          <BoardCard
+            title={t("chart.title")}
+            description={t(`chart.${activityStep(analysis.activity.length)}`)}
+            link={{
+              href: `${Routes.reports}?${reportQuery}`,
+              label: t("chart.details"),
+            }}
+            className="lg:col-span-2"
+          >
+            <ActivityChart activity={analysis.activity} />
+          </BoardCard>
+          <VoucherTypesCard analysis={analysis} query={reportQuery} />
+        </div>
+      )}
+      {stock && <WarehousesCard warehouses={analysis.warehouses} />}
+      <BoardMasonry>
+        {activity && !ranksItems && (
+          <VoucherTypesCard analysis={analysis} query={reportQuery} />
         )}
-        {shows(BoardDomain.stock) && (
-          <>
-            <StockStateCard
-              stock={analysis.stock}
-              warehouseQuery={warehouseQuery}
-            />
-            {ranksItems && <RunningOut rows={analysis.runningOut} />}
-            {ranksItems && <Dormant analysis={analysis} />}
-            <WarehousesCard
-              warehouses={analysis.warehouses}
-              className="lg:col-span-3"
-            />
-          </>
+        {stock && (
+          <StockStateCard
+            stock={analysis.stock}
+            warehouseQuery={warehouseQuery}
+          />
         )}
-        {shows(BoardDomain.issues) && (
-          <>
-            {ranksItems && <TopIssued analysis={analysis} />}
-            <CustomersCard analysis={analysis} />
-          </>
+        {stock && ranksItems && <RunningOut rows={analysis.runningOut} />}
+        {stock && ranksItems && <Dormant analysis={analysis} />}
+        {issues && ranksItems && <TopIssued analysis={analysis} />}
+        {issues && <CustomersCard analysis={analysis} />}
+        {quality && <DamageCard analysis={analysis} query={reportQuery} />}
+        {quality && (
+          <ReceiptConformityCard analysis={analysis} query={reportQuery} />
         )}
-        {shows(BoardDomain.quality) && (
-          <>
-            <DamageCard analysis={analysis} query={reportQuery} />
-            <ReceiptConformityCard analysis={analysis} query={reportQuery} />
-            <SuppliersCard analysis={analysis} query={reportQuery} />
-          </>
-        )}
+        {quality && <SuppliersCard analysis={analysis} query={reportQuery} />}
         {shows(BoardDomain.team) && <TeamCard analysis={analysis} />}
-      </div>
+      </BoardMasonry>
     </div>
   )
 }
@@ -196,11 +189,9 @@ function Board({
 function ActivityTiles({
   analysis,
   query,
-  className,
 }: {
   analysis: ActivityAnalysis
   query: string
-  className?: string
 }) {
   const t = useTranslations("analysis.tiles")
   const { totals, previousTotals } = analysis
@@ -209,7 +200,7 @@ function ActivityTiles({
   const damage = totals[VoucherType.damage] ?? 0
   const gaps = analysis.receiptsWithDiscrepancy
   return (
-    <StatGrid columns={4} className={className}>
+    <StatGrid columns={4}>
       <StatTile
         label={t("inbound")}
         value={inbound}

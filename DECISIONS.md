@@ -469,7 +469,7 @@ Questionnaire : rapports au gérant (Q1) ; produits à écarts (Q33) ; casse (Q3
 - **En tête, ce qui attend un geste**, en pastilles qui ouvrent la liste concernée, seulement s'il y a quelque chose : sorties à valider, transferts à réceptionner, articles en rupture, articles à commander, inventaires en cours, réceptions avec écart. Sinon : « Rien n'attend de décision ».
 - **Domaines** (Activité, Stock, Sorties, Qualité, Équipe) en puces : « Tout » par défaut. Choisir un domaine ne garde que ses cartes, et les suivants s'ajoutent.
 - **Filtres** : dépôts, un article (par nom, référence ou code-barres) et la période (raccourcis ou calendrier, 30 derniers jours par défaut, un an au plus). Domaines et filtres sont gardés dans l'adresse.
-- **Cartes** :
+- **Cartes**, chacune à la hauteur de son contenu (aucune n'impose sa taille à sa voisine), en colonnes équilibrées par le navigateur :
   - activité : quatre chiffres comparés à la période précédente de même durée (bons d'entrée, de sortie, de casse, réceptions avec écart), la courbe des bons (par jour jusqu'à 31 jours, par semaine jusqu'à 4 mois, puis par mois) et les bons par type ;
   - stock : l'état du stock en anneau (suffisant, à commander, en rupture, chacun vers « Stock » filtré), ceux qui vont manquer (stock d'aujourd'hui divisé par le rythme des sorties de la période, sous 30 jours), le stock qui dort (en stock, sans sortie sur la période), et dépôt par dépôt ;
   - sorties : les articles les plus sortis (en nombre de sorties) et les clients qui en reçoivent le plus ;
