@@ -583,7 +583,7 @@ function VoucherEntryForm({
       <form
         onSubmit={(event) => void form.handleSubmit(submit)(event)}
         noValidate
-        className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start"
+        className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start"
       >
         <div className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-2">

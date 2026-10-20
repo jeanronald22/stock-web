@@ -223,7 +223,7 @@ function TransferReceiptForm({ transfer }: { transfer: Voucher }) {
       <form
         onSubmit={(event) => void submit(event)}
         noValidate
-        className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start"
+        className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start"
       >
         <ul className="space-y-3">
           {transfer.lines.map((line, index) => {
