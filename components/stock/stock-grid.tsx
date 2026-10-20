@@ -46,16 +46,14 @@ export function StockGrid({
           >
             <p
               className={cn(
-                "text-xl font-semibold tabular-nums",
+                "num text-xl font-semibold",
                 row.state === StockState.out && "text-destructive"
               )}
             >
               {quantityLabel(row.item.baseUnit, row.quantity)}
             </p>
             {packs && (
-              <p className="text-xs text-muted-foreground tabular-nums">
-                {packs}
-              </p>
+              <p className="num text-xs text-muted-foreground">{packs}</p>
             )}
             {alert && (
               <p

@@ -38,6 +38,7 @@ import {
   ExportButton,
   ReportEmpty,
   ReportSection,
+  StatGrid,
   StatTile,
   StatTone,
   useReportQuantity,
@@ -92,36 +93,40 @@ export function MovementsReportScreen() {
 
 function Totals({ report }: { report: MovementsReport }) {
   const t = useTranslations("reports.movements.totals")
+  const inbound = totalOf(report.totals, INBOUND_TYPES)
+  const outbound = totalOf(report.totals, OUTBOUND_TYPES)
+  const damage = report.totals[VoucherType.damage] ?? 0
+  const adjustments = report.totals[VoucherType.adjustment] ?? 0
   return (
-    <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <StatGrid columns={4}>
       <StatTile
         label={t("inbound")}
-        value={totalOf(report.totals, INBOUND_TYPES)}
-        hint={t("vouchers")}
+        value={inbound}
+        hint={t("vouchers", { count: inbound })}
         icon={ArrowDownToLineIcon}
         tone={StatTone.good}
       />
       <StatTile
         label={t("outbound")}
-        value={totalOf(report.totals, OUTBOUND_TYPES)}
-        hint={t("vouchers")}
+        value={outbound}
+        hint={t("vouchers", { count: outbound })}
         icon={ArrowUpFromLineIcon}
       />
       <StatTile
         label={t("damage")}
-        value={report.totals[VoucherType.damage] ?? 0}
-        hint={t("vouchers")}
+        value={damage}
+        hint={t("vouchers", { count: damage })}
         icon={PackageXIcon}
         tone={StatTone.bad}
       />
       <StatTile
         label={t("adjustments")}
-        value={report.totals[VoucherType.adjustment] ?? 0}
-        hint={t("vouchers")}
+        value={adjustments}
+        hint={t("vouchers", { count: adjustments })}
         icon={SlidersHorizontalIcon}
         tone={StatTone.warning}
       />
-    </dl>
+    </StatGrid>
   )
 }
 
@@ -175,7 +180,7 @@ function ItemsTable({ rows }: { rows: ItemMovements[] }) {
                 >
                   {row.item.name}
                 </Link>
-                <p className="mt-1 text-sm text-muted-foreground tabular-nums">
+                <p className="mt-1 num text-sm text-muted-foreground">
                   {t("compact", {
                     inbound: quantity(row.item.baseUnit, inbound(row)),
                     outbound: quantity(row.item.baseUnit, outbound(row)),
@@ -228,27 +233,27 @@ function ItemsTable({ rows }: { rows: ItemMovements[] }) {
                           </p>
                         )}
                       </TableCell>
-                      <TableCell className="text-right tabular-nums">
+                      <TableCell className="text-right num">
                         {quantity(unit, inbound(row))}
                       </TableCell>
-                      <TableCell className="text-right tabular-nums">
+                      <TableCell className="text-right num">
                         {quantity(unit, outbound(row))}
                       </TableCell>
-                      <TableCell className="text-right text-muted-foreground tabular-nums">
+                      <TableCell className="text-right num text-muted-foreground">
                         {quantity(unit, transfers(row), true)}
                       </TableCell>
                       <TableCell
                         className={cn(
-                          "text-right tabular-nums",
+                          "text-right num",
                           row.damaged > 0 && "text-destructive"
                         )}
                       >
                         {quantity(unit, row.damaged)}
                       </TableCell>
-                      <TableCell className="text-right text-muted-foreground tabular-nums">
+                      <TableCell className="text-right num text-muted-foreground">
                         {quantity(unit, row.adjusted, true)}
                       </TableCell>
-                      <TableCell className="pr-4 text-right font-semibold tabular-nums">
+                      <TableCell className="pr-4 text-right num font-semibold">
                         {quantity(unit, row.net, true)}
                       </TableCell>
                     </TableRow>
@@ -272,11 +277,7 @@ function ItemsTable({ rows }: { rows: ItemMovements[] }) {
 export function ReportSkeleton() {
   return (
     <div className="space-y-8" aria-hidden>
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {Array.from({ length: 4 }, (_, index) => (
-          <Skeleton key={index} className="h-28 rounded-2xl" />
-        ))}
-      </div>
+      <Skeleton className="h-56 rounded-2xl lg:h-28" />
       <Skeleton className="h-64 rounded-2xl" />
       <Skeleton className="h-72 rounded-2xl" />
     </div>

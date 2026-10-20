@@ -122,9 +122,7 @@ export function StorekeeperOverview() {
                 <dt className="text-xs text-muted-foreground">
                   {t(`counts.${entry.key}`)}
                 </dt>
-                <dd className="text-2xl font-semibold tabular-nums">
-                  {entry.value}
-                </dd>
+                <dd className="num text-2xl font-semibold">{entry.value}</dd>
               </div>
             ))}
           </dl>

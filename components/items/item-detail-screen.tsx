@@ -13,12 +13,17 @@ import { toast } from "sonner"
 import { useCategoryTree } from "@/components/categories/use-category-tree"
 import { ItemLocationPicker } from "@/components/locations/item-location-picker"
 import { RecordActions } from "@/components/records/record-actions"
+import {
+  RecordSummary,
+  RecordSummaryFigure,
+} from "@/components/records/record-summary"
 import { RecordFacts } from "@/components/records/record-facts"
 import {
   RecordNotFound,
   RecordSkeleton,
 } from "@/components/records/record-states"
 import { VoucherHistory } from "@/components/records/voucher-history"
+import { StockGauge } from "@/components/stock/stock-gauge"
 import { StockStateBadge } from "@/components/stock/stock-state-badge"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -206,39 +211,31 @@ function StockSummary({
   const breakdown = usePackagingBreakdown()(item, total)
   const format = useFormatter()
   return (
-    <section
-      aria-labelledby="item-stock-title"
-      className="mt-8 flex items-center gap-4 rounded-2xl border bg-muted/30 p-4 sm:gap-8 sm:p-5"
+    <RecordSummary
+      label={t("inStock")}
+      visual={
+        // Téléphone : la photo reste à côté du chiffre, qui doit se lire sans faire défiler.
+        <ItemThumb
+          imageUrl={item.imageUrl}
+          size="xl"
+          className="size-16 rounded-xl sm:size-20 [&_svg]:size-7 sm:[&_svg]:size-8"
+        />
+      }
     >
-      {/* Téléphone : la photo reste à côté du chiffre, qui doit se lire sans faire défiler. */}
-      <ItemThumb
-        imageUrl={item.imageUrl}
-        size="xl"
-        className="size-16 rounded-xl sm:size-28 sm:rounded-2xl [&_svg]:size-7 sm:[&_svg]:size-10"
-      />
-      <div className="min-w-0">
-        <h2 id="item-stock-title" className="text-sm text-muted-foreground">
-          {t("inStock")}
-        </h2>
-        {loaded ? (
-          <p className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className="text-4xl font-semibold tracking-tight tabular-nums sm:text-5xl">
-              {format.number(total)}
-            </span>
-            <span className="text-lg text-muted-foreground">
-              {tUnits(`${item.baseUnit}.unitPlural`, { count: total })}
-            </span>
-          </p>
-        ) : (
-          <Skeleton className="mt-2 h-12 w-40" />
-        )}
-        {breakdown && (
-          <p className="mt-1 text-muted-foreground tabular-nums">
-            {t("breakdown", { breakdown })}
-          </p>
-        )}
-      </div>
-    </section>
+      {loaded ? (
+        <RecordSummaryFigure
+          value={format.number(total)}
+          unit={tUnits(`${item.baseUnit}.unitPlural`, { count: total })}
+        />
+      ) : (
+        <Skeleton className="mt-2 h-10 w-40" />
+      )}
+      {breakdown && (
+        <p className="mt-0.5 num text-sm text-muted-foreground">
+          {t("breakdown", { breakdown })}
+        </p>
+      )}
+    </RecordSummary>
   )
 }
 
@@ -303,6 +300,14 @@ function WarehouseStock({
                         ),
                       })}
                 </p>
+                {line.minQuantity !== null && (
+                  <StockGauge
+                    quantity={line.stock?.quantity ?? 0}
+                    threshold={line.minQuantity}
+                    state={line.state}
+                    className="my-2 max-w-xs"
+                  />
+                )}
                 <ItemLocationPicker
                   itemId={item.id}
                   itemName={item.name}
@@ -332,7 +337,7 @@ function WarehouseStock({
               </div>
               <p
                 className={cn(
-                  "text-xl font-semibold tabular-nums",
+                  "num text-xl font-semibold",
                   line.state === StockState.out && "text-destructive"
                 )}
               >
@@ -373,7 +378,7 @@ function ItemHistory({ item }: { item: Item }) {
         return (
           <span
             className={cn(
-              "font-semibold tabular-nums",
+              "num font-semibold",
               movement > 0 && "text-success-muted-foreground"
             )}
           >

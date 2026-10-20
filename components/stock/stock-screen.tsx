@@ -259,7 +259,7 @@ export function StockScreen() {
                           <div className="flex flex-col items-end gap-1">
                             <span
                               className={cn(
-                                "font-semibold tabular-nums",
+                                "num font-semibold",
                                 row.quantity === 0 && "text-muted-foreground"
                               )}
                             >

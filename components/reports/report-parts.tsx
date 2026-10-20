@@ -37,6 +37,41 @@ export function changeOf(current: number, previous: number): number | null {
  * Un chiffre de la période, en grand, avec ce qu'il compte et, au besoin, sa variation. Toute la
  * tuile mène au détail ([href]).
  */
+const TONE_COLORS: Record<StatTone, string> = {
+  [StatTone.neutral]: "text-muted-foreground",
+  [StatTone.good]: "text-primary",
+  [StatTone.warning]: "text-warning",
+  [StatTone.bad]: "text-destructive",
+}
+
+const STAT_COLUMNS = {
+  3: "lg:grid-cols-3",
+  4: "lg:grid-cols-4",
+} as const
+
+/**
+ * Chiffres côte à côte, en un seul bloc séparé par des filets. Sur téléphone, deux par ligne ; un
+ * dernier chiffre seul prend toute la ligne plutôt que de laisser une case vide.
+ */
+export function StatGrid({
+  columns,
+  className,
+  ...props
+}: {
+  columns: keyof typeof STAT_COLUMNS
+} & React.ComponentProps<"dl">) {
+  return (
+    <dl
+      className={cn(
+        "grid grid-cols-2 gap-px overflow-hidden rounded-2xl border bg-border [&>*:last-child:nth-child(odd)]:col-span-2 lg:[&>*:last-child:nth-child(odd)]:col-span-1",
+        STAT_COLUMNS[columns],
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
 export function StatTile({
   label,
   value,
@@ -59,24 +94,13 @@ export function StatTile({
   const body = (
     <>
       <div className="flex items-center justify-between gap-2">
-        <span className="text-sm text-muted-foreground">{label}</span>
-        <span
-          className={cn(
-            "flex size-8 items-center justify-center rounded-lg",
-            tone === StatTone.good && "bg-primary/10 text-primary",
-            tone === StatTone.warning &&
-              "bg-warning-muted text-warning-muted-foreground",
-            tone === StatTone.bad && "bg-destructive/10 text-destructive",
-            tone === StatTone.neutral && "bg-muted text-muted-foreground"
-          )}
+        <span className="label-caps">{label}</span>
+        <Icon
+          className={cn("size-4 shrink-0", TONE_COLORS[tone])}
           aria-hidden
-        >
-          <Icon className="size-4" />
-        </span>
+        />
       </div>
-      <p className="mt-2 text-3xl font-semibold tracking-tight tabular-nums">
-        {value}
-      </p>
+      <p className="mt-3 num text-3xl font-semibold">{value}</p>
       <p className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
         {change !== undefined && change !== null && (
           <span
@@ -97,14 +121,13 @@ export function StatTile({
       </p>
     </>
   )
-  const className =
-    "flex flex-col rounded-2xl border bg-card p-4 transition-colors sm:p-5"
+  const className = "flex flex-col bg-card p-4 transition-colors sm:p-5"
   return href ? (
     <Link
       href={href}
       className={cn(
         className,
-        "hover:border-foreground/20 hover:bg-muted/30 focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:outline-none"
+        "hover:bg-muted/40 focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:outline-none focus-visible:ring-inset"
       )}
     >
       {body}

@@ -148,7 +148,7 @@ function RequestDetails({ request }: { request: VoucherRequest }) {
       <dl className="mt-6 grid gap-4 rounded-2xl border p-5 sm:grid-cols-2 lg:grid-cols-4">
         {facts.map((fact) => (
           <div key={fact.label}>
-            <dt className="text-sm text-muted-foreground">{fact.label}</dt>
+            <dt className="label-caps">{fact.label}</dt>
             <dd className="mt-0.5 font-semibold">{fact.value}</dd>
           </div>
         ))}
@@ -187,7 +187,7 @@ function RequestDetails({ request }: { request: VoucherRequest }) {
                 </p>
               </div>
               <div className="text-right">
-                <p className="font-semibold tabular-nums">
+                <p className="num font-semibold">
                   {line.packagingName
                     ? `${format.number(line.enteredQuantity)} ${line.packagingName}`
                     : quantityLabel(line.item.baseUnit, line.enteredQuantity)}

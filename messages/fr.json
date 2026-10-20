@@ -219,10 +219,10 @@
       "tiles": {
         "inbound": "Entrées",
         "outbound": "Sorties",
-        "vouchers": "bons",
+        "vouchers": "{count, plural, one {bon} other {bons}}",
         "damage": "Casse",
         "gaps": "Écarts à la réception",
-        "gapsHint": "livraisons non conformes",
+        "gapsHint": "{count, plural, one {livraison non conforme} other {livraisons non conformes}}",
         "inventories": "Inventaires en cours",
         "inventoriesHint": "à compter, puis clôturer"
       }
@@ -466,7 +466,6 @@
     },
     "detail": {
       "editTitle": "Modifier le dépôt",
-      "summary": "En bref",
       "offered": "Articles proposés ici",
       "items": "{count, plural, one {article} other {articles}}",
       "toOrderCount": "{count, plural, one {# article à commander} other {# articles à commander}}",
@@ -1136,7 +1135,6 @@
     "notFound": "Ce fournisseur n’existe pas ou a été retiré.",
     "detail": {
       "editTitle": "Modifier le fournisseur",
-      "summary": "En bref",
       "lastReceipt": "Dernière livraison",
       "receiptCount": "{count, plural, one {# réception en tout} other {# réceptions en tout}}",
       "neverDelivered": "Aucune réception pour l’instant.",
@@ -1505,7 +1503,6 @@
     },
     "detail": {
       "editTitle": "Modifier le client",
-      "summary": "En bref",
       "lastIssue": "Dernière livraison",
       "issueCount": "{count, plural, one {# sortie en tout} other {# sorties en tout}}",
       "neverServed": "Aucune sortie pour l’instant.",
@@ -2145,7 +2142,7 @@
         "outbound": "Sorties",
         "damage": "Casse",
         "adjustments": "Ajustements",
-        "vouchers": "bons"
+        "vouchers": "{count, plural, one {bon} other {bons}}"
       }
     },
     "damage": {

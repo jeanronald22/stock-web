@@ -88,7 +88,7 @@ export function ImportReviewStep({
           <ul className="divide-y rounded-2xl border text-sm">
             {blocked.slice(0, PROBLEM_ROWS).map((row) => (
               <li key={row.line} className="flex gap-3 px-4 py-2.5">
-                <span className="w-16 shrink-0 text-muted-foreground tabular-nums">
+                <span className="w-16 shrink-0 num text-muted-foreground">
                   {t("line", { line: row.line })}
                 </span>
                 <span className="min-w-0">
@@ -157,7 +157,7 @@ export function ImportReviewStep({
                         {packaging &&
                           `${packaging.name} = ${quantityLabel(row.item.baseUnit, packaging.quantity)}`}
                       </TableCell>
-                      <TableCell className="pr-4 text-right tabular-nums">
+                      <TableCell className="pr-4 text-right num">
                         {row.opening &&
                           quantityLabel(
                             row.item.baseUnit,
@@ -192,10 +192,10 @@ function Stat({
 }) {
   return (
     <div className="rounded-2xl border p-3 sm:p-4">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
+      <dt className="label-caps">{label}</dt>
       <dd
         className={cn(
-          "mt-1 text-2xl font-semibold tabular-nums sm:text-3xl",
+          "mt-1 num text-2xl font-semibold sm:text-3xl",
           tone === StatTone.good && "text-primary",
           tone === StatTone.bad && "text-destructive"
         )}

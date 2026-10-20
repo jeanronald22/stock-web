@@ -219,10 +219,10 @@
       "tiles": {
         "inbound": "Ins",
         "outbound": "Outs",
-        "vouchers": "vouchers",
+        "vouchers": "{count, plural, one {voucher} other {vouchers}}",
         "damage": "Damage",
         "gaps": "Receipt discrepancies",
-        "gapsHint": "deliveries not as announced",
+        "gapsHint": "{count, plural, one {delivery not as announced} other {deliveries not as announced}}",
         "inventories": "Counts in progress",
         "inventoriesHint": "to count, then close"
       }
@@ -466,7 +466,6 @@
     },
     "detail": {
       "editTitle": "Edit warehouse",
-      "summary": "At a glance",
       "offered": "Items offered here",
       "items": "{count, plural, one {item} other {items}}",
       "toOrderCount": "{count, plural, one {# item to order} other {# items to order}}",
@@ -1136,7 +1135,6 @@
     "notFound": "This supplier does not exist or was removed.",
     "detail": {
       "editTitle": "Edit supplier",
-      "summary": "At a glance",
       "lastReceipt": "Last delivery",
       "receiptCount": "{count, plural, one {# receipt in all} other {# receipts in all}}",
       "neverDelivered": "No receipt yet.",
@@ -1505,7 +1503,6 @@
     },
     "detail": {
       "editTitle": "Edit customer",
-      "summary": "At a glance",
       "lastIssue": "Last delivery",
       "issueCount": "{count, plural, one {# issue in all} other {# issues in all}}",
       "neverServed": "No issue yet.",
@@ -2145,7 +2142,7 @@
         "outbound": "Outs",
         "damage": "Damage",
         "adjustments": "Adjustments",
-        "vouchers": "vouchers"
+        "vouchers": "{count, plural, one {voucher} other {vouchers}}"
       }
     },
     "damage": {

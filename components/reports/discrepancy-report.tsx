@@ -23,6 +23,7 @@ import {
   ExportButton,
   ReportEmpty,
   ReportSection,
+  StatGrid,
   StatTile,
   StatTone,
   useReportQuantity,
@@ -78,7 +79,7 @@ function Totals({ report }: { report: DiscrepancyReport }) {
     0
   )
   return (
-    <dl className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+    <StatGrid columns={3}>
       <StatTile
         label={t("receipts")}
         value={withGap}
@@ -100,7 +101,7 @@ function Totals({ report }: { report: DiscrepancyReport }) {
           report.inventoryGaps.length > 0 ? StatTone.warning : StatTone.good
         }
       />
-    </dl>
+    </StatGrid>
   )
 }
 
@@ -142,7 +143,7 @@ function Suppliers({ report }: { report: DiscrepancyReport }) {
                         "**:data-[slot=progress-indicator]:bg-warning"
                     )}
                   />
-                  <span className="w-12 text-right text-sm font-semibold tabular-nums">
+                  <span className="w-12 text-right num text-sm font-semibold">
                     {t("percent", { share })}
                   </span>
                 </div>
@@ -207,15 +208,15 @@ function ReceiptGaps({ report }: { report: DiscrepancyReport }) {
                   <TableCell className="whitespace-normal">
                     {row.item.name}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell className="text-right num">
                     {quantity(unit, row.expected)}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell className="text-right num">
                     {quantity(unit, row.received)}
                   </TableCell>
                   <TableCell
                     className={cn(
-                      "pr-4 text-right font-semibold tabular-nums",
+                      "pr-4 text-right num font-semibold",
                       gap < 0
                         ? "text-destructive"
                         : "text-warning-muted-foreground"
@@ -260,7 +261,7 @@ function InventoryGaps({ report }: { report: DiscrepancyReport }) {
               </div>
               <span
                 className={cn(
-                  "font-semibold tabular-nums",
+                  "num font-semibold",
                   row.gap < 0
                     ? "text-destructive"
                     : "text-warning-muted-foreground"

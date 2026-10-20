@@ -29,6 +29,7 @@ import {
   ExportButton,
   ReportEmpty,
   ReportSection,
+  StatGrid,
   StatTile,
   StatTone,
   useReportQuantity,
@@ -66,7 +67,7 @@ export function DamageReportScreen() {
             report.isPlaceholderData && "opacity-60"
           )}
         >
-          <dl className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+          <StatGrid columns={3}>
             <StatTile
               label={t("vouchers")}
               value={data.vouchers}
@@ -83,7 +84,7 @@ export function DamageReportScreen() {
               value={data.items.length}
               icon={BoxesIcon}
             />
-          </dl>
+          </StatGrid>
           {data.vouchers === 0 ? (
             <ReportEmpty>{t("empty")}</ReportEmpty>
           ) : (
@@ -123,10 +124,10 @@ export function DamageReportScreen() {
                               {row.item.name}
                             </Link>
                           </TableCell>
-                          <TableCell className="text-right text-destructive tabular-nums">
+                          <TableCell className="text-right num text-destructive">
                             {quantity(row.item.baseUnit, row.quantity)}
                           </TableCell>
-                          <TableCell className="pr-4 text-right tabular-nums">
+                          <TableCell className="pr-4 text-right num">
                             {t("times", { count: row.vouchers })}
                           </TableCell>
                         </TableRow>

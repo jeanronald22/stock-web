@@ -217,7 +217,7 @@ export function VoucherScreen({ id }: { id: string }) {
       <dl className="mt-8 grid gap-4 rounded-2xl border p-5 sm:grid-cols-2 lg:grid-cols-5">
         {facts.map((fact) => (
           <div key={fact.label}>
-            <dt className="text-sm text-muted-foreground">{fact.label}</dt>
+            <dt className="label-caps">{fact.label}</dt>
             <dd className="mt-0.5 font-semibold">{fact.value}</dd>
           </div>
         ))}
@@ -311,7 +311,7 @@ export function VoucherScreen({ id }: { id: string }) {
                     <span className="text-muted-foreground">—</span>
                   )}
                 </TableCell>
-                <TableCell className="pr-4 text-right font-semibold tabular-nums">
+                <TableCell className="pr-4 text-right num font-semibold">
                   <MovementLabel
                     movement={movementOf(data.type, line)}
                     format={(quantity) =>

@@ -15,6 +15,7 @@ import { useMemo, useState } from "react"
 import { ActivityChart } from "@/components/reports/activity-chart"
 import {
   changeOf,
+  StatGrid,
   StatTile,
   StatTone,
   useReportQuantity,
@@ -95,11 +96,7 @@ export function ActivityOverview({ focus }: { focus: OverviewFocus }) {
       </div>
 
       {!current.data ? (
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-hidden>
-          {Array.from({ length: 4 }, (_, index) => (
-            <Skeleton key={index} className="h-32 rounded-2xl" />
-          ))}
-        </div>
+        <Skeleton className="h-60 rounded-2xl lg:h-32" aria-hidden />
       ) : (
         <>
           {focus === OverviewFocus.activity ? (
@@ -151,11 +148,11 @@ function ActivityTiles({
   const change = (now: number, then: number | undefined) =>
     then === undefined ? null : changeOf(now, then)
   return (
-    <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <StatGrid columns={4}>
       <StatTile
         label={t("inbound")}
         value={inbound}
-        hint={t("vouchers")}
+        hint={t("vouchers", { count: inbound })}
         icon={ArrowDownToLineIcon}
         tone={StatTone.good}
         change={change(
@@ -167,7 +164,7 @@ function ActivityTiles({
       <StatTile
         label={t("outbound")}
         value={outbound}
-        hint={t("vouchers")}
+        hint={t("vouchers", { count: outbound })}
         icon={ArrowUpFromLineIcon}
         change={change(
           outbound,
@@ -177,7 +174,7 @@ function ActivityTiles({
       />
       <DamageTile summary={summary} query={query} />
       <GapsTile summary={summary} query={query} />
-    </dl>
+    </StatGrid>
   )
 }
 
@@ -192,8 +189,9 @@ function ControlTiles({
   const t = useTranslations("dashboard.activity.tiles")
   const open = useInventories(InventoryStatus.open, 0, 1)
   const inventories = open.data?.total ?? 0
+  const outbound = totalOf(summary.totals, OUTBOUND_TYPES)
   return (
-    <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <StatGrid columns={4}>
       <GapsTile summary={summary} query={query} />
       <DamageTile summary={summary} query={query} />
       <StatTile
@@ -206,12 +204,12 @@ function ControlTiles({
       />
       <StatTile
         label={t("outbound")}
-        value={totalOf(summary.totals, OUTBOUND_TYPES)}
-        hint={t("vouchers")}
+        value={outbound}
+        hint={t("vouchers", { count: outbound })}
         icon={ArrowUpFromLineIcon}
         href={`${Routes.reports}?${query}`}
       />
-    </dl>
+    </StatGrid>
   )
 }
 
@@ -227,7 +225,7 @@ function DamageTile({
     <StatTile
       label={t("damage")}
       value={summary.damageVouchers}
-      hint={t("vouchers")}
+      hint={t("vouchers", { count: summary.damageVouchers })}
       icon={PackageXIcon}
       tone={summary.damageVouchers > 0 ? StatTone.bad : StatTone.neutral}
       href={`${Routes.reportsDamage}?${query}`}
@@ -247,7 +245,7 @@ function GapsTile({
     <StatTile
       label={t("gaps")}
       value={summary.receiptsWithDiscrepancy}
-      hint={t("gapsHint")}
+      hint={t("gapsHint", { count: summary.receiptsWithDiscrepancy })}
       icon={ScaleIcon}
       tone={
         summary.receiptsWithDiscrepancy > 0
@@ -281,7 +279,7 @@ function TopIssued({ summary }: { summary: ActivitySummary }) {
                 >
                   {row.item.name}
                 </Link>
-                <span className="shrink-0 text-muted-foreground tabular-nums">
+                <span className="shrink-0 num text-muted-foreground">
                   {quantity(row.item.baseUnit, row.issued)}
                 </span>
               </div>
@@ -332,7 +330,7 @@ function DamageByReason({
               className="rounded-full border border-destructive/30 bg-destructive/5 px-3 py-1 text-sm"
             >
               {tReasons(`${row.reason}.label`)}{" "}
-              <span className="font-semibold tabular-nums">
+              <span className="num font-semibold">
                 {t("share", { share: Math.round((row.lines / total) * 100) })}
               </span>
             </li>

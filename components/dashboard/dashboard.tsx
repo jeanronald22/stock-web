@@ -118,7 +118,7 @@ export function Dashboard() {
     <PageBody>
       <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
         <div>
-          <p className="text-sm font-medium text-muted-foreground first-letter:uppercase">
+          <p className="label-caps">
             {format.dateTime(now, {
               weekday: "long",
               day: "numeric",
@@ -183,6 +183,7 @@ export function Dashboard() {
         {/* Ce qui attend une décision ou un geste passe avant les chiffres. */}
         <RequestsCard />
         <TransfersToReceiveCard />
+        {role !== null && <StockAlertsCard />}
         {role === StockRole.storekeeper && <StorekeeperOverview />}
         {(role === StockRole.generalManager || role === StockRole.manager) && (
           <ActivityOverview focus={OverviewFocus.activity} />
@@ -193,7 +194,6 @@ export function Dashboard() {
             <ActivityOverview focus={OverviewFocus.control} />
           </>
         )}
-        {role !== null && <StockAlertsCard />}
       </div>
     </PageBody>
   )
