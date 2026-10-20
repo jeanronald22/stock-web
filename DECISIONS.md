@@ -427,6 +427,20 @@ Questionnaire : réseau moyen ou coupé souvent au dépôt, coupures d'électric
 - **Session** : hors ligne, la session gardée sur le téléphone suffit, même si le jeton d'accès a expiré ; il est renouvelé (jeton de rafraîchissement, `offline_access`) avant le premier envoi au retour du réseau. Se déconnecter vide la file : l'écran prévient s'il reste des bons à envoyer.
 - **Application installable** (manifeste) et **service worker** (Serwist) : les fichiers de l'application sont gardés à l'installation ; les pages visitées le sont aussi ; une page jamais ouverte affiche un écran « hors ligne » qui renvoie à l'accueil. Les appels à l'API ne passent jamais par le cache du service worker.
 
+## D40. Interface : la charte appliquée, des écrans plus directs (2026-10-20)
+
+Constat après les lots précédents : l'application ressemblait à des composants shadcn par défaut, sans la charte (D12) ; sur téléphone, cinq ou six rangées de boutons et de filtres avant la liste.
+
+- **Listes** : une seule barre (`FilterBar`). Recherche et affichage toujours visibles ; filtres sur la même ligne à partir de la tablette, dans un panneau du bas sur téléphone, derrière un bouton « Filtres » qui dit combien sont posés. « Effacer les filtres » remet aussi les fiches actives.
+- **Actions** : sur un écran, l'action fréquente en bouton, le reste dans « … » (Stock : inventaire, inventaires passés, rapports, export ; bon : PDF, retour). Sur téléphone, « Réception » et « Sortie » tiennent sur une ligne, les autres opérations derrière « + ».
+- **En-tête** : les états (type de bon, en cours, archivé) suivent le titre (`PageHeader.badges`) ; ce ne sont pas des actions.
+- **Fiches** (article, dépôt, fournisseur, client) : même bandeau (`RecordSummary`) : de quoi la reconnaître, le chiffre qui la résume, ce qui demande d'agir.
+- **Typographie de la charte** : chiffres, quantités, références et numéros en Geist Mono à chasse fixe (`num`) ; libellés de faits, de chiffres et en-têtes de tableaux en étiquette mono capitales (`label-caps`).
+- **Jauge de stock** de la charte (`StockGauge`) : là où un seuil de dépôt est connu (fiche article, articles à commander de l'accueil).
+- **Chiffres** de l'accueil et des rapports en un seul bloc à filets (`StatGrid`) ; l'accueil montre ce qui demande un geste (articles à commander) avant l'activité.
+- **Colonnes** vides sur toute la page (lot, saisie) : non affichées.
+- **Notifications** (toasts) : gardées en haut, sous la barre. Essayées en bas : elles couvraient les panneaux du bas et les barres d'action, plus gênant que le titre caché quelques secondes.
+
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
 - [ ] Nom de la marque et nom du produit de stock (voir D7). Pistes : Kreskala, Kreskio, Tissero, NarvalWorks, FourmiLabs.
