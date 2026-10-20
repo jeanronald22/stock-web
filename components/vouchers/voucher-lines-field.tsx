@@ -301,12 +301,21 @@ function VoucherLineRow({
       : undefined
   const traitsInput =
     type === VoucherType.receipt && line.item.batchTracking && !knownBatch
+  // Des lots en stock, aucun choisi : leur quantité est dans la liste, pas encore sous la ligne.
+  // Un lot sans numéro a la valeur vide : s'il existe, la valeur vide le désigne.
+  const lots = inWarehouse?.batches ?? []
+  const batchPending =
+    issue &&
+    line.item.batchTracking &&
+    line.batch === "" &&
+    lots.length > 0 &&
+    !lots.some((batch) => (batch.batch ?? "") === "")
   // Écart affiché avant validation : compté − théorique (ajustement), reçu − annoncé (réception).
   const available = line.item.batchTracking
-    ? inWarehouse?.batches.find((batch) => batch.batch === line.batch)?.quantity
+    ? lots.find((batch) => (batch.batch ?? "") === line.batch)?.quantity
     : inWarehouse?.quantity
   const reference = adjustment
-    ? stock.isSuccess
+    ? stock.isSuccess && !batchPending
       ? (available ?? 0)
       : null
     : expected !== null
@@ -531,7 +540,7 @@ function VoucherLineRow({
             })}
           </span>
         )}
-        {issue && stock.isSuccess && (
+        {issue && stock.isSuccess && !batchPending && (
           <span className="text-muted-foreground">
             {adjustment
               ? t("vouchers.form.bookQuantity", {
