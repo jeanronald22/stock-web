@@ -2,6 +2,7 @@
 
 import {
   ArrowDownRightIcon,
+  ArrowRightIcon,
   ArrowUpRightIcon,
   DownloadIcon,
   type LucideIcon,
@@ -167,6 +168,95 @@ export function ReportSection({
       </div>
       {children}
     </section>
+  )
+}
+
+/**
+ * Carte du tableau de bord (D43) : un titre, ce qu'elle montre, et au besoin un lien vers le
+ * détail (un rapport, la liste filtrée).
+ */
+export function BoardCard({
+  title,
+  description,
+  link,
+  children,
+  className,
+}: {
+  title: string
+  description?: string
+  link?: { href: string; label: string }
+  children: React.ReactNode
+  className?: string
+}) {
+  return (
+    <div
+      className={cn("flex flex-col rounded-2xl border p-4 sm:p-5", className)}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="font-semibold">{title}</h3>
+          {description && (
+            <p className="text-sm text-muted-foreground">{description}</p>
+          )}
+        </div>
+        {link && (
+          <Link
+            href={link.href}
+            className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-primary hover:underline"
+          >
+            {link.label}
+            <ArrowRightIcon className="size-4" aria-hidden />
+          </Link>
+        )}
+      </div>
+      <div className="mt-4 flex-1">{children}</div>
+    </div>
+  )
+}
+
+/** Couleur d'une barre de classement. */
+const BAR_TONES: Record<StatTone, string> = {
+  [StatTone.neutral]: "bg-chart-4",
+  [StatTone.good]: "bg-primary",
+  [StatTone.warning]: "bg-warning",
+  [StatTone.bad]: "bg-destructive",
+}
+
+/**
+ * Ligne d'un classement : ce qui est classé, sa valeur, puis une barre dont la longueur est relative
+ * au premier ([share], de 0 à 1).
+ */
+export function RankedRow({
+  label,
+  value,
+  detail,
+  share,
+  tone = StatTone.neutral,
+}: {
+  label: React.ReactNode
+  value: React.ReactNode
+  detail?: React.ReactNode
+  share: number
+  tone?: StatTone
+}) {
+  return (
+    <li>
+      <div className="flex items-baseline justify-between gap-3 text-sm">
+        <span className="min-w-0 truncate font-medium">{label}</span>
+        <span className="shrink-0 num text-muted-foreground">{value}</span>
+      </div>
+      {detail && (
+        <p className="mt-0.5 truncate text-xs text-muted-foreground">
+          {detail}
+        </p>
+      )}
+      <div className="mt-1.5 h-1.5 rounded-full bg-muted">
+        <div
+          className={cn("h-full rounded-full", BAR_TONES[tone])}
+          style={{ width: `${Math.max(0, Math.min(1, share)) * 100}%` }}
+        />
+      </div>
+    </li>
   )
 }
 

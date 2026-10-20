@@ -74,8 +74,8 @@ test("transfert : envoyé d'un dépôt, en route, réceptionné à l'arrivée av
     page.getByText(`Transfert TRS-${year}-0001 envoyé.`)
   ).toBeVisible()
 
-  // En route : visible dans les bons et sur l'accueil.
-  await navigateTo(page, "Accueil")
+  // En route : visible dans les bons et sur le tableau de bord.
+  await navigateTo(page, "Tableau de bord")
   await expect(page.getByText("1 transfert à réceptionner")).toBeVisible()
   await navigateTo(page, "Bons")
   await page.getByRole("button", { name: /^Transferts en route/ }).click()

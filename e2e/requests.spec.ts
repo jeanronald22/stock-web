@@ -79,10 +79,10 @@ test("sortie à valider : préparée par le magasinier, refusée avec motif, ref
     .click()
   await expect(storekeeper.getByText("Demande envoyée")).toBeVisible()
 
-  // Le responsable la voit sur l'accueil, la refuse avec un motif.
-  await navigateTo(page, "Accueil")
-  await expect(page.getByText("1 sortie à valider")).toBeVisible()
-  await page.getByRole("link", { name: "Examiner" }).click()
+  // Le responsable la voit sur le tableau de bord, la refuse avec un motif.
+  await navigateTo(page, "Tableau de bord")
+  await page.getByRole("link", { name: "1 sortie à valider" }).click()
+  await page.getByRole("link", { name: "Sans client" }).click()
   await expect(
     page.getByText(/Cette sortie attend votre décision/)
   ).toBeVisible()

@@ -34,6 +34,7 @@ export const ReportKind = {
   damage: "damage",
   discrepancies: "discrepancies",
   summary: "summary",
+  analysis: "analysis",
 } as const
 export type ReportKind = (typeof ReportKind)[keyof typeof ReportKind]
 
@@ -62,6 +63,8 @@ export const useDiscrepancyReport = (search: ReportSearch) =>
   useReport(ReportKind.discrepancies, search)
 export const useActivitySummary = (search: ReportSearch) =>
   useReport(ReportKind.summary, search)
+export const useActivityAnalysis = (search: ReportSearch) =>
+  useReport(ReportKind.analysis, search)
 
 /** Entrées et sorties d'un article jour par jour, pour sa fiche ; relues comme les rapports. */
 export function useItemHistory(itemId: string, search: ReportSearch) {

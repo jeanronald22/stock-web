@@ -15,6 +15,7 @@ import {
 import { DateRangePicker } from "@/components/catalog/date-range-picker"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useItemHistory } from "@/lib/api/report-queries"
+import type { ItemDay } from "@/lib/api/reports"
 import type { BaseUnit } from "@/lib/api/stock"
 import { useErrorMessage } from "@/lib/api/use-error-message"
 import {
@@ -43,21 +44,12 @@ export function ItemMovementsChart({
   baseUnit: BaseUnit
 }) {
   const t = useTranslations("items.detail")
-  const format = useFormatter()
-  const quantityLabel = useQuantityLabel()
   const errorMessage = useErrorMessage()
   const [period, setPeriod] = useState<Period>(() =>
     presetPeriod(DEFAULT_PRESET)
   )
   const history = useItemHistory(itemId, period)
   const days = history.data?.days ?? []
-
-  const config = {
-    inbound: { label: t("inbound"), color: "var(--chart-2)" },
-    outbound: { label: t("outbound"), color: "var(--chart-5)" },
-  } satisfies ChartConfig
-  const day = (value: string) =>
-    format.dateTime(dayDate(value), { day: "numeric", month: "short" })
 
   return (
     <div>
@@ -87,109 +79,138 @@ export function ItemMovementsChart({
       ) : history.isPending ? (
         <Skeleton className="mt-4 h-60 rounded-xl" />
       ) : (
-        <ChartContainer
-          config={config}
+        <ItemHistoryArea
+          days={days}
+          baseUnit={baseUnit}
           className={cn(
-            "mt-4 aspect-auto h-60 w-full transition-opacity",
+            "mt-4 transition-opacity",
             history.isPlaceholderData && "opacity-60"
           )}
-          role="img"
-          aria-label={t("movementsChartSummary", {
-            inbound: quantityLabel(
-              baseUnit,
-              days.reduce((sum, entry) => sum + entry.inbound, 0)
-            ),
-            outbound: quantityLabel(
-              baseUnit,
-              days.reduce((sum, entry) => sum + entry.outbound, 0)
-            ),
-          })}
-        >
-          <AreaChart data={days} margin={{ left: -8, right: 8, top: 8 }}>
-            <defs>
-              {(["inbound", "outbound"] as const).map((key) => (
-                <linearGradient
-                  key={key}
-                  id={`item-${key}-fill`}
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="1"
-                >
-                  <stop
-                    offset="5%"
-                    stopColor={`var(--color-${key})`}
-                    stopOpacity={0.3}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor={`var(--color-${key})`}
-                    stopOpacity={0.02}
-                  />
-                </linearGradient>
-              ))}
-            </defs>
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="day"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              // Recharts n'écrit que les dates qui tiennent : moins sur téléphone.
-              minTickGap={24}
-              interval="preserveStartEnd"
-              tickFormatter={day}
-            />
-            <YAxis
-              allowDecimals={false}
-              tickLine={false}
-              axisLine={false}
-              width={48}
-              tickFormatter={(value: number) => format.number(value)}
-            />
-            <ChartTooltip
-              cursor={{ stroke: "var(--border)" }}
-              content={
-                <ChartTooltipContent
-                  indicator="line"
-                  labelFormatter={(value) =>
-                    format.dateTime(dayDate(String(value)), {
-                      weekday: "short",
-                      day: "numeric",
-                      month: "long",
-                    })
-                  }
-                  formatter={(value, name) => (
-                    <div className="flex w-full items-center justify-between gap-4">
-                      <span className="text-muted-foreground">
-                        {config[name as keyof typeof config]?.label}
-                      </span>
-                      <span className="num font-medium text-foreground">
-                        {quantityLabel(baseUnit, Number(value))}
-                      </span>
-                    </div>
-                  )}
-                />
-              }
-            />
-            <ChartLegend content={<ChartLegendContent />} />
-            <Area
-              dataKey="inbound"
-              type="monotone"
-              stroke="var(--color-inbound)"
-              strokeWidth={2}
-              fill="url(#item-inbound-fill)"
-            />
-            <Area
-              dataKey="outbound"
-              type="monotone"
-              stroke="var(--color-outbound)"
-              strokeWidth={2}
-              fill="url(#item-outbound-fill)"
-            />
-          </AreaChart>
-        </ChartContainer>
+        />
       )}
     </div>
+  )
+}
+
+/** Courbe des entrées et des sorties d'un article, jour par jour, en quantités de son unité. */
+export function ItemHistoryArea({
+  days,
+  baseUnit,
+  className,
+}: {
+  days: ItemDay[]
+  baseUnit: BaseUnit
+  className?: string
+}) {
+  const t = useTranslations("items.detail")
+  const format = useFormatter()
+  const quantityLabel = useQuantityLabel()
+  const config = {
+    inbound: { label: t("inbound"), color: "var(--chart-2)" },
+    outbound: { label: t("outbound"), color: "var(--chart-5)" },
+  } satisfies ChartConfig
+  const day = (value: string) =>
+    format.dateTime(dayDate(value), { day: "numeric", month: "short" })
+
+  return (
+    <ChartContainer
+      config={config}
+      className={cn("aspect-auto h-60 w-full", className)}
+      role="img"
+      aria-label={t("movementsChartSummary", {
+        inbound: quantityLabel(
+          baseUnit,
+          days.reduce((sum, entry) => sum + entry.inbound, 0)
+        ),
+        outbound: quantityLabel(
+          baseUnit,
+          days.reduce((sum, entry) => sum + entry.outbound, 0)
+        ),
+      })}
+    >
+      <AreaChart data={days} margin={{ left: -8, right: 8, top: 8 }}>
+        <defs>
+          {(["inbound", "outbound"] as const).map((key) => (
+            <linearGradient
+              key={key}
+              id={`item-${key}-fill`}
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="1"
+            >
+              <stop
+                offset="5%"
+                stopColor={`var(--color-${key})`}
+                stopOpacity={0.3}
+              />
+              <stop
+                offset="95%"
+                stopColor={`var(--color-${key})`}
+                stopOpacity={0.02}
+              />
+            </linearGradient>
+          ))}
+        </defs>
+        <CartesianGrid vertical={false} />
+        <XAxis
+          dataKey="day"
+          tickLine={false}
+          axisLine={false}
+          tickMargin={8}
+          // Recharts n'écrit que les dates qui tiennent : moins sur téléphone.
+          minTickGap={24}
+          interval="preserveStartEnd"
+          tickFormatter={day}
+        />
+        <YAxis
+          allowDecimals={false}
+          tickLine={false}
+          axisLine={false}
+          width={48}
+          tickFormatter={(value: number) => format.number(value)}
+        />
+        <ChartTooltip
+          cursor={{ stroke: "var(--border)" }}
+          content={
+            <ChartTooltipContent
+              indicator="line"
+              labelFormatter={(value) =>
+                format.dateTime(dayDate(String(value)), {
+                  weekday: "short",
+                  day: "numeric",
+                  month: "long",
+                })
+              }
+              formatter={(value, name) => (
+                <div className="flex w-full items-center justify-between gap-4">
+                  <span className="text-muted-foreground">
+                    {config[name as keyof typeof config]?.label}
+                  </span>
+                  <span className="num font-medium text-foreground">
+                    {quantityLabel(baseUnit, Number(value))}
+                  </span>
+                </div>
+              )}
+            />
+          }
+        />
+        <ChartLegend content={<ChartLegendContent />} />
+        <Area
+          dataKey="inbound"
+          type="monotone"
+          stroke="var(--color-inbound)"
+          strokeWidth={2}
+          fill="url(#item-inbound-fill)"
+        />
+        <Area
+          dataKey="outbound"
+          type="monotone"
+          stroke="var(--color-outbound)"
+          strokeWidth={2}
+          fill="url(#item-outbound-fill)"
+        />
+      </AreaChart>
+    </ChartContainer>
   )
 }

@@ -3,7 +3,7 @@
     "signIn": "Connexion",
     "welcome": "Bienvenue",
     "organizations": "Vos entreprises",
-    "dashboard": "Accueil",
+    "dashboard": "Tableau de bord",
     "items": "Articles",
     "newItem": "Nouvel article",
     "warehouses": "Dépôts",
@@ -150,7 +150,7 @@
     }
   },
   "dashboard": {
-    "greeting": "Bonjour {name}",
+    "greeting": "Bonjour {name}, voici où en sont vos dépôts.",
     "readyTitle": "Tout est en place",
     "readyDescription": "Deux étapes pour démarrer : vos lieux de stock, puis vos articles.",
     "steps": {
@@ -199,30 +199,6 @@
       "open": "Voir"
     },
     "scope": "Vos dépôts : {warehouses}",
-    "activity": {
-      "title": "Activité de vos dépôts",
-      "controlTitle": "À vérifier",
-      "period": "Période",
-      "reports": "Rapports",
-      "chart": "Entrées et sorties",
-      "chartHint": "Nombre de bons par jour.",
-      "topIssued": "Les plus sortis",
-      "noIssue": "Aucune sortie sur la période.",
-      "damageByReason": "Casse par motif",
-      "details": "Détail",
-      "noDamage": "Aucune casse sur la période.",
-      "share": "{share} %",
-      "tiles": {
-        "inbound": "Entrées",
-        "outbound": "Sorties",
-        "vouchers": "{count, plural, one {bon} other {bons}}",
-        "damage": "Casse",
-        "gaps": "Écarts à la réception",
-        "gapsHint": "{count, plural, one {livraison non conforme} other {livraisons non conformes}}",
-        "inventories": "Inventaires en cours",
-        "inventoriesHint": "à compter, puis clôturer"
-      }
-    },
     "storekeeper": {
       "actions": "Vos gestes du jour",
       "receipt": {
@@ -244,6 +220,54 @@
         "outbound": "sorties",
         "damage": "casses"
       }
+    },
+    "board": {
+      "title": "Tableau de bord",
+      "domains": {
+        "label": "Domaines affichés",
+        "all": "Tout",
+        "activity": "Activité",
+        "stock": "Stock",
+        "issues": "Sorties",
+        "quality": "Qualité",
+        "team": "Équipe"
+      },
+      "alerts": {
+        "label": "À traiter",
+        "none": "Rien n’attend de décision",
+        "requests": "{count, plural, one {# sortie à valider} other {# sorties à valider}}",
+        "requestsWaiting": "{count, plural, one {# demande en attente de validation} other {# demandes en attente de validation}}",
+        "transfers": "{count, plural, one {# transfert à réceptionner} other {# transferts à réceptionner}}",
+        "out": "{count, plural, one {# article en rupture} other {# articles en rupture}}",
+        "low": "{count, plural, one {# article à commander} other {# articles à commander}}",
+        "inventories": "{count, plural, one {# inventaire en cours} other {# inventaires en cours}}",
+        "gaps": "{count, plural, one {# réception avec écart} other {# réceptions avec écart}}"
+      },
+      "stockState": {
+        "title": "État du stock",
+        "description": "Articles suivis dans ces dépôts, aujourd’hui.",
+        "seeAll": "Voir le stock",
+        "center": "{count, plural, one {article} other {articles}}",
+        "ok": "Stock suffisant",
+        "low": "À commander",
+        "out": "En rupture",
+        "share": "{share} %",
+        "empty": "Aucun article suivi dans ces dépôts."
+      },
+      "conformity": {
+        "title": "Conformité des réceptions",
+        "description": "Livraisons conformes au bon de livraison.",
+        "details": "Écarts",
+        "value": "{share} %",
+        "detail": "{conform, plural, one {# conforme} other {# conformes}} sur {count, plural, one {# réception} other {# réceptions}}",
+        "empty": "Aucune réception sur la période."
+      },
+      "vouchers": {
+        "title": "Bons de la période",
+        "description": "{count, plural, =0 {Aucun bon} one {# bon au total} other {# bons au total}}",
+        "seeAll": "Rapports",
+        "empty": "Aucun bon sur la période."
+      }
     }
   },
   "menu": {
@@ -252,7 +276,7 @@
     "currentOrganization": "Entreprise active"
   },
   "nav": {
-    "home": "Accueil",
+    "home": "Tableau de bord",
     "items": "Articles",
     "warehouses": "Dépôts",
     "vouchers": "Bons",
@@ -785,7 +809,13 @@
       "open": "{count, plural, =0 {Filtres} one {Filtres, # posé} other {Filtres, # posés}}",
       "clear": "Effacer les filtres",
       "apply": "Voir les résultats"
-    }
+    },
+    "allItems": "Tous les articles",
+    "itemFilter": "Filtrer par article",
+    "itemFilterSearch": "Nom, référence ou code-barres",
+    "itemFilterEmpty": "Aucun article trouvé.",
+    "itemFilterLoading": "Article…",
+    "itemFilterClear": "Retirer le filtre article"
   },
   "vouchers": {
     "title": "Bons",
@@ -1147,7 +1177,6 @@
       "empty": "Épuisé"
     },
     "alert": "{warehouse} : {quantity}, seuil {threshold}",
-    "reports": "Rapports",
     "export": {
       "file": "stock",
       "sheet": "Stock",
@@ -2143,8 +2172,8 @@
   },
   "reports": {
     "title": "Rapports",
-    "description": "Ce qui est entré, sorti, cassé, et où sont les écarts.",
-    "breadcrumb": "Stock",
+    "description": "Le détail de ce qui est entré, sorti, cassé, et où sont les écarts.",
+    "breadcrumb": "Tableau de bord",
     "export": {
       "item": "Article",
       "reference": "Référence",
@@ -2199,14 +2228,14 @@
     },
     "activity": {
       "inbound": "Entrées",
-      "outbound": "Sorties"
+      "outbound": "Sorties",
+      "weekOf": "Semaine du {day}"
     },
     "stat": {
       "change": "{change, number, ::+!} %"
     },
     "movements": {
       "activity": "Activité",
-      "activityHint": "Bons d’entrée et de sortie, jour par jour.",
       "byItem": "Par article",
       "byItemHint": "{count, plural, =0 {Aucun article n’a bougé} one {# article a bougé} other {# articles ont bougé}}, chacun dans son unité.",
       "search": "Rechercher un article",
@@ -2285,6 +2314,101 @@
       }
     },
     "exportButton": "Exporter"
+  },
+  "analysis": {
+    "tiles": {
+      "inbound": "Entrées",
+      "outbound": "Sorties",
+      "damage": "Casse",
+      "gaps": "Écarts à la réception",
+      "vouchers": "{count, plural, one {bon} other {bons}}",
+      "gapsHint": "{count, plural, one {livraison non conforme} other {livraisons non conformes}}"
+    },
+    "chart": {
+      "title": "Entrées et sorties",
+      "day": "Nombre de bons par jour.",
+      "week": "Nombre de bons par semaine.",
+      "month": "Nombre de bons par mois.",
+      "details": "Mouvements"
+    },
+    "warehouses": {
+      "title": "Par dépôt",
+      "description": "Bons de la période, seuils d’aujourd’hui.",
+      "columns": {
+        "warehouse": "Dépôt",
+        "inbound": "Entrées",
+        "outbound": "Sorties",
+        "damage": "Casse",
+        "alerts": "À commander",
+        "out": "En rupture"
+      },
+      "compact": "{inbound, plural, one {# entrée} other {# entrées}} · {outbound, plural, one {# sortie} other {# sorties}} · {damage, plural, one {# casse} other {# casses}}",
+      "alertsCompact": "{alerts} à commander · {out} en rupture"
+    },
+    "items": {
+      "title": "Les articles",
+      "description": "Chacun dans son unité.",
+      "topIssued": "Les plus sortis",
+      "topIssuedHint": "Par nombre de bons de sortie.",
+      "issues": "{count, plural, one {# sortie} other {# sorties}}",
+      "noIssue": "Aucune sortie sur la période.",
+      "runningOut": "Bientôt en rupture",
+      "runningOutHint": "Ce que le stock tient au rythme des sorties de la période.",
+      "days": "{days, plural, =0 {En rupture} one {≈ # jour} other {≈ # jours}}",
+      "pace": "{daily} par jour · {stock} en stock",
+      "noRunningOut": "Au rythme actuel, rien ne manquera dans le mois.",
+      "dormant": "Stock qui dort",
+      "dormantHint": "En stock, sans sortie sur la période.",
+      "lastIssued": "Dernière sortie {when}",
+      "neverIssued": "Jamais sorti",
+      "noDormant": "Tout ce qui est en stock est sorti sur la période.",
+      "moreDormant": "Et {count, plural, one {# autre article} other {# autres articles}}."
+    },
+    "item": {
+      "description": "{reference} · dans les dépôts choisis.",
+      "open": "Ouvrir la fiche",
+      "stock": "En stock",
+      "stockHint": "à la fin de la période",
+      "inbound": "Entré",
+      "inboundHint": "réceptions, retours, transferts",
+      "outbound": "Sorti",
+      "outboundHint": "sorties, casse, transferts",
+      "coverage": "Tient encore",
+      "coverageHint": "au rythme de {daily} par jour",
+      "noIssue": "aucune sortie sur la période",
+      "chart": "Entrées et sorties",
+      "chartHint": "Quantités, jour par jour."
+    },
+    "damage": {
+      "title": "Casse par motif",
+      "description": "Part des lignes cassées.",
+      "details": "Détail",
+      "empty": "Aucune casse sur la période.",
+      "share": "{share} %",
+      "lines": "{count, plural, one {# ligne} other {# lignes}}"
+    },
+    "suppliers": {
+      "title": "Fournisseurs",
+      "description": "Réceptions qui ne correspondaient pas au bon de livraison.",
+      "details": "Écarts",
+      "empty": "Aucune réception sur la période.",
+      "none": "Sans fournisseur",
+      "count": "{withGap} sur {count, plural, one {# réception} other {# réceptions}}"
+    },
+    "customers": {
+      "title": "Clients",
+      "description": "Ceux qui reçoivent le plus de sorties.",
+      "empty": "Aucune sortie sur la période.",
+      "none": "Sans client renseigné",
+      "vouchers": "{count, plural, one {# sortie} other {# sorties}}"
+    },
+    "team": {
+      "title": "L’équipe",
+      "description": "Bons saisis sur la période.",
+      "empty": "Aucun bon sur la période.",
+      "vouchers": "{count, plural, one {# bon} other {# bons}}",
+      "detail": "{inbound, plural, one {# entrée} other {# entrées}} · {outbound, plural, one {# sortie} other {# sorties}} · {corrections, plural, one {# correction} other {# corrections}}"
+    }
   },
   "offline": {
     "queued": "Bon gardé sur ce téléphone",

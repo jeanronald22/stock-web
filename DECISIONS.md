@@ -408,7 +408,7 @@ Questionnaire : rapports au gérant (Q1) ; produits à écarts (Q33) ; casse, qu
   - magasinier : ses gestes du jour (réception, sortie, transfert à réceptionner), ses demandes en attente ou refusées, l'activité du jour dans ses dépôts, les alertes.
   Les premiers pas (dépôt, article, réception, équipe) ne s'affichent plus une fois faits.
 - **Quantités** : un total qui mélange des pièces et des kilos ne veut rien dire. Les chiffres d'ensemble comptent des bons et des lignes ; les quantités restent par article, dans son unité.
-- **Rapports**, sans entrée de menu : depuis l'accueil et « Stock ». Période (raccourcis 7 jours, ce mois, mois dernier, 3 mois, ou dates libres) et dépôts. Trois vues :
+- **Rapports**, sans entrée de menu : depuis l'accueil et « Stock » (depuis D43 : depuis les cartes du tableau de bord). Période (raccourcis 7 jours, ce mois, mois dernier, 3 mois, ou dates libres) et dépôts. Trois vues :
   - mouvements par article : entrées, sorties, transferts, retours, casse, ajustements, solde ;
   - casse par motif et par article ;
   - écarts : réceptions qui ne correspondent pas au bon de livraison, par fournisseur et ligne par ligne (pour le recours), et écarts d'inventaire par article.
@@ -460,6 +460,24 @@ Constat après les lots précédents : l'application ressemblait à des composan
 - **Une page A4 par article**, générée dans l'application (@react-pdf/renderer, chargé au premier export), aux couleurs de Kreskala : bandeau vert de la charte avec le logo, l'entreprise et sa ville ; photo principale, nom, référence, état, stock total et conditionnements, code-barres dessiné ; identification (référence, code-barres, unité, lots, conditionnements, date d'ajout), description ; disponibilité par dépôt (stock, seuil, état, emplacement), total ; jusqu'à quatre autres photos. Pied de page : date d'édition, numéro de page, kreskala.
 - **Depuis la fiche** : « Exporter en PDF », à côté de « Modifier ». **Depuis le catalogue** : « Sélectionner », des cases sur les cartes et les lignes (toute la carte coche, elle n'ouvre plus la fiche), « Toute la page », puis un seul PDF. Le choix survit au changement de page, de filtre et de vue. Cinquante articles au plus par export (temps de génération sur un téléphone).
 - **Photos** redessinées en JPEG avant la mise en page (react-pdf ne lit pas le WebP), réduites à 1 200 px ; une photo qui ne se charge pas est laissée de côté plutôt que de faire échouer l'export. Seuls les dépôts de la personne apparaissent, comme sur la fiche.
+
+## D43. Tableau de bord du gérant (2026-10-20)
+
+Questionnaire : rapports au gérant (Q1) ; produits à écarts (Q33) ; casse (Q34, Q36). Prolonge D38. L'accueil et une analyse à part disaient presque la même chose : ils ne font plus qu'un écran.
+
+- **L'accueil devient le « Tableau de bord »**, sans entrée de menu en plus, pour le gérant, le manager et le contrôleur. Le magasinier garde ses gestes du jour. « Stock » perd son accès aux rapports et garde l'inventaire et l'export.
+- **En tête, ce qui attend un geste**, en pastilles qui ouvrent la liste concernée, seulement s'il y a quelque chose : sorties à valider, transferts à réceptionner, articles en rupture, articles à commander, inventaires en cours, réceptions avec écart. Sinon : « Rien n'attend de décision ».
+- **Domaines** (Activité, Stock, Sorties, Qualité, Équipe) en puces : « Tout » par défaut. Choisir un domaine ne garde que ses cartes, et les suivants s'ajoutent.
+- **Filtres** : dépôts, un article (par nom, référence ou code-barres) et la période (raccourcis ou calendrier, 30 derniers jours par défaut, un an au plus). Domaines et filtres sont gardés dans l'adresse.
+- **Cartes** :
+  - activité : quatre chiffres comparés à la période précédente de même durée (bons d'entrée, de sortie, de casse, réceptions avec écart), la courbe des bons (par jour jusqu'à 31 jours, par semaine jusqu'à 4 mois, puis par mois) et les bons par type ;
+  - stock : l'état du stock en anneau (suffisant, à commander, en rupture, chacun vers « Stock » filtré), ceux qui vont manquer (stock d'aujourd'hui divisé par le rythme des sorties de la période, sous 30 jours), le stock qui dort (en stock, sans sortie sur la période), et dépôt par dépôt ;
+  - sorties : les articles les plus sortis (en nombre de sorties) et les clients qui en reçoivent le plus ;
+  - qualité : casse par motif, conformité des réceptions en jauge, fournisseurs avec écarts ;
+  - équipe : les bons saisis par personne.
+- **Un article choisi** : sa fiche en tête, avec ses quantités dans son unité (en stock, entré, sorti, ce que le stock tient encore) et sa courbe jour par jour, qui remplace celle des bons. Les classements d'articles disparaissent, et le reste ne compte que les bons qui le portent.
+- **Détail** : chaque carte ouvre l'un des trois rapports de D38 (« Rapports », `/rapports` : mouvements, casse, écarts), qui reprend les mêmes filtres et s'exporte en Excel. Son fil d'Ariane ramène au tableau de bord.
+- **Calcul** : en SQL sur le registre et les bons, comme D38, dans les dépôts de la personne, en un seul appel. Les états de stock reprennent la règle des alertes (D24).
 
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).

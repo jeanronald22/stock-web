@@ -174,7 +174,7 @@ export async function signUpWithBusiness(
   await page.getByRole("option", { name: "Quincaillerie" }).click()
   await page.getByRole("button", { name: "Créer mon espace" }).click()
   await page.getByRole("button", { name: "Ouvrir mon espace" }).click()
-  await expect(page.getByRole("heading", { name: "Bonjour Awa" })).toBeVisible()
+  await expect(page.getByText("Bonjour Awa,")).toBeVisible()
   return email
 }
 

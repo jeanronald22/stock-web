@@ -1,7 +1,7 @@
 import {
   BoxesIcon,
   ContactRoundIcon,
-  HouseIcon,
+  LayoutDashboardIcon,
   LayersIcon,
   ReceiptTextIcon,
   UsersIcon,
@@ -60,14 +60,14 @@ export function groupNavigation(
 export const workspaceNavigation: readonly NavigationEntry[] = [
   {
     href: Routes.dashboard,
-    icon: HouseIcon,
+    icon: LayoutDashboardIcon,
     label: "home",
     section: "overview",
+    // Les rapports (D38) sont le détail du tableau de bord (D43) : pas d'entrée à eux.
+    alsoActiveOn: [Routes.reports],
   },
   {
     href: Routes.stock,
-    // Les rapports (D38) se lisent depuis le stock : pas d'entrée à eux.
-    alsoActiveOn: [Routes.reports],
     icon: LayersIcon,
     label: "stock",
     section: "operations",

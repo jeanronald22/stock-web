@@ -3,7 +3,7 @@
     "signIn": "Sign in",
     "welcome": "Welcome",
     "organizations": "Your businesses",
-    "dashboard": "Home",
+    "dashboard": "Dashboard",
     "items": "Items",
     "newItem": "New item",
     "warehouses": "Depots",
@@ -150,7 +150,7 @@
     }
   },
   "dashboard": {
-    "greeting": "Hello {name}",
+    "greeting": "Hello {name}, here is where your warehouses stand.",
     "readyTitle": "Everything is in place",
     "readyDescription": "Two steps to get started: your stock locations, then your items.",
     "steps": {
@@ -199,30 +199,6 @@
       "open": "Open"
     },
     "scope": "Your warehouses: {warehouses}",
-    "activity": {
-      "title": "Activity in your warehouses",
-      "controlTitle": "To check",
-      "period": "Period",
-      "reports": "Reports",
-      "chart": "Ins and outs",
-      "chartHint": "Number of vouchers per day.",
-      "topIssued": "Most issued",
-      "noIssue": "No issue over the period.",
-      "damageByReason": "Damage by reason",
-      "details": "Details",
-      "noDamage": "No damage over the period.",
-      "share": "{share}%",
-      "tiles": {
-        "inbound": "Ins",
-        "outbound": "Outs",
-        "vouchers": "{count, plural, one {voucher} other {vouchers}}",
-        "damage": "Damage",
-        "gaps": "Receipt discrepancies",
-        "gapsHint": "{count, plural, one {delivery not as announced} other {deliveries not as announced}}",
-        "inventories": "Counts in progress",
-        "inventoriesHint": "to count, then close"
-      }
-    },
     "storekeeper": {
       "actions": "Your tasks today",
       "receipt": {
@@ -244,6 +220,54 @@
         "outbound": "outs",
         "damage": "damage"
       }
+    },
+    "board": {
+      "title": "Dashboard",
+      "domains": {
+        "label": "Shown sections",
+        "all": "All",
+        "activity": "Activity",
+        "stock": "Stock",
+        "issues": "Issues",
+        "quality": "Quality",
+        "team": "Team"
+      },
+      "alerts": {
+        "label": "To handle",
+        "none": "Nothing is waiting for a decision",
+        "requests": "{count, plural, one {# issue to approve} other {# issues to approve}}",
+        "requestsWaiting": "{count, plural, one {# request awaiting approval} other {# requests awaiting approval}}",
+        "transfers": "{count, plural, one {# transfer to receive} other {# transfers to receive}}",
+        "out": "{count, plural, one {# item out of stock} other {# items out of stock}}",
+        "low": "{count, plural, one {# item to reorder} other {# items to reorder}}",
+        "inventories": "{count, plural, one {# stock count in progress} other {# stock counts in progress}}",
+        "gaps": "{count, plural, one {# receipt with a discrepancy} other {# receipts with a discrepancy}}"
+      },
+      "stockState": {
+        "title": "Stock status",
+        "description": "Items tracked in these warehouses, today.",
+        "seeAll": "View stock",
+        "center": "{count, plural, one {item} other {items}}",
+        "ok": "Enough stock",
+        "low": "To reorder",
+        "out": "Out of stock",
+        "share": "{share}%",
+        "empty": "No item tracked in these warehouses."
+      },
+      "conformity": {
+        "title": "Receipt compliance",
+        "description": "Deliveries matching the delivery note.",
+        "details": "Discrepancies",
+        "value": "{share}%",
+        "detail": "{conform} compliant out of {count, plural, one {# receipt} other {# receipts}}",
+        "empty": "No receipt over the period."
+      },
+      "vouchers": {
+        "title": "Vouchers over the period",
+        "description": "{count, plural, =0 {No voucher} one {# voucher in all} other {# vouchers in all}}",
+        "seeAll": "Reports",
+        "empty": "No voucher over the period."
+      }
     }
   },
   "menu": {
@@ -252,7 +276,7 @@
     "currentOrganization": "Active business"
   },
   "nav": {
-    "home": "Home",
+    "home": "Dashboard",
     "items": "Items",
     "warehouses": "Depots",
     "vouchers": "Vouchers",
@@ -785,7 +809,13 @@
       "open": "{count, plural, =0 {Filters} one {Filters, # set} other {Filters, # set}}",
       "clear": "Clear filters",
       "apply": "Show results"
-    }
+    },
+    "allItems": "All items",
+    "itemFilter": "Filter by item",
+    "itemFilterSearch": "Name, reference or barcode",
+    "itemFilterEmpty": "No item found.",
+    "itemFilterLoading": "Item…",
+    "itemFilterClear": "Remove the item filter"
   },
   "vouchers": {
     "title": "Vouchers",
@@ -1147,7 +1177,6 @@
       "empty": "Empty"
     },
     "alert": "{warehouse}: {quantity}, threshold {threshold}",
-    "reports": "Reports",
     "export": {
       "file": "stock",
       "sheet": "Stock",
@@ -2143,8 +2172,8 @@
   },
   "reports": {
     "title": "Reports",
-    "description": "What came in, went out, broke, and where the discrepancies are.",
-    "breadcrumb": "Stock",
+    "description": "The detail of what came in, went out, broke, and where the discrepancies are.",
+    "breadcrumb": "Dashboard",
     "export": {
       "item": "Item",
       "reference": "Reference",
@@ -2199,14 +2228,14 @@
     },
     "activity": {
       "inbound": "Ins",
-      "outbound": "Outs"
+      "outbound": "Outs",
+      "weekOf": "Week of {day}"
     },
     "stat": {
       "change": "{change, number, ::+!}%"
     },
     "movements": {
       "activity": "Activity",
-      "activityHint": "Inbound and outbound vouchers, day by day.",
       "byItem": "By item",
       "byItemHint": "{count, plural, =0 {No item moved} one {# item moved} other {# items moved}}, each in its own unit.",
       "search": "Search for an item",
@@ -2285,6 +2314,101 @@
       }
     },
     "exportButton": "Export"
+  },
+  "analysis": {
+    "tiles": {
+      "inbound": "Inbound",
+      "outbound": "Outbound",
+      "damage": "Damage",
+      "gaps": "Receipt discrepancies",
+      "vouchers": "{count, plural, one {voucher} other {vouchers}}",
+      "gapsHint": "{count, plural, one {non-matching delivery} other {non-matching deliveries}}"
+    },
+    "chart": {
+      "title": "Inbound and outbound",
+      "day": "Vouchers per day.",
+      "week": "Vouchers per week.",
+      "month": "Vouchers per month.",
+      "details": "Movements"
+    },
+    "warehouses": {
+      "title": "By depot",
+      "description": "Vouchers of the period, today’s thresholds.",
+      "columns": {
+        "warehouse": "Depot",
+        "inbound": "Inbound",
+        "outbound": "Outbound",
+        "damage": "Damage",
+        "alerts": "To reorder",
+        "out": "Out of stock"
+      },
+      "compact": "{inbound} inbound · {outbound} outbound · {damage} damage",
+      "alertsCompact": "{alerts} to reorder · {out} out of stock"
+    },
+    "items": {
+      "title": "Items",
+      "description": "Each in its own unit.",
+      "topIssued": "Most issued",
+      "topIssuedHint": "By number of issue vouchers.",
+      "issues": "{count, plural, one {# issue} other {# issues}}",
+      "noIssue": "Nothing issued during the period.",
+      "runningOut": "Running out soon",
+      "runningOutHint": "How long stock lasts at the period’s issue rate.",
+      "days": "{days, plural, =0 {Out of stock} one {≈ # day} other {≈ # days}}",
+      "pace": "{daily} per day · {stock} in stock",
+      "noRunningOut": "At the current rate, nothing runs out within a month.",
+      "dormant": "Idle stock",
+      "dormantHint": "In stock, not issued during the period.",
+      "lastIssued": "Last issued {when}",
+      "neverIssued": "Never issued",
+      "noDormant": "Everything in stock was issued during the period.",
+      "moreDormant": "And {count, plural, one {# more item} other {# more items}}."
+    },
+    "item": {
+      "description": "{reference} · in the selected depots.",
+      "open": "Open item",
+      "stock": "In stock",
+      "stockHint": "at the end of the period",
+      "inbound": "In",
+      "inboundHint": "receipts, returns, transfers",
+      "outbound": "Out",
+      "outboundHint": "issues, damage, transfers",
+      "coverage": "Lasts",
+      "coverageHint": "at {daily} per day",
+      "noIssue": "nothing issued during the period",
+      "chart": "Inbound and outbound",
+      "chartHint": "Quantities, day by day."
+    },
+    "damage": {
+      "title": "Damage by reason",
+      "description": "Share of damaged lines.",
+      "details": "Details",
+      "empty": "No damage during the period.",
+      "share": "{share}%",
+      "lines": "{count, plural, one {# line} other {# lines}}"
+    },
+    "suppliers": {
+      "title": "Suppliers",
+      "description": "Receipts that did not match the delivery note.",
+      "details": "Discrepancies",
+      "empty": "No receipts during the period.",
+      "none": "No supplier",
+      "count": "{withGap} of {count, plural, one {# receipt} other {# receipts}}"
+    },
+    "customers": {
+      "title": "Customers",
+      "description": "Those who receive the most issues.",
+      "empty": "Nothing issued during the period.",
+      "none": "No customer given",
+      "vouchers": "{count, plural, one {# issue} other {# issues}}"
+    },
+    "team": {
+      "title": "The team",
+      "description": "Vouchers recorded during the period.",
+      "empty": "No vouchers during the period.",
+      "vouchers": "{count, plural, one {# voucher} other {# vouchers}}",
+      "detail": "{inbound} inbound · {outbound} outbound · {corrections, plural, one {# correction} other {# corrections}}"
+    }
   },
   "offline": {
     "queued": "Voucher kept on this phone",

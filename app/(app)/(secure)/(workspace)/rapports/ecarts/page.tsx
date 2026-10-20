@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function DiscrepancyReportPage() {
   return (
-    // Période et dépôts lus dans l'adresse.
+    // Période, dépôts et article lus dans l'adresse.
     <Suspense>
       <DiscrepancyReportScreen />
     </Suspense>

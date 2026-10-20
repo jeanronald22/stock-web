@@ -15,7 +15,6 @@ import { useFormatter, useNow, useTranslations } from "next-intl"
 import { ShelfScene } from "@/components/illustrations/shelf-scene"
 import { usePageTour } from "@/components/tour/tour-provider"
 import { PageBody } from "@/components/workspace/page-header"
-import { OpenInventories } from "@/components/inventory/open-inventories"
 import { useStockAccess } from "@/components/workspace/stock-access"
 import { useWorkspace } from "@/components/workspace/workspace-context"
 import { StockPermission, StockRole } from "@/lib/api/stock"
@@ -30,7 +29,7 @@ import { cn } from "@/lib/utils"
 import { ReceivedInvitations } from "@/components/organizations/received-invitations"
 import { useMe } from "@/lib/api/platform-queries"
 
-import { ActivityOverview, OverviewFocus } from "./activity-overview"
+import { ManagerBoard } from "./manager-board"
 import { RequestsCard } from "./requests-card"
 import { StockAlertsCard } from "./stock-alerts-card"
 import { StorekeeperOverview } from "./storekeeper-overview"
@@ -113,6 +112,11 @@ export function Dashboard() {
     (access.can(StockPermission.manageCatalog) || managesTeam) &&
     steps.some((step) => step.key !== TEAM_STEP && step.count === 0)
   const scoped = role !== null && role !== StockRole.generalManager
+  // Le magasinier garde ses gestes du jour ; les autres rôles suivent l'activité (D43).
+  const board =
+    role === StockRole.generalManager ||
+    role === StockRole.manager ||
+    role === StockRole.controller
 
   return (
     <PageBody>
@@ -126,8 +130,11 @@ export function Dashboard() {
             })}
           </p>
           <h1 className="mt-1 animate-rise-in text-3xl font-semibold tracking-tight sm:text-4xl">
-            {t("dashboard.greeting", { name: user.firstName ?? "" })}
+            {t("dashboard.board.title")}
           </h1>
+          <p className="mt-1 text-muted-foreground">
+            {t("dashboard.greeting", { name: user.firstName ?? "" })}
+          </p>
         </div>
         {scoped && warehouses.data && warehouses.data.length > 0 && (
           <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -180,18 +187,15 @@ export function Dashboard() {
       )}
 
       <div className="mt-8 space-y-6">
-        {/* Ce qui attend une décision ou un geste passe avant les chiffres. */}
-        <RequestsCard />
-        <TransfersToReceiveCard />
-        {role !== null && <StockAlertsCard />}
-        {role === StockRole.storekeeper && <StorekeeperOverview />}
-        {(role === StockRole.generalManager || role === StockRole.manager) && (
-          <ActivityOverview focus={OverviewFocus.activity} />
-        )}
-        {role === StockRole.controller && (
+        {board ? (
+          <ManagerBoard />
+        ) : (
           <>
-            <OpenInventories className="" />
-            <ActivityOverview focus={OverviewFocus.control} />
+            {/* Ce qui attend une décision ou un geste passe avant les chiffres. */}
+            <RequestsCard />
+            <TransfersToReceiveCard />
+            {role !== null && <StockAlertsCard />}
+            {role === StockRole.storekeeper && <StorekeeperOverview />}
           </>
         )}
       </div>

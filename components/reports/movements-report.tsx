@@ -29,7 +29,12 @@ import {
 import { useMovementsReport } from "@/lib/api/report-queries"
 import type { ItemMovements, MovementsReport } from "@/lib/api/reports"
 import { VoucherType } from "@/lib/api/vouchers"
-import { INBOUND_TYPES, OUTBOUND_TYPES, totalOf } from "@/lib/reports/activity"
+import {
+  activityStep,
+  INBOUND_TYPES,
+  OUTBOUND_TYPES,
+  totalOf,
+} from "@/lib/reports/activity"
 import { cn } from "@/lib/utils"
 
 import { ActivityChart } from "./activity-chart"
@@ -56,6 +61,7 @@ const transfers = (row: ItemMovements) => row.transferredIn - row.transferredOut
 /** Mouvements de la période (D38) : l'activité en bons, puis article par article. */
 export function MovementsReportScreen() {
   const t = useTranslations("reports.movements")
+  const tChart = useTranslations("analysis.chart")
   const { search } = useReportSearch()
   const report = useMovementsReport(search)
   const exporter = useReportExport()
@@ -78,7 +84,10 @@ export function MovementsReportScreen() {
           )}
         >
           <Totals report={report.data} />
-          <ReportSection title={t("activity")} description={t("activityHint")}>
+          <ReportSection
+            title={t("activity")}
+            description={tChart(activityStep(report.data.activity.length))}
+          >
             <div className="rounded-2xl border p-4 sm:p-5">
               <ActivityChart activity={report.data.activity} />
             </div>

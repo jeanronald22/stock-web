@@ -1,13 +1,11 @@
 "use client"
 
 import {
-  ChartColumnIcon,
   ClipboardListIcon,
   DownloadIcon,
   EllipsisVerticalIcon,
   HistoryIcon,
 } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 
@@ -26,13 +24,13 @@ import { Spinner } from "@/components/ui/spinner"
 import { useStockAccess } from "@/components/workspace/stock-access"
 import { StockPermission } from "@/lib/api/stock"
 import type { StockSearch } from "@/lib/api/vouchers"
-import { Routes } from "@/lib/routes"
 
 import { useStockExport } from "./use-stock-export"
 
 /**
- * Actions moins fréquentes de « Stock », derrière un seul bouton : inventaire (D32), rapports et
- * export (D38). L'export suit les filtres affichés ; sans stock, il n'est pas proposé.
+ * Actions moins fréquentes de « Stock », derrière un seul bouton : inventaire (D32) et export
+ * (D38). L'export suit les filtres affichés ; sans stock, il n'est pas proposé.
+ * Les rapports s'ouvrent depuis le tableau de bord (D43).
  */
 export function StockMoreMenu({
   search,
@@ -42,7 +40,6 @@ export function StockMoreMenu({
   canExport: boolean
 }) {
   const t = useTranslations()
-  const router = useRouter()
   const counts = useStockAccess().can(StockPermission.correctStock)
   const exporter = useExport(useStockExport(search))
   const [starting, setStarting] = useState(false)
@@ -73,11 +70,7 @@ export function StockMoreMenu({
             <HistoryIcon />
             {t("inventory.history.open")}
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => router.push(Routes.reports)}>
-            <ChartColumnIcon />
-            {t("stock.reports")}
-          </DropdownMenuItem>
+          {canExport && <DropdownMenuSeparator />}
           {canExport && (
             <DropdownMenuItem
               disabled={exporter.busy}

@@ -26,7 +26,7 @@ export const Routes = {
   newCustomerReturn: "/bons/retour-client",
   newSupplierReturn: "/bons/retour-fournisseur",
   stock: "/stock",
-  /** Rapports (D38) : ouverts depuis l'accueil et « Stock », sans entrée de menu. */
+  /** Rapports (D38) : le détail du tableau de bord (D43), ouvert depuis ses cartes. */
   reports: "/rapports",
   reportsDamage: "/rapports/casse",
   reportsDiscrepancies: "/rapports/ecarts",
@@ -117,6 +117,8 @@ export const ListQueryParams = {
   from: "du",
   to: "au",
   order: "ordre",
+  /** Domaines affichés du tableau de bord (D43), séparés par des virgules ; absent, tous. */
+  domain: "domaine",
   /** Grille (par défaut) ou liste (LIST_VIEW_PARAM) : articles et stock. */
   view: "vue",
 } as const

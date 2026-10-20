@@ -202,6 +202,10 @@ export function useListParams() {
       update({ category: categoryId }),
     setSupplier: (supplierId: string | undefined) =>
       update({ supplier: supplierId }),
+    setItem: (itemId: string | undefined) => update({ item: itemId }),
+    /** Domaines du tableau de bord ; undefined : tous. */
+    setDomains: (domains: readonly string[] | undefined) =>
+      update({ domain: domains?.join(",") }),
     setCustomerKind: (kind: CustomerKind | undefined) =>
       update({
         customerKind: (Object.keys(CUSTOMER_KINDS) as CustomerKindParam[]).find(

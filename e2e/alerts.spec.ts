@@ -133,11 +133,10 @@ test("catégories, seuils d'alerte et filtres combinables", async ({
   await shot(page, testInfo, "02b-entreprises")
   await page.keyboard.press("Escape")
 
-  // L'accueil annonce les articles à commander.
-  await navigateTo(page, "Accueil")
-  await expect(page.getByTestId("stock-alerts")).toContainText(
-    "2 articles à commander"
-  )
+  // Le tableau de bord annonce ce qui manque, en pastilles vers le stock filtré.
+  await navigateTo(page, "Tableau de bord")
+  const alerts = page.getByRole("navigation", { name: "À traiter" })
+  await expect(alerts).toContainText("à commander")
 
   // Bons : période et ordre.
   await navigateTo(page, "Bons")
