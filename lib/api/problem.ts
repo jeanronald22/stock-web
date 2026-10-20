@@ -25,7 +25,6 @@ export const ProblemCode = {
   locationNotFound: "location-not-found",
   locationCodeTaken: "location-code-taken",
   locationUnavailable: "location-unavailable",
-  itemReferenceTaken: "item-reference-taken",
   packagingNameDuplicate: "packaging-name-duplicate",
   packagingDefaultDuplicate: "packaging-default-duplicate",
   packagingQuantityNotWhole: "packaging-quantity-not-whole",

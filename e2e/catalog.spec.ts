@@ -65,7 +65,10 @@ test("articles et dépôts : un article proposé dans un dépôt et pas dans l'a
     page.getByRole("heading", { name: "Quel article ajoutez-vous ?" })
   ).toBeVisible()
   await page.getByLabel("Nom", { exact: true }).fill("Carreau 60x60 beige")
-  await page.getByLabel(/Référence/).fill("CAR-6060")
+  // La référence n'est pas saisie : elle est numérotée à la création (D41).
+  await expect(page.getByLabel("Référence")).toHaveValue(
+    "Attribuée à la création"
+  )
   await shot(page, testInfo, "03-assistant-article")
   await next(page)
   await expect(
@@ -119,20 +122,6 @@ test("articles et dépôts : un article proposé dans un dépôt et pas dans l'a
     )
     .toBeGreaterThan(0)
   await shot(page, testInfo, "05-articles")
-
-  // Référence déjà prise : refusée par l'API à la fin, l'assistant revient à la première étape.
-  await page.getByRole("link", { name: "Nouvel article" }).click()
-  await page.getByLabel("Nom", { exact: true }).fill("Autre carreau")
-  await page.getByLabel(/Référence/).fill("car-6060")
-  for (let step = 0; step < 4; step++) await next(page)
-  await page.getByRole("button", { name: "Créer l’article" }).click()
-  await expect(
-    page.getByRole("heading", { name: "Quel article ajoutez-vous ?" })
-  ).toBeVisible()
-  await expect(
-    page.getByText("Un autre article porte déjà cette référence.")
-  ).toBeVisible()
-  await page.getByRole("button", { name: "Annuler" }).click()
 
   // Filtre par dépôt : chaque article n'apparaît que là où il est proposé ; deux dépôts cochés,
   // les articles de l'un ou de l'autre.

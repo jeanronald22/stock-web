@@ -60,6 +60,13 @@ test("fiche article : le stock en grand, par dépôt, ses mouvements ; modifier 
   await expect(
     page.getByRole("heading", { name: "Carreau 60x60", level: 1 })
   ).toBeVisible()
+  // Référence numérotée à la création (D41), pas tirée du nom.
+  await expect(
+    page.getByRole("button", { name: "Copier : Référence" })
+  ).toBeVisible()
+  await expect(
+    page.getByText("ART-0001", { exact: true }).first()
+  ).toBeVisible()
   // En tête, l'essentiel ; dessous, la fiche technique et le stock de chaque dépôt.
   const summary = page.getByLabel("L’essentiel de l’article")
   await expect(summary.getByText("102 pièces")).toBeVisible()

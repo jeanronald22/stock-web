@@ -59,7 +59,6 @@ export const BARCODE_PATTERN = /^[!-~]{1,64}$/
 /** Mêmes limites que l'API (stock-api, StockLimits), pour signaler l'erreur avant l'envoi. */
 export const StockLimits = {
   name: 120,
-  reference: 40,
   /** Code-barres : caractères imprimables sans espace (stock-api, StockLimits.BARCODE_PATTERN). */
   barcode: 64,
   city: 80,
@@ -250,7 +249,8 @@ export type StockGrantInput = { role: StockRole; warehouseIds: string[] }
 export type Item = {
   id: string
   name: string
-  reference: string | null
+  /** ART-0001… attribuée par l'API à la création (D41). */
+  reference: string
   /** Code-barres (D34), scanné à la caméra ou à la douchette. */
   barcode: string | null
   baseUnit: BaseUnit
@@ -274,7 +274,6 @@ export type ItemImage = { id: string; url: string }
 
 export type ItemInput = {
   name: string
-  reference?: string
   barcode?: string
   baseUnit: BaseUnit
   batchTracking: boolean

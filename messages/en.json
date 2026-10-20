@@ -507,7 +507,6 @@
       "name": "Name",
       "namePlaceholder": "Beige tile 60x60",
       "reference": "Reference",
-      "referencePlaceholder": "TIL-6060",
       "description": "Description",
       "descriptionPlaceholder": "Brand, colour, use…",
       "baseUnit": "Counting unit",
@@ -546,7 +545,9 @@
           "label": "Issues and counts in"
         },
         "hint": "Suggested on every voucher; each line can still be changed."
-      }
+      },
+      "referenceAuto": "Assigned on creation",
+      "referenceHint": "Numbered automatically (ART-0001, ART-0002…): references follow on and never change."
     },
     "created": "Item created.",
     "saved": "Item saved.",
@@ -1886,10 +1887,6 @@
         "label": "Name",
         "hint": "Beige tile 60x60"
       },
-      "reference": {
-        "label": "Reference",
-        "hint": "CAR-6060"
-      },
       "barcode": {
         "label": "Barcode",
         "hint": "EAN, UPC, Code 128…"
@@ -1953,7 +1950,6 @@
       "examples": [
         {
           "name": "Beige tile 60x60",
-          "reference": "CAR-6060",
           "unit": "Piece",
           "category": "Tiles > Floor",
           "packagingName": "Carton",
@@ -1965,7 +1961,6 @@
         },
         {
           "name": "Mixer tap",
-          "reference": "ROB-MEL",
           "unit": "Piece",
           "category": "Sanitary",
           "batchTracking": "No",
@@ -2029,8 +2024,6 @@
       "problems": {
         "nameMissing": "missing name",
         "nameTooLong": "name too long (120 characters max)",
-        "referenceTooLong": "reference too long (40 characters max)",
-        "referenceDuplicate": "reference already used higher in the file",
         "barcodeInvalid": "unreadable barcode (no spaces, 64 characters max)",
         "barcodeDuplicate": "barcode already used higher in the file",
         "unitUnknown": "unknown unit (piece, kg, litre, metre, m², m³)",
@@ -2067,7 +2060,6 @@
       }
     },
     "serverReasons": {
-      "referenceTaken": "an item in the catalogue already has this reference",
       "barcodeTaken": "an item in the catalogue already has this barcode",
       "categoryUnavailable": "category not found",
       "warehouseUnavailable": "warehouse unavailable",

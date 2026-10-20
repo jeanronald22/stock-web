@@ -141,11 +141,6 @@ export function ImportReviewStep({
                     <TableRow key={row.line}>
                       <TableCell className="pl-4">
                         <p className="font-medium">{row.item.name}</p>
-                        {row.item.reference && (
-                          <p className="font-mono text-xs text-muted-foreground">
-                            {row.item.reference}
-                          </p>
-                        )}
                       </TableCell>
                       <TableCell>
                         {tUnits(`${row.item.baseUnit}.label`)}

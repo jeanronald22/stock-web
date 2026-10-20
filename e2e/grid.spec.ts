@@ -31,7 +31,6 @@ test("articles et stock en grille par défaut, en liste au choix ; le choix rest
   await callApi(page, "POST", "/v1/items", {
     id: tile,
     name: "Carreau 60x60 beige",
-    reference: "CAR-6060",
     baseUnit: "PIECE",
     packagings: [{ name: "Carton", quantity: 4 }],
     warehouses: [{ warehouseId: depot, minQuantity: 20 }],
@@ -64,7 +63,7 @@ test("articles et stock en grille par défaut, en liste au choix ; le choix rest
   ).toBeVisible()
   // La carte dit l'essentiel : la référence reste au tableau, où elle se cherche.
   await expect(itemCard(page, "Carreau 60x60 beige")).not.toContainText(
-    "CAR-6060"
+    "ART-0001"
   )
   await shot(page, testInfo, "01-articles-grille")
 

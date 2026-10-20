@@ -6,7 +6,6 @@ import type { BaseUnit } from "@/lib/api/stock"
  */
 export const ImportField = {
   name: "name",
-  reference: "reference",
   barcode: "barcode",
   unit: "unit",
   category: "category",
@@ -58,15 +57,6 @@ const FIELD_ALIASES: Record<ImportField, readonly string[]> = {
     "name",
     "item",
     "description article",
-  ],
-  reference: [
-    "reference",
-    "ref",
-    "reference article",
-    "code article",
-    "code produit",
-    "code",
-    "sku",
   ],
   barcode: [
     "code barres",

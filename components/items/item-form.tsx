@@ -52,7 +52,7 @@ export function ItemForm({
           <ItemPhotoField item={item} />
         </FormSection>
         <FormSection title={t("items.form.identity")}>
-          <ItemIdentityFields form={form} />
+          <ItemIdentityFields form={form} reference={item.reference} />
         </FormSection>
         <FormSection
           title={t("items.form.counting")}

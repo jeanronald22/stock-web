@@ -449,6 +449,12 @@ Constat après les lots précédents : l'application ressemblait à des composan
 - **Colonnes** vides sur toute la page (lot, saisie) : non affichées.
 - **Notifications** (toasts) : gardées en haut, sous la barre. Essayées en bas : elles couvraient les panneaux du bas et les barres d'action, plus gênant que le titre caché quelques secondes.
 
+## D41. Références d'articles automatiques (2026-10-20)
+
+- **ART-0001, ART-0002…** : attribuées par l'API à la création, par entreprise, dans l'ordre, sans trou ni doublon (compteur `item_sequence` verrouillé jusqu'à la fin de la transaction, comme les numéros de bons). Elles ne suivent plus le nom (« CAR-6060 ») : un catalogue garde des références homogènes, qui se suivent.
+- **Ne se saisissent ni ne se modifient** : le formulaire les montre en lecture seule ; une référence envoyée par une ancienne version de l'application est ignorée. L'import Excel ne lit plus de colonne « Référence » (le code-barres reste importé). Le code-barres reste le moyen d'identifier un article à la caisse ou chez le fournisseur.
+- **Reprise** : les articles sans référence en reçoivent une dans l'ordre de création ; celles déjà saisies restent, leur numéro est sauté s'il a la forme ART-n.
+
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
 - [ ] Nom de la marque et nom du produit de stock (voir D7). Pistes : Kreskala, Kreskio, Tissero, NarvalWorks, FourmiLabs.

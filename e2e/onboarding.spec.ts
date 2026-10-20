@@ -17,15 +17,15 @@ const year = new Date().getFullYear()
 
 /**
  * CSV tel qu'Excel l'enregistre en français : « ; », encodage Windows, titres à sa façon. Deux
- * lignes à corriger : une unité inconnue, une référence en double.
+ * lignes à corriger : une unité inconnue, un code-barres en double.
  */
 const CATALOG_CSV = [
-  "Désignation;Réf;Unité;Famille;Conditionnement;Quantité par conditionnement;Suivi par lot;Seuil;Stock actuel;Lot",
-  "Carreau 30x30 gris;CAR-3030;Pièce;Carrelage > Mur;Carton;10;Oui;50;120;L77",
-  "Ciment 50 kg;CIM-50;pce;Maçonnerie;;;Non;10;40;",
-  "Fer à béton 8 mm;FER-8;m;Maçonnerie;;;;;250,5;",
-  "Sable fin;SAB;sac;;;;;;;",
-  "Colle carrelage;CIM-50;Pièce;;;;;;;",
+  "Désignation;Code-barres;Unité;Famille;Conditionnement;Quantité par conditionnement;Suivi par lot;Seuil;Stock actuel;Lot",
+  "Carreau 30x30 gris;6181234567001;Pièce;Carrelage > Mur;Carton;10;Oui;50;120;L77",
+  "Ciment 50 kg;6181234567002;pce;Maçonnerie;;;Non;10;40;",
+  "Fer à béton 8 mm;;m;Maçonnerie;;;;;250,5;",
+  "Sable fin;;sac;;;;;;;",
+  "Colle carrelage;6181234567002;Pièce;;;;;;;",
 ].join("\r\n")
 
 test("import d'un catalogue Excel, conditionnement par défaut, étiquettes", async ({
@@ -79,7 +79,7 @@ test("import d'un catalogue Excel, conditionnement par défaut, étiquettes", as
   ).toBeVisible()
   await expect(page.getByText("Ligne 5")).toBeVisible()
   await expect(page.getByText(/unité inconnue/)).toBeVisible()
-  await expect(page.getByText(/référence déjà vue plus haut/)).toBeVisible()
+  await expect(page.getByText(/code-barres déjà vu plus haut/)).toBeVisible()
   await expect(
     page.getByText(
       "3 articles arrivent avec leur stock, posé dans Magasin Akwa."

@@ -507,7 +507,6 @@
       "name": "Nom",
       "namePlaceholder": "Carreau 60x60 beige",
       "reference": "Référence",
-      "referencePlaceholder": "CAR-6060",
       "description": "Description",
       "descriptionPlaceholder": "Marque, couleur, usage…",
       "baseUnit": "Unité de comptage",
@@ -546,7 +545,9 @@
           "label": "Sorties et comptages en"
         },
         "hint": "Proposé d’office sur les bons ; chaque ligne reste modifiable."
-      }
+      },
+      "referenceAuto": "Attribuée à la création",
+      "referenceHint": "Numérotée automatiquement (ART-0001, ART-0002…) : les références se suivent et ne changent pas."
     },
     "created": "Article créé.",
     "saved": "Article enregistré.",
@@ -1886,10 +1887,6 @@
         "label": "Nom",
         "hint": "Carreau 60x60 beige"
       },
-      "reference": {
-        "label": "Référence",
-        "hint": "CAR-6060"
-      },
       "barcode": {
         "label": "Code-barres",
         "hint": "EAN, UPC, Code 128…"
@@ -1953,7 +1950,6 @@
       "examples": [
         {
           "name": "Carreau 60x60 beige",
-          "reference": "CAR-6060",
           "unit": "Pièce",
           "category": "Carrelage > Sol",
           "packagingName": "Carton",
@@ -1965,7 +1961,6 @@
         },
         {
           "name": "Robinet mélangeur",
-          "reference": "ROB-MEL",
           "unit": "Pièce",
           "category": "Sanitaire",
           "batchTracking": "Non",
@@ -2029,8 +2024,6 @@
       "problems": {
         "nameMissing": "nom manquant",
         "nameTooLong": "nom trop long (120 caractères au plus)",
-        "referenceTooLong": "référence trop longue (40 caractères au plus)",
-        "referenceDuplicate": "référence déjà vue plus haut dans le fichier",
         "barcodeInvalid": "code-barres illisible (pas d’espace, 64 caractères au plus)",
         "barcodeDuplicate": "code-barres déjà vu plus haut dans le fichier",
         "unitUnknown": "unité inconnue (pièce, kg, litre, mètre, m², m³)",
@@ -2067,7 +2060,6 @@
       }
     },
     "serverReasons": {
-      "referenceTaken": "un article du catalogue a déjà cette référence",
       "barcodeTaken": "un article du catalogue a déjà ce code-barres",
       "categoryUnavailable": "catégorie introuvable",
       "warehouseUnavailable": "dépôt indisponible",

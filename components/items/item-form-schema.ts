@@ -27,7 +27,6 @@ export function itemFormSchema(messages: ItemFormMessages) {
   return z
     .object({
       name: text(StockLimits.name).min(1, messages.required),
-      reference: text(StockLimits.reference),
       barcode: z
         .string()
         .trim()
@@ -97,7 +96,6 @@ export type ItemFormValues = z.infer<ReturnType<typeof itemFormSchema>>
 export function toItemInput(values: ItemFormValues): ItemInput {
   return {
     name: values.name,
-    reference: values.reference || undefined,
     barcode: values.barcode || undefined,
     description: values.description || undefined,
     baseUnit: values.baseUnit,
@@ -126,7 +124,6 @@ export function itemFormDefaults(
 ): ItemFormValues {
   return {
     name: item?.name ?? "",
-    reference: item?.reference ?? "",
     barcode: item?.barcode ?? "",
     description: item?.description ?? "",
     baseUnit: item?.baseUnit ?? "PIECE",
