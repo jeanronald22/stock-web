@@ -10,7 +10,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { useRef, useState } from "react"
 import {
   Controller,
@@ -77,6 +77,7 @@ import {
   type EntryType,
   type Returnable,
 } from "@/lib/api/vouchers"
+import { formatQuantityInput } from "@/lib/forms/quantity"
 import { isOnline } from "@/lib/offline/connectivity"
 import { OutboxKind, removeOutboxEntry } from "@/lib/offline/outbox"
 import { isNetworkError, useEnqueue } from "@/lib/offline/use-enqueue"
@@ -260,6 +261,7 @@ function VoucherEntryForm({
   draft: { id: string; values: VoucherFormValues } | undefined
 }) {
   const t = useTranslations()
+  const locale = useLocale()
   const router = useRouter()
   const errorMessage = useErrorMessage()
   const quantityLabel = useQuantityLabel()
@@ -342,7 +344,7 @@ function VoucherEntryForm({
       lines: previous
         ? previous.lines.map((line) => ({
             ...newLine(line.item, type),
-            quantity: String(line.enteredQuantity),
+            quantity: formatQuantityInput(line.enteredQuantity, locale),
             unit: line.packagingName ?? BASE_UNIT_CHOICE,
             batch: line.batch ?? "",
           }))
@@ -354,7 +356,7 @@ function VoucherEntryForm({
                 newLine(line.item, type, {
                   batch: line.batch ?? "",
                   limit: line.remaining,
-                  quantity: String(line.remaining),
+                  quantity: formatQuantityInput(line.remaining, locale),
                 })
               ),
       counterparty:
