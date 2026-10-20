@@ -80,10 +80,10 @@ export function ItemIdentityFields({
       {/* Attribuée par l'API à la création, dans l'ordre (D41) : on la montre, sans la saisir. */}
       <Field>
         <FieldLabel htmlFor="reference">{t("items.form.reference")}</FieldLabel>
-        <InputGroup>
+        <InputGroup className="bg-muted/40">
           <InputGroupInput
             id="reference"
-            className="font-mono"
+            className={cn(reference ? "font-mono" : "text-muted-foreground")}
             readOnly
             value={reference ?? t("items.form.referenceAuto")}
             aria-describedby="reference-hint"
