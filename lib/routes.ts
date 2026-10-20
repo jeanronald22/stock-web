@@ -35,7 +35,14 @@ export const Routes = {
   /** Clients et chantiers : second onglet de « Contacts » (D30). */
   customers: "/clients",
   team: "/equipe",
-  notificationSettings: "/notifications",
+  /** Profil de la personne connectée (D46), ouvert depuis le menu du compte. */
+  profile: "/profil",
+  /** Paramètres (D45) : l'entreprise, ses alertes, ses règles de travail, et les notifications de chacun. */
+  settings: "/parametres",
+  settingsCompany: "/parametres/entreprise",
+  settingsAlerts: "/parametres/alertes",
+  settingsRules: "/parametres/regles",
+  notificationSettings: "/parametres/notifications",
   newInvitation: "/equipe/inviter",
   /** Lien reçu par e-mail ; même chemin que l'API (stock-api, TeamService.INVITATION_PATH). */
   invitation: "/invitation",

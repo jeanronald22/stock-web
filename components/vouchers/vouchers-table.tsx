@@ -10,6 +10,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useFormatter, useTranslations } from "next-intl"
 
+import { PersonName } from "@/components/profile/person-name"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -80,7 +81,7 @@ export function VouchersTable({
           <TableHead className="hidden text-right lg:table-cell">
             {t("table.lines")}
           </TableHead>
-          <TableHead className="hidden xl:table-cell">
+          <TableHead className="hidden md:table-cell">
             {t("table.createdBy")}
           </TableHead>
           <TableHead className="w-10" />
@@ -102,6 +103,12 @@ export function VouchersTable({
               <p className="mt-1 text-xs text-muted-foreground md:hidden">
                 {day(voucher)} · {warehouseLabel(voucher)}
               </p>
+              <PersonName
+                name={voucher.createdByName}
+                photoUrl={voucher.createdByPhotoUrl}
+                className="mt-1.5 flex text-xs text-muted-foreground md:hidden"
+                avatarClassName="size-5"
+              />
             </TableCell>
             <TableCell className="hidden md:table-cell">
               <div className="flex flex-wrap items-center gap-1.5">
@@ -125,8 +132,11 @@ export function VouchersTable({
             <TableCell className="hidden text-right num lg:table-cell">
               {voucher.lineCount}
             </TableCell>
-            <TableCell className="hidden text-muted-foreground xl:table-cell">
-              {voucher.createdByName}
+            <TableCell className="hidden max-w-48 text-muted-foreground md:table-cell">
+              <PersonName
+                name={voucher.createdByName}
+                photoUrl={voucher.createdByPhotoUrl}
+              />
             </TableCell>
             <TableCell className="pr-2">
               <VoucherRowMenu id={voucher.id} number={voucher.number} />

@@ -18,7 +18,7 @@
     "invitation": "Invitation",
     "newInvitation": "Invite someone",
     "member": "Member",
-    "notifications": "Notifications",
+    "notifications": "Settings · Notifications",
     "newTransfer": "New transfer",
     "transferReceipt": "Transfer receipt",
     "newDamage": "New damage",
@@ -36,7 +36,12 @@
     "importItems": "Import items",
     "reports": "Reports · Movements",
     "reportsDamage": "Reports · Damage",
-    "reportsDiscrepancies": "Reports · Discrepancies"
+    "reportsDiscrepancies": "Reports · Discrepancies",
+    "settings": "Settings",
+    "settingsCompany": "Settings · Business",
+    "settingsAlerts": "Settings · Alerts",
+    "settingsRules": "Settings · Work rules",
+    "profile": "My profile"
   },
   "common": {
     "retry": "Try again",
@@ -273,7 +278,8 @@
   "menu": {
     "open": "Open account menu",
     "switchOrganization": "Switch business",
-    "currentOrganization": "Active business"
+    "currentOrganization": "Active business",
+    "profile": "My profile"
   },
   "nav": {
     "home": "Dashboard",
@@ -288,7 +294,8 @@
       "catalog": "Catalogue",
       "administration": "Administration"
     },
-    "contacts": "Contacts"
+    "contacts": "Contacts",
+    "settings": "Settings"
   },
   "workspace": {
     "toggleSidebar": "Show or hide the menu",
@@ -571,7 +578,11 @@
         "hint": "Suggested on every voucher; each line can still be changed."
       },
       "referenceAuto": "Assigned on creation",
-      "referenceHint": "Numbered automatically (ART-0001, ART-0002…): references follow on and never change."
+      "referenceHint": "Numbered automatically (ART-0001, ART-0002…): references follow on and never change.",
+      "maxQuantity": "Maximum stock",
+      "maxQuantityPlaceholder": "None",
+      "maxQuantityHint": "Maximum stock: above it, the owner and general managers are told about overstock. Empty: no maximum.",
+      "maxQuantityAboveMin": "The maximum stock must be above the alert threshold."
     },
     "created": "Item created.",
     "saved": "Item saved.",
@@ -627,8 +638,8 @@
       "inStock": "In stock",
       "breakdown": "that is {breakdown}",
       "byWarehouse": "By warehouse",
-      "thresholds": "Alert thresholds",
-      "thresholdsHint": "Below this threshold, the item becomes “to order” and the warehouse managers are notified. Empty: no alert.",
+      "thresholds": "Thresholds and maximums",
+      "thresholdsHint": "Below the threshold, the item becomes “to order” and the warehouse managers are notified. Above the maximum, the owner and general managers are told about overstock. Empty: no alert.",
       "noWarehouse": "This item is not offered in any of your warehouses.",
       "threshold": "Alert threshold: {quantity}",
       "noThreshold": "No alert threshold",
@@ -685,7 +696,8 @@
       "movementsChartSummary": "Over the period: {inbound} in, {outbound} out.",
       "periodLabel": "Period shown",
       "inbound": "Ins",
-      "outbound": "Outs"
+      "outbound": "Outs",
+      "maximum": "maximum {quantity}"
     },
     "more": {
       "label": "Catalogue options",
@@ -945,7 +957,8 @@
       "batchMismatchToast": "A batch does not match what is already known: see the flagged line.",
       "mixedShades": "{name}: {count} different shades on this voucher.",
       "mixedCalibers": "{name}: {count} different calibers on this voucher.",
-      "mixedConsequence": "The customer may notice when laying them: prefer a single batch if possible."
+      "mixedConsequence": "The customer may notice when laying them: prefer a single batch if possible.",
+      "expiresOn": "Expires"
     },
     "entry": {
       "see": "See voucher",
@@ -1439,13 +1452,6 @@
       "title": "Invitation ready",
       "backToTeam": "Back to the team",
       "inviteAnother": "Invite someone else"
-    },
-    "rules": {
-      "title": "Work rules",
-      "issueApproval": "Storekeepers’ issues need approval",
-      "issueApprovalHint": "Issues, transfers and supplier returns prepared by a storekeeper wait for the approval of a general manager, manager or controller of the warehouse.",
-      "enabled": "Storekeepers’ issues will be approved.",
-      "disabled": "Storekeepers issue directly again."
     }
   },
   "invitation": {
@@ -1557,6 +1563,43 @@
         "approved": "Your issue is approved: {number}",
         "by": "By {name}.",
         "rejected": "Your issue is rejected · {warehouse}"
+      },
+      "RUNNING_OUT": {
+        "name": "Expected stockout",
+        "when": "For the owner and general managers: when, at the current pace of issues, an item’s stock will not last long.",
+        "title": "{count, plural, one {# item will run out} other {# items will run out}}",
+        "line": "{name} ({warehouse}): {days, plural, =0 {less than a day} one {# day} other {# days}} left"
+      },
+      "DORMANT_STOCK": {
+        "name": "Dormant stock",
+        "when": "For the owner and general managers: when an item in stock has not gone out for a long time.",
+        "title": "{count, plural, one {# item is dormant} other {# items are dormant}}",
+        "line": "{name} ({warehouse}): {quantity}, no issue for {days, plural, one {# day} other {# days}}"
+      },
+      "OVERSTOCK": {
+        "name": "Overstock",
+        "when": "For the owner and general managers: when an item goes above the maximum stock on its record.",
+        "title": "{count, plural, one {# item overstocked} other {# items overstocked}}",
+        "line": "{name} ({warehouse}): {quantity}, maximum {maximum}"
+      },
+      "ABNORMAL_DAMAGE": {
+        "name": "Abnormal damage",
+        "when": "For the owner and general managers: when an item’s damage goes beyond the accepted share over 30 days.",
+        "title": "Abnormal damage: {count, plural, one {# item} other {# items}}",
+        "line": "{name} ({warehouse}): {damaged} damaged, {percent}% of what went out"
+      },
+      "UNRELIABLE_SUPPLIER": {
+        "name": "Unreliable supplier",
+        "when": "For the owner and general managers: when too many of a supplier’s deliveries arrive with a gap over 90 days.",
+        "title": "{count, plural, one {# supplier often delivers with gaps} other {# suppliers often deliver with gaps}}",
+        "line": "{name}: {withGap} of {receipts} receipts with a gap"
+      },
+      "EXPIRING_BATCHES": {
+        "name": "Expiring batches",
+        "when": "For the owner and general managers: when a batch in stock nears its expiry date.",
+        "title": "{count, plural, one {# batch near its expiry date} other {# batches near their expiry date}}",
+        "line": "{name}, batch {batch} ({warehouse}): expires {date}",
+        "expired": "{name}, batch {batch} ({warehouse}): expired since {date}"
       }
     }
   },
@@ -1864,7 +1907,8 @@
   },
   "batches": {
     "shade": "shade {shade}",
-    "caliber": "cal. {caliber}"
+    "caliber": "cal. {caliber}",
+    "expiresOn": "expires {date}"
   },
   "records": {
     "edit": "Edit",
@@ -2468,5 +2512,223 @@
       "lastMonth": "Last month",
       "last3Months": "Last 3 months"
     }
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Your business’s settings, and your own.",
+    "tabs": {
+      "company": "Business",
+      "alerts": "Alerts",
+      "rules": "Work rules",
+      "notifications": "Notifications"
+    },
+    "denied": {
+      "title": "Restricted setting",
+      "description": "Your role does not give access to this setting. Ask the business owner."
+    },
+    "rules": {
+      "issueApprovalTitle": "Issue approval",
+      "issueApprovalHint": "Issues, transfers and supplier returns prepared by a storekeeper wait for the approval of a general manager, manager or controller of the warehouse.",
+      "issueApproval": "Storekeepers’ issues need approval",
+      "issueApprovalWho": "When off, storekeepers issue directly; every issue stays recorded under their name.",
+      "enabled": "Storekeepers’ issues will be approved.",
+      "disabled": "Storekeepers issue directly again."
+    },
+    "alerts": {
+      "description": "Checked every hour. When an alert appears, the owner and general managers are told in the app and by email, once.",
+      "rules": {
+        "forecastDays": "Warn when an item’s stock will only last this many days, at the pace of issues over the last 30 days.",
+        "dormantDays": "Warn when an item in stock has not gone out for this many days.",
+        "damagePercent": "Warn when an item’s damage exceeds this share of what went out (issues and damage) over 30 days.",
+        "supplierGapPercent": "Warn when this share of a supplier’s receipts arrives with a gap over 90 days (at least 3 receipts).",
+        "expiryDays": "Warn when a batch in stock reaches its expiry date within this many days, or has passed it."
+      },
+      "values": {
+        "forecastDays": "Stock for less than",
+        "dormantDays": "No issue for",
+        "damagePercent": "Damage above",
+        "supplierGapPercent": "Receipts with a gap above",
+        "expiryDays": "Expiry within"
+      },
+      "units": {
+        "days": "days",
+        "percent": "%"
+      },
+      "between": "A whole number between {min} and {max}.",
+      "on": "Alert on",
+      "off": "Alert off",
+      "overstock": "Set on each item’s record: the maximum stock, warehouse by warehouse, next to the alert threshold.",
+      "overstockLink": "Open items",
+      "emailTitle": "Emails",
+      "email": "Everyone can turn off an alert’s email and keep the in-app notice.",
+      "emailLink": "Notification preferences",
+      "save": "Save alerts",
+      "saved": "Alerts saved. They apply from the next check."
+    },
+    "company": {
+      "description": "Your business’s record and its verification. Only the owner and administrators see it.",
+      "save": "Save record",
+      "saved": "Record saved.",
+      "kyb": {
+        "title": "Business verification",
+        "stages": {
+          "undeclared": "Not declared",
+          "declared": "Declared",
+          "ready": "Declared",
+          "pending": "Awaiting verification",
+          "verified": "Verified",
+          "rejected": "Verification declined"
+        },
+        "hints": {
+          "undeclared": "Complete level 1: it says who runs the business and where to find it.",
+          "declared": "Level 1 reached. Add your identifiers and their proofs to request verification.",
+          "ready": "Everything is uploaded: request verification from Kreskala.",
+          "pending": "Request sent on {date}. Kreskala is checking your documents; replacing a proof cancels the request.",
+          "verified": "Kreskala verified your identifiers. Replacing a proof will require a new verification.",
+          "rejected": "Verification did not go through. Replace unreadable or wrong documents, then send the request again."
+        },
+        "levels": {
+          "1": "Level 1 · Declared",
+          "2": "Level 2 · Verified by Kreskala"
+        },
+        "requirements": {
+          "RESPONSIBLE_NAME": "Name of the person in charge",
+          "MANAGER_ID": "Manager’s ID document",
+          "ADDRESS_OR_PREMISES": "Address, or photo of the premises",
+          "BUSINESS_IDS": "Business identifiers",
+          "BUSINESS_ID_PROOFS": "Proof of each identifier"
+        },
+        "done": "Done:",
+        "missing": "To complete:",
+        "request": "Request verification",
+        "requested": "Request sent. Kreskala is checking your documents."
+      },
+      "identity": {
+        "title": "Business",
+        "description": "The name shown in the app, on vouchers and in emails, and the logo your team sees."
+      },
+      "responsible": {
+        "title": "Person in charge",
+        "description": "The person answerable for the business, the one on the ID document."
+      },
+      "address": {
+        "title": "Address",
+        "description": "Neighbourhood, street, landmark: enough to find the premises. Without an address, a photo of the premises is enough for level 1."
+      },
+      "businessIds": {
+        "title": "Identifiers",
+        "description": "Copy them exactly as written on the proofs. Changing them cancels a verification.",
+        "types": {
+          "RCCM": "RCCM (trade register)",
+          "NIU": "NIU (unique identification number)"
+        },
+        "examples": {
+          "RCCM": "RC/DLA/2019/B/1234",
+          "NIU": "M012345678901A"
+        }
+      },
+      "fields": {
+        "name": "Business name",
+        "sector": "Sector",
+        "city": "City",
+        "responsibleName": "Full name",
+        "responsibleNameHint": "As written on their ID document.",
+        "phone": "Phone",
+        "phoneHint": "Without a country code, {prefix} is added.",
+        "address": "Premises address"
+      },
+      "documents": {
+        "title": "Documents",
+        "description": "Photo or PDF, 5 MB at most. Encrypted, they are only seen by the owner, administrators and Kreskala for verification; every viewing is recorded.",
+        "kinds": {
+          "MANAGER_ID": {
+            "name": "Manager’s ID document",
+            "hint": "National ID card, passport or residence permit, still valid."
+          },
+          "PREMISES_PHOTO": {
+            "name": "Photo of the premises",
+            "hint": "The shopfront or the inside, with the sign if possible."
+          },
+          "RCCM": {
+            "name": "RCCM proof",
+            "hint": "Extract or certificate of registration in the trade register."
+          },
+          "NIU": {
+            "name": "NIU proof",
+            "hint": "Registration certificate or taxpayer card."
+          }
+        },
+        "proofHint": "The official document bearing your {type}.",
+        "uploadedOn": "Uploaded on {date} · {size}",
+        "sizeKb": "{size} KB",
+        "sizeMb": "{size} MB",
+        "missing": {
+          "levelOne": "Needed for level 1",
+          "verification": "Needed for verification",
+          "optional": "Optional: the address is enough for level 1"
+        },
+        "view": "View",
+        "upload": "Upload",
+        "replace": "Replace",
+        "remove": "Remove",
+        "removeTitle": "Remove this document?",
+        "removeDescription": "It is deleted at once. The business’s level may drop; removing a proof cancels the verification.",
+        "removed": "Document removed.",
+        "uploaded": "Document uploaded.",
+        "unsupported": "Upload a photo (JPEG, PNG, WebP) or a PDF.",
+        "tooLarge": "This file is over 5 MB: shrink the photo or scan at a lower quality.",
+        "previewTitle": "Document preview",
+        "openInTab": "Open in a tab"
+      },
+      "logo": {
+        "title": "Logo",
+        "description": "JPEG, PNG or WebP image, 5 MB at most. Saved as soon as it is uploaded: it replaces the business’s initials in the app.",
+        "upload": "Upload a logo",
+        "replace": "Replace",
+        "remove": "Remove",
+        "uploaded": "Logo saved.",
+        "removed": "Logo removed.",
+        "unsupported": "Choose a JPEG, PNG or WebP image.",
+        "tooLarge": "This image is over 5 MB: choose a lighter one."
+      }
+    }
+  },
+  "profile": {
+    "title": "My profile",
+    "description": "Your picture, name, language and password, across all your businesses.",
+    "photo": {
+      "title": "Profile picture",
+      "description": "It appears next to your name for the members of your businesses.",
+      "upload": "Add a picture",
+      "replace": "Replace",
+      "remove": "Remove",
+      "uploaded": "Picture saved.",
+      "removed": "Picture removed.",
+      "unsupported": "Upload a JPEG, PNG or WebP picture.",
+      "tooLarge": "The picture is larger than 5 MB."
+    },
+    "identity": {
+      "title": "Identity",
+      "description": "Your name signs the vouchers you approve and the counts you make.",
+      "email": "Email address",
+      "emailHint": "It is your sign-in identifier: it cannot be changed here.",
+      "save": "Save",
+      "saved": "Name saved."
+    },
+    "language": {
+      "title": "Language",
+      "description": "Used for the app, and for the emails and notifications you receive."
+    },
+    "password": {
+      "title": "Password",
+      "description": "Kreskala first asks for your current password, then the new one, and brings you back here.",
+      "change": "Change password",
+      "changed": "Password changed.",
+      "failed": "The password could not be changed. Please try again."
+    }
+  },
+  "pdf": {
+    "credit": "Made with Kreskala",
+    "phone": "Tel. {phone}"
   }
 }

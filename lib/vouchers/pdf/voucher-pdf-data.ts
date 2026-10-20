@@ -1,10 +1,12 @@
+import type { PdfFooter, PdfLetterhead } from "@/lib/pdf/pdf-letterhead"
+
 /**
  * Contenu d'un bon prêt à mettre en page : textes déjà traduits et mis en forme (dates, quantités),
- * le document PDF n'a ni accès aux traductions ni à l'API.
+ * logo déjà converti ; le document PDF n'a ni accès aux traductions ni à l'API.
  */
 export type VoucherPdfData = {
   fileName: string
-  organization: { name: string; city: string }
+  letterhead: PdfLetterhead
   title: string
   number: string
   facts: { label: string; value: string }[]
@@ -21,5 +23,5 @@ export type VoucherPdfData = {
   lineCount: string
   note: { label: string; text: string } | null
   signatures: { label: string; name: string }[]
-  footer: string
+  footer: PdfFooter
 }

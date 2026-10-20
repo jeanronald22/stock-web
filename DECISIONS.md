@@ -288,7 +288,7 @@ Ajout au modèle D10, qui n'en prévoyait pas. Répond à « alerte avant ruptur
 | Invitation reçue | une personne déjà inscrite est invitée | elle (l'e-mail d'invitation part déjà) | oui | non |
 | Accès Stock modifié | rôle ou dépôts changés | la personne concernée | oui | oui |
 
-- **Préférences** : l'e-mail se désactive type par type (« Mon compte › Notifications ») ; l'avis dans l'application reste toujours.
+- **Préférences** : l'e-mail se désactive type par type (« Paramètres › Notifications », D45) ; l'avis dans l'application reste toujours.
 - **Lecture** : cloche dans l'en-tête avec le nombre de non lues, liste des dernières, « tout marquer comme lu » ; seules les notifications de l'entreprise active, et celles qui ne dépendent d'aucune entreprise (invitation reçue). Relues toutes les minutes.
 - **Envoi** : après l'enregistrement de l'opération, hors de la requête : un e-mail lent ou refusé ne retarde ni n'annule un bon. Conservation : 90 jours.
 
@@ -478,6 +478,66 @@ Questionnaire : rapports au gérant (Q1) ; produits à écarts (Q33) ; casse (Q3
 - **Un article choisi** : sa fiche en tête, avec ses quantités dans son unité (en stock, entré, sorti, ce que le stock tient encore) et sa courbe jour par jour, qui remplace celle des bons. Les classements d'articles disparaissent, et le reste ne compte que les bons qui le portent.
 - **Détail** : chaque carte ouvre l'un des trois rapports de D38 (« Rapports », `/rapports` : mouvements, casse, écarts), qui reprend les mêmes filtres et s'exporte en Excel. Son fil d'Ariane ramène au tableau de bord.
 - **Calcul** : en SQL sur le registre et les bons, comme D38, dans les dépôts de la personne, en un seul appel. Les états de stock reprennent la règle des alertes (D24).
+
+## D44. Alertes paramétrables, par e-mail et dans l'application (2026-10-20)
+
+Questionnaire : « alerte avant rupture » (Q44), fins de série (Q21), casse et pertes anormales (Q34 à Q37), recours auprès du fournisseur (Q11, Q12). Prolonge D24 (seuils) et D26 (notifications).
+
+- **Six règles en plus du seuil d'alerte** (D24), réglées pour toute l'entreprise par le propriétaire, les administrateurs et le gérant. Chacune peut être coupée :
+
+| Règle | Réglage (par défaut) | Se déclenche quand |
+|---|---|---|
+| Rupture prévue | N jours (15) | au rythme des sorties des 30 derniers jours, le stock d'un article dans un dépôt tient moins de N jours |
+| Stock qui dort | N jours (90) | un article a du stock dans un dépôt et n'en est pas sorti depuis N jours (ni depuis son arrivée, s'il n'est jamais sorti) |
+| Surstock | stock maximum par article et par dépôt, sur la fiche (vide : pas d'alerte) | le stock dépasse ce maximum |
+| Casse anormale | N % (5) | sur 30 jours, la casse d'un article dans un dépôt dépasse N % de ce qui en est parti (sorties et casse) |
+| Fournisseur peu fiable | N % (20) | sur 90 jours, un fournisseur a livré au moins 3 réceptions, dont N % avec un écart au bon de livraison |
+| Péremption | N jours (30) | un lot en stock atteint sa date limite dans N jours, ou l'a dépassée |
+
+- **Écarts au modèle D10** : `item_warehouse.max_quantity` (stock maximum) et `batch_attributes.expires_on` (date limite du lot) n'y figuraient pas. La date limite se saisit à la première réception du lot, comme la nuance et le calibre (D35).
+- **Veille** : une tâche de fond passe chaque heure sur chaque entreprise active. Une alerte reste enregistrée (`stock.alert_state`) tant que sa condition dure. On n'est prévenu qu'à son apparition, et de nouveau seulement si elle disparaît puis revient. Couper une règle oublie ses alertes. Plusieurs instances de l'API peuvent tourner : seule celle qui enregistre l'alerte prévient.
+- **Qui est prévenu** : le propriétaire et les gérants, dans l'application et par e-mail. Un avis par règle et par passage liste les articles, lots ou fournisseurs concernés. L'e-mail se coupe type par type dans « Paramètres › Notifications » (D26, D45).
+- **Où se règle** : l'onglet « Alertes » de « Paramètres » (D45). Un premier bouton sur le tableau de bord a été jugé incohérent : le tableau montre les alertes, il ne les règle pas. Le maximum se saisit à côté du seuil, sur la fiche article.
+
+## D45. Paramètres de l'entreprise et KYB déclaratif (2026-10-20)
+
+Prolonge D6 (KYB), D26 (notifications), D33 (règles de travail) et D44 (alertes). Un réglage posé sur l'écran qui en montre l'effet s'est révélé incohérent : les réglages ont leur entrée de menu.
+
+- **« Paramètres »** (`/parametres`), dans le compartiment Administration, ouvert à tous. Ses onglets suivent les mêmes droits que l'API, et un onglet hors des droits n'est ni proposé ni affiché :
+  - **Entreprise** : la fiche et le KYB, au propriétaire et aux administrateurs (le module Plateforme ne connaît pas les rôles Stock) ;
+  - **Alertes** (D44) : au propriétaire, aux administrateurs et aux gérants ;
+  - **Règles de travail** (D33), sorties de l'écran « Équipe » : au propriétaire et aux administrateurs ;
+  - **Notifications** (D26), anciennement `/notifications` : à chacun, pour soi.
+- **Navigation** : les onglets en colonne à gauche sur grand écran (1280 px et plus). Plus étroit, ils passent au-dessus du contenu, sur une ligne, ou deux par ligne sur téléphone, sans qu'aucun ne soit coupé.
+- **La fiche** : nom, secteur, ville, nom du responsable, téléphone (normalisé au format international, l'indicatif du pays est ajouté s'il manque), adresse, et les identifiants du pays. Les types d'identifiants viennent du référentiel des pays (`platform.country.business_id_types` : RCCM et NIU au Cameroun) et sont rangés dans `platform.organization_business_id`, pas en colonnes. La fiche porte une version : une modification faite ailleurs entre-temps est refusée.
+- **Le logo**, dans la fiche, enregistré dès le dépôt : une image (JPEG, PNG, WebP, 5 Mo au plus) qui remplace les initiales de l'entreprise dans le sélecteur d'entreprise. Ce n'est pas une pièce du KYB : il se montre aux membres par lien signé, comme les photos d'articles, sans chiffrement ni journal (`platform.organization.logo_key`).
+- **Les pièces**, une par sorte : pièce d'identité du gérant, photo du local, et un justificatif par identifiant. Photo (JPEG, PNG, WebP) ou PDF, reconnus à leur contenu, 5 Mo au plus. Déposée, une pièce remplace la précédente, qui est effacée du stockage.
+- **Niveaux, calculés par l'API** : 0 à l'inscription ; 1 (« Déclarée ») avec le nom du responsable, la pièce du gérant, et l'adresse ou la photo du local ; 2 (« Vérifiée ») quand Kreskala approuve. La demande de vérification s'envoie quand chaque identifiant et son justificatif sont là ; elle passe « En attente de vérification ». Changer un identifiant ou un justificatif remet la vérification à zéro : la décision portait sur ce qui avait été déposé.
+- **Sécurité des pièces** (D6) : chiffrées par l'API (AES-GCM, clé `KYB_ENCRYPTION_KEY`) avant le stockage, qui ne voit que des octets ; jamais de lien signé : elles ne se lisent que par l'API, sans cache, et chaque dépôt, lecture ou retrait est inscrit dans `platform.kyb_document_access`, qui survit à la pièce.
+- **Pas encore de back-office** : la demande se repère dans les journaux et en base ; l'approbation (statut `APPROVED`, niveau 2) et le refus viendront avec lui.
+- **Écart au modèle D10** : la fiche (`responsible_name`, `kyb_requested_at`, `version`, `logo_key`), les identifiants et les pièces n'y figuraient pas.
+
+## D46. « Mon profil » de la personne connectée (2026-10-20)
+
+Prolonge D17 (comptes Keycloak) et D45 (paramètres). Les réglages de l'entreprise sont dans « Paramètres » ; ceux de la personne, valables dans toutes ses entreprises, ont leur page.
+
+- **« Mon profil »** (`/profil`), ouvert depuis le menu du compte (en bas de la barre latérale), à chacun et quel que soit son rôle.
+- **Photo de profil** : enregistrée dès le dépôt, une image (JPEG, PNG, WebP, 5 Mo au plus) reconnue à son contenu. Elle remplace les initiales dans le menu du compte et dans l'écran « Équipe », et accompagne le nom de qui a validé ou préparé un bon (liste et bon). Le bon garde le nom du moment ; la photo, elle, est celle d'aujourd'hui, lue par la Plateforme (`UserDirectory.photoLinks`). Elle se montre aux membres par lien signé, comme le logo (`platform.user_account.photo_key`). Remplacée ou retirée, l'ancienne est effacée du stockage.
+- **Prénom et nom** : modifiables, ils signent les bons et les inventaires.
+- **L'adresse e-mail** ne se modifie pas : c'est l'identifiant de connexion, et la changer demande une vérification que Keycloak gère seul. Elle se lit sur la page.
+- **Langue** : enregistrée par l'API (`PUT /v1/me/locale`, français ou anglais), parce que les e-mails et les avis partent dans la langue de la personne ; le cookie change aussi la langue de l'écran tout de suite. Le menu du compte fait de même.
+- **Mot de passe** : jamais envoyé à l'API Kreskala. Le bouton lance l'action Keycloak `UPDATE_PASSWORD` (« application-initiated action ») sur les pages de connexion de Kreskala. Keycloak demande d'abord le mot de passe actuel, l'adresse étant pré-remplie (`login_hint`) : avec le jeton hors ligne (`offline_access`), il ne garde pas de session de connexion, et c'est aussi la preuve que la personne connaît l'actuel. Le retour sur « Mon profil » et le résultat (`kc_action_status`) passent par la session du navigateur.
+- **Écart au modèle D10** : `photo_key` n'y figurait pas.
+
+## D47. Documents PDF au nom de l'entreprise (2026-10-20)
+
+Prolonge D36 (étiquettes), D45 (fiche et logo) et les bons et fiches d'articles en PDF. Un document imprimé est celui de l'entreprise : c'est elle qui le remet à un fournisseur, un client ou un chauffeur.
+
+- **En-tête commun** aux documents A4 (bons, fiches d'articles) : le logo de l'entreprise en premier (proportions gardées, PNG net et transparent), son nom, puis ses coordonnées et identifiants (adresse et ville, téléphone, RCCM et NIU renseignés) ; à droite, la nature du document et son numéro. Sans logo, le nom prend sa place.
+- **Charte sobre** : encre, gris et filets, sans les couleurs de Kreskala ; seuls les états du stock gardent leur couleur, parce qu'elle a un sens.
+- **Kreskala en mention** : « Édité avec Kreskala », discret, en bas à droite de chaque page.
+- **En-tête lisible par chaque membre** (`GET /v1/company/letterhead`) : un magasinier imprime aussi des bons. Il ne porte que ce qui s'imprime ; la fiche complète et les pièces restent aux gérants (D45). Hors connexion, le document part avec le nom et la ville connus.
+- **Étiquettes** : inchangées dans leur principe (code, nom, référence), plus aérées.
 
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).

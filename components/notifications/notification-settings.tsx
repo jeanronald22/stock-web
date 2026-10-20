@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/field"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
-import { PageBody, PageHeader } from "@/components/workspace/page-header"
+import { SettingsLead } from "@/components/settings/settings-shell"
 import {
   useChangeNotificationPreference,
   useNotificationPreferences,
@@ -20,7 +20,7 @@ import {
 import { useErrorMessage } from "@/lib/api/use-error-message"
 
 /**
- * Réglages des notifications (DECISIONS.md, D26) : l'avis dans l'application reste toujours ;
+ * Réglages des notifications (DECISIONS.md, D26), onglet des paramètres (D45) : l'avis dans l'application reste toujours ;
  * l'e-mail se coupe type par type, enregistré aussitôt.
  */
 export function NotificationSettings() {
@@ -30,12 +30,8 @@ export function NotificationSettings() {
   const change = useChangeNotificationPreference()
 
   return (
-    <PageBody>
-      <PageHeader
-        title={t("settingsTitle")}
-        description={t("settingsDescription")}
-        className="mb-8"
-      />
+    <>
+      <SettingsLead>{t("settingsDescription")}</SettingsLead>
       {preferences.isPending ? (
         <Skeleton className="h-48 w-full rounded-2xl" />
       ) : (
@@ -74,6 +70,6 @@ export function NotificationSettings() {
           )
         })
       )}
-    </PageBody>
+    </>
   )
 }

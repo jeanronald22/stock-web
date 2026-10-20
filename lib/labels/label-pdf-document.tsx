@@ -28,7 +28,9 @@ const PADDING_MM = 3
 /** Taille des textes secondaires, rapportée à celle du nom. */
 const SMALL_RATIO = 0.8
 const DIGITS_LETTER_SPACING = 0.6
-const LINE_HEIGHT = 1.15
+const LINE_HEIGHT = 1.2
+/** Écarts entre le nom, la référence, les barres et les chiffres : rien ne se touche. */
+const GAP_MM = 0.8
 
 const mm = (value: number) => value * PT_PER_MM
 
@@ -48,12 +50,16 @@ const styles = StyleSheet.create({
   },
   reference: {
     color: MUTED,
-    marginTop: 1,
+    marginTop: mm(GAP_MM * 1.5),
     maxLines: 1,
     textOverflow: "ellipsis",
   },
-  barcode: { flexGrow: 1, marginTop: mm(1.5) },
-  digits: { textAlign: "center", letterSpacing: DIGITS_LETTER_SPACING },
+  barcode: { flexGrow: 1, marginTop: mm(GAP_MM * 2) },
+  digits: {
+    textAlign: "center",
+    letterSpacing: DIGITS_LETTER_SPACING,
+    marginTop: mm(GAP_MM),
+  },
 })
 
 /**

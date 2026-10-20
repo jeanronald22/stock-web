@@ -42,8 +42,9 @@ export const privacyPolicyFr: PrivacyPolicyContent = {
         {
           kind: "list",
           items: [
-            "Votre compte : adresse e-mail, mot de passe, prénom, nom et langue préférée. Votre mot de passe n’est jamais conservé en clair : nous n’en gardons qu’une empreinte irréversible.",
+            "Votre compte : adresse e-mail, mot de passe, prénom, nom, langue préférée et, si vous en déposez une, votre photo de profil. Votre mot de passe n’est jamais conservé en clair : nous n’en gardons qu’une empreinte irréversible.",
             "Votre entreprise : nom, ville, pays, activité, votre rôle dans l’équipe (propriétaire, administrateur ou membre) et votre rôle dans Stock (gérant, manager, contrôleur ou magasinier), avec les dépôts qui vous sont attribués.",
+            "La fiche et la vérification de votre entreprise, renseignées par son propriétaire ou ses administrateurs : nom du responsable, téléphone, adresse du local, identifiants officiels (RCCM et NIU au Cameroun), et les pièces déposées : pièce d’identité du gérant, photo du local, justificatifs des identifiants. Kreskala est responsable de ce traitement.",
             "Les invitations : l’adresse e-mail de la personne invitée, le nom de la personne qui invite et l’état de l’invitation. Le lien d’invitation n’est jamais conservé : nous n’en gardons qu’une empreinte irréversible.",
             "Les bons (réception, sortie, transfert, casse, ajustement, retour) et les inventaires : votre nom y figure quand vous les validez ou comptez, avec le fournisseur ou le client que vous indiquez. Un bon validé n’est jamais modifié : c’est le registre de votre stock.",
             "Les coordonnées de vos fournisseurs (nom, téléphone, e-mail, adresse) : votre entreprise en est responsable, Kreskala les conserve pour elle.",
@@ -70,7 +71,8 @@ export const privacyPolicyFr: PrivacyPolicyContent = {
             "Créer votre compte, vous connecter et protéger votre accès : c’est nécessaire pour vous fournir le service.",
             "Préparer l’espace de votre entreprise et vérifier, à chaque action, que vous en êtes bien membre : c’est nécessaire pour vous fournir le service et pour isoler les données de chaque entreprise.",
             "Vous envoyer les e-mails du service (confirmation de votre adresse, nouveau mot de passe) : c’est nécessaire pour vous fournir le service.",
-            "Vous prévenir de ce qui vous concerne (stock à commander dans vos dépôts, arrivée d’un membre, changement de votre accès), dans l’application et, si vous le laissez activé, par e-mail : c’est nécessaire pour vous fournir le service. L’e-mail se coupe à tout moment, type par type, dans Mon compte › Notifications.",
+            "Vous prévenir de ce qui vous concerne (stock à commander dans vos dépôts, arrivée d’un membre, changement de votre accès), dans l’application et, si vous le laissez activé, par e-mail : c’est nécessaire pour vous fournir le service. L’e-mail se coupe à tout moment, type par type, dans Paramètres › Notifications.",
+            "Vérifier que votre entreprise existe bien, à partir de sa fiche et des pièces déposées, quand elle demande la vérification : c’est notre intérêt légitime à prévenir la fraude et l’usurpation d’identité, et à ne dire « vérifiée » qu’une entreprise contrôlée.",
             "Envoyer une invitation, à la demande d’un responsable de l’entreprise, à l’adresse qu’il indique : c’est l’intérêt légitime de l’entreprise à constituer son équipe. La personne invitée n’est inscrite que si elle accepte.",
             "Détecter les abus et les tentatives d’intrusion, corriger les erreurs : c’est notre intérêt légitime à offrir un service sûr et fiable.",
           ],
@@ -114,8 +116,10 @@ export const privacyPolicyFr: PrivacyPolicyContent = {
           kind: "list",
           items: [
             "Les membres de votre entreprise voient les données de cette entreprise, selon leur rôle. Ils ne voient jamais celles d’une autre entreprise.",
+            "Votre photo de profil est visible des membres des entreprises dont vous faites partie, à côté de votre nom.",
             "Les équipes de Kreskala n’y accèdent que lorsque c’est nécessaire : assistance que vous avez demandée, correction d’une erreur, sécurité.",
-            "Nos prestataires techniques n’agissent que sur nos instructions et sont tenus à la confidentialité. Les photos d’articles et de casse sont conservées chez Cloudflare (service R2), dans un espace privé : elles ne s’affichent que par des liens temporaires, donnés aux seuls membres de votre entreprise. La liste complète (hébergement, envoi des e-mails) sera publiée ici avant l’ouverture du service.",
+            "Les pièces de vérification ne sont visibles que du propriétaire et des administrateurs de l’entreprise, et des équipes de Kreskala chargées de la vérification. Elles ne s’ouvrent jamais par un lien : chaque consultation passe par Kreskala, qui enregistre qui a ouvert quelle pièce, et quand.",
+            "Nos prestataires techniques n’agissent que sur nos instructions et sont tenus à la confidentialité. Les photos d’articles et de casse, et les photos de profil, sont conservées chez Cloudflare (service R2), dans un espace privé : elles ne s’affichent que par des liens temporaires, donnés aux seuls membres de votre entreprise. Les pièces de vérification y sont conservées chiffrées : Cloudflare n’en voit que des octets illisibles. La liste complète (hébergement, envoi des e-mails) sera publiée ici avant l’ouverture du service.",
           ],
         },
         {
@@ -147,7 +151,9 @@ export const privacyPolicyFr: PrivacyPolicyContent = {
             "Les liens envoyés par e-mail : trente minutes.",
             "Les notifications : quatre-vingt-dix jours, puis elles sont supprimées.",
             "Les invitations : le lien est valable sept jours. L’invitation reste ensuite dans l’historique de l’équipe tant que le compte de l’entreprise est ouvert.",
+            "Votre photo de profil : tant que vous la gardez. Remplacée ou retirée, l’ancienne photo est effacée aussitôt.",
             "Les photos d’articles : tant que l’article a cette photo. Remplacée ou retirée, l’ancienne photo est effacée aussitôt.",
+            "Les pièces de vérification : tant que l’entreprise les garde. Remplacée ou retirée, l’ancienne pièce est effacée aussitôt. Le registre des consultations, qui ne contient aucune image, est gardé tant que le compte de l’entreprise est ouvert.",
             "Les photos de casse : aussi longtemps que le bon qu’elles prouvent, c’est-à-dire tant que le compte de l’entreprise est ouvert. Elles ne peuvent pas être retirées une à une.",
           ],
         },
@@ -164,6 +170,7 @@ export const privacyPolicyFr: PrivacyPolicyContent = {
             "Chaque entreprise est isolée : à chaque requête, nous vérifions que vous en êtes membre, et la base de données elle-même refuse de mélanger les données de deux entreprises.",
             "Les mots de passe sont protégés par une empreinte irréversible, et les tentatives de connexion répétées sont freinées.",
             "Les accès de connexion expirent vite : un jeton volé ne sert que quelques minutes.",
+            "Les pièces de vérification sont chiffrées par Kreskala avant d’être conservées, et chaque dépôt, consultation ou retrait est enregistré.",
           ],
         },
         {

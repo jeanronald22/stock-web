@@ -4,6 +4,7 @@ import {
   LayoutDashboardIcon,
   LayersIcon,
   ReceiptTextIcon,
+  SettingsIcon,
   UsersIcon,
   WarehouseIcon,
   type LucideIcon,
@@ -16,7 +17,14 @@ export type NavigationEntry = {
   icon: LucideIcon
   /** Clé de message sous « nav ». */
   label:
-    "home" | "stock" | "vouchers" | "items" | "contacts" | "warehouses" | "team"
+    | "home"
+    | "stock"
+    | "vouchers"
+    | "items"
+    | "contacts"
+    | "warehouses"
+    | "team"
+    | "settings"
   section: NavigationSection
   /** Autres écrans de l'entrée : « Contacts » couvre fournisseurs et clients (D30). */
   alsoActiveOn?: readonly string[]
@@ -98,6 +106,13 @@ export const workspaceNavigation: readonly NavigationEntry[] = [
     label: "team",
     section: "administration",
     teamManagersOnly: true,
+  },
+  // Pour tous : chacun y règle ses notifications ; le reste suit les droits (D45).
+  {
+    href: Routes.settings,
+    icon: SettingsIcon,
+    label: "settings",
+    section: "administration",
   },
 ]
 

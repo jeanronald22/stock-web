@@ -49,7 +49,10 @@ export function PageHeader({
             )}
           </div>
           {description && (
-            <p className="mt-1 text-muted-foreground">{description}</p>
+            // Une adresse e-mail sous un nom ne se coupe pas d'elle-même : elle passe à la ligne où il faut.
+            <p className="mt-1 wrap-anywhere text-muted-foreground">
+              {description}
+            </p>
           )}
         </div>
       </div>

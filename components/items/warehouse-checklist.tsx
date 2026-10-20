@@ -1,6 +1,11 @@
 "use client"
 
-import { BellIcon, PlusIcon } from "lucide-react"
+import {
+  BellIcon,
+  ChevronsUpIcon,
+  PlusIcon,
+  type LucideIcon,
+} from "lucide-react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import type { FieldError as FormFieldError } from "react-hook-form"
@@ -19,12 +24,19 @@ import type { Warehouse } from "@/lib/api/stock"
 import { Routes } from "@/lib/routes"
 import { cn } from "@/lib/utils"
 
-/** Dépôt coché dans le formulaire ; seuil en texte, vide : pas d'alerte. */
-export type PlacementValue = { warehouseId: string; minQuantity: string }
+/** Dépôt coché dans le formulaire ; seuil et maximum en texte, vides : pas d'alerte. */
+export type PlacementValue = {
+  warehouseId: string
+  minQuantity: string
+  maxQuantity: string
+}
+
+type QuantityField = "minQuantity" | "maxQuantity"
 
 /**
  * Dépôts où l'article est proposé : une case par dépôt actif et, pour chaque dépôt coché, le seuil
- * sous lequel il faut commander (en unité de base).
+ * sous lequel il faut commander et le stock maximum au-dessus duquel il y a surstock (D44), en
+ * unité de base.
  */
 export function WarehouseChecklist({
   warehouses,
@@ -38,8 +50,8 @@ export function WarehouseChecklist({
   onChange: (placements: PlacementValue[]) => void
   /** Unité de base au pluriel : « pièces », « m² ». */
   unitLabel: string
-  /** Erreurs des seuils, dans l'ordre de [value]. */
-  errors?: ({ minQuantity?: FormFieldError } | undefined)[]
+  /** Erreurs des seuils et maximums, dans l'ordre de [value]. */
+  errors?: (Partial<Record<QuantityField, FormFieldError>> | undefined)[]
 }) {
   const t = useTranslations()
 
@@ -75,13 +87,15 @@ export function WarehouseChecklist({
   const toggle = (id: string, checked: boolean) =>
     onChange(
       checked
-        ? [...value, { warehouseId: id, minQuantity: "" }]
+        ? [...value, emptyPlacement(id)]
         : value.filter((placement) => placement.warehouseId !== id)
     )
-  const setMinQuantity = (id: string, minQuantity: string) =>
+  const setQuantity = (id: string, field: QuantityField, text: string) =>
     onChange(
       value.map((placement) =>
-        placement.warehouseId === id ? { ...placement, minQuantity } : placement
+        placement.warehouseId === id
+          ? { ...placement, [field]: text }
+          : placement
       )
     )
 
@@ -92,8 +106,6 @@ export function WarehouseChecklist({
           const Icon = warehouseKindIcons[warehouse.kind]
           const index = indexes.get(warehouse.id)
           const checked = index !== undefined
-          const error = checked ? errors?.[index]?.minQuantity : undefined
-          const thresholdId = `min-quantity-${warehouse.id}`
           return (
             <li
               key={warehouse.id}
@@ -120,30 +132,31 @@ export function WarehouseChecklist({
                 </span>
               </label>
               {checked && (
-                <div className="px-3 pb-3">
-                  <label
-                    htmlFor={thresholdId}
-                    className="mb-1 flex items-center gap-1.5 text-xs font-medium text-muted-foreground"
-                  >
-                    <BellIcon className="size-3.5" aria-hidden />
-                    {t("items.form.minQuantity")}
-                  </label>
-                  <InputGroup className="h-9 bg-background">
-                    <InputGroupInput
-                      id={thresholdId}
-                      inputMode="decimal"
-                      placeholder={t("items.form.minQuantityPlaceholder")}
-                      value={value[index].minQuantity}
-                      aria-invalid={!!error}
-                      onChange={(event) =>
-                        setMinQuantity(warehouse.id, event.target.value)
-                      }
-                    />
-                    <InputGroupAddon align="inline-end">
-                      <InputGroupText>{unitLabel}</InputGroupText>
-                    </InputGroupAddon>
-                  </InputGroup>
-                  <FieldError errors={[error]} />
+                <div className="grid grid-cols-2 gap-2 px-3 pb-3">
+                  <QuantityInput
+                    id={`min-quantity-${warehouse.id}`}
+                    icon={BellIcon}
+                    label={t("items.form.minQuantity")}
+                    placeholder={t("items.form.minQuantityPlaceholder")}
+                    unitLabel={unitLabel}
+                    value={value[index].minQuantity}
+                    error={errors?.[index]?.minQuantity}
+                    onChange={(text) =>
+                      setQuantity(warehouse.id, "minQuantity", text)
+                    }
+                  />
+                  <QuantityInput
+                    id={`max-quantity-${warehouse.id}`}
+                    icon={ChevronsUpIcon}
+                    label={t("items.form.maxQuantity")}
+                    placeholder={t("items.form.maxQuantityPlaceholder")}
+                    unitLabel={unitLabel}
+                    value={value[index].maxQuantity}
+                    error={errors?.[index]?.maxQuantity}
+                    onChange={(text) =>
+                      setQuantity(warehouse.id, "maxQuantity", text)
+                    }
+                  />
                 </div>
               )}
             </li>
@@ -151,7 +164,7 @@ export function WarehouseChecklist({
         })}
       </ul>
       <p className="text-xs text-muted-foreground">
-        {t("items.form.minQuantityHint")}
+        {t("items.form.minQuantityHint")} {t("items.form.maxQuantityHint")}
       </p>
       {warehouses.length > 1 && (
         <Button
@@ -167,7 +180,7 @@ export function WarehouseChecklist({
                     ...value,
                     ...visibleIds
                       .filter((id) => !indexes.has(id))
-                      .map((warehouseId) => ({ warehouseId, minQuantity: "" })),
+                      .map(emptyPlacement),
                   ]
             )
           }
@@ -175,6 +188,56 @@ export function WarehouseChecklist({
           {allSelected ? t("items.form.selectNone") : t("items.form.selectAll")}
         </Button>
       )}
+    </div>
+  )
+}
+
+function emptyPlacement(warehouseId: string): PlacementValue {
+  return { warehouseId, minQuantity: "", maxQuantity: "" }
+}
+
+function QuantityInput({
+  id,
+  icon: Icon,
+  label,
+  placeholder,
+  unitLabel,
+  value,
+  error,
+  onChange,
+}: {
+  id: string
+  icon: LucideIcon
+  label: string
+  placeholder: string
+  unitLabel: string
+  value: string
+  error: FormFieldError | undefined
+  onChange: (text: string) => void
+}) {
+  return (
+    <div className="min-w-0">
+      <label
+        htmlFor={id}
+        className="mb-1 flex items-center gap-1.5 text-xs font-medium text-muted-foreground"
+      >
+        <Icon className="size-3.5 shrink-0" aria-hidden />
+        <span className="truncate">{label}</span>
+      </label>
+      <InputGroup className="h-9 bg-background">
+        <InputGroupInput
+          id={id}
+          inputMode="decimal"
+          placeholder={placeholder}
+          value={value}
+          aria-invalid={!!error}
+          onChange={(event) => onChange(event.target.value)}
+        />
+        <InputGroupAddon align="inline-end">
+          <InputGroupText>{unitLabel}</InputGroupText>
+        </InputGroupAddon>
+      </InputGroup>
+      <FieldError errors={[error]} />
     </div>
   )
 }

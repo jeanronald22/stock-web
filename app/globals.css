@@ -233,6 +233,11 @@
   html {
     @apply font-sans;
   }
+  /* La barre d'actions collée en bas d'un formulaire ne doit pas cacher le champ qui prend le focus
+     ou qu'on fait défiler jusqu'à l'écran (WCAG 2.4.11). */
+  html:has([data-slot="form-actions"]) {
+    scroll-padding-bottom: 6rem;
+  }
 }
 
 /*

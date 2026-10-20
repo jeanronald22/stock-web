@@ -16,6 +16,7 @@ export type ItemFormMessages = {
   invalidNumber: string
   positive: string
   wholeNumber: string
+  maximumAboveMinimum: string
   duplicateName: string
   invalidBarcode: string
 }
@@ -49,9 +50,13 @@ export function itemFormSchema(messages: ItemFormMessages) {
         )
         .max(StockLimits.packagingsPerItem),
       categoryId: z.string().nullable(),
-      // Seuil saisi en texte, vide : pas d'alerte dans ce dépôt.
+      // Seuil et maximum saisis en texte, vides : pas d'alerte dans ce dépôt.
       warehouses: z.array(
-        z.object({ warehouseId: z.string(), minQuantity: z.string() })
+        z.object({
+          warehouseId: z.string(),
+          minQuantity: z.string(),
+          maxQuantity: z.string(),
+        })
       ),
     })
     .superRefine((values, context) => {
@@ -77,21 +82,31 @@ export function itemFormSchema(messages: ItemFormMessages) {
         seen.add(name)
       })
       values.warehouses.forEach((placement, index) => {
-        // parseQuantity refuse aussi un nombre négatif.
-        if (
-          placement.minQuantity.trim() &&
-          parseQuantity(placement.minQuantity) === null
-        )
+        const issue = (field: "minQuantity" | "maxQuantity", message: string) =>
           context.addIssue({
             code: "custom",
-            path: ["warehouses", index, "minQuantity"],
-            message: messages.invalidNumber,
+            path: ["warehouses", index, field],
+            message,
           })
+        // parseQuantity refuse aussi un nombre négatif.
+        const minimum = optionalQuantity(placement.minQuantity)
+        const maximum = optionalQuantity(placement.maxQuantity)
+        if (minimum === undefined) issue("minQuantity", messages.invalidNumber)
+        if (maximum === undefined) issue("maxQuantity", messages.invalidNumber)
+        else if (maximum === 0) issue("maxQuantity", messages.positive)
+        else if (maximum !== null && minimum != null && maximum <= minimum)
+          issue("maxQuantity", messages.maximumAboveMinimum)
       })
     })
 }
 
 export type ItemFormValues = z.infer<ReturnType<typeof itemFormSchema>>
+
+/** Quantité facultative saisie en texte : null si vide, undefined si illisible. */
+function optionalQuantity(text: string): number | null | undefined {
+  if (!text.trim()) return null
+  return parseQuantity(text) ?? undefined
+}
 
 export function toItemInput(values: ItemFormValues): ItemInput {
   return {
@@ -108,9 +123,8 @@ export function toItemInput(values: ItemFormValues): ItemInput {
     })),
     warehouses: values.warehouses.map((placement) => ({
       warehouseId: placement.warehouseId,
-      minQuantity: placement.minQuantity.trim()
-        ? parseQuantity(placement.minQuantity)
-        : null,
+      minQuantity: optionalQuantity(placement.minQuantity) ?? null,
+      maxQuantity: optionalQuantity(placement.maxQuantity) ?? null,
     })),
     categoryId: values.categoryId,
   }
@@ -142,10 +156,15 @@ export function itemFormDefaults(
             placement.minQuantity === null
               ? ""
               : formatQuantityInput(placement.minQuantity, locale),
+          maxQuantity:
+            placement.maxQuantity === null
+              ? ""
+              : formatQuantityInput(placement.maxQuantity, locale),
         }))
       : defaultWarehouseIds.map((warehouseId) => ({
           warehouseId,
           minQuantity: "",
+          maxQuantity: "",
         })),
   }
 }

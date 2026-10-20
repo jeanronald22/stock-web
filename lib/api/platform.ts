@@ -4,6 +4,8 @@ import type { ApiClient } from "./http"
 export const PlatformPaths = {
   me: "/v1/me",
   meProfile: "/v1/me/profile",
+  meLocale: "/v1/me/locale",
+  mePhoto: "/v1/me/photo",
   receivedInvitationAccept: (id: string) => `/v1/me/invitations/${id}/accept`,
   organizations: "/v1/organizations",
   team: "/v1/team",
@@ -16,6 +18,15 @@ export const PlatformPaths = {
   invitation: (token: string) => `/v1/invitations/${encodeURIComponent(token)}`,
   invitationAccept: (token: string) =>
     `/v1/invitations/${encodeURIComponent(token)}/accept`,
+} as const
+
+/** Nom de la partie du formulaire multipart (stock-api, PlatformApi.DOCUMENT_PART). */
+const PHOTO_PART = "file"
+
+/** Photo de profil : une image (stock-api, ImageFormat), 5 Mo au plus (ProfilePhotoService.MAX_SIZE). */
+export const ProfilePhotoRules = {
+  types: ["image/jpeg", "image/png", "image/webp"],
+  maxBytes: 5 * 1024 * 1024,
 } as const
 
 export const membershipRoles = ["OWNER", "ADMIN", "MEMBER"] as const
@@ -57,6 +68,8 @@ export type TeamMember = {
   role: MembershipRole
   status: MembershipStatus
   joinedAt: string
+  /** Lien signé vers sa photo de profil (D46) ; null sans photo. */
+  photoUrl: string | null
   self: boolean
 }
 
@@ -96,6 +109,8 @@ export type Organization = {
   sector: string
   role: MembershipRole
   kybLevel: number
+  /** Lien signé vers le logo (D45), relatif à l'API ; null sans logo. */
+  logoUrl: string | null
 }
 
 export type User = {
@@ -106,6 +121,8 @@ export type User = {
   lastName: string | null
   locale: string
   profileComplete: boolean
+  /** Lien signé vers la photo de profil (D46), relatif à l'API ; null sans photo. */
+  photoUrl: string | null
 }
 
 /** Invitation à l'adresse de la personne connectée, visible sans le lien reçu par e-mail. */
@@ -203,6 +220,19 @@ export const platformApi = (send: ApiClient) => ({
   me: () => send<Me>({ method: "GET", path: PlatformPaths.me }),
   updateProfile: (input: ProfileInput) =>
     send<User>({ method: "PUT", path: PlatformPaths.meProfile, body: input }),
+  changeLocale: (locale: string) =>
+    send<User>({
+      method: "PUT",
+      path: PlatformPaths.meLocale,
+      body: { locale },
+    }),
+  uploadPhoto: (file: Blob) => {
+    const body = new FormData()
+    body.append(PHOTO_PART, file)
+    return send<User>({ method: "PUT", path: PlatformPaths.mePhoto, body })
+  },
+  removePhoto: () =>
+    send<User>({ method: "DELETE", path: PlatformPaths.mePhoto }),
   createOrganization: (input: NewOrganization) =>
     send<Organization>({
       method: "POST",

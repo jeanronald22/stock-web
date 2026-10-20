@@ -2,20 +2,32 @@
 
 import {
   BellRingIcon,
+  CalendarClockIcon,
+  ChevronsUpIcon,
   KeyRoundIcon,
+  HourglassIcon,
   MailOpenIcon,
   ClipboardCheckIcon,
   ClipboardClockIcon,
   FileWarningIcon,
+  MoonIcon,
   PackageCheckIcon,
+  PackageXIcon,
+  ShieldAlertIcon,
   TruckIcon,
   UserPlusIcon,
   type LucideIcon,
 } from "lucide-react"
 import { useTranslations } from "next-intl"
 
-import { useQuantityLabel } from "@/components/items/describe"
-import { NotificationType, type AppNotification } from "@/lib/api/notifications"
+import { useDayLabel, useQuantityLabel } from "@/components/items/describe"
+import {
+  NotificationType,
+  type AppNotification,
+  type NotificationParams,
+  type RuleAlertLine,
+  type StockAlertLine,
+} from "@/lib/api/notifications"
 
 /** Articles détaillés dans un avis de stock ; les autres sont comptés (« et 2 autres »). */
 const LISTED_ITEMS = 3
@@ -30,19 +42,90 @@ export const notificationIcons: Record<NotificationType, LucideIcon> = {
   [NotificationType.receiptDiscrepancy]: FileWarningIcon,
   [NotificationType.voucherPending]: ClipboardClockIcon,
   [NotificationType.voucherDecided]: ClipboardCheckIcon,
+  [NotificationType.runningOut]: HourglassIcon,
+  [NotificationType.dormantStock]: MoonIcon,
+  [NotificationType.overstock]: ChevronsUpIcon,
+  [NotificationType.abnormalDamage]: PackageXIcon,
+  [NotificationType.unreliableSupplier]: ShieldAlertIcon,
+  [NotificationType.expiringBatches]: CalendarClockIcon,
 }
+
+/** Alertes paramétrables sur des articles (D44) : le type de l'avis dit la forme de ses lignes. */
+type RuleAlertType =
+  | typeof NotificationType.runningOut
+  | typeof NotificationType.dormantStock
+  | typeof NotificationType.overstock
+  | typeof NotificationType.abnormalDamage
+  | typeof NotificationType.expiringBatches
 
 /** Titre et détail d'une notification, traduits depuis son type et ses paramètres (D26). */
 export function useNotificationText() {
   const t = useTranslations("notifications.types")
   const roles = useTranslations("team.stockRoles")
   const quantityLabel = useQuantityLabel()
+  const dayLabel = useDayLabel()
+
+  /** Les premières lignes, puis « et 2 autres » : [total] compte toutes les alertes apparues. */
+  const listed = (lines: string[], total: number) => {
+    const others = total - Math.min(lines.length, LISTED_ITEMS)
+    return [
+      ...lines.slice(0, LISTED_ITEMS),
+      ...(others > 0 ? [t("STOCK_ALERT.others", { count: others })] : []),
+    ].join(" · ")
+  }
+
+  const ruleAlert = (type: RuleAlertType, params: NotificationParams) => {
+    const items = (params.items ?? []) as RuleAlertLine[]
+    const total = params.total ?? items.length
+    const line = (item: RuleAlertLine) => {
+      const where = { name: item.name, warehouse: item.warehouseName }
+      const quantity = quantityLabel(item.baseUnit, Number(item.quantity))
+      const days = item.days ?? 0
+      switch (type) {
+        case NotificationType.runningOut:
+          return t("RUNNING_OUT.line", { ...where, days })
+        case NotificationType.dormantStock:
+          return t("DORMANT_STOCK.line", { ...where, quantity, days })
+        case NotificationType.overstock:
+          return t("OVERSTOCK.line", {
+            ...where,
+            quantity,
+            maximum: quantityLabel(item.baseUnit, Number(item.maximum)),
+          })
+        case NotificationType.abnormalDamage:
+          return t("ABNORMAL_DAMAGE.line", {
+            ...where,
+            damaged: quantityLabel(item.baseUnit, Number(item.damaged)),
+            percent: item.percent ?? 0,
+          })
+        case NotificationType.expiringBatches: {
+          const date = dayLabel(item.expiresOn ?? "")
+          return days < 0
+            ? t("EXPIRING_BATCHES.expired", {
+                ...where,
+                batch: item.batch ?? "",
+                date,
+              })
+            : t("EXPIRING_BATCHES.line", {
+                ...where,
+                batch: item.batch ?? "",
+                date,
+              })
+        }
+      }
+    }
+    return {
+      title: t(`${type}.title`, { count: total }),
+      detail: listed(items.map(line), total),
+    }
+  }
 
   return (notification: AppNotification): { title: string; detail: string } => {
     const params = notification.params
     switch (notification.type) {
       case NotificationType.stockAlert: {
-        const items = params.items ?? []
+        // Le type de l'avis dit la forme de ses lignes.
+        const items = (params.items ?? []) as StockAlertLine[]
         const lines = items.slice(0, LISTED_ITEMS).map((item) =>
           t("STOCK_ALERT.line", {
             name: item.name,
@@ -175,6 +258,29 @@ export function useNotificationText() {
                     })
                   )
                   .join(" · "),
+        }
+      }
+      case NotificationType.runningOut:
+      case NotificationType.dormantStock:
+      case NotificationType.overstock:
+      case NotificationType.abnormalDamage:
+      case NotificationType.expiringBatches:
+        return ruleAlert(notification.type, params)
+      case NotificationType.unreliableSupplier: {
+        const suppliers = params.suppliers ?? []
+        const total = params.total ?? suppliers.length
+        return {
+          title: t("UNRELIABLE_SUPPLIER.title", { count: total }),
+          detail: listed(
+            suppliers.map((supplier) =>
+              t("UNRELIABLE_SUPPLIER.line", {
+                name: supplier.name,
+                withGap: supplier.withGap,
+                receipts: supplier.receipts,
+              })
+            ),
+            total
+          ),
         }
       }
     }

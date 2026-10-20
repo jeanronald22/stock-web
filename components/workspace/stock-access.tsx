@@ -22,8 +22,8 @@ export type StockAccessContext = {
 
 const Context = createContext<StockAccessContext | null>(null)
 
-/** Écrans du compte et de l'équipe, ouverts même sans rôle Stock. */
-const ACCOUNT_ROUTES = [Routes.team, Routes.notificationSettings]
+/** Écrans du profil, de l'équipe et des paramètres, ouverts même sans rôle Stock. */
+const ACCOUNT_ROUTES = [Routes.team, Routes.settings, Routes.profile]
 
 /**
  * Rôle Stock de la personne connectée (DECISIONS.md, D25). L'API refuse de toute façon ce que le

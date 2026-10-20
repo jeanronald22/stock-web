@@ -18,7 +18,7 @@
     "invitation": "Invitation",
     "newInvitation": "Inviter une personne",
     "member": "Membre",
-    "notifications": "Notifications",
+    "notifications": "Paramètres · Notifications",
     "newTransfer": "Nouveau transfert",
     "transferReceipt": "Réception de transfert",
     "newDamage": "Nouvelle casse",
@@ -36,7 +36,12 @@
     "importItems": "Importer des articles",
     "reports": "Rapports · Mouvements",
     "reportsDamage": "Rapports · Casse",
-    "reportsDiscrepancies": "Rapports · Écarts"
+    "reportsDiscrepancies": "Rapports · Écarts",
+    "settings": "Paramètres",
+    "settingsCompany": "Paramètres · Entreprise",
+    "settingsAlerts": "Paramètres · Alertes",
+    "settingsRules": "Paramètres · Règles de travail",
+    "profile": "Mon profil"
   },
   "common": {
     "retry": "Réessayer",
@@ -273,7 +278,8 @@
   "menu": {
     "open": "Ouvrir le menu du compte",
     "switchOrganization": "Changer d’entreprise",
-    "currentOrganization": "Entreprise active"
+    "currentOrganization": "Entreprise active",
+    "profile": "Mon profil"
   },
   "nav": {
     "home": "Tableau de bord",
@@ -288,7 +294,8 @@
       "catalog": "Catalogue",
       "administration": "Administration"
     },
-    "contacts": "Contacts"
+    "contacts": "Contacts",
+    "settings": "Paramètres"
   },
   "workspace": {
     "toggleSidebar": "Afficher ou masquer le menu",
@@ -571,7 +578,11 @@
         "hint": "Proposé d’office sur les bons ; chaque ligne reste modifiable."
       },
       "referenceAuto": "Attribuée à la création",
-      "referenceHint": "Numérotée automatiquement (ART-0001, ART-0002…) : les références se suivent et ne changent pas."
+      "referenceHint": "Numérotée automatiquement (ART-0001, ART-0002…) : les références se suivent et ne changent pas.",
+      "maxQuantity": "Stock maximum",
+      "maxQuantityPlaceholder": "Aucun",
+      "maxQuantityHint": "Stock maximum : au-dessus, le propriétaire et les gérants sont prévenus d’un surstock. Vide : pas de maximum.",
+      "maxQuantityAboveMin": "Le stock maximum doit dépasser le seuil d’alerte."
     },
     "created": "Article créé.",
     "saved": "Article enregistré.",
@@ -627,8 +638,8 @@
       "inStock": "En stock",
       "breakdown": "soit {breakdown}",
       "byWarehouse": "Par dépôt",
-      "thresholds": "Seuils d’alerte",
-      "thresholdsHint": "Sous ce seuil, l’article passe « à commander » et les responsables du dépôt sont prévenus. Vide : pas d’alerte.",
+      "thresholds": "Seuils et maximums",
+      "thresholdsHint": "Sous le seuil, l’article passe « à commander » et les responsables du dépôt sont prévenus. Au-dessus du maximum, le propriétaire et les gérants sont prévenus d’un surstock. Vide : pas d’alerte.",
       "noWarehouse": "Cet article n’est proposé dans aucun de vos dépôts.",
       "threshold": "Seuil d’alerte : {quantity}",
       "noThreshold": "Pas de seuil d’alerte",
@@ -685,7 +696,8 @@
       "movementsChartSummary": "Sur la période : {inbound} entrés, {outbound} sortis.",
       "periodLabel": "Période de la courbe",
       "inbound": "Entrées",
-      "outbound": "Sorties"
+      "outbound": "Sorties",
+      "maximum": "maximum {quantity}"
     },
     "more": {
       "label": "Options du catalogue",
@@ -945,7 +957,8 @@
       "batchMismatchToast": "Un lot ne correspond pas à ce qui est déjà connu : voir la ligne signalée.",
       "mixedShades": "{name} : {count} nuances différentes sur ce bon.",
       "mixedCalibers": "{name} : {count} calibres différents sur ce bon.",
-      "mixedConsequence": "Le client risque de le voir à la pose : préférez un seul lot si possible."
+      "mixedConsequence": "Le client risque de le voir à la pose : préférez un seul lot si possible.",
+      "expiresOn": "Périme le"
     },
     "entry": {
       "see": "Voir le bon",
@@ -1439,13 +1452,6 @@
       "title": "Invitation prête",
       "backToTeam": "Retour à l’équipe",
       "inviteAnother": "Inviter une autre personne"
-    },
-    "rules": {
-      "title": "Règles de travail",
-      "issueApproval": "Les sorties des magasiniers passent par une validation",
-      "issueApprovalHint": "Sorties, transferts et retours fournisseur préparés par un magasinier attendent l’accord d’un gérant, d’un manager ou d’un contrôleur du dépôt.",
-      "enabled": "Les sorties des magasiniers seront validées.",
-      "disabled": "Les magasiniers sortent à nouveau directement."
     }
   },
   "invitation": {
@@ -1557,6 +1563,43 @@
         "approved": "Votre sortie est validée : {number}",
         "by": "Par {name}.",
         "rejected": "Votre sortie est refusée · {warehouse}"
+      },
+      "RUNNING_OUT": {
+        "name": "Rupture prévue",
+        "when": "Pour le propriétaire et les gérants : quand, au rythme des sorties, le stock d’un article ne tiendra plus longtemps.",
+        "title": "{count, plural, one {# article va manquer} other {# articles vont manquer}}",
+        "line": "{name} ({warehouse}) : encore {days, plural, =0 {moins d’un jour} one {# jour} other {# jours}}"
+      },
+      "DORMANT_STOCK": {
+        "name": "Stock qui dort",
+        "when": "Pour le propriétaire et les gérants : quand un article en stock n’est pas sorti depuis longtemps.",
+        "title": "{count, plural, one {# article dort en stock} other {# articles dorment en stock}}",
+        "line": "{name} ({warehouse}) : {quantity}, sans sortie depuis {days, plural, one {# jour} other {# jours}}"
+      },
+      "OVERSTOCK": {
+        "name": "Surstock",
+        "when": "Pour le propriétaire et les gérants : quand un article dépasse le stock maximum de sa fiche.",
+        "title": "{count, plural, one {# article en surstock} other {# articles en surstock}}",
+        "line": "{name} ({warehouse}) : {quantity}, maximum {maximum}"
+      },
+      "ABNORMAL_DAMAGE": {
+        "name": "Casse anormale",
+        "when": "Pour le propriétaire et les gérants : quand la casse d’un article dépasse la part admise sur 30 jours.",
+        "title": "Casse anormale : {count, plural, one {# article} other {# articles}}",
+        "line": "{name} ({warehouse}) : {damaged} cassés, {percent} % de ce qui est parti"
+      },
+      "UNRELIABLE_SUPPLIER": {
+        "name": "Fournisseur peu fiable",
+        "when": "Pour le propriétaire et les gérants : quand trop de livraisons d’un fournisseur arrivent avec écart sur 90 jours.",
+        "title": "{count, plural, one {# fournisseur livre souvent avec écart} other {# fournisseurs livrent souvent avec écart}}",
+        "line": "{name} : {withGap} réceptions sur {receipts} avec écart"
+      },
+      "EXPIRING_BATCHES": {
+        "name": "Lots qui périment",
+        "when": "Pour le propriétaire et les gérants : quand un lot en stock approche de sa date limite.",
+        "title": "{count, plural, one {# lot proche de sa date limite} other {# lots proches de leur date limite}}",
+        "line": "{name}, lot {batch} ({warehouse}) : périme le {date}",
+        "expired": "{name}, lot {batch} ({warehouse}) : périmé depuis le {date}"
       }
     }
   },
@@ -1864,7 +1907,8 @@
   },
   "batches": {
     "shade": "nuance {shade}",
-    "caliber": "cal. {caliber}"
+    "caliber": "cal. {caliber}",
+    "expiresOn": "périme le {date}"
   },
   "records": {
     "edit": "Modifier",
@@ -2468,5 +2512,223 @@
       "lastMonth": "Le mois dernier",
       "last3Months": "3 derniers mois"
     }
+  },
+  "settings": {
+    "title": "Paramètres",
+    "description": "Les réglages de l’entreprise, et les vôtres.",
+    "tabs": {
+      "company": "Entreprise",
+      "alerts": "Alertes",
+      "rules": "Règles de travail",
+      "notifications": "Notifications"
+    },
+    "denied": {
+      "title": "Réglage réservé",
+      "description": "Votre rôle ne donne pas accès à ce réglage. Demandez au propriétaire de l’entreprise."
+    },
+    "rules": {
+      "issueApprovalTitle": "Validation des sorties",
+      "issueApprovalHint": "Sorties, transferts et retours fournisseur préparés par un magasinier attendent l’accord d’un gérant, d’un manager ou d’un contrôleur du dépôt.",
+      "issueApproval": "Les sorties des magasiniers passent par une validation",
+      "issueApprovalWho": "Coupée, les magasiniers sortent directement ; chaque sortie reste enregistrée à leur nom.",
+      "enabled": "Les sorties des magasiniers seront validées.",
+      "disabled": "Les magasiniers sortent à nouveau directement."
+    },
+    "alerts": {
+      "description": "Vérifiées chaque heure. Quand une alerte apparaît, le propriétaire et les gérants sont prévenus dans l’application et par e-mail, une seule fois.",
+      "rules": {
+        "forecastDays": "Prévenir quand le stock d’un article ne tient plus que ce nombre de jours, au rythme des sorties des 30 derniers jours.",
+        "dormantDays": "Prévenir quand un article en stock n’est pas sorti depuis ce nombre de jours.",
+        "damagePercent": "Prévenir quand la casse d’un article dépasse cette part de ce qui est parti (sorties et casse) sur 30 jours.",
+        "supplierGapPercent": "Prévenir quand cette part des réceptions d’un fournisseur arrive avec écart sur 90 jours (3 réceptions au moins).",
+        "expiryDays": "Prévenir quand un lot en stock atteint sa date limite dans ce nombre de jours, ou l’a dépassée."
+      },
+      "values": {
+        "forecastDays": "Stock pour moins de",
+        "dormantDays": "Sans sortie depuis",
+        "damagePercent": "Casse au-delà de",
+        "supplierGapPercent": "Réceptions avec écart au-delà de",
+        "expiryDays": "Date limite dans"
+      },
+      "units": {
+        "days": "jours",
+        "percent": "%"
+      },
+      "between": "Un nombre entier entre {min} et {max}.",
+      "on": "Alerte activée",
+      "off": "Alerte coupée",
+      "overstock": "Se règle sur la fiche de chaque article : le stock maximum, dépôt par dépôt, à côté du seuil d’alerte.",
+      "overstockLink": "Ouvrir les articles",
+      "emailTitle": "E-mails",
+      "email": "Chacun peut couper l’e-mail d’une alerte et garder l’avis dans l’application.",
+      "emailLink": "Préférences de notification",
+      "save": "Enregistrer les alertes",
+      "saved": "Alertes enregistrées. Elles s’appliquent dès la prochaine vérification."
+    },
+    "company": {
+      "description": "La fiche de l’entreprise et sa vérification. Seuls le propriétaire et les administrateurs la voient.",
+      "save": "Enregistrer la fiche",
+      "saved": "Fiche enregistrée.",
+      "kyb": {
+        "title": "Vérification de l’entreprise",
+        "stages": {
+          "undeclared": "Non déclarée",
+          "declared": "Déclarée",
+          "ready": "Déclarée",
+          "pending": "En attente de vérification",
+          "verified": "Vérifiée",
+          "rejected": "Vérification refusée"
+        },
+        "hints": {
+          "undeclared": "Complétez le niveau 1 : il dit qui tient l’entreprise et où la trouver.",
+          "declared": "Niveau 1 atteint. Ajoutez vos identifiants et leurs justificatifs pour demander la vérification.",
+          "ready": "Tout est déposé : demandez la vérification à Kreskala.",
+          "pending": "Demande envoyée le {date}. Kreskala vérifie vos pièces ; remplacer un justificatif annule la demande.",
+          "verified": "Kreskala a vérifié vos identifiants. Remplacer un justificatif demandera une nouvelle vérification.",
+          "rejected": "La vérification n’a pas abouti. Remplacez les pièces illisibles ou erronées, puis renvoyez la demande."
+        },
+        "levels": {
+          "1": "Niveau 1 · Déclarée",
+          "2": "Niveau 2 · Vérifiée par Kreskala"
+        },
+        "requirements": {
+          "RESPONSIBLE_NAME": "Nom du responsable",
+          "MANAGER_ID": "Pièce d’identité du gérant",
+          "ADDRESS_OR_PREMISES": "Adresse, ou photo du local",
+          "BUSINESS_IDS": "Identifiants de l’entreprise",
+          "BUSINESS_ID_PROOFS": "Justificatif de chaque identifiant"
+        },
+        "done": "Fait :",
+        "missing": "À compléter :",
+        "request": "Demander la vérification",
+        "requested": "Demande envoyée. Kreskala vérifie vos pièces."
+      },
+      "identity": {
+        "title": "Entreprise",
+        "description": "Le nom affiché dans l’application, sur les bons et dans les e-mails, et le logo que voit votre équipe."
+      },
+      "responsible": {
+        "title": "Responsable",
+        "description": "La personne qui répond de l’entreprise, celle de la pièce d’identité."
+      },
+      "address": {
+        "title": "Adresse",
+        "description": "Quartier, rue, repère : de quoi trouver le local. Sans adresse, une photo du local suffit au niveau 1."
+      },
+      "businessIds": {
+        "title": "Identifiants",
+        "description": "Recopiez-les tels qu’ils sont écrits sur les justificatifs. Les modifier annule une vérification.",
+        "types": {
+          "RCCM": "RCCM (registre du commerce)",
+          "NIU": "NIU (numéro d’identifiant unique)"
+        },
+        "examples": {
+          "RCCM": "RC/DLA/2019/B/1234",
+          "NIU": "M012345678901A"
+        }
+      },
+      "fields": {
+        "name": "Nom de l’entreprise",
+        "sector": "Secteur",
+        "city": "Ville",
+        "responsibleName": "Nom et prénom",
+        "responsibleNameHint": "Tel qu’écrit sur sa pièce d’identité.",
+        "phone": "Téléphone",
+        "phoneHint": "Sans indicatif, {prefix} est ajouté.",
+        "address": "Adresse du local"
+      },
+      "documents": {
+        "title": "Pièces",
+        "description": "Photo ou PDF, 5 Mo au plus. Chiffrées, elles ne sont vues que par le propriétaire, les administrateurs et Kreskala pour la vérification ; chaque consultation est enregistrée.",
+        "kinds": {
+          "MANAGER_ID": {
+            "name": "Pièce d’identité du gérant",
+            "hint": "Carte nationale d’identité, passeport ou titre de séjour, en cours de validité."
+          },
+          "PREMISES_PHOTO": {
+            "name": "Photo du local",
+            "hint": "La devanture ou l’intérieur, avec l’enseigne si possible."
+          },
+          "RCCM": {
+            "name": "Justificatif RCCM",
+            "hint": "Extrait ou certificat d’immatriculation au registre du commerce."
+          },
+          "NIU": {
+            "name": "Justificatif NIU",
+            "hint": "Attestation d’immatriculation ou carte de contribuable."
+          }
+        },
+        "proofHint": "Le document officiel qui porte votre {type}.",
+        "uploadedOn": "Déposée le {date} · {size}",
+        "sizeKb": "{size} Ko",
+        "sizeMb": "{size} Mo",
+        "missing": {
+          "levelOne": "À déposer pour le niveau 1",
+          "verification": "À déposer pour la vérification",
+          "optional": "Facultative : l’adresse suffit au niveau 1"
+        },
+        "view": "Voir",
+        "upload": "Déposer",
+        "replace": "Remplacer",
+        "remove": "Retirer",
+        "removeTitle": "Retirer cette pièce ?",
+        "removeDescription": "Elle est supprimée tout de suite. Le niveau de l’entreprise peut baisser ; retirer un justificatif annule la vérification.",
+        "removed": "Pièce retirée.",
+        "uploaded": "Pièce déposée.",
+        "unsupported": "Déposez une photo (JPEG, PNG, WebP) ou un PDF.",
+        "tooLarge": "Ce fichier dépasse 5 Mo : réduisez la photo ou numérisez en qualité moindre.",
+        "previewTitle": "Aperçu de la pièce",
+        "openInTab": "Ouvrir dans un onglet"
+      },
+      "logo": {
+        "title": "Logo",
+        "description": "Image JPEG, PNG ou WebP, 5 Mo au plus. Enregistré dès le dépôt : il remplace les initiales de l’entreprise dans l’application.",
+        "upload": "Déposer un logo",
+        "replace": "Remplacer",
+        "remove": "Retirer",
+        "uploaded": "Logo enregistré.",
+        "removed": "Logo retiré.",
+        "unsupported": "Choisissez une image JPEG, PNG ou WebP.",
+        "tooLarge": "Cette image dépasse 5 Mo : choisissez-en une plus légère."
+      }
+    }
+  },
+  "profile": {
+    "title": "Mon profil",
+    "description": "Votre photo, votre nom, votre langue et votre mot de passe, dans toutes vos entreprises.",
+    "photo": {
+      "title": "Photo de profil",
+      "description": "Elle s’affiche à côté de votre nom pour les membres de vos entreprises.",
+      "upload": "Ajouter une photo",
+      "replace": "Remplacer",
+      "remove": "Retirer",
+      "uploaded": "Photo enregistrée.",
+      "removed": "Photo retirée.",
+      "unsupported": "Déposez une photo JPEG, PNG ou WebP.",
+      "tooLarge": "La photo dépasse 5 Mo."
+    },
+    "identity": {
+      "title": "Identité",
+      "description": "Votre nom signe les bons que vous validez et les inventaires que vous comptez.",
+      "email": "Adresse e-mail",
+      "emailHint": "C’est votre identifiant de connexion : elle ne se modifie pas ici.",
+      "save": "Enregistrer",
+      "saved": "Nom enregistré."
+    },
+    "language": {
+      "title": "Langue",
+      "description": "Celle de l’application, des e-mails et des notifications que vous recevez."
+    },
+    "password": {
+      "title": "Mot de passe",
+      "description": "Kreskala vous demande d’abord votre mot de passe actuel, puis le nouveau, et vous ramène ici.",
+      "change": "Changer le mot de passe",
+      "changed": "Mot de passe changé.",
+      "failed": "Le mot de passe n’a pas pu être changé. Réessayez."
+    }
+  },
+  "pdf": {
+    "credit": "Édité avec Kreskala",
+    "phone": "Tél. {phone}"
   }
 }
