@@ -178,7 +178,9 @@ export type VoucherSummary = {
   customerId: string | null
   counterparty: string | null
   lineCount: number
+  /** Qui a validé le bon : son nom, et le lien signé vers sa photo de profil (D46) ou null. */
   createdByName: string
+  createdByPhotoUrl: string | null
   /** Envoi de transfert : dépôt d'arrivée et état. */
   destination: WarehouseRef | null
   transferState: TransferState | null
@@ -231,6 +233,7 @@ export type Voucher = Omit<VoucherSummary, "lineCount"> & {
   inventoryId: string | null
   /** Bon issu d'une demande (D33) : qui l'a préparé ; createdByName l'a validé. */
   preparedByName: string | null
+  preparedByPhotoUrl: string | null
 }
 
 export type VoucherLineInput = {

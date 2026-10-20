@@ -20,6 +20,7 @@ import { useBatchLabel, useQuantityLabel } from "@/components/items/describe"
 import { ItemLink } from "@/components/items/item-link"
 import { ItemThumb } from "@/components/items/item-thumb"
 import { LocationLabel } from "@/components/locations/location-label"
+import { PersonName } from "@/components/profile/person-name"
 import { Button, buttonVariants } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -142,9 +143,24 @@ export function VoucherScreen({ id }: { id: string }) {
     },
     data.preparedByName && {
       label: t("vouchers.detail.preparedBy"),
-      value: data.preparedByName,
+      value: (
+        <PersonName
+          name={data.preparedByName}
+          photoUrl={data.preparedByPhotoUrl}
+          className="mt-1"
+        />
+      ),
     },
-    { label: t("vouchers.detail.createdBy"), value: data.createdByName },
+    {
+      label: t("vouchers.detail.createdBy"),
+      value: (
+        <PersonName
+          name={data.createdByName}
+          photoUrl={data.createdByPhotoUrl}
+          className="mt-1"
+        />
+      ),
+    },
   ]
   const facts = candidates.filter((fact): fact is Fact => !!fact)
   // Une colonne sans rien sur aucune ligne (pas de lot, saisie en unité de base) n'est pas montrée.

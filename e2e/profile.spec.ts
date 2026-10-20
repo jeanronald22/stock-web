@@ -1,7 +1,9 @@
 import { expect, test, type Page } from "@playwright/test"
 
 import {
+  callApi,
   dismissTour,
+  navigateTo,
   openNavigation,
   PASSWORD,
   redirectApi,
@@ -66,6 +68,39 @@ test("mon profil : photo, nom, langue et mot de passe", async ({
   await expect(menuButton).toContainText("Awa Marie Bello")
   await shot(page, testInfo, "02-photo")
   await page.keyboard.press("Escape")
+
+  // Sur les bons, la photo accompagne le nom de qui a validé : dans la liste et sur le bon.
+  const depot = crypto.randomUUID()
+  await callApi(page, "POST", "/v1/warehouses", {
+    id: depot,
+    name: "Dépôt Akwa",
+    kind: "WAREHOUSE",
+  })
+  const cement = crypto.randomUUID()
+  await callApi(page, "POST", "/v1/items", {
+    id: cement,
+    name: "Ciment 50 kg",
+    baseUnit: "PIECE",
+  })
+  await callApi(page, "POST", "/v1/vouchers", {
+    id: crypto.randomUUID(),
+    type: "RECEIPT",
+    warehouseId: depot,
+    lines: [{ itemId: cement, quantity: 40 }],
+  })
+  await navigateTo(page, "Bons")
+  await dismissTour(page, "Entrées et sorties")
+  const row = page.getByRole("row").filter({ hasText: "REC-" })
+  await expect(
+    row.getByText("Awa Marie Bello").filter({ visible: true })
+  ).toBeVisible()
+  await expect(row.locator("img").filter({ visible: true })).toBeVisible()
+  await shot(page, testInfo, "02b-bons")
+  await row.getByRole("link", { name: /^REC-/ }).click()
+  const validator = page.locator("dd").filter({ hasText: "Awa Marie Bello" })
+  await expect(validator.locator("img")).toBeVisible()
+  await shot(page, testInfo, "02c-bon")
+  await page.goto("/profil")
 
   // La langue change l'écran aussitôt, et reste après un rechargement : elle est au profil.
   await page.getByRole("button", { name: "English" }).click()
