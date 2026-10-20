@@ -65,6 +65,7 @@ export function OrganizationPicker() {
                 >
                   <OrganizationAvatar
                     name={organization.name}
+                    logoUrl={organization.logoUrl}
                     className="size-12 text-base"
                   />
                   <span className="min-w-0 flex-1">

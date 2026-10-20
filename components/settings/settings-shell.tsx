@@ -8,18 +8,19 @@ import {
   SirenIcon,
   type LucideIcon,
 } from "lucide-react"
+import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useEffect } from "react"
 
 import { EmptyState } from "@/components/catalog/empty-state"
-import { SectionTabs } from "@/components/workspace/section-tabs"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import { useStockAccess } from "@/components/workspace/stock-access"
 import { useWorkspace } from "@/components/workspace/workspace-context"
 import { MembershipRole } from "@/lib/api/platform"
 import { StockRole } from "@/lib/api/stock"
 import { Routes } from "@/lib/routes"
+import { cn } from "@/lib/utils"
 
 type SettingsTab = {
   href: string
@@ -72,34 +73,82 @@ export function SettingsShell({ children }: { children: React.ReactNode }) {
   const tabs = useSettingsTabs()
   const known = SETTINGS_TABS.some((tab) => covers(tab, pathname))
   const allowed = tabs.some((tab) => covers(tab, pathname))
+  // Seul onglet ouvert (les notifications d'un magasinier) : pas de navigation.
+  const hasNav = tabs.length > 1
 
   return (
     <PageBody>
       <PageHeader title={t("title")} description={t("description")} />
-      {tabs.length > 1 && (
-        <SectionTabs
-          label={t("title")}
-          tabs={tabs.map((tab) => ({
-            href: tab.href,
-            icon: tab.icon,
-            label: t(`tabs.${tab.label}`),
-          }))}
-        />
-      )}
-      <div className="mt-8">
-        {known && !allowed ? (
-          <EmptyState
-            illustration={
-              <LockKeyholeIcon className="mx-auto size-16 text-muted-foreground" />
-            }
-            title={t("denied.title")}
-            description={t("denied.description")}
-          />
-        ) : (
-          children
+      <div
+        className={cn(
+          "mt-8",
+          hasNav && "xl:grid xl:grid-cols-[13rem_minmax(0,1fr)] xl:gap-10"
         )}
+      >
+        {hasNav && (
+          <SettingsNav
+            label={t("title")}
+            tabs={tabs.map((tab) => ({
+              ...tab,
+              text: t(`tabs.${tab.label}`),
+              active: covers(tab, pathname),
+            }))}
+          />
+        )}
+        <div className="min-w-0">
+          {known && !allowed ? (
+            <EmptyState
+              illustration={
+                <LockKeyholeIcon className="mx-auto size-16 text-muted-foreground" />
+              }
+              title={t("denied.title")}
+              description={t("denied.description")}
+            />
+          ) : (
+            children
+          )}
+        </div>
       </div>
     </PageBody>
+  )
+}
+
+/**
+ * Onglets des paramètres, en colonne à gauche sur grand écran. Plus étroit, ils passent au-dessus :
+ * sur une ligne, ou deux par ligne sur téléphone, sans qu'aucun ne soit coupé.
+ */
+function SettingsNav({
+  label,
+  tabs,
+}: {
+  label: string
+  tabs: (SettingsTab & { text: string; active: boolean })[]
+}) {
+  return (
+    <nav
+      aria-label={label}
+      className="mb-8 grid grid-cols-2 gap-1 rounded-xl border bg-muted/40 p-1 sm:flex sm:w-fit sm:flex-wrap xl:sticky xl:top-24 xl:mb-0 xl:w-auto xl:flex-col xl:self-start xl:border-0 xl:bg-transparent xl:p-0"
+    >
+      {tabs.map((tab) => {
+        const Icon = tab.icon
+        return (
+          <Link
+            key={tab.href}
+            href={tab.href}
+            aria-current={tab.active ? "page" : undefined}
+            className={cn(
+              "flex h-10 min-w-0 items-center gap-2.5 rounded-lg px-3 text-sm font-medium transition-colors",
+              tab.active
+                ? "bg-background text-foreground shadow-sm xl:bg-primary/10 xl:text-primary xl:shadow-none"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            )}
+          >
+            <Icon className="size-4 shrink-0" aria-hidden />
+            <span className="truncate">{tab.text}</span>
+          </Link>
+        )
+      })}
+    </nav>
   )
 }
 

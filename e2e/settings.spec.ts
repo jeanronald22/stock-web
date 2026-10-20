@@ -56,6 +56,19 @@ test("paramètres : fiche de l'entreprise, pièces et demande de vérification",
     ).toBeVisible()
   await shot(page, testInfo, "01-entreprise")
 
+  // Le logo s'enregistre dès le dépôt et remplace les initiales dans le sélecteur d'entreprise.
+  const switcher = page.getByRole("button", { name: "Changer d’entreprise" })
+  await expect(switcher.locator("img")).toHaveCount(0)
+  await page
+    .locator('input[type="file"][accept="image/jpeg,image/png,image/webp"]')
+    .setInputFiles("e2e/fixtures/carreau.png")
+  await expect(page.getByText("Logo enregistré.")).toBeVisible()
+  await expect(switcher.locator("img")).toBeVisible()
+  await expect(
+    page.getByRole("button", { name: "Remplacer" }).first()
+  ).toBeVisible()
+  await shot(page, testInfo, "01b-logo")
+
   // La fiche : le téléphone et les identifiants sont normalisés par l'API.
   await expect(page.getByLabel("Nom de l’entreprise")).toHaveValue(
     "Quincaillerie Bello"

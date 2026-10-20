@@ -2603,7 +2603,7 @@
       },
       "identity": {
         "title": "Business",
-        "description": "The name shown in the app, on vouchers and in emails."
+        "description": "The name shown in the app, on vouchers and in emails, and the logo your team sees."
       },
       "responsible": {
         "title": "Person in charge",
@@ -2677,6 +2677,17 @@
         "tooLarge": "This file is over 5 MB: shrink the photo or scan at a lower quality.",
         "previewTitle": "Document preview",
         "openInTab": "Open in a tab"
+      },
+      "logo": {
+        "title": "Logo",
+        "description": "JPEG, PNG or WebP image, 5 MB at most. Saved as soon as it is uploaded: it replaces the business’s initials in the app.",
+        "upload": "Upload a logo",
+        "replace": "Replace",
+        "remove": "Remove",
+        "uploaded": "Logo saved.",
+        "removed": "Logo removed.",
+        "unsupported": "Choose a JPEG, PNG or WebP image.",
+        "tooLarge": "This image is over 5 MB: choose a lighter one."
       }
     }
   }

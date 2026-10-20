@@ -41,7 +41,11 @@ export function OrganizationSwitcher() {
           />
         }
       >
-        <OrganizationAvatar name={active.name} className="size-7 text-xs" />
+        <OrganizationAvatar
+          name={active.name}
+          logoUrl={active.logoUrl}
+          className="size-7 text-xs"
+        />
         <span className="grid min-w-0 text-left leading-tight">
           <span className="truncate text-sm font-semibold">{active.name}</span>
           <span className="truncate text-xs font-normal text-muted-foreground">
@@ -63,6 +67,7 @@ export function OrganizationSwitcher() {
             >
               <OrganizationAvatar
                 name={organization.name}
+                logoUrl={organization.logoUrl}
                 className="size-7 text-xs"
               />
               <span className="min-w-0 flex-1 truncate">

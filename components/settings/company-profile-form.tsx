@@ -38,6 +38,7 @@ import { applyServerErrors } from "@/lib/forms/apply-server-errors"
 import { applyProblemToField } from "@/lib/forms/problem-fields"
 import { citySuggestions, sectorCodes } from "@/lib/onboarding/catalog"
 
+import { CompanyLogo } from "./company-logo"
 import { KybAnchors } from "./kyb-anchors"
 
 const CITY_LIST_ID = "company-city-suggestions"
@@ -195,6 +196,7 @@ export function CompanyProfileForm({
         description={t("settings.company.identity.description")}
       >
         <FieldGroup>
+          <CompanyLogo company={company} />
           <Field data-invalid={!!errors.name}>
             <FieldLabel htmlFor="company-name">
               {t("settings.company.fields.name")}

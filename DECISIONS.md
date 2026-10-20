@@ -508,12 +508,14 @@ Prolonge D6 (KYB), D26 (notifications), D33 (règles de travail) et D44 (alertes
   - **Alertes** (D44) : au propriétaire, aux administrateurs et aux gérants ;
   - **Règles de travail** (D33), sorties de l'écran « Équipe » : au propriétaire et aux administrateurs ;
   - **Notifications** (D26), anciennement `/notifications` : à chacun, pour soi.
+- **Navigation** : les onglets en colonne à gauche sur grand écran (1280 px et plus). Plus étroit, ils passent au-dessus du contenu, sur une ligne, ou deux par ligne sur téléphone, sans qu'aucun ne soit coupé.
 - **La fiche** : nom, secteur, ville, nom du responsable, téléphone (normalisé au format international, l'indicatif du pays est ajouté s'il manque), adresse, et les identifiants du pays. Les types d'identifiants viennent du référentiel des pays (`platform.country.business_id_types` : RCCM et NIU au Cameroun) et sont rangés dans `platform.organization_business_id`, pas en colonnes. La fiche porte une version : une modification faite ailleurs entre-temps est refusée.
+- **Le logo**, dans la fiche, enregistré dès le dépôt : une image (JPEG, PNG, WebP, 5 Mo au plus) qui remplace les initiales de l'entreprise dans le sélecteur d'entreprise. Ce n'est pas une pièce du KYB : il se montre aux membres par lien signé, comme les photos d'articles, sans chiffrement ni journal (`platform.organization.logo_key`).
 - **Les pièces**, une par sorte : pièce d'identité du gérant, photo du local, et un justificatif par identifiant. Photo (JPEG, PNG, WebP) ou PDF, reconnus à leur contenu, 5 Mo au plus. Déposée, une pièce remplace la précédente, qui est effacée du stockage.
 - **Niveaux, calculés par l'API** : 0 à l'inscription ; 1 (« Déclarée ») avec le nom du responsable, la pièce du gérant, et l'adresse ou la photo du local ; 2 (« Vérifiée ») quand Kreskala approuve. La demande de vérification s'envoie quand chaque identifiant et son justificatif sont là ; elle passe « En attente de vérification ». Changer un identifiant ou un justificatif remet la vérification à zéro : la décision portait sur ce qui avait été déposé.
 - **Sécurité des pièces** (D6) : chiffrées par l'API (AES-GCM, clé `KYB_ENCRYPTION_KEY`) avant le stockage, qui ne voit que des octets ; jamais de lien signé : elles ne se lisent que par l'API, sans cache, et chaque dépôt, lecture ou retrait est inscrit dans `platform.kyb_document_access`, qui survit à la pièce.
 - **Pas encore de back-office** : la demande se repère dans les journaux et en base ; l'approbation (statut `APPROVED`, niveau 2) et le refus viendront avec lui.
-- **Écart au modèle D10** : la fiche (`responsible_name`, `kyb_requested_at`, `version`), les identifiants et les pièces n'y figuraient pas.
+- **Écart au modèle D10** : la fiche (`responsible_name`, `kyb_requested_at`, `version`, `logo_key`), les identifiants et les pièces n'y figuraient pas.
 
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).

@@ -84,7 +84,7 @@ export function KybDocuments({ company }: { company: Company }) {
       title={t("title")}
       description={t("description")}
     >
-      <ul className="grid gap-3 lg:grid-cols-2">
+      <ul className="grid gap-3 2xl:grid-cols-2">
         {company.documentKinds.map((kind) => (
           <DocumentCard
             key={kind}

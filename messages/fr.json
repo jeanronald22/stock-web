@@ -2603,7 +2603,7 @@
       },
       "identity": {
         "title": "Entreprise",
-        "description": "Le nom affiché dans l’application, sur les bons et dans les e-mails."
+        "description": "Le nom affiché dans l’application, sur les bons et dans les e-mails, et le logo que voit votre équipe."
       },
       "responsible": {
         "title": "Responsable",
@@ -2677,6 +2677,17 @@
         "tooLarge": "Ce fichier dépasse 5 Mo : réduisez la photo ou numérisez en qualité moindre.",
         "previewTitle": "Aperçu de la pièce",
         "openInTab": "Ouvrir dans un onglet"
+      },
+      "logo": {
+        "title": "Logo",
+        "description": "Image JPEG, PNG ou WebP, 5 Mo au plus. Enregistré dès le dépôt : il remplace les initiales de l’entreprise dans l’application.",
+        "upload": "Déposer un logo",
+        "replace": "Remplacer",
+        "remove": "Retirer",
+        "uploaded": "Logo enregistré.",
+        "removed": "Logo retiré.",
+        "unsupported": "Choisissez une image JPEG, PNG ou WebP.",
+        "tooLarge": "Cette image dépasse 5 Mo : choisissez-en une plus légère."
       }
     }
   }

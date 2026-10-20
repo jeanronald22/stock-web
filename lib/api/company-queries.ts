@@ -56,6 +56,17 @@ export function useRemoveKybDocument() {
   return useCompanyMutation((kind: string) => company.remove(kind))
 }
 
+/** Le logo paraît aussi dans le sélecteur d'entreprise : la liste du compte est relue. */
+export function useUploadLogo() {
+  const { company } = useApi()
+  return useCompanyMutation((file: Blob) => company.uploadLogo(file))
+}
+
+export function useRemoveLogo() {
+  const { company } = useApi()
+  return useCompanyMutation(() => company.removeLogo())
+}
+
 export function useRequestVerification() {
   const { company } = useApi()
   return useCompanyMutation(() => company.requestVerification())

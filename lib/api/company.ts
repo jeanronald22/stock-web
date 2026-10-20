@@ -6,6 +6,7 @@ export const CompanyPaths = {
   document: (kind: string) =>
     `/v1/company/documents/${encodeURIComponent(kind)}`,
   verification: "/v1/company/verification",
+  logo: "/v1/company/logo",
 } as const
 
 /** Nom de la partie du formulaire multipart (stock-api, PlatformApi.DOCUMENT_PART). */
@@ -19,6 +20,9 @@ export const CompanyLimits = {
   /** Taille d'une pièce, en octets (5 Mo, stock-api CompanyService.MAX_SIZE). */
   documentBytes: 5 * 1024 * 1024,
 } as const
+
+/** Logo : une image (stock-api, ImageFormat), 5 Mo au plus (CompanyService.MAX_SIZE). */
+export const LOGO_TYPES = ["image/jpeg", "image/png", "image/webp"] as const
 
 /** Formats acceptés par l'API, reconnus à leur contenu : photo ou PDF. */
 export const KYB_DOCUMENT_TYPES = [
@@ -102,6 +106,8 @@ export type Company = {
   /** Pièces que l'entreprise peut déposer : celles du niveau 1, puis un justificatif par identifiant. */
   documentKinds: string[]
   documents: KybDocument[]
+  /** Lien signé vers le logo, relatif à l'API ; null sans logo. */
+  logoUrl: string | null
   kyb: {
     /** 0 : inscription ; 1 : déclarée ; 2 : vérifiée par Kreskala. */
     level: number
@@ -146,6 +152,18 @@ export const companyApi = (send: ApiClient) => {
         body,
       })
     },
+    uploadLogo: (file: Blob) => {
+      const body = new FormData()
+      body.append(DOCUMENT_PART, file)
+      return send<Company>({
+        ...scoped,
+        method: "PUT",
+        path: CompanyPaths.logo,
+        body,
+      })
+    },
+    removeLogo: () =>
+      send<Company>({ ...scoped, method: "DELETE", path: CompanyPaths.logo }),
     remove: (kind: string) =>
       send<Company>({
         ...scoped,

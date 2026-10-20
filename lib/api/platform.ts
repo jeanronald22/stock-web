@@ -96,6 +96,8 @@ export type Organization = {
   sector: string
   role: MembershipRole
   kybLevel: number
+  /** Lien signé vers le logo (D45), relatif à l'API ; null sans logo. */
+  logoUrl: string | null
 }
 
 export type User = {
