@@ -58,3 +58,10 @@ SEED_EMAIL=vous@exemple.com SEED_PASSWORD='…' SEED_ORGANIZATION="Vimelec" npm 
 Relançable sans doublon. `SEED_ORGANIZATION` est facultatif (première entreprise dont le compte est
 propriétaire) ; `SEED_APP_URL` et `SEED_API_URL` changent les adresses (par défaut 3100 et 8081).
 
+## Intégration continue et recette
+
+`.github/workflows/ci.yml` : à chaque pull request vers `develop` ou `main`, lint, types et build.
+À chaque push sur `develop`, en plus, l'image `stock-web` (`Dockerfile`) est publiée sur ghcr.io
+puis le service web de la recette est mis à jour. La pile de recette est décrite dans `stock-api`
+(`deploy/recette`). Les tests e2e (Playwright) ne tournent pas encore dans la CI : ils demandent
+la pile complète.

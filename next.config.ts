@@ -5,6 +5,8 @@ import createNextIntlPlugin from "next-intl/plugin"
 const withNextIntl = createNextIntlPlugin()
 
 const nextConfig: NextConfig = {
+  // Image Docker minimale (Dockerfile) : le serveur et les seuls fichiers dont il a besoin.
+  output: "standalone",
   // Le badge de développement (« N ») couvre le lien « Retour » de la barre d'action sur téléphone.
   devIndicators: false,
   experimental: {
