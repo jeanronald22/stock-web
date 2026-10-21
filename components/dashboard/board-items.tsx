@@ -34,11 +34,18 @@ const URGENT_DAYS = 7
 /** Au-delà, il ne presse pas (comme l'API, AnalysisService.COVERAGE_HORIZON_DAYS). */
 const COVERAGE_HORIZON_DAYS = 30
 
+/** Rythme quotidien en dessous duquel le dixième compte. */
+const PRECISE_PACE_BELOW = 10
+
 const coverageTone = (days: number) =>
   days < URGENT_DAYS ? StatTone.bad : StatTone.warning
 
-/** Un rythme par jour se lit au dixième : « 1,7 pièce par jour ». */
-const perDay = (value: number) => Math.round(value * 10) / 10
+/**
+ * Un petit rythme se lit au dixième (« 1,7 pièce par jour ») ; au-delà de 10, le dixième n'apporte
+ * rien (« 48 pièces par jour » plutôt que « 47,6 »).
+ */
+const perDay = (value: number) =>
+  value < PRECISE_PACE_BELOW ? Math.round(value * 10) / 10 : Math.round(value)
 
 /** Les articles les plus sortis de la période, en nombre de sorties ; la quantité dans son unité. */
 export function TopIssued({ analysis }: { analysis: ActivityAnalysis }) {
