@@ -548,8 +548,8 @@ La branche `develop` est essayée sur un environnement de recette avant de passe
 - **Images Docker sur ghcr.io** (`stock-web`, `stock-api`, `stock-keycloak`), étiquetées `develop` et SHA du commit, pour revenir à une version. Configuration lue au démarrage : la même image servira la production.
 - **Déploiement** : à chaque push sur `develop` (fusion de pull request comprise), après les vérifications, par une clé SSH qui ne peut lancer que `deploy.sh`. Chaque dépôt met à jour son composant (web ; API avec Keycloak), vérifie qu'il répond et revient sinon à la version précédente. Inactif tant que la variable `RECETTE_SSH_HOST` n'est pas définie. La pile est décrite dans `stock-api/deploy/recette` ; les secrets restent dans le `.env` du serveur.
 - **Pas de sauvegarde automatique** de la recette pour l'instant.
-- **Fichiers sur le disque du serveur** (`STORAGE_PROVIDER=local`, volume) pour la recette ; R2 (D20) reste prévu en production.
-- **E-mails** dans Mailpit : aucun ne sort de la recette tant qu'un vrai serveur d'envoi n'est pas choisi. Codes de connexion par téléphone dans les journaux de Keycloak, faute de fournisseur.
+- **Fichiers dans Cloudflare R2** dès la recette (D20) : compartiment privé `kreskala-recette`, servi par l'API sur liens signés ; la production aura le sien.
+- **E-mails envoyés par Resend** (API et Keycloak), expéditeur `no-reply@mboumgni.dev` ; Mailpit reste en secours. Codes de connexion par téléphone dans les journaux de Keycloak, faute de fournisseur.
 
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
