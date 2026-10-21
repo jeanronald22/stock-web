@@ -72,16 +72,16 @@ jobs:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/develop' && vars.RECETTE_SSH_HOST != ''
     needs: image
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
+    permissions:
+      packages: read
     environment:
       name: recette
       url: ${{ vars.RECETTE_URL }}
+    # Un déploiement à la fois par dépôt ; deploy.sh fait attendre celui de l'autre dépôt.
     concurrency:
       group: deploy-recette-web
       cancel-in-progress: false
-    env:
-      SSH_TARGET: ${{ vars.RECETTE_SSH_USER }}@${{ vars.RECETTE_SSH_HOST }}
-      RECETTE_DIR: ${{ vars.RECETTE_DIR || '/opt/kreskala-recette' }}
     steps:
       - name: Clé SSH
         env:
@@ -92,5 +92,10 @@ jobs:
           printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
-      - name: Mise à jour du service web
-        run: ssh "$SSH_TARGET" "cd '$RECETTE_DIR' && docker compose pull web && docker compose up -d web && docker image prune -f"
+      # La clé ne peut lancer que deploy.sh (deploy/recette dans stock-api) ; le jeton éphémère
+      # de ce workflow, passé sur l'entrée standard, lui sert à lire les images privées.
+      - name: Mise à jour du composant web
+        env:
+          SSH_TARGET: ${{ vars.RECETTE_SSH_USER }}@${{ vars.RECETTE_SSH_HOST }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: printf '%s' "$GHCR_TOKEN" | ssh "$SSH_TARGET" deploy web "$GITHUB_SHA" "$GITHUB_ACTOR"
