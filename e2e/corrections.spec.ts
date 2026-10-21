@@ -8,6 +8,7 @@ import {
   shot,
   signUpWithBusiness,
 } from "./support"
+import { joinTeam } from "./team-member"
 
 test.beforeEach(async ({ context }) => redirectApi(context))
 
@@ -141,6 +142,49 @@ test("ajustement : le stock prend la quantité comptée, l'écart avec le théor
     page.getByText("Théorique 100 pièces, compté 92 pièces")
   ).toBeVisible()
   await shot(page, testInfo, "02-fiche-ajustement")
+})
+
+test("casse et ajustement : un magasinier n'a pas le formulaire, même par l'adresse", async ({
+  page,
+  browser,
+}, testInfo) => {
+  await signUpWithBusiness(page, testInfo, "casse-refusee")
+  await dismissTour(page, "Tout est ici")
+  const depot = crypto.randomUUID()
+  await callApi(page, "POST", "/v1/warehouses", {
+    id: depot,
+    name: "Magasin Akwa",
+    kind: "SHOP",
+  })
+  const storekeeper = await joinTeam(page, browser, testInfo, "STOREKEEPER", [
+    depot,
+  ])
+
+  await navigateTo(storekeeper, "Bons")
+  await dismissTour(storekeeper, "Entrées et sorties")
+  await storekeeper
+    .getByRole("button", { name: "Autre opération" })
+    .first()
+    .click()
+  await expect(
+    storekeeper.getByRole("menuitem", { name: /casse|ajustement/i })
+  ).toHaveCount(0)
+  await storekeeper.keyboard.press("Escape")
+
+  // Par l'adresse, l'écran le dit d'emblée au lieu de laisser remplir un bon refusé à l'envoi.
+  for (const path of ["/bons/casse", "/bons/ajustement"]) {
+    await storekeeper.goto(path)
+    await expect(
+      storekeeper.getByRole("heading", {
+        name: "Réservé aux responsables du stock",
+      })
+    ).toBeVisible()
+    await expect(
+      storekeeper.getByRole("button", { name: /^Enregistrer/ })
+    ).toHaveCount(0)
+  }
+  await storekeeper.getByRole("link", { name: "Retour aux bons" }).click()
+  await expect(storekeeper).toHaveURL(/\/bons$/)
 })
 
 test("réception comparée au bon de livraison : l'écart se voit et se retrouve par le filtre", async ({

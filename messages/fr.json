@@ -693,7 +693,7 @@
       "whereToFind": "Où le trouver",
       "movementsChart": "Entrées et sorties",
       "movementsChartHint": "Les quantités reçues et sorties, jour par jour, dans vos dépôts.",
-      "movementsChartSummary": "Sur la période : {inbound} entrés, {outbound} sortis.",
+      "movementsChartSummary": "Sur la période : entrées {inbound}, sorties {outbound}.",
       "periodLabel": "Période de la courbe",
       "inbound": "Entrées",
       "outbound": "Sorties",
@@ -877,7 +877,7 @@
       "to": "Arrivée",
       "receivedBy": "Réceptionné le {date} :",
       "concludes": "Réception du transfert envoyé le {date} :",
-      "expected": "{quantity} envoyés",
+      "expected": "Envoyé : {quantity}",
       "reason": "Motif",
       "announced": "Annoncé : {quantity}",
       "counted": "Théorique {book}, compté {counted}",
@@ -1004,6 +1004,11 @@
         "description": "La marchandise repart chez le fournisseur : le stock diminue à la validation.",
         "submit": "{count, plural, =0 {Valider le retour} one {Valider le retour · # article} other {Valider le retour · # articles}}",
         "done": "Retour {number} validé."
+      },
+      "denied": {
+        "title": "Réservé aux responsables du stock",
+        "description": "Casse et ajustement corrigent le stock : le gérant, les managers et les contrôleurs les enregistrent. Prévenez l’un d’eux.",
+        "back": "Retour aux bons"
       }
     },
     "print": {
@@ -1023,8 +1028,8 @@
         "CUSTOMER_RETURN": "Bon de retour client",
         "SUPPLIER_RETURN": "Bon de retour fournisseur"
       },
-      "receivedOf": "{received} reçus sur {expected}",
-      "countedOf": "{counted} comptés (théorique {book})",
+      "receivedOf": "Reçu : {received} sur {expected}",
+      "countedOf": "Compté : {counted} (théorique {book})",
       "witnessedBy": "Témoin (nom et signature)",
       "preparedBy": "Préparé par",
       "location": "Empl. {code}"
@@ -1064,7 +1069,7 @@
       "description": "De {source} vers {destination}. Indiquez ce qui est réellement arrivé : un écart reste visible sur les deux bons.",
       "sent": "Envoyé : {quantity}",
       "received": "Quantité reçue",
-      "gap": "{direction, select, missing {{quantity} manquants} other {{quantity} en trop}}",
+      "gap": "{direction, select, missing {Manque : {quantity}} other {En trop : {quantity}}}",
       "date": "Date de réception",
       "notePlaceholder": "Carton abîmé, colis manquant…",
       "beforeSent": "La réception ne peut pas précéder l’envoi.",
@@ -1439,12 +1444,12 @@
         "description": "Un administrateur peut à son tour inviter et gérer les membres."
       },
       "stockRole": {
-        "title": "Que fera-t-elle dans Stock ?",
+        "title": "Que fera cette personne dans Stock ?",
         "description": "Le rôle décide de ce qu’elle peut faire. Vous pourrez le changer à tout moment."
       },
       "warehouses": {
         "title": "Dans quels dépôts ?",
-        "description": "Elle ne verra et ne mouvementera que le stock de ces dépôts.",
+        "description": "Cette personne ne verra et ne mouvementera que le stock de ces dépôts.",
         "required": "Choisissez au moins un dépôt."
       }
     },
@@ -1543,13 +1548,13 @@
         "when": "Quand un transfert que vous avez envoyé est réceptionné.",
         "title": "Transfert {number} reçu à {destination}",
         "complete": "Tout est arrivé.",
-        "gap": "{name} : {received} reçus sur {expected}"
+        "gap": "{name} : reçu {received} sur {expected}"
       },
       "RECEIPT_DISCREPANCY": {
         "name": "Écart à la réception",
         "when": "Quand une réception dans un de vos dépôts ne correspond pas au bon de livraison.",
         "title": "Réception {number} : écart avec le bon de livraison",
-        "gap": "{name} : {received} reçus sur {expected} annoncés"
+        "gap": "{name} : reçu {received} au lieu de {expected}"
       },
       "VOUCHER_PENDING": {
         "name": "Sortie à valider",
@@ -1586,7 +1591,7 @@
         "name": "Casse anormale",
         "when": "Pour le propriétaire et les gérants : quand la casse d’un article dépasse la part admise sur 30 jours.",
         "title": "Casse anormale : {count, plural, one {# article} other {# articles}}",
-        "line": "{name} ({warehouse}) : {damaged} cassés, {percent} % de ce qui est parti"
+        "line": "{name} ({warehouse}) : {damaged} de casse, {percent} % de ce qui est parti"
       },
       "UNRELIABLE_SUPPLIER": {
         "name": "Fournisseur peu fiable",

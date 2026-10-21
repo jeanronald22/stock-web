@@ -4,13 +4,14 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import {
   ArrowRightLeftIcon,
   ClipboardClockIcon,
+  LockKeyholeIcon,
   PlusIcon,
   Undo2Icon,
   WarehouseIcon,
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { useRef, useState } from "react"
 import {
   Controller,
@@ -68,6 +69,7 @@ import {
   useReturnable,
 } from "@/lib/api/voucher-queries"
 import {
+  correctionTypes,
   customerTypes,
   returnOrigins,
   shortagesOf,
@@ -77,6 +79,7 @@ import {
   type EntryType,
   type Returnable,
 } from "@/lib/api/vouchers"
+import { formatQuantityInput } from "@/lib/forms/quantity"
 import { isOnline } from "@/lib/offline/connectivity"
 import { OutboxKind, removeOutboxEntry } from "@/lib/offline/outbox"
 import { isNetworkError, useEnqueue } from "@/lib/offline/use-enqueue"
@@ -112,8 +115,35 @@ import { VoucherLinesField } from "./voucher-lines-field"
 /** Lot en cause dans une erreur de l'API (stock-api, ProblemFields.BATCH). */
 const BATCH_FIELD = "batch"
 
-/** Retour depuis un bon (D31, ?origine=…) : les lignes qui restent à retourner sont proposées. */
+/**
+ * Saisie d'un bon. Casse et ajustement demandent le droit de correction (D25) : sans lui, l'écran
+ * le dit d'emblée plutôt que de laisser remplir un bon que l'API refusera.
+ */
 export function VoucherEntry({ type }: { type: EntryType }) {
+  const t = useTranslations("vouchers.entry.denied")
+  const { can } = useStockAccess()
+  if (correctionTypes.has(type) && !can(StockPermission.correctStock))
+    return (
+      <PageBody>
+        <EmptyState
+          illustration={
+            <LockKeyholeIcon className="mx-auto size-16 text-muted-foreground" />
+          }
+          title={t("title")}
+          description={t("description")}
+          action={
+            <Link href={Routes.vouchers} className={buttonVariants()}>
+              {t("back")}
+            </Link>
+          }
+        />
+      </PageBody>
+    )
+  return <VoucherEntryLoader type={type} />
+}
+
+/** Retour depuis un bon (D31, ?origine=…) : les lignes qui restent à retourner sont proposées. */
+function VoucherEntryLoader({ type }: { type: EntryType }) {
   const t = useTranslations()
   const searchParams = useSearchParams()
   const originId =
@@ -260,6 +290,7 @@ function VoucherEntryForm({
   draft: { id: string; values: VoucherFormValues } | undefined
 }) {
   const t = useTranslations()
+  const locale = useLocale()
   const router = useRouter()
   const errorMessage = useErrorMessage()
   const quantityLabel = useQuantityLabel()
@@ -342,7 +373,7 @@ function VoucherEntryForm({
       lines: previous
         ? previous.lines.map((line) => ({
             ...newLine(line.item, type),
-            quantity: String(line.enteredQuantity),
+            quantity: formatQuantityInput(line.enteredQuantity, locale),
             unit: line.packagingName ?? BASE_UNIT_CHOICE,
             batch: line.batch ?? "",
           }))
@@ -354,7 +385,7 @@ function VoucherEntryForm({
                 newLine(line.item, type, {
                   batch: line.batch ?? "",
                   limit: line.remaining,
-                  quantity: String(line.remaining),
+                  quantity: formatQuantityInput(line.remaining, locale),
                 })
               ),
       counterparty:
@@ -583,7 +614,7 @@ function VoucherEntryForm({
       <form
         onSubmit={(event) => void form.handleSubmit(submit)(event)}
         noValidate
-        className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start"
+        className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start"
       >
         <div className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-2">

@@ -1004,6 +1004,11 @@
         "description": "The goods go back to the supplier: stock decreases on validation.",
         "submit": "{count, plural, =0 {Validate the return} one {Validate the return · # item} other {Validate the return · # items}}",
         "done": "Return {number} validated."
+      },
+      "denied": {
+        "title": "Reserved for stock supervisors",
+        "description": "Damage and adjustments correct the stock: the general manager, managers and controllers record them. Let one of them know.",
+        "back": "Back to vouchers"
       }
     },
     "print": {
@@ -1549,7 +1554,7 @@
         "name": "Receipt discrepancy",
         "when": "When a receipt in one of your warehouses does not match the delivery note.",
         "title": "Receipt {number}: discrepancy with the delivery note",
-        "gap": "{name}: {received} received of {expected} announced"
+        "gap": "{name}: received {received} instead of {expected}"
       },
       "VOUCHER_PENDING": {
         "name": "Issue to approve",

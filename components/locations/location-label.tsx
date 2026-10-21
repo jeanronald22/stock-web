@@ -19,7 +19,7 @@ export function LocationLabel({
       )}
     >
       <MapPinIcon className="size-3.5 shrink-0" aria-hidden />
-      <span className="font-mono font-medium text-foreground">
+      <span className="shrink-0 font-mono font-medium whitespace-nowrap text-foreground">
         {location.code}
       </span>
       {location.label && <span className="truncate">· {location.label}</span>}
