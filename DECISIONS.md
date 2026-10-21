@@ -539,6 +539,17 @@ Prolonge D36 (étiquettes), D45 (fiche et logo) et les bons et fiches d'articles
 - **En-tête lisible par chaque membre** (`GET /v1/company/letterhead`) : un magasinier imprime aussi des bons. Il ne porte que ce qui s'imprime ; la fiche complète et les pièces restent aux gérants (D45). Hors connexion, le document part avec le nom et la ville connus.
 - **Étiquettes** : inchangées dans leur principe (code, nom, référence), plus aérées.
 
+## D48. Recette sur un VPS, déployée par la CI (2026-10-21)
+
+La branche `develop` est essayée sur un environnement de recette avant de passer sur `main`.
+
+- **Un seul point d'entrée** : Caddy, ports 80 et 443, certificats Let's Encrypt. Trois adresses publiques, une par service que le navigateur appelle : l'application web, l'API et Keycloak (une quatrième pour la boîte Mailpit de la recette, protégée par mot de passe). L'application web s'exécute dans le navigateur : c'est lui, et non le serveur Next.js, qui appelle l'API et Keycloak ; les garder sur le réseau privé couperait l'application. PostgreSQL n'est jamais exposé.
+- **L'API lit les clés de Keycloak par le réseau privé** ; l'émetteur des jetons reste l'adresse publique de Keycloak (`KC_HOSTNAME`).
+- **Images Docker sur ghcr.io** (`stock-web`, `stock-api`, `stock-keycloak`), étiquetées `develop` et SHA du commit, pour revenir à une version. Configuration lue au démarrage : la même image servira la production.
+- **Déploiement** : à chaque push sur `develop` (fusion de pull request comprise), après les vérifications, par SSH (`docker compose pull` puis `up`). Inactif tant que la variable `RECETTE_SSH_HOST` n'est pas définie. La pile est décrite dans `stock-api/deploy/recette` ; les secrets restent dans le `.env` du serveur.
+- **Fichiers sur le disque du serveur** (`STORAGE_PROVIDER=local`, volume) pour la recette ; R2 (D20) reste prévu en production.
+- **E-mails** dans Mailpit : aucun ne sort de la recette tant qu'un vrai serveur d'envoi n'est pas choisi. Codes de connexion par téléphone dans les journaux de Keycloak, faute de fournisseur.
+
 ## Questions ouvertes
 - [ ] Protection serveur de `main` : passer à GitHub Pro, ou utiliser une organisation GitHub (plan Team).
 - [ ] Nom de la marque et nom du produit de stock (voir D7). Pistes : Kreskala, Kreskio, Tissero, NarvalWorks, FourmiLabs.
