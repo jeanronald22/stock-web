@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import {
   ArrowRightLeftIcon,
   ClipboardClockIcon,
+  LockKeyholeIcon,
   PlusIcon,
   Undo2Icon,
   WarehouseIcon,
@@ -68,6 +69,7 @@ import {
   useReturnable,
 } from "@/lib/api/voucher-queries"
 import {
+  correctionTypes,
   customerTypes,
   returnOrigins,
   shortagesOf,
@@ -113,8 +115,35 @@ import { VoucherLinesField } from "./voucher-lines-field"
 /** Lot en cause dans une erreur de l'API (stock-api, ProblemFields.BATCH). */
 const BATCH_FIELD = "batch"
 
-/** Retour depuis un bon (D31, ?origine=…) : les lignes qui restent à retourner sont proposées. */
+/**
+ * Saisie d'un bon. Casse et ajustement demandent le droit de correction (D25) : sans lui, l'écran
+ * le dit d'emblée plutôt que de laisser remplir un bon que l'API refusera.
+ */
 export function VoucherEntry({ type }: { type: EntryType }) {
+  const t = useTranslations("vouchers.entry.denied")
+  const { can } = useStockAccess()
+  if (correctionTypes.has(type) && !can(StockPermission.correctStock))
+    return (
+      <PageBody>
+        <EmptyState
+          illustration={
+            <LockKeyholeIcon className="mx-auto size-16 text-muted-foreground" />
+          }
+          title={t("title")}
+          description={t("description")}
+          action={
+            <Link href={Routes.vouchers} className={buttonVariants()}>
+              {t("back")}
+            </Link>
+          }
+        />
+      </PageBody>
+    )
+  return <VoucherEntryLoader type={type} />
+}
+
+/** Retour depuis un bon (D31, ?origine=…) : les lignes qui restent à retourner sont proposées. */
+function VoucherEntryLoader({ type }: { type: EntryType }) {
   const t = useTranslations()
   const searchParams = useSearchParams()
   const originId =
