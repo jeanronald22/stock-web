@@ -1549,7 +1549,7 @@
         "name": "Receipt discrepancy",
         "when": "When a receipt in one of your warehouses does not match the delivery note.",
         "title": "Receipt {number}: discrepancy with the delivery note",
-        "gap": "{name}: {received} received of {expected} announced"
+        "gap": "{name}: received {received} instead of {expected}"
       },
       "VOUCHER_PENDING": {
         "name": "Issue to approve",

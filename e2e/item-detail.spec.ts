@@ -91,7 +91,7 @@ test("fiche article : le stock en grand, par dépôt, ses mouvements ; modifier 
   await page.getByRole("tab", { name: "Mouvements" }).click()
   await expect(
     page.getByRole("img", {
-      name: "Sur la période : 102 pièces entrés, 0 pièce sortis.",
+      name: "Sur la période : entrées 102 pièces, sorties 0 pièce.",
     })
   ).toBeVisible()
   await expect(
@@ -109,7 +109,7 @@ test("fiche article : le stock en grand, par dépôt, ses mouvements ; modifier 
   ).toBeVisible()
   await expect(
     page.getByRole("img", {
-      name: "Sur la période : 102 pièces entrés, 0 pièce sortis.",
+      name: "Sur la période : entrées 102 pièces, sorties 0 pièce.",
     })
   ).toBeVisible()
   await page.waitForTimeout(1500)
