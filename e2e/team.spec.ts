@@ -139,7 +139,8 @@ test("une personne invitée rejoint l'équipe comme magasinière d'un seul dép�
       .getByRole("link", { name: "Équipe" })
   ).toBeHidden()
   await shot(guest, testInfo, "04-magasinier")
-  // Sa sortie fait passer le câble sous le seuil : le propriétaire sera prévenu.
+  // Sa sortie fait passer le câble sous le seuil : le propriétaire sera prévenu, de la sortie
+  // elle-même (D49) comme de l'alerte.
   await callApi(guest, "POST", "/v1/vouchers", {
     id: crypto.randomUUID(),
     type: "ISSUE",
@@ -148,18 +149,22 @@ test("une personne invitée rejoint l'équipe comme magasinière d'un seul dép�
   })
   await context.close()
 
-  // Notifications du propriétaire : l'arrivée de Paul, puis l'alerte de stock, aussi par e-mail.
+  // Notifications du propriétaire : l'arrivée de Paul, sa sortie et l'alerte de stock, aussi par e-mail.
   await expect(async () => {
     await page.reload()
     await expect(
-      page.getByRole("button", { name: "Notifications, 2 non lues" })
+      page.getByRole("button", { name: "Notifications, 3 non lues" })
     ).toBeVisible({ timeout: 2_000 })
   }).toPass()
-  await page.getByRole("button", { name: "Notifications, 2 non lues" }).click()
+  await page.getByRole("button", { name: "Notifications, 3 non lues" }).click()
   const panel = page.getByRole("dialog", { name: "Notifications" })
   await expect(panel).toContainText("1 article à commander · Dépôt Bonabéri")
   await expect(panel).toContainText("Câble 2,5 mm² : 40 m (seuil 50 m)")
   await expect(panel).toContainText("Paul Etoga a rejoint l’équipe")
+  await expect(panel).toContainText(/Sortie SOR-\S+ · Dépôt Bonabéri/)
+  await expect(panel).toContainText(
+    "Par Paul Etoga · Câble 2,5 mm² : − 40 m, désormais 40 m (stock bas)"
+  )
   await shot(page, testInfo, "05a-notifications")
   await page.keyboard.press("Escape")
   // Menus en mode clair : fond clair (le thème des composants forçait le mode sombre).
@@ -169,12 +174,15 @@ test("une personne invitée rejoint l'équipe comme magasinière d'un seul dép�
   // Ferme le menu, puis le panneau latéral sur téléphone (sans effet ailleurs).
   await page.keyboard.press("Escape")
   await page.keyboard.press("Escape")
-  await page.getByRole("button", { name: "Notifications, 2 non lues" }).click()
+  await page.getByRole("button", { name: "Notifications, 3 non lues" }).click()
   await panel.getByRole("button", { name: "Tout marquer comme lu" }).click()
   await expect(panel).toContainText("Tout est lu.")
   await page.keyboard.press("Escape")
   expect(await waitForMail(ownerEmail, "1 article à commander")).toContain(
     "Câble 2,5 mm² : 40 m, seuil 50 m (stock bas)"
+  )
+  expect(await waitForMail(ownerEmail, "Sortie SOR-")).toContain(
+    "Câble 2,5 mm² : − 40 m, désormais 40 m (stock bas)"
   )
 
   // Côté propriétaire : la personne est membre ; sa fiche change son accès Stock.
