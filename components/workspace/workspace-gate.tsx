@@ -6,9 +6,11 @@ import { useMemo } from "react"
 import { HomeRedirect } from "@/components/app/home-redirect"
 import { Splash } from "@/components/app/splash"
 import { CatalogSync } from "@/components/offline/catalog-sync"
+import { OfflineNotReady } from "@/components/offline/offline-not-ready"
 import { OutboxSync } from "@/components/offline/outbox-sync"
 import { TourProvider } from "@/components/tour/tour-provider"
 import { useMe } from "@/lib/api/platform-queries"
+import { waitsForNetwork } from "@/lib/offline/waits-for-network"
 import { useActiveOrganization } from "@/lib/organization/active-organization"
 
 import { WorkspaceContext, type Workspace } from "./workspace-context"
@@ -35,6 +37,7 @@ export function WorkspaceGate({ children }: { children: React.ReactNode }) {
       : null
   }, [me.data, activeOrganizationId])
 
+  if (waitsForNetwork(me)) return <OfflineNotReady />
   if (!me.data && !me.error) return <Splash label={t("common.loading")} />
   // Erreur de chargement, ou entreprise retirée depuis le dernier passage : l'accueil décide.
   if (!workspace) return <HomeRedirect />

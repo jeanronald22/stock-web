@@ -10,7 +10,7 @@ import {
 import { useActiveOrganization } from "@/lib/organization/active-organization"
 
 import { useApi } from "./api-provider"
-import { stockKeys } from "./stock-queries"
+import { invalidateStock, stockKeys } from "./stock-queries"
 import type { RequestStatus, StockSettings } from "./voucher-requests"
 import type { VoucherInput } from "./vouchers"
 
@@ -110,10 +110,7 @@ function useRequestMutation<Input, Output>(
   const organizationId = useOrganizationId()
   return useMutation({
     mutationFn,
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: stockKeys.all(organizationId),
-      }),
+    onSuccess: () => invalidateStock(queryClient, organizationId),
   })
 }
 

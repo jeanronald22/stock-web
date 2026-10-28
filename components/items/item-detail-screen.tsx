@@ -20,8 +20,12 @@ import { useCategoryTree } from "@/components/categories/use-category-tree"
 import { RecordSection } from "@/components/records/record-section"
 import {
   RecordNotFound,
+  RecordOffline,
   RecordSkeleton,
+  RecordState,
+  recordState,
 } from "@/components/records/record-states"
+import { useRecordId } from "@/components/records/use-record-id"
 import { useDayAge } from "@/components/records/use-day-age"
 import { VoucherHistory } from "@/components/records/voucher-history"
 import {
@@ -44,6 +48,7 @@ import {
 } from "@/lib/api/stock"
 import { useItem, useWarehouses } from "@/lib/api/stock-queries"
 import { useItemStock, useVouchersPage } from "@/lib/api/voucher-queries"
+import { waitsForNetwork } from "@/lib/offline/waits-for-network"
 import {
   ItemSection,
   ListQueryParams,
@@ -73,21 +78,18 @@ const SECTION_ICONS: Record<ItemSection, LucideIcon> = {
   [ItemSection.movements]: HistoryIcon,
 }
 
-export function ItemDetailScreen({ id }: { id: string }) {
+export function ItemDetailScreen() {
   const t = useTranslations("items")
+  const id = useRecordId()
   const item = useItem(id)
   // Relue à l'ouverture : un dépôt vient peut-être d'être ajouté.
   const warehouses = useWarehouses(CatalogStatus.active, { fresh: true })
+  const list = { listLabel: t("title"), listHref: Routes.items }
 
-  if (item.isPending || warehouses.isPending) return <RecordSkeleton />
-  if (!item.data)
-    return (
-      <RecordNotFound
-        title={t("notFound")}
-        listLabel={t("title")}
-        listHref={Routes.items}
-      />
-    )
+  const state = recordState(id, item, warehouses)
+  if (state === RecordState.offline) return <RecordOffline {...list} />
+  if (state === RecordState.loading) return <RecordSkeleton />
+  if (!item.data) return <RecordNotFound title={t("notFound")} {...list} />
   return <ItemDetails item={item.data} warehouses={warehouses.data ?? []} />
 }
 
@@ -307,9 +309,14 @@ function KeyFacts({
               dateStyle: "medium",
             })}
           </Link>
+        ) : latest.isPending && !waitsForNetwork(latest) ? (
+          <Skeleton className="mt-1 h-5 w-24" />
         ) : (
           <span className="font-normal text-muted-foreground">
-            {t("items.detail.noMovement")}
+            {/* Hors ligne, l'article vient de la copie du catalogue : ses bons ne sont pas là. */}
+            {latest.isPending
+              ? t("items.detail.movementOffline")
+              : t("items.detail.noMovement")}
           </span>
         )}
       </KeyFact>

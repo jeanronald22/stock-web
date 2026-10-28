@@ -51,25 +51,42 @@ export const Routes = {
   runtimeConfig: "/runtime-config",
   /** Écran du service worker pour une page jamais ouverte sans réseau (D39). */
   offline: "/hors-ligne",
+  /**
+   * Fiches consultées : une page par section, l'identifiant dans l'adresse (RecordQueryParams),
+   * pour qu'elles s'ouvrent sans réseau même jamais visitées sur ce téléphone (D39).
+   */
+  itemRecord: "/articles/fiche",
+  warehouseRecord: "/depots/fiche",
+  voucherRecord: "/bons/fiche",
+  /** Réception d'un transfert au dépôt d'arrivée (D27). */
+  transferReceipt: "/bons/receptionner",
+  supplierRecord: "/fournisseurs/fiche",
+  customerRecord: "/clients/fiche",
+  requestRecord: "/bons/demandes/fiche",
 } as const
 
 export type AppRoute = (typeof Routes)[keyof typeof Routes]
 
+/** Paramètre d'adresse des fiches consultées (Routes.itemRecord…). */
+export const RecordQueryParams = { id: "id" } as const
+
+const withId = (route: AppRoute, id: string) =>
+  `${route}?${new URLSearchParams({ [RecordQueryParams.id]: id })}`
+
 /** Fiches : adresse construite à partir de l'identifiant. */
 export const RecordRoutes = {
-  item: (id: string) => `${Routes.items}/${id}`,
+  item: (id: string) => withId(Routes.itemRecord, id),
   /** Modification de la fiche ; la fiche elle-même se consulte. */
   itemEdit: (id: string) => `${Routes.items}/${id}/modifier`,
-  warehouse: (id: string) => `${Routes.warehouses}/${id}`,
+  warehouse: (id: string) => withId(Routes.warehouseRecord, id),
   warehouseEdit: (id: string) => `${Routes.warehouses}/${id}/modifier`,
-  voucher: (id: string) => `${Routes.vouchers}/${id}`,
-  /** Réception d'un transfert au dépôt d'arrivée (D27). */
-  transferReceipt: (id: string) => `${Routes.vouchers}/${id}/receptionner`,
-  supplier: (id: string) => `${Routes.suppliers}/${id}`,
+  voucher: (id: string) => withId(Routes.voucherRecord, id),
+  transferReceipt: (id: string) => withId(Routes.transferReceipt, id),
+  supplier: (id: string) => withId(Routes.supplierRecord, id),
   supplierEdit: (id: string) => `${Routes.suppliers}/${id}/modifier`,
-  customer: (id: string) => `${Routes.customers}/${id}`,
+  customer: (id: string) => withId(Routes.customerRecord, id),
   customerEdit: (id: string) => `${Routes.customers}/${id}/modifier`,
-  request: (id: string) => `${Routes.requests}/${id}`,
+  request: (id: string) => withId(Routes.requestRecord, id),
   /** Inventaire d'un dépôt (D32), ouvert depuis « Stock ». */
   inventory: (id: string) => `${Routes.stock}/inventaires/${id}`,
   member: (userId: string) => `${Routes.team}/${userId}`,

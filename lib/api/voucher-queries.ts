@@ -8,10 +8,11 @@ import {
   useQueryClient,
 } from "@tanstack/react-query"
 
+import { useOfflineCatalog } from "@/lib/offline/use-offline-catalog"
 import { useActiveOrganization } from "@/lib/organization/active-organization"
 
 import { useApi } from "./api-provider"
-import { stockKeys } from "./stock-queries"
+import { invalidateStock, stockKeys } from "./stock-queries"
 import type {
   StockSearch,
   TransferReceiptInput,
@@ -68,7 +69,7 @@ export function useVoucher(id: string) {
   return useQuery({
     queryKey: voucherKeys.voucher(organizationId, id),
     queryFn: () => vouchers.voucher(id),
-    enabled: !!organizationId,
+    enabled: !!organizationId && !!id,
   })
 }
 
@@ -99,10 +100,14 @@ export function useStockPage(search: StockSearch, page: number, size: number) {
 export function useItemStock(itemId: string | undefined) {
   const { vouchers } = useApi()
   const organizationId = useOrganizationId()
+  // Stock jamais lu sur ce téléphone, sans réseau : celui de la copie du catalogue (D39).
+  const copied = useOfflineCatalog()?.stock[itemId ?? ""]
   return useQuery({
     queryKey: voucherKeys.itemStock(organizationId, itemId ?? ""),
     queryFn: () => vouchers.itemStock(itemId!),
     enabled: !!organizationId && !!itemId,
+    placeholderData:
+      itemId && copied ? { itemId, warehouses: copied } : undefined,
   })
 }
 
@@ -133,10 +138,7 @@ export function useReceiveTransfer() {
       id: string
       input: TransferReceiptInput
     }) => vouchers.receiveTransfer(transferId, id, input),
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: stockKeys.all(organizationId),
-      }),
+    onSuccess: () => invalidateStock(queryClient, organizationId),
   })
 }
 
@@ -162,9 +164,6 @@ export function useRecordVoucher() {
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: VoucherInput }) =>
       vouchers.record(id, input),
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: stockKeys.all(organizationId),
-      }),
+    onSuccess: () => invalidateStock(queryClient, organizationId),
   })
 }

@@ -44,7 +44,8 @@ export function ProfileScreen() {
         className="mb-8"
       />
       <ProfilePhoto user={user} name={memberName(user)} />
-      <ProfileIdentity user={user} />
+      {/* Nom gardé sur le téléphone (D39) puis relu : le formulaire repart du nom à jour. */}
+      <ProfileIdentity key={memberName(user)} user={user} />
       <ProfileLanguage />
       <ProfilePassword email={user.email} />
     </PageBody>

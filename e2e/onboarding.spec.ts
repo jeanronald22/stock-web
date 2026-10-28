@@ -43,6 +43,7 @@ test("import d'un catalogue Excel, conditionnement par défaut, étiquettes", as
 
   // Catalogue vide : l'import est proposé à côté de la création.
   await navigateTo(page, "Articles")
+  await dismissTour(page, "Votre catalogue")
   await page.getByRole("link", { name: "Ou importer un fichier Excel" }).click()
   await expect(
     page.getByRole("heading", { name: "Importez votre catalogue" })
@@ -96,7 +97,6 @@ test("import d'un catalogue Excel, conditionnement par défaut, étiquettes", as
   ).toBeVisible()
   await shot(page, testInfo, "04-bilan")
   await page.getByRole("button", { name: "Voir les articles" }).click()
-  await dismissTour(page, "Votre catalogue")
   await expect(
     page.getByRole("link", { name: "Fer à béton 8 mm" })
   ).toBeVisible()
@@ -180,6 +180,7 @@ test("import d'un catalogue Excel, conditionnement par défaut, étiquettes", as
     ],
   })
   await navigateTo(page, "Bons")
+  await dismissTour(page, "Entrées et sorties")
   await page.getByRole("link", { name: new RegExp(`REC-${year}-0001`) }).click()
   await page.getByRole("link", { name: "Étiquettes" }).click()
   await expect(

@@ -675,6 +675,7 @@
       "alerts": "{count, plural, =0 {No alert} one {# on alert} other {# on alert}}",
       "lastMovement": "Last movement",
       "noMovement": "None yet",
+      "movementOffline": "Shown when online",
       "byWarehouseHint": "What is left in each warehouse, and its alert threshold.",
       "stockDetail": "Stock details",
       "missing": "Not set",
@@ -1940,6 +1941,10 @@
     "more": "More actions",
     "cancel": "Cancel",
     "allVouchers": "See the {count} vouchers",
+    "offline": {
+      "title": "Not on this phone yet",
+      "description": "This record has not been opened here with a connection. It will show up on its own as soon as the network is back."
+    },
     "contact": {
       "call": "Call",
       "whatsapp": "WhatsApp",
@@ -2521,6 +2526,10 @@
       "title": "No network",
       "description": "This page has not been opened on this phone yet. The home page, stock and voucher entry work without a network.",
       "home": "Go to the home page"
+    },
+    "notReady": {
+      "title": "Not ready to work offline yet",
+      "description": "Open the app once with a connection on this phone: it will keep what it needs to work without one. It will carry on by itself as soon as the network is back."
     }
   },
   "period": {

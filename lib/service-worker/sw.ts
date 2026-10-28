@@ -25,9 +25,20 @@ declare const self: ServiceWorkerGlobalScope
 /** Page affichée à la place d'une page jamais ouverte, sans réseau. */
 const OFFLINE_PAGE = "/hors-ligne"
 const DOCUMENT = "document"
+/** La racine redirige vers le tableau de bord côté serveur : sans réseau, on l'ouvre directement. */
+const ROOT = "/"
+const DASHBOARD = "/accueil"
+/** Paramètre des requêtes de navigation de Next.js (contenu des écrans, pas une page HTML). */
+const NEXT_RSC_PARAM = "_rsc"
 
-const serwist = new Serwist({
+const serwist: Serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
+  // Une page gardée sert quels que soient ses paramètres : une fiche se lit dans l'adresse
+  // (« /articles/fiche?id=… »), et une liste filtrée s'ouvre sans réseau comme la liste. Sauf les
+  // requêtes de navigation de Next.js : elles attendent le contenu de l'écran, pas la page HTML.
+  precacheOptions: {
+    ignoreURLParametersMatching: [new RegExp(`^(?!${NEXT_RSC_PARAM}$)`)],
+  },
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
@@ -35,6 +46,17 @@ const serwist = new Serwist({
     {
       matcher: ({ url }) => url.origin !== self.location.origin,
       handler: new NetworkOnly(),
+    },
+    {
+      matcher: ({ request, url }) =>
+        request.destination === DOCUMENT && url.pathname === ROOT,
+      handler: async ({ request }): Promise<Response> => {
+        try {
+          return await fetch(request)
+        } catch {
+          return (await serwist.matchPrecache(DASHBOARD)) ?? Response.error()
+        }
+      },
     },
     ...defaultCache,
   ],

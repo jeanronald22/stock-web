@@ -11,7 +11,7 @@ import { useActiveOrganization } from "@/lib/organization/active-organization"
 
 import { useApi } from "./api-provider"
 import type { CountInput, InventoryStatus, SheetSearch } from "./inventories"
-import { stockKeys } from "./stock-queries"
+import { invalidateStock, stockKeys } from "./stock-queries"
 
 export const inventoryKeys = {
   all: (organizationId: string | null) =>
@@ -95,10 +95,7 @@ function useInventoryMutation<Input, Output>(
   const organizationId = useOrganizationId()
   return useMutation({
     mutationFn,
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: stockKeys.all(organizationId),
-      }),
+    onSuccess: () => invalidateStock(queryClient, organizationId),
   })
 }
 

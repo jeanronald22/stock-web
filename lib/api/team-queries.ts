@@ -7,7 +7,7 @@ import { useActiveOrganization } from "@/lib/organization/active-organization"
 import { useApi } from "./api-provider"
 import type { AssignableRole, MembershipStatus } from "./platform"
 import { platformKeys } from "./platform-queries"
-import { stockKeys } from "./stock-queries"
+import { invalidateStock } from "./stock-queries"
 import type { StockGrantInput } from "./stock"
 
 /** Équipe de l'entreprise active, et rôles Stock rattachés : relus ensemble après chaque changement. */
@@ -61,9 +61,7 @@ function useTeamMutation<Input, Output>(
           queryKey: teamKeys.all(organizationId),
         }),
         // Le rôle Stock de la personne connectée a peut-être changé aussi.
-        queryClient.invalidateQueries({
-          queryKey: stockKeys.all(organizationId),
-        }),
+        invalidateStock(queryClient, organizationId),
       ]),
   })
 }

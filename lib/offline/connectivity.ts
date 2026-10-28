@@ -50,15 +50,19 @@ export function reportNetworkSuccess() {
   notify()
 }
 
-function startProbe() {
+function probe(url: string) {
+  if (!browserOnline) return
+  fetch(url, { cache: "no-store" })
+    .then(() => reportNetworkSuccess())
+    .catch(() => undefined)
+}
+
+/** [immediately] : sans attendre le premier intervalle (la connexion vient de revenir). */
+function startProbe(immediately = false) {
   if (probeTimer || !probeUrl) return
   const url = probeUrl
-  probeTimer = setInterval(() => {
-    if (!browserOnline) return
-    fetch(url, { cache: "no-store" })
-      .then(() => reportNetworkSuccess())
-      .catch(() => undefined)
-  }, PROBE_INTERVAL_MS)
+  if (immediately) probe(url)
+  probeTimer = setInterval(() => probe(url), PROBE_INTERVAL_MS)
 }
 
 function stopProbe() {
@@ -77,7 +81,7 @@ export function startConnectivity(apiUrl: string): () => void {
     // Une connexion qui revient mérite une vérification immédiate de l'API.
     if (browserOnline && apiUnreachable) {
       stopProbe()
-      startProbe()
+      startProbe(true)
     }
     notify()
   }

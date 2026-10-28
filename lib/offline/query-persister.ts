@@ -6,13 +6,15 @@ import { createStore, del, get, set } from "idb-keyval"
 
 /**
  * Lectures gardées sur le téléphone (D39) : l'application rouvre sans réseau sur ce qui a déjà été
- * vu. Une seule entrée IndexedDB, réécrite au plus une fois par seconde.
+ * vu. Une seule entrée IndexedDB, réécrite au plus une fois par seconde, et tout de suite quand
+ * l'application passe en arrière-plan : le téléphone peut la fermer sans prévenir.
  */
 
 const DATABASE = "kreskala-cache"
 const TABLE = "queries"
 const KEY = "query-client"
 const WRITE_DELAY_MS = 1_000
+const HIDDEN = "hidden"
 
 /** Lectures gardées sept jours au plus : au-delà, elles tromperaient plus qu'elles n'aideraient. */
 export const PERSISTED_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1_000
@@ -28,18 +30,33 @@ const database = () => (idb ??= createStore(DATABASE, TABLE))
 export function createQueryPersister(): Persister {
   let timer: ReturnType<typeof setTimeout> | null = null
   let latest: PersistedClient | null = null
+  const cancel = () => {
+    if (timer) clearTimeout(timer)
+    timer = null
+    latest = null
+  }
+  const write = () => {
+    const client = latest
+    cancel()
+    if (client) void set(KEY, client, database()).catch(() => undefined)
+  }
+  // Rendu côté serveur : rien à garder.
+  if (typeof document !== "undefined")
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === HIDDEN) write()
+    })
   return {
     persistClient: (client) => {
       latest = client
-      if (timer) return
-      timer = setTimeout(() => {
-        timer = null
-        if (latest) void set(KEY, latest, database()).catch(() => undefined)
-      }, WRITE_DELAY_MS)
+      timer ??= setTimeout(write, WRITE_DELAY_MS)
     },
     restoreClient: () =>
       get<PersistedClient>(KEY, database()).catch(() => undefined),
-    removeClient: () => clearPersistedQueries(),
+    // Déconnexion : une écriture en attente ne doit pas remettre ce qui vient d'être effacé.
+    removeClient: () => {
+      cancel()
+      return clearPersistedQueries()
+    },
   }
 }
 

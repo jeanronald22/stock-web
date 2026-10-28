@@ -7,8 +7,10 @@ import { createContext, use, useMemo } from "react"
 
 import { Splash } from "@/components/app/splash"
 import { EmptyState } from "@/components/catalog/empty-state"
+import { OfflineNotReady } from "@/components/offline/offline-not-ready"
 import { useMyStockAccess } from "@/lib/api/stock-queries"
 import type { MyStockAccess, StockPermission } from "@/lib/api/stock"
+import { waitsForNetwork } from "@/lib/offline/waits-for-network"
 import { Routes } from "@/lib/routes"
 
 import { PageBody } from "./page-header"
@@ -55,6 +57,7 @@ export function StockAccessProvider({
   if (!value) {
     // Erreur de chargement : l'écran affichera lui-même l'erreur de ses propres données.
     if (query.isError) return children
+    if (waitsForNetwork(query)) return <OfflineNotReady />
     return <Splash label={t("common.loading")} />
   }
   if (gated && !value.access.role) {

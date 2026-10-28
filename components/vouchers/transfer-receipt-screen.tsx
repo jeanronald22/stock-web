@@ -11,6 +11,12 @@ import { EmptyState } from "@/components/catalog/empty-state"
 import { SearchScene } from "@/components/illustrations/search-scene"
 import { useBatchLabel, useQuantityLabel } from "@/components/items/describe"
 import { ItemThumb } from "@/components/items/item-thumb"
+import {
+  RecordOffline,
+  RecordState,
+  recordState,
+} from "@/components/records/record-states"
+import { useRecordId } from "@/components/records/use-record-id"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
@@ -47,12 +53,22 @@ import { todayOn } from "./voucher-form-schema"
 /** Réception de transfert gardée hors ligne (D39) : de quoi rouvrir l'envoi si l'API la refuse. */
 export type TransferReceiptDraft = { transferId: string }
 
-export function TransferReceiptScreen({ id }: { id: string }) {
+export function TransferReceiptScreen() {
   const t = useTranslations()
+  const id = useRecordId()
   const transfer = useVoucher(id)
   const { can, covers } = useStockAccess()
 
-  if (transfer.isPending) {
+  const state = recordState(id, transfer)
+  if (state === RecordState.offline) {
+    return (
+      <RecordOffline
+        listLabel={t("vouchers.title")}
+        listHref={Routes.vouchers}
+      />
+    )
+  }
+  if (state === RecordState.loading) {
     return (
       <PageBody>
         <Skeleton className="h-9 w-64" />

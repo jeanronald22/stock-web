@@ -27,6 +27,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  RecordOffline,
+  RecordState,
+  recordState,
+} from "@/components/records/record-states"
+import { useRecordId } from "@/components/records/use-record-id"
 import { Button, buttonVariants } from "@/components/ui/button"
 import {
   Dialog,
@@ -62,10 +68,14 @@ import { ENTRY_ROUTES } from "@/lib/vouchers/entry-routes"
 
 import { RequestStatusBadge } from "./request-status-badge"
 
-export function RequestScreen({ id }: { id: string }) {
+export function RequestScreen() {
   const t = useTranslations("requests")
+  const id = useRecordId()
   const request = useRequest(id)
-  if (request.isPending) {
+  const state = recordState(id, request)
+  if (state === RecordState.offline)
+    return <RecordOffline listLabel={t("title")} listHref={Routes.requests} />
+  if (state === RecordState.loading) {
     return (
       <PageBody>
         <Skeleton className="h-9 w-64" />

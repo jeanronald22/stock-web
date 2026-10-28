@@ -9,7 +9,7 @@ import { toast } from "sonner"
 
 import { useApi } from "@/lib/api/api-provider"
 import { ApiError, ProblemCode } from "@/lib/api/problem"
-import { stockKeys } from "@/lib/api/stock-queries"
+import { invalidateStock } from "@/lib/api/stock-queries"
 import { useTokenRenewal } from "@/lib/auth/token-renewal"
 import { isOnline } from "@/lib/offline/connectivity"
 import {
@@ -103,9 +103,7 @@ export function OutboxSync() {
       }
     }
     if (sent.length > 0) {
-      await queryClient.invalidateQueries({
-        queryKey: stockKeys.all(organizationId),
-      })
+      await invalidateStock(queryClient, organizationId)
       const number = sent.length === 1 ? sent[0].number : undefined
       toast.success(
         number ? t("sentOne", { number }) : t("sent", { count: sent.length })

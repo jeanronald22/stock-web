@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { useCallback, useRef, useState } from "react"
 
 import { useApi } from "@/lib/api/api-provider"
-import { stockKeys } from "@/lib/api/stock-queries"
+import { invalidateStock } from "@/lib/api/stock-queries"
 import {
   ImportOutcome,
   StockLimits,
@@ -110,9 +110,7 @@ export function useItemImport() {
       setError(failure)
       setPhase(ImportPhase.interrupted)
     } finally {
-      await queryClient.invalidateQueries({
-        queryKey: stockKeys.all(organizationId),
-      })
+      await invalidateStock(queryClient, organizationId)
     }
   }, [stock, queryClient, organizationId])
 

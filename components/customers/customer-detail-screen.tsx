@@ -11,8 +11,12 @@ import { RecordSummary } from "@/components/records/record-summary"
 import { RecordFacts } from "@/components/records/record-facts"
 import {
   RecordNotFound,
+  RecordOffline,
   RecordSkeleton,
+  RecordState,
+  recordState,
 } from "@/components/records/record-states"
+import { useRecordId } from "@/components/records/use-record-id"
 import { useDayAge } from "@/components/records/use-day-age"
 import { VoucherHistory } from "@/components/records/voucher-history"
 import { Badge } from "@/components/ui/badge"
@@ -34,18 +38,16 @@ import {
 
 import { CustomerKindIcon } from "./customers-screen"
 
-export function CustomerDetailScreen({ id }: { id: string }) {
+export function CustomerDetailScreen() {
   const t = useTranslations("customers")
+  const id = useRecordId()
   const customer = useCustomer(id)
-  if (customer.isPending) return <RecordSkeleton />
-  if (!customer.data)
-    return (
-      <RecordNotFound
-        title={t("notFound")}
-        listLabel={t("title")}
-        listHref={Routes.customers}
-      />
-    )
+  const list = { listLabel: t("title"), listHref: Routes.customers }
+
+  const state = recordState(id, customer)
+  if (state === RecordState.offline) return <RecordOffline {...list} />
+  if (state === RecordState.loading) return <RecordSkeleton />
+  if (!customer.data) return <RecordNotFound title={t("notFound")} {...list} />
   return <CustomerDetails customer={customer.data} />
 }
 

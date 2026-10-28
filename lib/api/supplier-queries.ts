@@ -11,7 +11,7 @@ import { useActiveOrganization } from "@/lib/organization/active-organization"
 
 import { useApi } from "./api-provider"
 import { CatalogStatus } from "./stock"
-import { stockKeys } from "./stock-queries"
+import { invalidateStock, stockKeys } from "./stock-queries"
 import type { SupplierInput, SupplierSearch } from "./suppliers"
 
 export const supplierKeys = {
@@ -69,10 +69,7 @@ function useSupplierMutation<Input, Output>(
   const organizationId = useOrganizationId()
   return useMutation({
     mutationFn,
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: stockKeys.all(organizationId),
-      }),
+    onSuccess: () => invalidateStock(queryClient, organizationId),
   })
 }
 
