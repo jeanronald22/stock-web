@@ -1517,6 +1517,18 @@
         "line": "{name} : {quantity} (seuil {threshold})",
         "others": "{count, plural, one {et # autre} other {et # autres}}"
       },
+      "STOCK_IN": {
+        "name": "Entrées de stock",
+        "when": "Pour le propriétaire : chaque réception ou retour client validé par un membre de l’équipe, avec le stock qui en résulte."
+      },
+      "STOCK_OUT": {
+        "name": "Sorties de stock",
+        "when": "Pour le propriétaire : chaque sortie ou retour fournisseur validé par un membre de l’équipe, avec le stock qui reste."
+      },
+      "STOCK_CORRECTED": {
+        "name": "Corrections de stock",
+        "when": "Pour le propriétaire : chaque casse, ajustement ou clôture d’inventaire validé par un membre de l’équipe."
+      },
       "MEMBER_JOINED": {
         "name": "Nouveau membre",
         "when": "Quand une personne que vous avez invitée rejoint l’équipe.",
@@ -1606,6 +1618,14 @@
         "line": "{name}, lot {batch} ({warehouse}) : périme le {date}",
         "expired": "{name}, lot {batch} ({warehouse}) : périmé depuis le {date}"
       }
+    },
+    "movement": {
+      "title": "{type} {number} · {warehouse}",
+      "by": "Par {name}",
+      "reason": "motif : {reason}",
+      "line": "{name} : {change}, désormais {quantity}{state, select, LOW { (stock bas)} OUT { (rupture)} other {}}",
+      "lineAlone": "{name} : {change}",
+      "unchanged": "Le comptage confirme le stock."
     }
   },
   "contacts": {

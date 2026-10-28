@@ -1517,6 +1517,18 @@
         "line": "{name}: {quantity} (threshold {threshold})",
         "others": "{count, plural, one {and # other} other {and # others}}"
       },
+      "STOCK_IN": {
+        "name": "Stock in",
+        "when": "For the owner: every receipt or customer return validated by a team member, with the resulting stock."
+      },
+      "STOCK_OUT": {
+        "name": "Stock out",
+        "when": "For the owner: every issue or supplier return validated by a team member, with the stock left."
+      },
+      "STOCK_CORRECTED": {
+        "name": "Stock corrections",
+        "when": "For the owner: every damage, adjustment or inventory closing validated by a team member."
+      },
       "MEMBER_JOINED": {
         "name": "New member",
         "when": "When someone you invited joins the team.",
@@ -1606,6 +1618,14 @@
         "line": "{name}, batch {batch} ({warehouse}): expires {date}",
         "expired": "{name}, batch {batch} ({warehouse}): expired since {date}"
       }
+    },
+    "movement": {
+      "title": "{type} {number} · {warehouse}",
+      "by": "By {name}",
+      "reason": "reason: {reason}",
+      "line": "{name}: {change}, now {quantity}{state, select, LOW { (low stock)} OUT { (out of stock)} other {}}",
+      "lineAlone": "{name}: {change}",
+      "unchanged": "The count confirms the stock."
     }
   },
   "contacts": {

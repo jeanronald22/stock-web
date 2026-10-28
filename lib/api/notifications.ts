@@ -1,5 +1,6 @@
 import type { ApiClient } from "./http"
-import type { BaseUnit, StockRole } from "./stock"
+import type { BaseUnit, StockRole, StockState } from "./stock"
+import type { VoucherReason, VoucherType } from "./vouchers"
 
 /** Routes des notifications (stock-api, PlatformApi). */
 export const NotificationPaths = {
@@ -12,6 +13,9 @@ export const NotificationPaths = {
 /** Notifications de base (stock-api, NotificationType ; DECISIONS.md, D26). */
 export const notificationTypes = [
   "STOCK_ALERT",
+  "STOCK_IN",
+  "STOCK_OUT",
+  "STOCK_CORRECTED",
   "MEMBER_JOINED",
   "INVITATION_RECEIVED",
   "ACCESS_CHANGED",
@@ -30,6 +34,9 @@ export const notificationTypes = [
 export type NotificationType = (typeof notificationTypes)[number]
 export const NotificationType = {
   stockAlert: "STOCK_ALERT",
+  stockIn: "STOCK_IN",
+  stockOut: "STOCK_OUT",
+  stockCorrected: "STOCK_CORRECTED",
   memberJoined: "MEMBER_JOINED",
   invitationReceived: "INVITATION_RECEIVED",
   accessChanged: "ACCESS_CHANGED",
@@ -52,6 +59,18 @@ export type StockAlertLine = {
   state: "LOW" | "OUT"
   quantity: string
   threshold: string | null
+  baseUnit: BaseUnit
+}
+/**
+ * Article d'un mouvement (D49) : variation signée [change] et, relu après le bon, le stock du
+ * dépôt ; [state] seulement au seuil ou en rupture.
+ */
+export type MovementLine = {
+  name: string
+  change: string
+  quantity: string | null
+  threshold: string | null
+  state: Exclude<StockState, "OK"> | null
   baseUnit: BaseUnit
 }
 /** Ligne d'une réception (de transfert ou fournisseur) en écart. */
@@ -90,9 +109,15 @@ export type NotificationParams = {
   warehouseName?: string
   voucherId?: string
   voucherNumber?: string
-  /** Avis de stock : StockAlertLine ; alerte paramétrable sur des articles : RuleAlertLine. */
-  items?: StockAlertLine[] | RuleAlertLine[]
-  /** Alerte paramétrable : nombre d'alertes apparues ; la liste n'en détaille que les premières. */
+  /**
+   * Avis de stock : StockAlertLine ; alerte paramétrable sur des articles : RuleAlertLine ;
+   * mouvement : MovementLine.
+   */
+  items?: StockAlertLine[] | RuleAlertLine[] | MovementLine[]
+  /**
+   * Alerte paramétrable : nombre d'alertes apparues ; mouvement : nombre d'articles qui ont bougé.
+   * La liste n'en détaille que les premiers.
+   */
   total?: number
   suppliers?: SupplierAlertLine[]
   memberName?: string
@@ -104,6 +129,11 @@ export type NotificationParams = {
   sourceName?: string
   lineCount?: number
   discrepancies?: TransferGap[]
+  /** Mouvement (D49) : type du bon, tiers, motif et qui l'a validé. */
+  voucherType?: VoucherType
+  counterparty?: string | null
+  reason?: VoucherReason | null
+  actorName?: string
   /** Demande de sortie (D33). */
   requestId?: string
   requesterName?: string

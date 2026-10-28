@@ -1,6 +1,8 @@
 "use client"
 
 import {
+  ArrowDownToLineIcon,
+  ArrowUpFromLineIcon,
   BellRingIcon,
   CalendarClockIcon,
   ChevronsUpIcon,
@@ -9,6 +11,7 @@ import {
   MailOpenIcon,
   ClipboardCheckIcon,
   ClipboardClockIcon,
+  ClipboardPenLineIcon,
   FileWarningIcon,
   MoonIcon,
   PackageCheckIcon,
@@ -24,6 +27,7 @@ import { useDayLabel, useQuantityLabel } from "@/components/items/describe"
 import {
   NotificationType,
   type AppNotification,
+  type MovementLine,
   type NotificationParams,
   type RuleAlertLine,
   type StockAlertLine,
@@ -34,6 +38,9 @@ const LISTED_ITEMS = 3
 
 export const notificationIcons: Record<NotificationType, LucideIcon> = {
   [NotificationType.stockAlert]: BellRingIcon,
+  [NotificationType.stockIn]: ArrowDownToLineIcon,
+  [NotificationType.stockOut]: ArrowUpFromLineIcon,
+  [NotificationType.stockCorrected]: ClipboardPenLineIcon,
   [NotificationType.memberJoined]: UserPlusIcon,
   [NotificationType.invitationReceived]: MailOpenIcon,
   [NotificationType.accessChanged]: KeyRoundIcon,
@@ -61,6 +68,9 @@ type RuleAlertType =
 /** Titre et détail d'une notification, traduits depuis son type et ses paramètres (D26). */
 export function useNotificationText() {
   const t = useTranslations("notifications.types")
+  const movement = useTranslations("notifications.movement")
+  const voucherTypes = useTranslations("vouchers.types")
+  const reasons = useTranslations("vouchers.reasons")
   const roles = useTranslations("team.stockRoles")
   const quantityLabel = useQuantityLabel()
   const dayLabel = useDayLabel()
@@ -120,6 +130,44 @@ export function useNotificationText() {
     }
   }
 
+  /** « Sortie SOR-2026-0012 · Dépôt Bonabéri », puis qui, le tiers ou le motif, et chaque article (D49). */
+  const movementText = (params: NotificationParams) => {
+    const items = (params.items ?? []) as MovementLine[]
+    const total = params.total ?? items.length
+    const context = [
+      movement("by", { name: params.actorName ?? "" }),
+      ...(params.counterparty ? [params.counterparty] : []),
+      ...(params.reason
+        ? [movement("reason", { reason: reasons(`${params.reason}.label`) })]
+        : []),
+    ].join(", ")
+    const lines = items.map((item) => {
+      const change = Number(item.change)
+      const values = {
+        name: item.name,
+        change: `${change > 0 ? "+" : "−"}\u00a0${quantityLabel(item.baseUnit, Math.abs(change))}`,
+      }
+      return item.quantity === null
+        ? movement("lineAlone", values)
+        : movement("line", {
+            ...values,
+            quantity: quantityLabel(item.baseUnit, Number(item.quantity)),
+            state: item.state ?? "OK",
+          })
+    })
+    return {
+      title: movement("title", {
+        type: params.voucherType ? voucherTypes(params.voucherType) : "",
+        number: params.voucherNumber ?? "",
+        warehouse: params.warehouseName ?? "",
+      }),
+      detail: [
+        context,
+        total === 0 ? movement("unchanged") : listed(lines, total),
+      ].join(" · "),
+    }
+  }
+
   return (notification: AppNotification): { title: string; detail: string } => {
     const params = notification.params
     switch (notification.type) {
@@ -148,6 +196,10 @@ export function useNotificationText() {
           ].join(" · "),
         }
       }
+      case NotificationType.stockIn:
+      case NotificationType.stockOut:
+      case NotificationType.stockCorrected:
+        return movementText(params)
       case NotificationType.memberJoined:
         return {
           title: t("MEMBER_JOINED.title", { name: params.memberName ?? "" }),

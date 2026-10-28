@@ -557,3 +557,13 @@ La branche `develop` est essayée sur un environnement de recette avant de passe
 - [ ] Texte exact de la loi camerounaise sur les données personnelles et obligations associées.
 - [ ] Agrégateur de paiement mobile money.
 - [ ] Fournisseur d'envoi d'e-mails en production (D17).
+
+## D49. Journal des mouvements pour le propriétaire (2026-10-28)
+
+Constat en recette : le propriétaire ne savait rien des bons validés par son équipe (seules les alertes de seuil, d'écart et de transfert le prévenaient). Complète D26.
+
+- **Quoi** : chaque bon validé par un autre membre prévient le propriétaire, dans l'application et par e-mail : un avis par bon, avec qui l'a validé, le tiers ou le motif, puis, article par article, la variation (« − 40 m ») et le stock qui reste dans le dépôt, marqué « stock bas » ou « rupture » s'il y a lieu. Au-delà de 20 articles (import, inventaire), l'avis compte les autres.
+- **Trois types**, pour régler l'e-mail séparément (« Paramètres › Notifications ») : entrées (réception, retour client), sorties (sortie, retour fournisseur), corrections (casse, ajustement, clôture d'inventaire, stock de départ). E-mail activé par défaut, comme les autres types ; l'avis dans l'application reste toujours.
+- **Pas d'avis** pour ses propres bons, ni pour les transferts, qui le préviennent déjà (D27). Les alertes (seuil, écart, alertes paramétrables) restent des avis distincts : le journal dit ce qui s'est passé, l'alerte ce qu'il faut faire.
+- **Qui** : le propriétaire seulement ; l'ouvrir aux gérants demandera de pouvoir couper aussi l'avis dans l'application.
+
