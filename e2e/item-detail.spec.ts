@@ -56,6 +56,7 @@ test("fiche article : le stock en grand, par dépôt, ses mouvements ; modifier 
   })
 
   await navigateTo(page, "Articles")
+  await dismissTour(page, "Votre catalogue")
   await page.getByRole("link", { name: /Carreau 60x60/ }).click()
   await expect(
     page.getByRole("heading", { name: "Carreau 60x60", level: 1 })

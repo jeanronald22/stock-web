@@ -675,6 +675,7 @@
       "alerts": "{count, plural, =0 {Aucune alerte} one {# en alerte} other {# en alerte}}",
       "lastMovement": "Dernier mouvement",
       "noMovement": "Aucun pour l’instant",
+      "movementOffline": "Visible avec du réseau",
       "byWarehouseHint": "Ce qu’il reste dans chaque dépôt, et son seuil d’alerte.",
       "stockDetail": "Détail du stock",
       "missing": "Non renseigné",
@@ -1940,6 +1941,10 @@
     "more": "Autres actions",
     "cancel": "Annuler",
     "allVouchers": "Voir les {count} bons",
+    "offline": {
+      "title": "Pas encore sur ce téléphone",
+      "description": "Cette fiche n’a pas été ouverte ici avec du réseau. Elle s’affichera d’elle-même dès qu’il revient."
+    },
     "contact": {
       "call": "Appeler",
       "whatsapp": "WhatsApp",
@@ -2521,6 +2526,10 @@
       "title": "Pas de réseau",
       "description": "Cette page n’a pas encore été ouverte sur ce téléphone. L’accueil, le stock et la saisie des bons, eux, marchent sans réseau.",
       "home": "Aller à l’accueil"
+    },
+    "notReady": {
+      "title": "Pas encore prêt sans réseau",
+      "description": "Ouvrez l’application une fois avec du réseau sur ce téléphone : elle gardera de quoi travailler sans. Elle reprendra d’elle-même dès que le réseau revient."
     }
   },
   "period": {

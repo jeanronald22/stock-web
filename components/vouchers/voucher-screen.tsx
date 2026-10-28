@@ -21,6 +21,12 @@ import { ItemLink } from "@/components/items/item-link"
 import { ItemThumb } from "@/components/items/item-thumb"
 import { LocationLabel } from "@/components/locations/location-label"
 import { PersonName } from "@/components/profile/person-name"
+import {
+  RecordOffline,
+  RecordState,
+  recordState,
+} from "@/components/records/record-states"
+import { useRecordId } from "@/components/records/use-record-id"
 import { Button, buttonVariants } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -69,15 +75,25 @@ import {
 } from "./voucher-badges"
 
 /** Bon validé : en lecture seule, une correction passe par un nouveau bon. */
-export function VoucherScreen({ id }: { id: string }) {
+export function VoucherScreen() {
   const t = useTranslations()
   const format = useFormatter()
   const quantityLabel = useQuantityLabel()
   const batchLabel = useBatchLabel()
+  const id = useRecordId()
   const voucher = useVoucher(id)
   const { can, covers } = useStockAccess()
 
-  if (voucher.isPending) {
+  const state = recordState(id, voucher)
+  if (state === RecordState.offline) {
+    return (
+      <RecordOffline
+        listLabel={t("vouchers.title")}
+        listHref={Routes.vouchers}
+      />
+    )
+  }
+  if (state === RecordState.loading) {
     return (
       <PageBody>
         <Skeleton className="h-9 w-64" />

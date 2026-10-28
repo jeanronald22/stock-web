@@ -32,7 +32,9 @@ export function ItemEditScreen({ id }: { id: string }) {
   const item = useItem(id)
   const warehouses = useWarehouses()
 
-  if (item.isPending || warehouses.isPending) return <FormSkeleton />
+  // La modification part de la fiche relue, jamais de la copie du catalogue gardée hors ligne.
+  if (item.isPending || item.isPlaceholderData || warehouses.isPending)
+    return <FormSkeleton />
   if (!item.data) {
     return (
       <PageBody>

@@ -50,7 +50,12 @@ export function AlertSettings() {
     <>
       <SettingsLead>{t("description")}</SettingsLead>
       {settings.data ? (
-        <AlertSettingsForm settings={settings.data} />
+        // Rouverte, l'application montre d'abord les réglages gardés sur le téléphone (D39) : s'ils
+        // ont changé depuis, le formulaire repart des réglages relus, sinon il les remettrait.
+        <AlertSettingsForm
+          key={JSON.stringify(settings.data)}
+          settings={settings.data}
+        />
       ) : (
         <div className="space-y-3" aria-hidden>
           {alertRules.map(({ rule }) => (

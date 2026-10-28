@@ -17,8 +17,12 @@ import {
 import { RecordFacts } from "@/components/records/record-facts"
 import {
   RecordNotFound,
+  RecordOffline,
   RecordSkeleton,
+  RecordState,
+  recordState,
 } from "@/components/records/record-states"
+import { useRecordId } from "@/components/records/use-record-id"
 import { useDayAge } from "@/components/records/use-day-age"
 import { VoucherHistory } from "@/components/records/voucher-history"
 import { Badge } from "@/components/ui/badge"
@@ -43,18 +47,16 @@ import { VoucherKind } from "@/lib/vouchers/voucher-kinds"
 /** Articles du catalogue montrés sur la fiche ; la liste des articles filtrée montre le reste. */
 const CATALOG_PREVIEW = 12
 
-export function SupplierDetailScreen({ id }: { id: string }) {
+export function SupplierDetailScreen() {
   const t = useTranslations("suppliers")
+  const id = useRecordId()
   const supplier = useSupplier(id)
-  if (supplier.isPending) return <RecordSkeleton />
-  if (!supplier.data)
-    return (
-      <RecordNotFound
-        title={t("notFound")}
-        listLabel={t("title")}
-        listHref={Routes.suppliers}
-      />
-    )
+  const list = { listLabel: t("title"), listHref: Routes.suppliers }
+
+  const state = recordState(id, supplier)
+  if (state === RecordState.offline) return <RecordOffline {...list} />
+  if (state === RecordState.loading) return <RecordSkeleton />
+  if (!supplier.data) return <RecordNotFound title={t("notFound")} {...list} />
   return <SupplierDetails supplier={supplier.data} />
 }
 

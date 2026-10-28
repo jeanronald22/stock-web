@@ -3,11 +3,14 @@
 import { useEffect } from "react"
 import {
   keepPreviousData,
+  type QueryClient,
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query"
 
+import { markCatalogStale } from "@/lib/offline/offline-catalog"
+import { useOfflineCatalog } from "@/lib/offline/use-offline-catalog"
 import { useActiveOrganization } from "@/lib/organization/active-organization"
 
 import { useApi } from "./api-provider"
@@ -89,7 +92,7 @@ export function useWarehouse(id: string) {
   return useQuery({
     queryKey: stockKeys.warehouse(organizationId, id),
     queryFn: () => stock.warehouse(id),
-    enabled: !!organizationId,
+    enabled: !!organizationId && !!id,
   })
 }
 
@@ -135,10 +138,13 @@ export function useItemCount() {
 export function useItem(id: string | undefined) {
   const { stock } = useApi()
   const organizationId = useOrganizationId()
+  // Fiche jamais ouverte sur ce téléphone, sans réseau : la copie du catalogue la montre (D39).
+  const copy = useOfflineCatalog()?.items.find((item) => item.id === id)
   return useQuery({
     queryKey: stockKeys.item(organizationId, id ?? ""),
     queryFn: () => stock.item(id!),
     enabled: !!organizationId && !!id,
+    placeholderData: copy,
   })
 }
 
@@ -178,6 +184,21 @@ export function useLabelSeed(itemIds: string[], voucherId: string | null) {
   })
 }
 
+/**
+ * Après une écriture qui touche au stock : listes, compteurs et fiches sont relus, et la copie du
+ * catalogue gardée pour le hors ligne est refaite (D39), une réception pouvant placer un article
+ * dans un nouveau dépôt.
+ */
+export function invalidateStock(
+  queryClient: QueryClient,
+  organizationId: string | null
+): Promise<void> {
+  if (organizationId) markCatalogStale(organizationId)
+  return queryClient.invalidateQueries({
+    queryKey: stockKeys.all(organizationId),
+  })
+}
+
 /** Après toute écriture, le catalogue de l'entreprise est relu : listes, compteurs et fiches restent cohérents. */
 function useStockMutation<Input, Output>(
   mutationFn: (input: Input) => Promise<Output>
@@ -186,10 +207,7 @@ function useStockMutation<Input, Output>(
   const organizationId = useOrganizationId()
   return useMutation({
     mutationFn,
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: stockKeys.all(organizationId),
-      }),
+    onSuccess: () => invalidateStock(queryClient, organizationId),
   })
 }
 

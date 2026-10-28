@@ -1,5 +1,6 @@
-import type { UserManager } from "oidc-client-ts"
+import { ErrorResponse, type UserManager } from "oidc-client-ts"
 
+import { reportNetworkFailure } from "@/lib/offline/connectivity"
 import { StorageKeys } from "@/lib/storage-keys"
 
 const LOCK_NAME = "kreskala.token-renewal"
@@ -19,8 +20,11 @@ export async function renewTokens(userManager: UserManager): Promise<void> {
     }
     try {
       await userManager.signinSilent()
-    } catch {
-      // Hors ligne ou session terminée : l'API répondra 401 et l'application renverra vers la connexion.
+    } catch (error) {
+      // Keycloak a répondu (session terminée) : l'API répondra 401 et l'application renverra vers la
+      // connexion. Sinon, il est injoignable (wifi sans internet, réseau trop faible) : c'est un
+      // passage hors ligne, la session gardée sur le téléphone suffit (D39).
+      if (!(error instanceof ErrorResponse)) reportNetworkFailure()
     }
   }
   if ("locks" in navigator) await navigator.locks.request(LOCK_NAME, renewOnce)

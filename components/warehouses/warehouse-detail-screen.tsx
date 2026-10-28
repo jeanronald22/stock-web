@@ -23,8 +23,12 @@ import {
 import { RecordFacts } from "@/components/records/record-facts"
 import {
   RecordNotFound,
+  RecordOffline,
   RecordSkeleton,
+  RecordState,
+  recordState,
 } from "@/components/records/record-states"
+import { useRecordId } from "@/components/records/use-record-id"
 import { VoucherHistory } from "@/components/records/voucher-history"
 import { StockStateBadge } from "@/components/stock/stock-state-badge"
 import { Badge } from "@/components/ui/badge"
@@ -57,18 +61,16 @@ import { warehouseKindIcons } from "./warehouse-kind"
 const TO_ORDER_PREVIEW = 5
 const ALERT_STATES = [StockState.low, StockState.out]
 
-export function WarehouseDetailScreen({ id }: { id: string }) {
+export function WarehouseDetailScreen() {
   const t = useTranslations("warehouses")
+  const id = useRecordId()
   const warehouse = useWarehouse(id)
-  if (warehouse.isPending) return <RecordSkeleton />
-  if (!warehouse.data)
-    return (
-      <RecordNotFound
-        title={t("notFound")}
-        listLabel={t("title")}
-        listHref={Routes.warehouses}
-      />
-    )
+  const list = { listLabel: t("title"), listHref: Routes.warehouses }
+
+  const state = recordState(id, warehouse)
+  if (state === RecordState.offline) return <RecordOffline {...list} />
+  if (state === RecordState.loading) return <RecordSkeleton />
+  if (!warehouse.data) return <RecordNotFound title={t("notFound")} {...list} />
   return <WarehouseDetails warehouse={warehouse.data} />
 }
 

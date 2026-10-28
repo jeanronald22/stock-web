@@ -12,7 +12,10 @@ const revision = randomUUID()
 /** Au-delà, un fichier n'est pas gardé à l'installation (forfaits mobiles). */
 const PRECACHE_MAX_FILE_BYTES = 400 * 1024
 
-/** Pages ouvertes sans réseau dès l'installation : celles du terrain. */
+/**
+ * Pages ouvertes sans réseau dès l'installation : celles du terrain, et les fiches (une page par
+ * section, l'identifiant dans l'adresse) pour en consulter une jamais ouverte sur ce téléphone.
+ */
 const FIELD_PAGES = [
   Routes.offline,
   Routes.dashboard,
@@ -24,6 +27,13 @@ const FIELD_PAGES = [
   Routes.newDamage,
   Routes.newAdjustment,
   Routes.items,
+  Routes.itemRecord,
+  Routes.warehouseRecord,
+  Routes.voucherRecord,
+  Routes.transferReceipt,
+  Routes.supplierRecord,
+  Routes.customerRecord,
+  Routes.requestRecord,
 ]
 
 export const { dynamic, dynamicParams, revalidate, generateStaticParams, GET } =
