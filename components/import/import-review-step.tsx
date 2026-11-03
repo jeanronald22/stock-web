@@ -3,6 +3,7 @@
 import { DownloadIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 
+import { ChoiceCard } from "@/components/catalog/choice-card"
 import { useQuantityLabel } from "@/components/items/describe"
 import { Button } from "@/components/ui/button"
 import {
@@ -14,12 +15,19 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { CATEGORY_PATH_SEPARATOR } from "@/lib/catalog/category-tree"
+import type { ExistingItem } from "@/lib/api/stock"
 import type { PreparedRow } from "@/lib/import/prepare-rows"
+import { RecordRoutes } from "@/lib/routes"
 import { cn } from "@/lib/utils"
 
 /** Lignes montrées dans l'aperçu et dans la liste à corriger ; le reste est compté. */
 const PREVIEW_ROWS = 20
 const PROBLEM_ROWS = 50
+
+/** Lignes dont le nom est déjà au catalogue (D50) : laissées de côté, ou créées quand même. */
+export const SameNameChoice = { skip: "skip", create: "create" } as const
+export type SameNameChoice =
+  (typeof SameNameChoice)[keyof typeof SameNameChoice]
 
 /** Couleur d'un chiffre du bilan : ce qui part, ce qui reste à corriger. */
 const StatTone = { good: "good", bad: "bad", neutral: "neutral" } as const
@@ -32,12 +40,19 @@ type StatTone = (typeof StatTone)[keyof typeof StatTone]
 export function ImportReviewStep({
   ready,
   blocked,
+  homonyms,
+  sameName,
+  onSameName,
   newCategories,
   openingWarehouse,
   onDownloadBlocked,
 }: {
   ready: PreparedRow[]
   blocked: PreparedRow[]
+  /** Lignes dont un article actif porte déjà le nom, et cet article. */
+  homonyms: { row: PreparedRow; existing: ExistingItem }[]
+  sameName: SameNameChoice
+  onSameName: (choice: SameNameChoice) => void
   newCategories: number
   /** Nom du dépôt du stock de départ ; null sans stock de départ. */
   openingWarehouse: string | null
@@ -50,7 +65,7 @@ export function ImportReviewStep({
 
   return (
     <div className="space-y-8">
-      <dl className="grid grid-cols-3 gap-2 sm:gap-3">
+      <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
         <Stat
           label={t("stats.ready")}
           value={ready.length}
@@ -61,6 +76,7 @@ export function ImportReviewStep({
           value={blocked.length}
           tone={blocked.length > 0 ? StatTone.bad : StatTone.neutral}
         />
+        <Stat label={t("stats.homonyms")} value={homonyms.length} />
         <Stat label={t("stats.categories")} value={newCategories} />
       </dl>
       {openingWarehouse && withStock > 0 && (
@@ -107,6 +123,68 @@ export function ImportReviewStep({
             {blocked.length > PROBLEM_ROWS && (
               <li className="px-4 py-2.5 text-muted-foreground">
                 {t("more", { count: blocked.length - PROBLEM_ROWS })}
+              </li>
+            )}
+          </ul>
+        </section>
+      )}
+
+      {homonyms.length > 0 && (
+        <section aria-labelledby="import-homonyms" className="space-y-3">
+          <div>
+            <h2 id="import-homonyms" className="font-semibold">
+              {t("homonyms.title")}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {t("homonyms.description")}
+            </p>
+          </div>
+          <div
+            role="radiogroup"
+            aria-labelledby="import-homonyms"
+            className="grid gap-2 sm:grid-cols-2"
+          >
+            <ChoiceCard
+              selected={sameName === SameNameChoice.skip}
+              label={t("homonyms.skip")}
+              hint={t("homonyms.skipHint")}
+              onSelect={() => onSameName(SameNameChoice.skip)}
+            />
+            <ChoiceCard
+              selected={sameName === SameNameChoice.create}
+              label={t("homonyms.create")}
+              hint={t("homonyms.createHint")}
+              onSelect={() => onSameName(SameNameChoice.create)}
+            />
+          </div>
+          <ul className="divide-y rounded-2xl border text-sm">
+            {homonyms.slice(0, PROBLEM_ROWS).map(({ row, existing }) => (
+              <li
+                key={row.line}
+                className="flex flex-wrap gap-x-3 gap-y-1 px-4 py-2.5"
+              >
+                <span className="w-16 shrink-0 num text-muted-foreground">
+                  {t("line", { line: row.line })}
+                </span>
+                <span className="min-w-0 flex-1 font-medium">
+                  {row.item.name}
+                </span>
+                <a
+                  href={RecordRoutes.item(existing.id)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-muted-foreground underline-offset-4 hover:underline"
+                >
+                  {t("homonyms.existing", {
+                    reference: existing.reference ?? "",
+                    name: existing.name,
+                  })}
+                </a>
+              </li>
+            ))}
+            {homonyms.length > PROBLEM_ROWS && (
+              <li className="px-4 py-2.5 text-muted-foreground">
+                {t("more", { count: homonyms.length - PROBLEM_ROWS })}
               </li>
             )}
           </ul>

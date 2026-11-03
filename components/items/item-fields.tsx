@@ -1,6 +1,12 @@
 "use client"
 
-import { HashIcon, ScanBarcodeIcon, TagIcon } from "lucide-react"
+import {
+  HashIcon,
+  ScanBarcodeIcon,
+  TagIcon,
+  TriangleAlertIcon,
+} from "lucide-react"
+import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form"
@@ -30,7 +36,8 @@ import {
 } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
-import { baseUnits, type Warehouse } from "@/lib/api/stock"
+import { baseUnits, type ExistingItem, type Warehouse } from "@/lib/api/stock"
+import { RecordRoutes } from "@/lib/routes"
 import { cn } from "@/lib/utils"
 
 import type { ItemFormValues } from "./item-form-schema"
@@ -47,10 +54,13 @@ export function ItemIdentityFields({
   form,
   reference,
   autoFocus,
+  sameNameItem,
 }: ItemFormProps & {
   /** Celle de l'article modifié ; absente à la création. */
   reference?: string
   autoFocus?: boolean
+  /** Création : article actif qui porte déjà ce nom (D50). */
+  sameNameItem?: ExistingItem | null
 }) {
   const t = useTranslations()
   const errors = form.formState.errors
@@ -76,6 +86,28 @@ export function ItemIdentityFields({
           </InputGroupAddon>
         </InputGroup>
         <FieldError errors={[errors.name]} />
+        {sameNameItem && (
+          <p
+            role="status"
+            className="flex gap-2 rounded-xl bg-warning-muted/60 p-3 text-sm text-warning-muted-foreground"
+          >
+            <TriangleAlertIcon className="mt-0.5 size-4 shrink-0" aria-hidden />
+            <span>
+              {t("items.form.sameName")}{" "}
+              <Link
+                href={RecordRoutes.item(sameNameItem.id)}
+                target="_blank"
+                className="font-medium underline underline-offset-4"
+              >
+                {sameNameItem.reference
+                  ? `${sameNameItem.reference} · ${sameNameItem.name}`
+                  : sameNameItem.name}
+              </Link>
+              {". "}
+              {t("items.form.sameNameHint")}
+            </span>
+          </p>
+        )}
       </Field>
       {/* Attribuée par l'API à la création, dans l'ordre (D41) : on la montre, sans la saisir. */}
       <Field>

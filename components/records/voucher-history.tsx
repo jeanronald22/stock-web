@@ -27,6 +27,7 @@ export function VoucherHistory({
   allHref,
   empty,
   detail,
+  hrefOf = (voucher) => RecordRoutes.voucher(voucher.id),
 }: {
   title: string
   /** Mémorisée par l'appelant (clé de cache). */
@@ -34,6 +35,8 @@ export function VoucherHistory({
   allHref: string
   empty: string
   detail?: (voucher: VoucherSummary) => React.ReactNode
+  /** Où mène chaque bon : sa fiche, ou un geste qui en part (retour depuis ce bon). */
+  hrefOf?: (voucher: VoucherSummary) => string
 }) {
   const t = useTranslations("records")
   const format = useFormatter()
@@ -56,7 +59,7 @@ export function VoucherHistory({
             {rows.map((voucher) => (
               <li key={voucher.id}>
                 <Link
-                  href={RecordRoutes.voucher(voucher.id)}
+                  href={hrefOf(voucher)}
                   className="flex flex-wrap items-center gap-x-3 gap-y-1 p-3 transition-colors hover:bg-muted/40"
                 >
                   <span className="font-mono font-semibold">

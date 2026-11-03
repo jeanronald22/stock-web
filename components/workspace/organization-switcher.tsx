@@ -36,7 +36,8 @@ export function OrganizationSwitcher() {
         render={
           <Button
             variant="ghost"
-            className="h-10 max-w-64 min-w-0 gap-2 px-2"
+            // Le bouton ne rétrécit pas d'ordinaire : ici le nom s'abrège pour laisser la place au reste de l'en-tête.
+            className="h-10 max-w-64 min-w-0 shrink gap-2 px-2"
             aria-label={t("menu.switchOrganization")}
           />
         }

@@ -35,6 +35,9 @@ export function WarehousesCard({
 }) {
   const t = useTranslations("analysis.warehouses")
   if (warehouses.length < MIN_WAREHOUSES) return null
+  // Comme l'état du stock : « À commander » ne compte pas les ruptures, comptées à part.
+  const toOrder = (warehouse: WarehouseActivity) =>
+    warehouse.alerts - warehouse.out
   const count = (value: number, tone?: string) => (
     <span className={cn("num", value === 0 ? "text-muted-foreground" : tone)}>
       {value === 0 ? "—" : value}
@@ -66,7 +69,7 @@ export function WarehousesCard({
             {(warehouse.alerts > 0 || warehouse.out > 0) && (
               <p className="mt-0.5 num text-sm text-warning-muted-foreground">
                 {t("alertsCompact", {
-                  alerts: warehouse.alerts,
+                  alerts: toOrder(warehouse),
                   out: warehouse.out,
                 })}
               </p>
@@ -110,7 +113,7 @@ export function WarehousesCard({
                 {count(warehouse.damage, "text-destructive")}
               </TableCell>
               <TableCell className="text-right">
-                {count(warehouse.alerts, "text-warning-muted-foreground")}
+                {count(toOrder(warehouse), "text-warning-muted-foreground")}
               </TableCell>
               <TableCell className="pr-0 text-right font-semibold">
                 {count(warehouse.out, "text-destructive")}

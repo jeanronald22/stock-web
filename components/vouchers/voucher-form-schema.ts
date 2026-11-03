@@ -13,6 +13,7 @@ import {
   correctionTypes,
   customerTypes,
   entryDirectionOf,
+  isReturnType,
   OTHER_REASON,
   supplierTypes,
   VoucherLimits,
@@ -21,7 +22,7 @@ import {
   type VoucherInput,
   type VoucherReason,
 } from "@/lib/api/vouchers"
-import { parseQuantity } from "@/lib/forms/quantity"
+import { isNegativeQuantity, parseQuantity } from "@/lib/forms/quantity"
 
 /** Unité d'une ligne : « » pour l'unité de base, sinon le nom d'un conditionnement de l'article. */
 export const BASE_UNIT_CHOICE = ""
@@ -30,14 +31,21 @@ export type VoucherFormMessages = {
   required: string
   tooLong: (max: number) => string
   invalidNumber: string
+  negative: string
   positive: string
   wholeNumber: string
   batchRequired: string
   linesRequired: string
   futureDate: string
+  /** Date avant la limite d'antidatage (D50). */
+  tooOld: string
   reasonRequired: string
   noteRequired: string
   exceedsOrigin: string
+  /** Retour sans bon d'origine (D50). */
+  customerRequired: string
+  supplierRequired: string
+  returnNoteRequired: string
 }
 
 /** Copie de l'article choisi, pour convertir et vérifier la saisie sans relire l'API. */
@@ -49,12 +57,16 @@ const itemSnapshot = z.object({
   packagings: z.custom<Packaging[]>(),
   /** Emplacement habituel par dépôt (D37) : où prendre ou ranger l'article. */
   locations: z.custom<Record<string, LocationRef>>(),
+  /** Dépôts où l'article est proposé ; absent d'une saisie gardée avant qu'on les retienne. */
+  warehouseIds: z.array(z.string()).optional(),
 })
 
+/** [earliest] : premier jour permis (AAAA-MM-JJ), undefined sans limite (gérant). */
 export function voucherFormSchema(
   messages: VoucherFormMessages,
   today: string,
-  type: EntryType
+  type: EntryType,
+  earliest?: string
 ) {
   const transfer = type === VoucherType.transferOut
   const correction = correctionTypes.has(type)
@@ -107,7 +119,8 @@ export function voucherFormSchema(
       // Date du dépôt (AAAA-MM-JJ), comparable en texte.
       occurredOn: z
         .string()
-        .refine((date) => date <= today, messages.futureDate),
+        .refine((date) => date <= today, messages.futureDate)
+        .refine((date) => !earliest || date >= earliest, messages.tooOld),
     })
     .superRefine((values, context) => {
       if (transfer && !values.destinationWarehouseId)
@@ -128,6 +141,31 @@ export function voucherFormSchema(
           path: ["note"],
           message: messages.noteRequired,
         })
+      // Retour sans bon d'origine (D50) : rien ne prouve la sortie ou l'entrée, il faut le tiers et la raison.
+      if (isReturnType(type) && !values.originId) {
+        if (
+          type === VoucherType.customerReturn &&
+          !values.customer &&
+          !values.counterparty.trim()
+        )
+          context.addIssue({
+            code: "custom",
+            path: ["customer"],
+            message: messages.customerRequired,
+          })
+        if (type === VoucherType.supplierReturn && !values.supplier)
+          context.addIssue({
+            code: "custom",
+            path: ["supplier"],
+            message: messages.supplierRequired,
+          })
+        if (!values.note.trim())
+          context.addIssue({
+            code: "custom",
+            path: ["note"],
+            message: messages.returnNoteRequired,
+          })
+      }
       values.lines.forEach((line, index) => {
         const issue = (
           field: "quantity" | "batch" | "expected",
@@ -138,8 +176,11 @@ export function voucherFormSchema(
             path: ["lines", index, field],
             message,
           })
+        const unreadable = (text: string) =>
+          isNegativeQuantity(text) ? messages.negative : messages.invalidNumber
         const entered = parseQuantity(line.quantity)
-        if (entered === null) return issue("quantity", messages.invalidNumber)
+        if (entered === null)
+          return issue("quantity", unreadable(line.quantity))
         if (entered <= 0 && !(zeroAllowed && entered === 0))
           return issue("quantity", messages.positive)
         const whole = (value: number) =>
@@ -153,7 +194,7 @@ export function voucherFormSchema(
           issue("quantity", messages.exceedsOrigin)
         if (line.expected.trim()) {
           const expected = parseQuantity(line.expected)
-          if (expected === null) issue("expected", messages.invalidNumber)
+          if (expected === null) issue("expected", unreadable(line.expected))
           else if (!whole(expected)) issue("expected", messages.wholeNumber)
         }
         if (line.item.batchTracking && !line.batch.trim())
@@ -202,6 +243,7 @@ export function newLine(
       baseUnit: item.baseUnit,
       batchTracking: item.batchTracking,
       packagings: item.packagings,
+      warehouseIds: item.warehouses.map((placement) => placement.warehouseId),
       locations: Object.fromEntries(
         item.warehouses.flatMap((placement) =>
           placement.location

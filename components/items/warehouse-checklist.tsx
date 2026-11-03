@@ -110,7 +110,7 @@ export function WarehouseChecklist({
             <li
               key={warehouse.id}
               className={cn(
-                "rounded-xl border transition-colors",
+                "@container rounded-xl border transition-colors",
                 checked ? "border-primary bg-primary/5" : "hover:bg-muted/40"
               )}
             >
@@ -132,7 +132,8 @@ export function WarehouseChecklist({
                 </span>
               </label>
               {checked && (
-                <div className="grid grid-cols-2 gap-2 px-3 pb-3">
+                // Carte étroite : les deux seuils l'un sous l'autre, pour qu'une quantité à quatre chiffres et son unité restent lisibles.
+                <div className="grid gap-2 px-3 pb-3 @sm:grid-cols-2">
                   <QuantityInput
                     id={`min-quantity-${warehouse.id}`}
                     icon={BellIcon}

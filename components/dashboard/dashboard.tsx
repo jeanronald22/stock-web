@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils"
 import { ReceivedInvitations } from "@/components/organizations/received-invitations"
 import { useMe } from "@/lib/api/platform-queries"
 
-import { ManagerBoard } from "./manager-board"
+import { ManagerBoard, ReportsLink } from "./manager-board"
 import { RequestsCard } from "./requests-card"
 import { StockAlertsCard } from "./stock-alerts-card"
 import { StorekeeperOverview } from "./storekeeper-overview"
@@ -136,16 +136,19 @@ export function Dashboard() {
             {t("dashboard.greeting", { name: user.firstName ?? "" })}
           </p>
         </div>
-        {scoped && warehouses.data && warehouses.data.length > 0 && (
-          <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <WarehouseIcon className="size-4" aria-hidden />
-            {t("dashboard.scope", {
-              warehouses: warehouses.data
-                .map((warehouse) => warehouse.name)
-                .join(" · "),
-            })}
-          </p>
-        )}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          {scoped && warehouses.data && warehouses.data.length > 0 && (
+            <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <WarehouseIcon className="size-4" aria-hidden />
+              {t("dashboard.scope", {
+                warehouses: warehouses.data
+                  .map((warehouse) => warehouse.name)
+                  .join(" · "),
+              })}
+            </p>
+          )}
+          {board && <ReportsLink />}
+        </div>
       </div>
 
       {invitations.length > 0 && me.data && (

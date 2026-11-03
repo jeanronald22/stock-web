@@ -89,7 +89,9 @@
     "wholeNumber": "Un nombre entier de pièces.",
     "invalidNumber": "Indiquez un nombre, par exemple 12 ou 1,44.",
     "duplicateName": "Deux conditionnements portent ce nom.",
-    "email": "Cette adresse e-mail ne semble pas complète."
+    "email": "Cette adresse e-mail ne semble pas complète.",
+    "phone": "Indiquez un numéro de téléphone complet, par exemple 6 99 12 34 56.",
+    "negative": "Le nombre doit être positif."
   },
   "welcome": {
     "exit": "Quitter",
@@ -156,8 +158,8 @@
   },
   "dashboard": {
     "greeting": "Bonjour {name}, voici où en sont vos dépôts.",
-    "readyTitle": "Tout est en place",
-    "readyDescription": "Deux étapes pour démarrer : vos lieux de stock, puis vos articles.",
+    "readyTitle": "Votre espace est créé",
+    "readyDescription": "Pour démarrer : vos lieux de stock, vos articles, puis une première réception.",
     "steps": {
       "products": {
         "title": "Créer vos articles",
@@ -250,7 +252,7 @@
       },
       "stockState": {
         "title": "État du stock",
-        "description": "Articles suivis dans ces dépôts, aujourd’hui.",
+        "description": "Articles suivis dans ces dépôts, aujourd’hui. Les ruptures ne comptent pas dans « À commander ».",
         "seeAll": "Voir le stock",
         "center": "{count, plural, one {article} other {articles}}",
         "ok": "Stock suffisant",
@@ -272,7 +274,8 @@
         "description": "{count, plural, =0 {Aucun bon} one {# bon au total} other {# bons au total}}",
         "seeAll": "Rapports",
         "empty": "Aucun bon sur la période."
-      }
+      },
+      "reports": "Rapports"
     }
   },
   "menu": {
@@ -582,7 +585,9 @@
       "maxQuantity": "Stock maximum",
       "maxQuantityPlaceholder": "Aucun",
       "maxQuantityHint": "Stock maximum : au-dessus, le propriétaire et les gérants sont prévenus d’un surstock. Vide : pas de maximum.",
-      "maxQuantityAboveMin": "Le stock maximum doit dépasser le seuil d’alerte."
+      "maxQuantityAboveMin": "Le stock maximum doit dépasser le seuil d’alerte.",
+      "sameName": "Un article porte déjà ce nom :",
+      "sameNameHint": "Vérifiez qu’il ne s’agit pas du même ; sinon, distinguez-les par leur nom. Vous pouvez quand même continuer."
     },
     "created": "Article créé.",
     "saved": "Article enregistré.",
@@ -614,7 +619,7 @@
       },
       "warehouses": {
         "title": "Où le proposez-vous ?",
-        "description": "Cochez seulement les dépôts concernés."
+        "description": "Cochez les dépôts concernés. Une réception dans un autre dépôt l’y ajoutera."
       },
       "photo": {
         "title": "Une photo de l’article ?",
@@ -959,7 +964,9 @@
       "mixedShades": "{name} : {count} nuances différentes sur ce bon.",
       "mixedCalibers": "{name} : {count} calibres différents sur ce bon.",
       "mixedConsequence": "Le client risque de le voir à la pose : préférez un seul lot si possible.",
-      "expiresOn": "Périme le"
+      "expiresOn": "Périme le",
+      "tooOld": "{days, plural, =0 {Le bon se date du jour même. Au-delà, demandez à un gérant.} one {Au plus # jour en arrière. Au-delà, demandez à un gérant.} other {Au plus # jours en arrière. Au-delà, demandez à un gérant.}}",
+      "notOffered": "Pas encore proposé dans ce dépôt : il le sera à la validation."
     },
     "entry": {
       "see": "Voir le bon",
@@ -1067,10 +1074,9 @@
       "action": "Réceptionner",
       "title": "Réceptionner {number}",
       "crumb": "Réception",
-      "description": "De {source} vers {destination}. Indiquez ce qui est réellement arrivé : un écart reste visible sur les deux bons.",
+      "description": "De {source} vers {destination}. Indiquez ce qui est réellement arrivé, sans dépasser l’envoi : un manque reste visible sur les deux bons.",
       "sent": "Envoyé : {quantity}",
       "received": "Quantité reçue",
-      "gap": "{direction, select, missing {Manque : {quantity}} other {En trop : {quantity}}}",
       "date": "Date de réception",
       "notePlaceholder": "Carton abîmé, colis manquant…",
       "beforeSent": "La réception ne peut pas précéder l’envoi.",
@@ -1079,7 +1085,9 @@
       "unavailable": {
         "title": "Réception impossible",
         "description": "Ce transfert est déjà réceptionné, ou il n’arrive pas dans un de vos dépôts."
-      }
+      },
+      "missing": "Manque : {quantity}",
+      "exceedsSent": "Au plus {quantity} : on ne reçoit pas plus que l’envoi. S’il est arrivé davantage, faites corriger le stock par un ajustement."
     },
     "otherOperation": "Autre opération",
     "operations": {
@@ -1159,10 +1167,43 @@
       "action": {
         "CUSTOMER_RETURN": "Enregistrer un retour",
         "SUPPLIER_RETURN": "Renvoyer au fournisseur"
+      },
+      "customerRequired": "Sans sortie d’origine, indiquez le client ou le chantier.",
+      "supplierRequired": "Sans réception d’origine, indiquez le fournisseur.",
+      "noteRequired": "Sans bon d’origine, expliquez le retour (facture, motif).",
+      "notePlaceholder": "N° de facture, motif du retour",
+      "pick": {
+        "start": "Retour depuis ce bon",
+        "required": "Un retour client part de la sortie concernée : le client et ce qui peut revenir sont repris. Sans sortie, demandez à un responsable du dépôt de l’enregistrer.",
+        "CUSTOMER_RETURN": {
+          "latest": "Dernières sorties",
+          "ofParty": "Sorties de {name} : partez-en si le retour en vient",
+          "none": "Aucune sortie à retourner."
+        },
+        "SUPPLIER_RETURN": {
+          "latest": "Dernières réceptions",
+          "ofParty": "Réceptions de {name} : partez-en si le retour en vient",
+          "none": "Aucune réception de ce fournisseur."
+        }
       }
     },
     "allKinds": "Tous",
-    "kindsLabel": "Type de bon"
+    "kindsLabel": "Type de bon",
+    "review": {
+      "title": "Vérifier avant de valider",
+      "description": "Un bon validé ne se modifie plus : une erreur se corrige ensuite par un autre bon.",
+      "backdated": "Bon daté du {date}, avant aujourd’hui.",
+      "cancel": "Revenir au bon",
+      "confirm": "Valider quand même",
+      "deliveryNote": {
+        "gaps": "{count, plural, one {# ligne diffère du bon de livraison :} other {# lignes diffèrent du bon de livraison :}}",
+        "gap": "{name} : reçu {received}, annoncé {announced}"
+      },
+      "transfer": {
+        "gaps": "{count, plural, one {# ligne n’est pas arrivée en entier :} other {# lignes ne sont pas arrivées en entier :}}",
+        "gap": "{name} : reçu {received}, envoyé {announced}"
+      }
+    }
   },
   "stock": {
     "title": "Stock",
@@ -1819,7 +1860,9 @@
       "submit": "Enregistrer le comptage",
       "done": "{name} compté."
     },
-    "scan": "Scanner un article"
+    "scan": "Scanner un article",
+    "closedBy": "Clôturé par {name}, le {date}.",
+    "seeAdjustment": "Voir le bon d’ajustement {number}"
   },
   "requests": {
     "title": "Demandes",
@@ -2135,7 +2178,8 @@
       "stats": {
         "ready": "Prêts à importer",
         "blocked": "À corriger",
-        "categories": "Nouvelles catégories"
+        "categories": "Nouvelles catégories",
+        "homonyms": "Déjà au catalogue"
       },
       "opening": "{count, plural, one {# article arrive} other {# articles arrivent}} avec leur stock, posé dans {warehouse}.",
       "line": "Ligne {line}",
@@ -2170,7 +2214,18 @@
         "descriptionTooLong": "description trop longue (500 caractères au plus)",
         "stockInvalid": "stock illisible (nombre entier pour des pièces)",
         "batchMissing": "lot manquant pour un article suivi par lot",
-        "batchTooLong": "lot trop long (60 caractères au plus)"
+        "batchTooLong": "lot trop long (60 caractères au plus)",
+        "nameDuplicate": "nom déjà vu plus haut dans le fichier",
+        "barcodeTaken": "un article du catalogue a déjà ce code-barres"
+      },
+      "homonyms": {
+        "title": "Déjà au catalogue",
+        "description": "Un article actif porte déjà le nom de ces lignes. Deux articles du même nom se confondent dans les recherches et sur les bons.",
+        "skip": "Les laisser de côté",
+        "skipHint": "Recommandé : l’article existant est gardé tel quel.",
+        "create": "Les créer quand même",
+        "createHint": "Pour deux articles vraiment différents : pensez à les distinguer par leur nom.",
+        "existing": "{reference} · {name}"
       }
     },
     "result": {
@@ -2200,7 +2255,8 @@
       "accessDenied": "vous n’avez pas ce droit dans ce dépôt",
       "batchRequired": "lot manquant pour un article suivi par lot",
       "quantityNotWhole": "quantité non entière pour un article compté à la pièce",
-      "other": "refusé par l’application"
+      "other": "refusé par l’application",
+      "nameTaken": "un article du catalogue porte déjà ce nom"
     },
     "templateSheet": "Articles"
   },
@@ -2407,7 +2463,7 @@
     },
     "warehouses": {
       "title": "Par dépôt",
-      "description": "Bons de la période, seuils d’aujourd’hui.",
+      "description": "Bons de la période, seuils d’aujourd’hui. « À commander » compte les articles au seuil ; les ruptures sont à part.",
       "columns": {
         "warehouse": "Dépôt",
         "inbound": "Entrées",
@@ -2566,7 +2622,15 @@
       "issueApproval": "Les sorties des magasiniers passent par une validation",
       "issueApprovalWho": "Coupée, les magasiniers sortent directement ; chaque sortie reste enregistrée à leur nom.",
       "enabled": "Les sorties des magasiniers seront validées.",
-      "disabled": "Les magasiniers sortent à nouveau directement."
+      "disabled": "Les magasiniers sortent à nouveau directement.",
+      "backdateTitle": "Date des bons",
+      "backdateHint": "Un bon antidaté change l’historique et les rapports déjà consultés. Limitez le retard permis pour saisir un bon après coup.",
+      "backdateLabel": "Antidater au plus de",
+      "backdateUnit": "jours",
+      "backdateWho": "0 : seulement le jour même. Un gérant peut aller au-delà. Aucun bon ne se date avant l’entrée du dépôt ou de l’article dans Kreskala.",
+      "backdateInvalid": "Un nombre entier de {min} à {max}.",
+      "backdateSave": "Enregistrer",
+      "backdateSaved": "{days, plural, =0 {Les bons se datent désormais du jour même.} one {Les bons se datent désormais au plus # jour en arrière.} other {Les bons se datent désormais au plus # jours en arrière.}}"
     },
     "alerts": {
       "description": "Vérifiées chaque heure. Quand une alerte apparaît, le propriétaire et les gérants sont prévenus dans l’application et par e-mail, une seule fois.",

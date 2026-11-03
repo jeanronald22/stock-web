@@ -53,6 +53,8 @@ export const DECISION_NOTE_MAX = 500
 export type StockSettings = {
   /** Les sorties des magasiniers passent par une validation. */
   issueApproval: boolean
+  /** Un bon se date au plus tant de jours en arrière, sauf par un gérant (D50). */
+  backdateDays: number
 }
 
 export type RequestSummary = {
@@ -104,7 +106,8 @@ export const requestApi = (send: ApiClient) => {
         method: "GET",
         path: RequestPaths.settings,
       }),
-    saveSettings: (settings: StockSettings) =>
+    /** Une règle absente garde sa valeur. */
+    saveSettings: (settings: Partial<StockSettings>) =>
       send<StockSettings>({
         ...scoped,
         method: "PUT",

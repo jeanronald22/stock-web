@@ -1,9 +1,10 @@
 import {
   BARCODE_PATTERN,
+  nameKey,
   StockLimits,
   wholeQuantityUnits,
   type BaseUnit,
-  type ItemInput,
+  type NewItemInput,
 } from "@/lib/api/stock"
 import { parseQuantity } from "@/lib/forms/quantity"
 
@@ -20,8 +21,12 @@ import { cellText, isBlank, type Table, type TableCell } from "./read-table"
 export const RowProblem = {
   nameMissing: "nameMissing",
   nameTooLong: "nameTooLong",
+  /** Même nom qu'une ligne plus haut dans le fichier (D50). */
+  nameDuplicate: "nameDuplicate",
   barcodeInvalid: "barcodeInvalid",
   barcodeDuplicate: "barcodeDuplicate",
+  /** Code-barres déjà porté par un article du catalogue (vérifié avant l'import). */
+  barcodeTaken: "barcodeTaken",
   unitUnknown: "unitUnknown",
   categoryTooLong: "categoryTooLong",
   packagingIncomplete: "packagingIncomplete",
@@ -43,7 +48,7 @@ export type PreparedRow = {
   cells: TableCell[]
   problems: RowProblem[]
   /** Identifiant choisi ici : renvoyé après une coupure, l'article n'est pas créé deux fois. */
-  item: ItemInput & { id: string }
+  item: NewItemInput
   /** Catégorie et ses parents, à retrouver ou créer avant l'import ; vide sans catégorie. */
   categoryPath: string[]
   /** Stock présent, en unité de base ; null sans stock de départ. */
@@ -73,9 +78,8 @@ function quantityOf(cell: TableCell): number | null {
 }
 
 /**
- * Lignes du fichier contrôlées avec les mêmes règles que l'API ; une référence ou un code-barres
- * déjà vu plus haut dans le fichier est un doublon. Les refus du serveur (déjà pris dans le
- * catalogue) viendront au bilan.
+ * Lignes du fichier contrôlées avec les mêmes règles que l'API ; un nom ou un code-barres déjà vu
+ * plus haut dans le fichier est un doublon. La comparaison au catalogue vient ensuite (D50).
  */
 export function prepareRows(
   table: Table,
@@ -83,6 +87,7 @@ export function prepareRows(
   context: PrepareContext
 ): PreparedRow[] {
   const barcodes = new Set<string>()
+  const names = new Set<string>()
   return table.rows.map((cells, index) => {
     const problems: RowProblem[] = []
     const cell = (field: ImportField): TableCell => {
@@ -96,6 +101,9 @@ export function prepareRows(
     if (!name) problems.push(RowProblem.nameMissing)
     else if (name.length > StockLimits.name)
       problems.push(RowProblem.nameTooLong)
+    if (name && names.has(nameKey(name)))
+      problems.push(RowProblem.nameDuplicate)
+    if (name) names.add(nameKey(name))
 
     const barcode = text(ImportField.barcode)
     if (barcode && !BARCODE_PATTERN.test(barcode))

@@ -55,6 +55,7 @@ export function useItemForm(
         required: t("validation.required"),
         tooLong: (max) => t("validation.tooLong", { max }),
         invalidNumber: t("validation.invalidNumber"),
+        negative: t("validation.negative"),
         positive: t("validation.positive"),
         wholeNumber: t("validation.wholeNumber"),
         maximumAboveMinimum: t("items.form.maxQuantityAboveMin"),
@@ -68,12 +69,17 @@ export function useItemForm(
     },
   })
 
-  const submit = async (values: ItemFormValues): Promise<boolean> => {
+  /** [allowSameName] : la personne a été prévenue qu'un article actif porte ce nom (D50). */
+  const submit = async (
+    values: ItemFormValues,
+    allowSameName = false
+  ): Promise<boolean> => {
     try {
       await save.mutateAsync({
         id,
         version: item?.version,
         input: toItemInput(values),
+        allowSameName,
       })
       return true
     } catch (error) {
@@ -82,6 +88,7 @@ export function useItemForm(
         error,
         {
           [ProblemCode.itemBarcodeTaken]: "barcode",
+          [ProblemCode.itemNameTaken]: "name",
           [ProblemCode.warehouseUnavailable]: "warehouses",
           [ProblemCode.categoryUnavailable]: "categoryId",
           [ProblemCode.baseUnitLocked]: "baseUnit",

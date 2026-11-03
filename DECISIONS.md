@@ -568,3 +568,19 @@ Constat en recette : le propriétaire ne savait rien des bons validés par son �
 - **Pas d'avis** pour ses propres bons, ni pour les transferts, qui le préviennent déjà (D27). Les alertes (seuil, écart, alertes paramétrables) restent des avis distincts : le journal dit ce qui s'est passé, l'alerte ce qu'il faut faire.
 - **Qui** : le propriétaire seulement ; l'ouvrir aux gérants demandera de pouvoir couper aussi l'avis dans l'application.
 
+
+## D50. Corrections après l'audit de recette (2026-11-03)
+
+L'audit de recette (`kreskala-audit.md`, bugs 1 à 19) relève des bons qui faussent le stock et des écrans qui égarent. Complète D21, D27, D31, D33 et D43.
+
+- **Réception d'un transfert** : jamais plus que l'envoi, ligne par ligne ; l'API refuse (`transfer-received-exceeds-sent`) et l'écran le dit sous la ligne. Seul ce qui manque est signalé.
+- **Date des bons** : au plus 7 jours en arrière par défaut, réglable de 0 à 365 jours par le propriétaire et les administrateurs (« Paramètres › Règles de travail ») ; un gérant peut aller au-delà. Jamais avant le jour, dans le fuseau des dépôts, où le dépôt ou l'article est entré dans l'application. La clôture de période n'est pas faite.
+- **Retours sans bon d'origine** : le client ou le fournisseur est exigé, avec une raison dans la note. Un retour client libre est réservé à qui peut corriger le stock du dépôt ; les autres partent de la sortie d'origine, proposée à l'écran.
+- **Articles du même nom** : les noms se comparent sans la casse ni les espaces en trop, parmi les articles actifs. Créer un deuxième article du même nom demande une confirmation (`allowSameName`) ; la saisie prévient dès que le nom est tapé. L'import repère les doublons dans le fichier et au catalogue (nom ou code-barres) et propose « ignorer » ou « créer quand même » ; « mettre à jour l'article existant » n'est pas fait.
+- **Écart** : sur l'historique d'un article, le badge ne vaut que pour sa ligne du bon.
+- **Téléphones** des fournisseurs et clients : vérifiés selon le pays de l'entreprise (au Cameroun, +237 et 9 chiffres ; un numéro étranger, sous sa forme internationale), et gardés tels que saisis. Un numéro saisi avant la règle ne bloque pas la modification du reste de la fiche.
+- **Validation d'un bon** : un écart avec le bon de livraison, une perte en route sur un transfert ou une date antérieure à aujourd'hui demandent une confirmation, le bon ne se modifiant plus. Après validation, un rappel reste à l'écran avec le lien vers le bon, jusqu'au suivant.
+- **Réception dans un dépôt où l'article n'est pas proposé** : permise (D21), mais la ligne le dit avant validation.
+- **Rapports** : toujours sans entrée de menu (D43) ; un bouton « Rapports » en tête du tableau de bord, avec les filtres en cours.
+- **« À commander »** compte les articles au seuil, sans les ruptures, partout sur le tableau de bord ; les cartes le précisent.
+- **Démarrage** : l'application part de la dernière configuration reçue et la relit en arrière-plan, au lieu de l'attendre à chaque rechargement.

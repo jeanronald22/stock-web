@@ -17,12 +17,14 @@ import {
 import { isProblem, ProblemCode } from "@/lib/api/problem"
 import { useErrorMessage } from "@/lib/api/use-error-message"
 import { applyServerErrors } from "@/lib/forms/apply-server-errors"
+import { looksLikePhone } from "@/lib/forms/phone"
 import { applyProblemToField } from "@/lib/forms/problem-fields"
 
 const FIELDS = ["kind", "name", "phone", "address", "note"] as const
 
 function customerSchema(messages: {
   required: string
+  phone: string
   tooLong: (max: number) => string
 }) {
   const text = (max: number) =>
@@ -30,7 +32,10 @@ function customerSchema(messages: {
   return z.object({
     kind: z.enum(customerKinds),
     name: text(CustomerLimits.name).min(1, messages.required),
-    phone: text(CustomerLimits.phone),
+    phone: text(CustomerLimits.phone).refine(
+      (value) => !value || looksLikePhone(value),
+      messages.phone
+    ),
     address: text(CustomerLimits.address),
     note: text(CustomerLimits.note),
   })
@@ -57,6 +62,7 @@ export function useCustomerForm(
     resolver: zodResolver(
       customerSchema({
         required: t("validation.required"),
+        phone: t("validation.phone"),
         tooLong: (max) => t("validation.tooLong", { max }),
       })
     ),
@@ -92,7 +98,10 @@ export function useCustomerForm(
       if (
         applyProblemToField(
           error,
-          { [ProblemCode.customerNameTaken]: "name" },
+          {
+            [ProblemCode.customerNameTaken]: "name",
+            [ProblemCode.phoneInvalid]: "phone",
+          },
           form.setError
         )
       )

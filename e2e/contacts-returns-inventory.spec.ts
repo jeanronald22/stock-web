@@ -82,7 +82,7 @@ test("un chantier se crée dans Contacts, reçoit une sortie, puis rapporte une 
   await expect(page.getByText(`Sortie SOR-${year}-0001 validée.`)).toBeVisible()
 
   // Retour depuis la sortie : la ligne est proposée avec ce qui reste.
-  await page.getByRole("button", { name: "Voir le bon" }).click()
+  await page.getByRole("link", { name: "Voir le bon" }).click()
   await page.getByRole("button", { name: /^Actions du bon SOR-/ }).click()
   await page.getByRole("menuitem", { name: "Enregistrer un retour" }).click()
   await expect(

@@ -31,6 +31,7 @@ export const StockPaths = {
   itemBarcodes: "/v1/items/barcodes",
   /** Import du catalogue par paquets, avec le stock de départ (D36). */
   itemImport: "/v1/items/import",
+  itemMatches: "/v1/items/matches",
   myAccess: "/v1/stock/access/me",
   access: "/v1/stock/access",
   memberAccess: (subject: string) => `/v1/stock/access/members/${subject}`,
@@ -73,6 +74,8 @@ export const StockLimits = {
   pageSize: 50,
   /** Articles par paquet (import, codes-barres ; stock-api, StockLimits.ITEMS_PER_BATCH). */
   itemsPerBatch: 100,
+  /** Noms ou codes-barres comparés au catalogue en une fois (stock-api, ITEMS_PER_MATCH). */
+  itemsPerMatch: 1000,
 } as const
 
 export const catalogStatuses = ["ACTIVE", "ARCHIVED"] as const
@@ -291,11 +294,38 @@ export type ItemInput = {
 }
 
 /**
+ * Article à créer : [allowSameName] confirme sa création alors qu'un article actif porte déjà ce
+ * nom (D50) ; sans lui, l'API refuse (item-name-taken).
+ */
+export type NewItemInput = ItemInput & { id: string; allowSameName?: boolean }
+
+/** Article actif qui porte déjà ce nom ou ce code-barres (D50). */
+export type ExistingItem = {
+  id: string
+  name: string
+  reference: string | null
+}
+
+export type ItemMatches = {
+  /** [name] : le nom tel qu'il a été envoyé. */
+  names: { name: string; item: ExistingItem }[]
+  barcodes: { barcode: string; item: ExistingItem }[]
+}
+
+/**
+ * Clé de comparaison des noms : sans la casse ni les espaces en trop, comme l'API (stock-api,
+ * ItemNameMatcher). Sert à repérer les doublons à l'intérieur d'un fichier d'import.
+ */
+export function nameKey(name: string): string {
+  return name.trim().replace(/\s+/g, " ").toLowerCase()
+}
+
+/**
  * Paquet d'import (D36) : articles à créer (identifiants choisis par l'application) et leur stock de
  * départ dans un dépôt, en unité de base. Renvoyé après une coupure, il ne crée rien deux fois.
  */
 export type ImportBatch = {
-  items: (ItemInput & { id: string })[]
+  items: NewItemInput[]
   opening?: {
     voucherId: string
     warehouseId: string
@@ -431,12 +461,20 @@ export const stockApi = (send: ApiClient) => {
       }),
     item: (id: string) =>
       send<Item>({ ...scoped, method: "GET", path: StockPaths.item(id) }),
-    createItem: (id: string, input: ItemInput) =>
+    createItem: (id: string, input: ItemInput, allowSameName = false) =>
       send<Item>({
         ...scoped,
         method: "POST",
         path: StockPaths.items,
-        body: { id, ...input },
+        body: { id, ...input, allowSameName },
+      }),
+    /** Noms et codes-barres déjà au catalogue, [StockLimits.itemsPerMatch] au plus de chaque. */
+    itemMatches: (names: string[], barcodes: string[]) =>
+      send<ItemMatches>({
+        ...scoped,
+        method: "POST",
+        path: StockPaths.itemMatches,
+        body: { names, barcodes },
       }),
     updateItem: (id: string, version: number, input: ItemInput) =>
       send<Item>({

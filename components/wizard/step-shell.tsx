@@ -51,6 +51,11 @@ export function StepShell({
 }: StepShellProps) {
   const t = useTranslations()
   const progress = Math.round((step / totalSteps) * 100)
+  // Une seule étape : « Étape 1 sur 1 » ne dirait rien.
+  const counter =
+    totalSteps > 1
+      ? t("welcome.step", { current: step, total: totalSteps })
+      : undefined
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
@@ -104,7 +109,8 @@ export function StepShell({
       >
         <Progress
           value={progress}
-          aria-label={t("welcome.step", { current: step, total: totalSteps })}
+          aria-label={counter}
+          aria-hidden={!counter}
           className="**:data-[slot=progress-track]:h-1 **:data-[slot=progress-track]:rounded-none"
         />
         <div className="mx-auto flex h-20 max-w-5xl items-center justify-between gap-4 px-4 sm:px-8">
@@ -117,9 +123,7 @@ export function StepShell({
               {t("common.back")}
             </button>
           ) : (
-            <span className="text-sm text-muted-foreground">
-              {t("welcome.step", { current: step, total: totalSteps })}
-            </span>
+            <span className="text-sm text-muted-foreground">{counter}</span>
           )}
           <Button
             type="submit"

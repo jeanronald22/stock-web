@@ -126,7 +126,8 @@ function ThresholdRow({
     const id = `${field}-threshold-${placement.warehouseId}`
     const Icon = field === "min" ? BellIcon : ChevronsUpIcon
     return (
-      <div className="min-w-0 flex-1">
+      // Assez large pour une quantité à quatre chiffres et son unité ; sinon, passe à la ligne.
+      <div className="min-w-36 flex-1">
         <label
           htmlFor={id}
           className="mb-1 flex items-center gap-1.5 text-xs font-medium text-muted-foreground"
@@ -162,7 +163,7 @@ function ThresholdRow({
   return (
     <li className="rounded-xl border p-3">
       <p className="mb-2 text-sm font-medium">{warehouseName}</p>
-      <div className="flex items-end gap-2">
+      <div className="flex flex-wrap items-end gap-2">
         {input("min", minimum, minimumInvalid, setMinimum)}
         {input("max", maximum, maximumInvalid, setMaximum)}
         <Button
