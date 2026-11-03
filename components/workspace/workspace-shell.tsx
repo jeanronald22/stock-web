@@ -14,7 +14,8 @@ export function WorkspaceShell({ children }: { children: React.ReactNode }) {
       <StockAccessProvider>
         <SidebarProvider>
           <AppSidebar />
-          <SidebarInset>
+          {/* Sans min-w-0, un contenu large (bandeau, tableau) élargirait la page au lieu de passer à la ligne. */}
+          <SidebarInset className="min-w-0">
             <WorkspaceHeader />
             <div className="flex flex-1 flex-col">{children}</div>
           </SidebarInset>

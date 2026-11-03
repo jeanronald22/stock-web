@@ -91,6 +91,12 @@ test("transfert : envoyé d'un dépôt, en route, réceptionné à l'arrivée av
   await expect(page.getByText("Manque : 2 m")).toBeVisible()
   await shot(page, testInfo, "02-reception")
   await page.getByRole("button", { name: "Valider la réception" }).click()
+  // Une perte en route se confirme : la réception ne se modifiera plus (D50).
+  const review = page.getByRole("alertdialog")
+  await expect(
+    review.getByText("Câble 2,5 mm² : reçu 28 m, envoyé 30 m")
+  ).toBeVisible()
+  await review.getByRole("button", { name: "Valider quand même" }).click()
   await expect(
     page.getByRole("heading", { name: `TRE-${year}-0001` })
   ).toBeVisible()

@@ -3,9 +3,11 @@
 import {
   ArrowDownToLineIcon,
   ArrowUpFromLineIcon,
+  ChartColumnIcon,
   PackageXIcon,
   ScaleIcon,
 } from "lucide-react"
+import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 
@@ -19,6 +21,7 @@ import {
 } from "@/components/reports/report-parts"
 import { ReportFilters } from "@/components/reports/reports-shell"
 import { useReportSearch } from "@/components/reports/use-report-search"
+import { buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useActivityAnalysis } from "@/lib/api/report-queries"
 import type { ActivityAnalysis } from "@/lib/api/reports"
@@ -54,19 +57,40 @@ import {
  * l'activité de la période, l'état du stock, les sorties, la qualité et l'équipe, filtrés par
  * dépôt, article et période. Chaque carte ouvre le rapport ou la liste qui en donne le détail.
  */
-export function ManagerBoard() {
-  const errorMessage = useErrorMessage()
+/** Les rapports reprennent les filtres du tableau ; la période y est toujours écrite. */
+function useReportQuery(): string {
   const report = useReportSearch()
-  const domains = useBoardDomains()
   const params = useSearchParams()
-  const analysis = useActivityAnalysis(report.search)
-
-  // Les rapports et le stock reprennent les filtres du tableau ; la période y est toujours écrite.
   const reportParams = new URLSearchParams(params)
   reportParams.delete(ListQueryParams.domain)
   reportParams.set(ListQueryParams.from, report.period.from)
   reportParams.set(ListQueryParams.to, report.period.to)
-  const reportQuery = reportParams.toString()
+  return reportParams.toString()
+}
+
+/**
+ * Accès direct aux rapports, en tête du tableau de bord : ils n'ont pas d'entrée de menu (D43),
+ * et les cartes qui y mènent ne se devinent pas toutes.
+ */
+export function ReportsLink() {
+  const t = useTranslations("dashboard.board")
+  return (
+    <Link
+      href={`${Routes.reports}?${useReportQuery()}`}
+      className={buttonVariants({ variant: "outline" })}
+    >
+      <ChartColumnIcon />
+      {t("reports")}
+    </Link>
+  )
+}
+
+export function ManagerBoard() {
+  const errorMessage = useErrorMessage()
+  const report = useReportSearch()
+  const domains = useBoardDomains()
+  const analysis = useActivityAnalysis(report.search)
+  const reportQuery = useReportQuery()
   const warehouseQuery = report.warehouseIds
     .map((id) => `${ListQueryParams.warehouse}=${encodeURIComponent(id)}`)
     .join("&")

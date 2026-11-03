@@ -81,6 +81,10 @@ export const returnOrigins = {
 } as const satisfies Partial<Record<VoucherType, VoucherType>>
 export type ReturnVoucherType = keyof typeof returnOrigins
 
+export function isReturnType(type: VoucherType): type is ReturnVoucherType {
+  return type in returnOrigins
+}
+
 /** Le retour qui part d'un bon de ce type, s'il y en a un. */
 export function returnTypeOf(type: VoucherType): ReturnVoucherType | undefined {
   return (Object.keys(returnOrigins) as ReturnVoucherType[]).find(

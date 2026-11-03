@@ -1,7 +1,9 @@
 "use client"
 
 import {
+  ArrowRightIcon,
   BanIcon,
+  CircleCheckIcon,
   ClipboardCheckIcon,
   ScanBarcodeIcon,
   SearchIcon,
@@ -121,10 +123,18 @@ function InventorySheet({ inventory }: { inventory: Inventory }) {
     )
     return () => window.clearTimeout(timer)
   }, [typed])
-  // Ouvert : on part de ce qui reste à compter ; terminé : on relit les écarts.
-  const [filter, setFilter] = useState<LineFilter>(
+  // Ouvert : on part de ce qui reste à compter ; terminé : on relit les écarts. Clôturé à l'écran,
+  // « À compter » n'a plus d'objet : la feuille passe aux écarts.
+  const [chosenFilter, setFilter] = useState<LineFilter>(
     open ? SheetFilter.toCount : SheetFilter.gaps
   )
+  const filter =
+    !open && chosenFilter === SheetFilter.toCount
+      ? SheetFilter.gaps
+      : chosenFilter
+  const filters = open
+    ? sheetFilters
+    : sheetFilters.filter((value) => value !== SheetFilter.toCount)
   const [page, setPage] = useState(0)
   const [moved, setMoved] = useState<MovedLine[]>([])
   const search = useMemo(
@@ -204,14 +214,6 @@ function InventorySheet({ inventory }: { inventory: Inventory }) {
         badges={<InventoryStatusBadge status={inventory.status} />}
         actions={
           <>
-            {inventory.adjustment && (
-              <Link
-                href={RecordRoutes.voucher(inventory.adjustment.id)}
-                className={buttonVariants({ variant: "outline" })}
-              >
-                {inventory.adjustment.number}
-              </Link>
-            )}
             {canClose && <CancelInventory inventory={inventory} />}
             {canClose && (
               <CloseInventory
@@ -253,11 +255,7 @@ function InventorySheet({ inventory }: { inventory: Inventory }) {
       </div>
 
       {inventory.status === InventoryStatus.closed && (
-        <p className="mt-4 text-sm text-muted-foreground">
-          {inventory.adjustment
-            ? t("closedWithAdjustment")
-            : t("closedWithoutGap")}
-        </p>
+        <ClosedSummary inventory={inventory} />
       )}
 
       <div className="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center">
@@ -294,7 +292,7 @@ function InventorySheet({ inventory }: { inventory: Inventory }) {
           aria-label={t("filterLabel")}
           className="inline-flex flex-wrap rounded-xl border bg-muted/40 p-1"
         >
-          {([...sheetFilters, ALL_LINES] as const).map((value) => (
+          {([...filters, ALL_LINES] as const).map((value) => (
             <button
               key={value}
               type="button"
@@ -326,7 +324,7 @@ function InventorySheet({ inventory }: { inventory: Inventory }) {
         <Skeleton className="mt-4 h-64 rounded-2xl" />
       ) : rows.length === 0 ? (
         <p className="mt-6 rounded-xl border border-dashed p-8 text-center text-muted-foreground">
-          {filter === SheetFilter.toCount && !text
+          {open && filter === SheetFilter.toCount && !text
             ? t("allCounted")
             : t("noLine")}
         </p>
@@ -478,5 +476,46 @@ function CancelInventory({ inventory }: { inventory: Inventory }) {
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  )
+}
+
+/** Clôture (D32) : qui, quand, et le bon d'ajustement qui a inscrit les écarts au stock. */
+function ClosedSummary({ inventory }: { inventory: Inventory }) {
+  const t = useTranslations("inventory")
+  const format = useFormatter()
+  return (
+    <div
+      role="status"
+      className="mt-4 flex gap-3 rounded-xl border border-success/40 bg-success-muted px-4 py-3 text-sm text-success-muted-foreground"
+    >
+      <CircleCheckIcon className="mt-0.5 size-5 shrink-0" aria-hidden />
+      <div className="min-w-0 space-y-1">
+        <p className="font-medium">
+          {inventory.adjustment
+            ? t("closedWithAdjustment")
+            : t("closedWithoutGap")}
+        </p>
+        {inventory.endedAt && (
+          <p>
+            {t("closedBy", {
+              name: inventory.endedByName ?? "",
+              date: format.dateTime(new Date(inventory.endedAt), {
+                dateStyle: "medium",
+                timeStyle: "short",
+              }),
+            })}
+          </p>
+        )}
+        {inventory.adjustment && (
+          <Link
+            href={RecordRoutes.voucher(inventory.adjustment.id)}
+            className="inline-flex items-center gap-1 font-semibold text-primary hover:underline"
+          >
+            {t("seeAdjustment", { number: inventory.adjustment.number })}
+            <ArrowRightIcon className="size-4" aria-hidden />
+          </Link>
+        )}
+      </div>
+    </div>
   )
 }

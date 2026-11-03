@@ -143,11 +143,7 @@ test("lots : nuance et calibre à la réception, mélange de nuances signalé à
     .getByRole("button", { name: /Valider la sortie · 2 articles/ })
     .click()
   await expect(page.getByText(`Sortie SOR-${year}-0001 validée.`)).toBeVisible()
-  await page
-    .getByRole("listitem")
-    .filter({ hasText: `Sortie SOR-${year}-0001 validée.` })
-    .getByRole("button", { name: "Voir le bon" })
-    .click()
+  await page.getByRole("link", { name: "Voir le bon" }).click()
   await expect(
     page
       .getByText("L2409 · nuance B2 · cal. 9")

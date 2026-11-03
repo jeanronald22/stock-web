@@ -32,16 +32,23 @@ export function VoucherDetailsFields({
   form,
   type,
   today,
+  earliest,
+  noteRequired: required = false,
 }: {
   form: UseFormReturn<VoucherFormValues>
   type: EntryType
   today: string
+  /** Premier jour permis (D50) ; undefined sans limite. */
+  earliest: string | undefined
+  /** Retour sans bon d'origine (D50) : la note en donne la raison. */
+  noteRequired?: boolean
 }) {
   const t = useTranslations()
   const errors = form.formState.errors
   const reason = useWatch({ control: form.control, name: "reason" })
   // Casse ou ajustement « autre » : la note dit ce qui s'est passé.
-  const noteRequired = correctionTypes.has(type) && reason === OTHER_REASON
+  const noteRequired =
+    required || (correctionTypes.has(type) && reason === OTHER_REASON)
   const optional = (
     <span className="font-normal text-muted-foreground">
       ({t("common.optional")})
@@ -76,6 +83,7 @@ export function VoucherDetailsFields({
           <InputGroupInput
             id="occurredOn"
             type="date"
+            min={earliest}
             max={today}
             {...form.register("occurredOn")}
           />
@@ -94,9 +102,11 @@ export function VoucherDetailsFields({
           rows={2}
           aria-invalid={!!errors.note}
           placeholder={
-            noteRequired
-              ? t("vouchers.form.noteRequiredPlaceholder")
-              : t("vouchers.form.notePlaceholder")
+            required
+              ? t("vouchers.returns.notePlaceholder")
+              : noteRequired
+                ? t("vouchers.form.noteRequiredPlaceholder")
+                : t("vouchers.form.notePlaceholder")
           }
           {...form.register("note")}
         />

@@ -145,8 +145,8 @@ test("tableau de bord par rôle, ses filtres et ses rapports (mouvements, casse,
     page.getByRole("heading", { name: "Les plus sortis" })
   ).toHaveCount(0)
   await shot(page, testInfo, "03-tableau-article")
-  // Les rapports reprennent l'article et la période.
-  await page.getByRole("link", { name: "Rapports" }).click()
+  // Les rapports reprennent l'article et la période (bouton en tête du tableau de bord).
+  await page.getByRole("link", { name: "Rapports" }).first().click()
   await expect(page).toHaveURL(/\/rapports\?.*article=/)
   await expect(
     page.getByText("1 article a bougé", { exact: false })

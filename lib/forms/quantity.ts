@@ -5,6 +5,11 @@ export function parseQuantity(text: string): number | null {
   return Number(normalized)
 }
 
+/** « -5 » ou « −1,5 » : un nombre lisible mais négatif, à signaler comme tel plutôt qu'illisible. */
+export function isNegativeQuantity(text: string): boolean {
+  return /^[-−]\d+([.,]\d+)?$/.test(text.replace(/\s/g, ""))
+}
+
 /** Affichage dans un champ : 1.44 devient « 1,44 » en français. */
 export function formatQuantityInput(value: number, locale: string): string {
   return new Intl.NumberFormat(locale, {

@@ -58,7 +58,8 @@ export function useSaveStockSettings() {
   const queryClient = useQueryClient()
   const organizationId = useOrganizationId()
   return useMutation({
-    mutationFn: (settings: StockSettings) => requests.saveSettings(settings),
+    mutationFn: (settings: Partial<StockSettings>) =>
+      requests.saveSettings(settings),
     onSuccess: (settings) =>
       queryClient.setQueryData(requestKeys.settings(organizationId), settings),
   })

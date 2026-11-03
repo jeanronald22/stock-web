@@ -16,6 +16,7 @@ import { useActiveOrganization } from "@/lib/organization/active-organization"
 import { useApi } from "./api-provider"
 import {
   CatalogStatus,
+  nameKey,
   type CategoryInput,
   type ItemInput,
   type ItemSearch,
@@ -45,6 +46,8 @@ export const stockKeys = {
     [...stockKeys.all(organizationId), "item-count"] as const,
   item: (organizationId: string | null, id: string) =>
     [...stockKeys.all(organizationId), "item", id] as const,
+  sameName: (organizationId: string | null, name: string) =>
+    [...stockKeys.all(organizationId), "same-name", name] as const,
   locations: (organizationId: string | null, warehouseId: string) =>
     [...stockKeys.all(organizationId), "locations", warehouseId] as const,
   categories: (organizationId: string | null) =>
@@ -199,15 +202,31 @@ export function invalidateStock(
   })
 }
 
-/** Après toute écriture, le catalogue de l'entreprise est relu : listes, compteurs et fiches restent cohérents. */
+/**
+ * Après toute écriture, le catalogue de l'entreprise est relu : listes, compteurs et fiches restent
+ * cohérents. [reload] : listes que l'écriture remplit, relues avant que la mutation ne rende la
+ * main même si aucun écran ne les affiche. Sans cela, l'écran de liste où l'on revient après une
+ * création montrerait sa copie d'avant (« Créez votre premier… ») le temps de la relire.
+ */
 function useStockMutation<Input, Output>(
-  mutationFn: (input: Input) => Promise<Output>
+  mutationFn: (input: Input) => Promise<Output>,
+  reload?: (input: Input) => readonly string[]
 ) {
   const queryClient = useQueryClient()
   const organizationId = useOrganizationId()
   return useMutation({
     mutationFn,
-    onSuccess: () => invalidateStock(queryClient, organizationId),
+    onSuccess: async (_output, input) => {
+      await invalidateStock(queryClient, organizationId)
+      await Promise.all(
+        (reload?.(input) ?? []).map((list) =>
+          queryClient.refetchQueries({
+            queryKey: [...stockKeys.all(organizationId), list],
+            type: "inactive",
+          })
+        )
+      )
+    },
   })
 }
 
@@ -225,7 +244,8 @@ export function useSaveWarehouse() {
     }) =>
       version === undefined
         ? stock.createWarehouse(id, input)
-        : stock.updateWarehouse(id, version, input)
+        : stock.updateWarehouse(id, version, input),
+    ({ version }) => (version === undefined ? ["warehouses"] : [])
   )
 }
 
@@ -246,14 +266,18 @@ export function useSaveItem() {
       id,
       version,
       input,
+      allowSameName,
     }: {
       id: string
       version?: number
       input: ItemInput
+      /** Création : confirmée malgré un article actif du même nom (D50). */
+      allowSameName?: boolean
     }) =>
       version === undefined
-        ? stock.createItem(id, input)
-        : stock.updateItem(id, version, input)
+        ? stock.createItem(id, input, allowSameName)
+        : stock.updateItem(id, version, input),
+    ({ version }) => (version === undefined ? ["items", "item-count"] : [])
   )
 }
 
@@ -424,4 +448,21 @@ export function useChangeThreshold() {
       maxQuantity: number | null
     }) => stock.changeThreshold(itemId, warehouseId, minQuantity, maxQuantity)
   )
+}
+
+/**
+ * Article actif qui porte déjà ce nom (D50), pour prévenir avant d'en créer un second ; null s'il
+ * n'y en a pas. [name] : déjà différé par l'appelant, pour ne pas interroger à chaque touche.
+ */
+export function useSameNameItem(name: string) {
+  const { stock } = useApi()
+  const organizationId = useOrganizationId()
+  const key = nameKey(name)
+  return useQuery({
+    queryKey: stockKeys.sameName(organizationId, key),
+    queryFn: async () =>
+      (await stock.itemMatches([key], [])).names[0]?.item ?? null,
+    enabled: !!organizationId && key.length > 0,
+    staleTime: 30_000,
+  })
 }

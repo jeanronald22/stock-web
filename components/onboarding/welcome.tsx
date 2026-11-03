@@ -19,9 +19,7 @@ import { ProfileStep } from "./profile-step"
 
 type Stage = "profile" | "business" | { created: Organization }
 
-const TOTAL_STEPS = 2
 const PROFILE_STEP = 1
-const BUSINESS_STEP = 2
 const DONE_KEY = "done"
 
 /** Inscription (DECISIONS.md, D15) : le nom de la personne, puis sa structure. */
@@ -41,9 +39,12 @@ function WelcomeFlow({ user }: { user: User }) {
   const router = useRouter()
   const auth = useAuth()
   const { setActiveOrganizationId } = useActiveOrganization()
-  const [stage, setStage] = useState<Stage>(() =>
-    user.profileComplete ? "business" : "profile"
+  // Profil déjà rempli (une entreprise de plus) : la structure est la seule étape.
+  const [asksProfile] = useState(!user.profileComplete)
+  const [stage, setStage] = useState<Stage>(
+    asksProfile ? "profile" : "business"
   )
+  const totalSteps = asksProfile ? 2 : 1
   const navigate = useStepNavigation<Stage>(setStage)
   const exit = () => void auth.signoutRedirect()
 
@@ -53,15 +54,15 @@ function WelcomeFlow({ user }: { user: User }) {
         <ProfileStep
           user={user}
           step={PROFILE_STEP}
-          totalSteps={TOTAL_STEPS}
+          totalSteps={totalSteps}
           onDone={() => navigate.forward("business")}
           onExit={exit}
         />
       ) : stage === "business" ? (
         <BusinessStep
-          step={BUSINESS_STEP}
-          totalSteps={TOTAL_STEPS}
-          onBack={() => navigate.back("profile")}
+          step={totalSteps}
+          totalSteps={totalSteps}
+          onBack={asksProfile ? () => navigate.back("profile") : undefined}
           onCreated={(organization) => {
             setActiveOrganizationId(organization.id)
             navigate.forward({ created: organization })

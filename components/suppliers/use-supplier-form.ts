@@ -12,12 +12,14 @@ import { useSaveSupplier } from "@/lib/api/supplier-queries"
 import { SupplierLimits, type Supplier } from "@/lib/api/suppliers"
 import { useErrorMessage } from "@/lib/api/use-error-message"
 import { applyServerErrors } from "@/lib/forms/apply-server-errors"
+import { looksLikePhone } from "@/lib/forms/phone"
 import { applyProblemToField } from "@/lib/forms/problem-fields"
 
 const FIELDS = ["name", "phone", "email", "address", "note"] as const
 
 function supplierSchema(messages: {
   required: string
+  phone: string
   email: string
   tooLong: (max: number) => string
 }) {
@@ -25,7 +27,10 @@ function supplierSchema(messages: {
     z.string().trim().max(max, messages.tooLong(max))
   return z.object({
     name: text(SupplierLimits.name).min(1, messages.required),
-    phone: text(SupplierLimits.phone),
+    phone: text(SupplierLimits.phone).refine(
+      (value) => !value || looksLikePhone(value),
+      messages.phone
+    ),
     email: text(SupplierLimits.email).refine(
       (value) => !value || z.email().safeParse(value).success,
       messages.email
@@ -56,6 +61,7 @@ export function useSupplierForm(
     resolver: zodResolver(
       supplierSchema({
         required: t("validation.required"),
+        phone: t("validation.phone"),
         email: t("validation.email"),
         tooLong: (max) => t("validation.tooLong", { max }),
       })
@@ -91,7 +97,10 @@ export function useSupplierForm(
       if (
         applyProblemToField(
           error,
-          { [ProblemCode.supplierNameTaken]: "name" },
+          {
+            [ProblemCode.supplierNameTaken]: "name",
+            [ProblemCode.phoneInvalid]: "phone",
+          },
           form.setError
         )
       )

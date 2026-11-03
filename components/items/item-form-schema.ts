@@ -8,12 +8,17 @@ import {
   type Item,
   type ItemInput,
 } from "@/lib/api/stock"
-import { formatQuantityInput, parseQuantity } from "@/lib/forms/quantity"
+import {
+  formatQuantityInput,
+  isNegativeQuantity,
+  parseQuantity,
+} from "@/lib/forms/quantity"
 
 export type ItemFormMessages = {
   required: string
   tooLong: (max: number) => string
   invalidNumber: string
+  negative: string
   positive: string
   wholeNumber: string
   maximumAboveMinimum: string
@@ -60,6 +65,8 @@ export function itemFormSchema(messages: ItemFormMessages) {
       ),
     })
     .superRefine((values, context) => {
+      const unreadable = (text: string) =>
+        isNegativeQuantity(text) ? messages.negative : messages.invalidNumber
       const seen = new Set<string>()
       values.packagings.forEach((packaging, index) => {
         const quantity = parseQuantity(packaging.quantity)
@@ -69,7 +76,7 @@ export function itemFormSchema(messages: ItemFormMessages) {
             path: ["packagings", index, field],
             message,
           })
-        if (quantity === null) issue("quantity", messages.invalidNumber)
+        if (quantity === null) issue("quantity", unreadable(packaging.quantity))
         else if (quantity <= 0) issue("quantity", messages.positive)
         else if (
           wholeQuantityUnits.has(values.baseUnit) &&
@@ -88,11 +95,12 @@ export function itemFormSchema(messages: ItemFormMessages) {
             path: ["warehouses", index, field],
             message,
           })
-        // parseQuantity refuse aussi un nombre négatif.
         const minimum = optionalQuantity(placement.minQuantity)
         const maximum = optionalQuantity(placement.maxQuantity)
-        if (minimum === undefined) issue("minQuantity", messages.invalidNumber)
-        if (maximum === undefined) issue("maxQuantity", messages.invalidNumber)
+        if (minimum === undefined)
+          issue("minQuantity", unreadable(placement.minQuantity))
+        if (maximum === undefined)
+          issue("maxQuantity", unreadable(placement.maxQuantity))
         else if (maximum === 0) issue("maxQuantity", messages.positive)
         else if (maximum !== null && minimum != null && maximum <= minimum)
           issue("maxQuantity", messages.maximumAboveMinimum)

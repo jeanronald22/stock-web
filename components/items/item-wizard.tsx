@@ -2,7 +2,8 @@
 
 import { useRouter, useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { useState } from "react"
+import { useDeferredValue, useState } from "react"
+import { useWatch } from "react-hook-form"
 import { toast } from "sonner"
 
 import { Splash } from "@/components/app/splash"
@@ -12,8 +13,12 @@ import { MeasureScene } from "@/components/illustrations/measure-scene"
 import { PackagingScene } from "@/components/illustrations/packaging-scene"
 import { PhotoScene } from "@/components/illustrations/photo-scene"
 import { FormWizard, type WizardStep } from "@/components/wizard/form-wizard"
-import { CatalogStatus, type Warehouse } from "@/lib/api/stock"
-import { useUploadItemImage, useWarehouses } from "@/lib/api/stock-queries"
+import { CatalogStatus, nameKey, type Warehouse } from "@/lib/api/stock"
+import {
+  useSameNameItem,
+  useUploadItemImage,
+  useWarehouses,
+} from "@/lib/api/stock-queries"
 import { EntryQueryParams, ListQueryParams, Routes } from "@/lib/routes"
 
 import {
@@ -56,6 +61,14 @@ function ItemWizardSteps({ warehouses }: { warehouses: Warehouse[] }) {
   )
   const upload = useUploadItemImage()
   const [photo, setPhoto] = useState<File | null>(null)
+  // Un article actif du même nom (D50) : prévenu dès la saisie, on peut créer quand même.
+  const name = useWatch({ control: form.control, name: "name" })
+  const deferredName = useDeferredValue(name)
+  const sameName = useSameNameItem(deferredName)
+  const sameNameItem =
+    sameName.data && nameKey(deferredName) === nameKey(name)
+      ? sameName.data
+      : null
 
   const steps: WizardStep<ItemFormValues>[] = [
     {
@@ -64,7 +77,9 @@ function ItemWizardSteps({ warehouses }: { warehouses: Warehouse[] }) {
       title: t("items.wizard.identity.title"),
       description: t("items.wizard.identity.description"),
       fields: ["name", "categoryId", "description"],
-      content: <ItemIdentityFields form={form} autoFocus />,
+      content: (
+        <ItemIdentityFields form={form} autoFocus sameNameItem={sameNameItem} />
+      ),
     },
     {
       key: "photo",
@@ -111,7 +126,7 @@ function ItemWizardSteps({ warehouses }: { warehouses: Warehouse[] }) {
       exitLabel={t("common.cancel")}
       onExit={() => router.push(Routes.items)}
       onSubmit={async (values) => {
-        const saved = await submit(values)
+        const saved = await submit(values, sameNameItem !== null)
         if (!saved) return false
         // L'article existe : une photo qui ne passe pas n'annule pas la création.
         if (photo)

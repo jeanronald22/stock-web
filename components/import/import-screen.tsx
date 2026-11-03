@@ -19,11 +19,15 @@ import { ProblemCode } from "@/lib/api/problem"
 import {
   baseUnits,
   CatalogStatus,
+  StockLimits,
   StockPermission,
   type BaseUnit,
+  type ExistingItem,
   type Warehouse,
 } from "@/lib/api/stock"
 import { useCategories, useWarehouses } from "@/lib/api/stock-queries"
+import { useApi } from "@/lib/api/api-provider"
+import { useErrorMessage } from "@/lib/api/use-error-message"
 import { planCategories } from "@/lib/import/category-plan"
 import {
   autoMap,
@@ -31,13 +35,17 @@ import {
   type ColumnMapping,
 } from "@/lib/import/import-fields"
 import { downloadWorkbook } from "@/lib/import/import-files"
-import { prepareRows, type PreparedRow } from "@/lib/import/prepare-rows"
+import {
+  prepareRows,
+  RowProblem,
+  type PreparedRow,
+} from "@/lib/import/prepare-rows"
 import { Routes } from "@/lib/routes"
 
 import { ImportColumnsStep } from "./import-columns-step"
 import { ImportFileStep, type ChosenFile } from "./import-file-step"
 import { ImportResultStep } from "./import-result-step"
-import { ImportReviewStep } from "./import-review-step"
+import { ImportReviewStep, SameNameChoice } from "./import-review-step"
 import { ImportWarehousesStep } from "./import-warehouses-step"
 import { ImportPhase, useItemImport } from "./use-item-import"
 
@@ -57,6 +65,7 @@ const REJECTED_FILE = "articles-refuses.xlsx"
 /** Refus de l'API rapporté au bilan d'import : son message (import.serverReasons). */
 const ServerReason = {
   barcodeTaken: "barcodeTaken",
+  nameTaken: "nameTaken",
   categoryUnavailable: "categoryUnavailable",
   warehouseUnavailable: "warehouseUnavailable",
   accessDenied: "accessDenied",
@@ -68,6 +77,7 @@ type ServerReason = (typeof ServerReason)[keyof typeof ServerReason]
 
 const SERVER_REASONS: Record<string, ServerReason> = {
   [ProblemCode.itemBarcodeTaken]: ServerReason.barcodeTaken,
+  [ProblemCode.itemNameTaken]: ServerReason.nameTaken,
   [ProblemCode.categoryUnavailable]: ServerReason.categoryUnavailable,
   [ProblemCode.warehouseUnavailable]: ServerReason.warehouseUnavailable,
   [ProblemCode.stockAccessDenied]: ServerReason.accessDenied,
@@ -103,6 +113,18 @@ export function ImportScreen() {
   return <ImportWizard warehouses={warehouses.data} />
 }
 
+/** Ce que le catalogue a déjà, par nom tel qu'écrit dans le fichier et par code-barres (D50). */
+type CatalogMatches = {
+  byName: Map<string, ExistingItem>
+  byBarcode: Set<string>
+}
+
+function chunks<T>(values: T[], size: number): T[][] {
+  return Array.from({ length: Math.ceil(values.length / size) }, (_, index) =>
+    values.slice(index * size, (index + 1) * size)
+  )
+}
+
 /**
  * Import du catalogue (D36) en cinq temps : le fichier, ses colonnes, les dépôts, la vérification,
  * puis l'import et son bilan. Rien n'est envoyé avant la vérification.
@@ -113,6 +135,11 @@ function ImportWizard({ warehouses }: { warehouses: Warehouse[] }) {
   const access = useStockAccess()
   const categories = useCategories()
   const run = useItemImport()
+  const { stock } = useApi()
+  const errorMessage = useErrorMessage()
+  const [matches, setMatches] = useState<CatalogMatches | null>(null)
+  const [checking, setChecking] = useState(false)
+  const [sameName, setSameName] = useState<SameNameChoice>(SameNameChoice.skip)
   const covered = warehouses.filter((warehouse) => access.covers(warehouse.id))
 
   const [step, setStep] = useState<Step>(Step.file)
@@ -155,8 +182,41 @@ function ImportWizard({ warehouses }: { warehouses: Warehouse[] }) {
         : [],
     [chosen, mapping, unitLabels, selected, withOpening]
   )
-  const ready = prepared.filter((row) => row.problems.length === 0)
-  const blocked = prepared.filter((row) => row.problems.length > 0)
+  // Code-barres déjà pris au catalogue : la ligne serait refusée, elle est à corriger. Nom déjà
+  // pris : à ignorer ou à créer quand même, au choix (D50).
+  const checked = useMemo(
+    () =>
+      prepared.map((row) =>
+        row.problems.length === 0 &&
+        row.item.barcode &&
+        matches?.byBarcode.has(row.item.barcode)
+          ? { ...row, problems: [RowProblem.barcodeTaken] }
+          : row
+      ),
+    [prepared, matches]
+  )
+  const valid = useMemo(
+    () => checked.filter((row) => row.problems.length === 0),
+    [checked]
+  )
+  const blocked = checked.filter((row) => row.problems.length > 0)
+  const homonyms = useMemo(
+    () =>
+      valid.flatMap((row) => {
+        const existing = matches?.byName.get(row.item.name)
+        return existing ? [{ row, existing }] : []
+      }),
+    [valid, matches]
+  )
+  const ready = useMemo(
+    () =>
+      valid.flatMap((row) => {
+        if (!matches?.byName.has(row.item.name)) return [row]
+        if (sameName === SameNameChoice.skip) return []
+        return [{ ...row, item: { ...row.item, allowSameName: true } }]
+      }),
+    [valid, matches, sameName]
+  )
   const newCategories = useMemo(
     () => planCategories(ready, categories.data ?? []).created.length,
     [ready, categories.data]
@@ -184,6 +244,41 @@ function ImportWizard({ warehouses }: { warehouses: Warehouse[] }) {
     setStepError(null)
     setStep(next)
   }
+
+  /** Avant la vérification : ce que le catalogue a déjà, en quelques appels. */
+  const checkCatalog = async () => {
+    const candidates = prepared.filter((row) => row.problems.length === 0)
+    const names = [...new Set(candidates.map((row) => row.item.name))]
+    const barcodes = [
+      ...new Set(candidates.flatMap((row) => row.item.barcode ?? [])),
+    ]
+    setChecking(true)
+    try {
+      const found: CatalogMatches = { byName: new Map(), byBarcode: new Set() }
+      const rounds = Math.max(
+        Math.ceil(names.length / StockLimits.itemsPerMatch),
+        Math.ceil(barcodes.length / StockLimits.itemsPerMatch)
+      )
+      const nameChunks = chunks(names, StockLimits.itemsPerMatch)
+      const barcodeChunks = chunks(barcodes, StockLimits.itemsPerMatch)
+      for (let round = 0; round < rounds; round += 1) {
+        const result = await stock.itemMatches(
+          nameChunks[round] ?? [],
+          barcodeChunks[round] ?? []
+        )
+        result.names.forEach(({ name, item }) => {
+          if (!found.byName.has(name)) found.byName.set(name, item)
+        })
+        result.barcodes.forEach(({ barcode }) => found.byBarcode.add(barcode))
+      }
+      setMatches(found)
+      go(Step.review)
+    } catch (error) {
+      setStepError(errorMessage(error))
+    } finally {
+      setChecking(false)
+    }
+  }
   const submit = () => {
     if (step === Step.file) {
       if (!chosen) return setStepError(t("import.file.required"))
@@ -199,7 +294,7 @@ function ImportWizard({ warehouses }: { warehouses: Warehouse[] }) {
         return setStepError(t("import.warehouses.required"))
       if (stockMapped && openingCandidates.length > 0 && !openingWarehouseId)
         return setStepError(t("import.warehouses.opening.required"))
-      return go(Step.review)
+      return void checkCatalog()
     }
     if (step === Step.review) {
       if (ready.length === 0) return setStepError(t("import.review.nothing"))
@@ -278,7 +373,7 @@ function ImportWizard({ warehouses }: { warehouses: Warehouse[] }) {
       description={screen.description}
       formId={FORM_ID}
       submitLabel={screen.submit}
-      submitting={running}
+      submitting={running || checking}
       onBack={
         step > Step.file && step < Step.result
           ? () => go((step - 1) as Step)
@@ -329,6 +424,9 @@ function ImportWizard({ warehouses }: { warehouses: Warehouse[] }) {
           <ImportReviewStep
             ready={ready}
             blocked={blocked}
+            homonyms={homonyms}
+            sameName={sameName}
+            onSameName={setSameName}
             newCategories={newCategories}
             openingWarehouse={withOpening ? openingName : null}
             onDownloadBlocked={() =>

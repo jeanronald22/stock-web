@@ -252,7 +252,13 @@ function VoucherLineRow({
   const batchLabel = useBatchLabel()
   const line = useWatch({ control: form.control, name: `lines.${index}` })
   const warehouseId = useWatch({ control: form.control, name: "warehouseId" })
-  const errors = form.formState.errors.lines?.[index]
+  // Une ligne ajoutée après une validation refusée est revalidée avec tout le bon : vide, elle
+  // serait aussitôt en erreur. Ses erreurs attendent qu'on la quitte, ou la validation suivante.
+  const [submitsBefore] = useState(form.formState.submitCount)
+  const shown =
+    form.formState.submitCount > submitsBefore ||
+    form.getFieldState(`lines.${index}`, form.formState).isTouched
+  const errors = shown ? form.formState.errors.lines?.[index] : undefined
   // Le stock part du dépôt (sortie, transfert, casse) ou y est compté : le disponible s'affiche.
   const issue = !incomingTypes.has(type)
   // Réception par lot : le stock dit ce qu'on sait déjà des lots de l'article (nuance, calibre).
@@ -526,6 +532,15 @@ function VoucherLineRow({
         <FieldError errors={[errors?.batch]} />
         <FieldError errors={[errors?.expected]} />
 
+        {/* Une entrée propose l'article dans le dépôt (D21) : on le dit plutôt que de le faire en silence. */}
+        {!issue &&
+          !!warehouseId &&
+          line.item.warehouseIds &&
+          !line.item.warehouseIds.includes(warehouseId) && (
+            <span className="text-muted-foreground">
+              {t("vouchers.form.notOffered")}
+            </span>
+          )}
         {converted !== null && (
           <span className="text-muted-foreground">
             {t("vouchers.form.converted", {

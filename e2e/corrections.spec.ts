@@ -98,7 +98,7 @@ test("casse : motif obligatoire, note pour « autre », photos gardées comme pr
   ).toBeVisible()
 
   // La fiche : motif, sortie, photo ; une deuxième photo s'ajoute après coup.
-  await page.getByRole("button", { name: "Voir le bon" }).click()
+  await page.getByRole("link", { name: "Voir le bon" }).click()
   await expect(
     page.getByRole("heading", { name: `CAS-${year}-0001` })
   ).toBeVisible()
@@ -136,7 +136,7 @@ test("ajustement : le stock prend la quantité comptée, l'écart avec le théor
     page.getByText(`Ajustement AJU-${year}-0001 validé.`)
   ).toBeVisible()
 
-  await page.getByRole("button", { name: "Voir le bon" }).click()
+  await page.getByRole("link", { name: "Voir le bon" }).click()
   await expect(page.getByText("− 8 pièces")).toBeVisible()
   await expect(
     page.getByText("Théorique 100 pièces, compté 92 pièces")
@@ -210,6 +210,11 @@ test("réception comparée au bon de livraison : l'écart se voit et se retrouve
   await expect(page.getByText("Écart : −2 pièces")).toBeVisible()
   await shot(page, testInfo, "01-reception-ecart")
   await page.getByRole("button", { name: /Valider la réception/ }).click()
+  // L'écart avec le bon de livraison se confirme avant validation (D50).
+  await page
+    .getByRole("alertdialog")
+    .getByRole("button", { name: "Valider quand même" })
+    .click()
   await expect(
     page.getByText(`Réception REC-${year}-0002 validée.`)
   ).toBeVisible()

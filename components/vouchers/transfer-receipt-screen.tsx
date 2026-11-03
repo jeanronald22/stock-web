@@ -32,6 +32,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { PageBody, PageHeader } from "@/components/workspace/page-header"
 import { useStockAccess } from "@/components/workspace/stock-access"
 import { StockPermission, wholeQuantityUnits } from "@/lib/api/stock"
+import { useStockSettings } from "@/lib/api/request-queries"
 import { useReceiveTransfer, useVoucher } from "@/lib/api/voucher-queries"
 import {
   TransferState,
@@ -42,13 +43,23 @@ import {
   type TransferReceiptInput,
 } from "@/lib/api/vouchers"
 import { useErrorMessage } from "@/lib/api/use-error-message"
-import { formatQuantityInput, parseQuantity } from "@/lib/forms/quantity"
+import {
+  formatQuantityInput,
+  isNegativeQuantity,
+  parseQuantity,
+} from "@/lib/forms/quantity"
 import { isOnline } from "@/lib/offline/connectivity"
 import { OutboxKind } from "@/lib/offline/outbox"
 import { isNetworkError, useEnqueue } from "@/lib/offline/use-enqueue"
 import { OUTBOX_ANCHOR, RecordRoutes, Routes } from "@/lib/routes"
+import { earliestVoucherDay } from "@/lib/vouchers/backdating"
 
 import { todayOn } from "./voucher-form-schema"
+import {
+  ReviewSource,
+  VoucherReviewDialog,
+  type VoucherReview,
+} from "./voucher-review-dialog"
 
 /** Réception de transfert gardée hors ligne (D39) : de quoi rouvrir l'envoi si l'API la refuse. */
 export type TransferReceiptDraft = { transferId: string }
@@ -57,6 +68,7 @@ export function TransferReceiptScreen() {
   const t = useTranslations()
   const id = useRecordId()
   const transfer = useVoucher(id)
+  const settings = useStockSettings()
   const { can, covers } = useStockAccess()
 
   const state = recordState(id, transfer)
@@ -68,7 +80,7 @@ export function TransferReceiptScreen() {
       />
     )
   }
-  if (state === RecordState.loading) {
+  if (state === RecordState.loading || !settings.data) {
     return (
       <PageBody>
         <Skeleton className="h-9 w-64" />
@@ -102,7 +114,12 @@ export function TransferReceiptScreen() {
       </PageBody>
     )
   }
-  return <TransferReceiptForm transfer={data} />
+  return (
+    <TransferReceiptForm
+      transfer={data}
+      backdateDays={settings.data.backdateDays}
+    />
+  )
 }
 
 /**
@@ -110,7 +127,14 @@ export function TransferReceiptScreen() {
  * avec celle envoyée. Un écart (manquant, casse en route) se saisit ici et reste visible sur les
  * deux bons.
  */
-function TransferReceiptForm({ transfer }: { transfer: Voucher }) {
+function TransferReceiptForm({
+  transfer,
+  backdateDays,
+}: {
+  transfer: Voucher
+  /** Règle de l'entreprise (D50) : un bon se date au plus tant de jours en arrière. */
+  backdateDays: number
+}) {
   const t = useTranslations()
   const locale = useLocale()
   const router = useRouter()
@@ -121,6 +145,8 @@ function TransferReceiptForm({ transfer }: { transfer: Voucher }) {
   const [receiptId] = useState(() => crypto.randomUUID())
   const enqueue = useEnqueue()
   const [today] = useState(todayOn)
+  const { access } = useStockAccess()
+  const earliest = earliestVoucherDay(today, backdateDays, access)
   const sentOn = transfer.occurredAt.slice(0, 10)
   const [received, setReceived] = useState(() =>
     transfer.lines.map((line) => formatQuantityInput(line.quantity, locale))
@@ -131,9 +157,17 @@ function TransferReceiptForm({ transfer }: { transfer: Voucher }) {
 
   const errors = transfer.lines.map((line, index) => {
     const value = parseQuantity(received[index])
-    if (value === null) return t("validation.invalidNumber")
+    if (value === null)
+      return isNegativeQuantity(received[index])
+        ? t("validation.negative")
+        : t("validation.invalidNumber")
     if (wholeQuantityUnits.has(line.baseUnit) && !Number.isInteger(value))
       return t("validation.wholeNumber")
+    // Une marchandise ne grossit pas en route (l'API refuse aussi).
+    if (value > line.quantity)
+      return t("vouchers.receive.exceedsSent", {
+        quantity: quantityLabel(line.baseUnit, line.quantity),
+      })
     return null
   })
   const dateError =
@@ -141,12 +175,38 @@ function TransferReceiptForm({ transfer }: { transfer: Voucher }) {
       ? t("vouchers.form.futureDate")
       : occurredOn < sentOn
         ? t("vouchers.receive.beforeSent")
-        : null
+        : earliest && occurredOn < earliest
+          ? t("vouchers.form.tooOld", { days: backdateDays })
+          : null
 
-  const submit = async (event: FormEvent) => {
+  const [review, setReview] = useState<VoucherReview | null>(null)
+
+  const validate = (event: FormEvent) => {
     event.preventDefault()
     setSubmitted(true)
     if (errors.some(Boolean) || dateError) return
+    // Une perte en route ou une date passée se confirme : la réception ne se modifiera plus.
+    const gaps = transfer.lines.flatMap((line, index) => {
+      const value = parseQuantity(received[index]) ?? 0
+      return value < line.quantity
+        ? [
+            {
+              key: `${line.itemId}-${index}`,
+              name: line.itemName,
+              baseUnit: line.baseUnit,
+              received: value,
+              announced: line.quantity,
+            },
+          ]
+        : []
+    })
+    const backdatedOn = occurredOn < today ? occurredOn : null
+    if (gaps.length > 0 || backdatedOn)
+      return setReview({ source: ReviewSource.transfer, gaps, backdatedOn })
+    void submit()
+  }
+
+  const submit = async () => {
     const input = {
       // Aujourd'hui : l'API date de l'enregistrement. Un autre jour : midi, heure locale.
       occurredAt:
@@ -236,8 +296,16 @@ function TransferReceiptForm({ transfer }: { transfer: Voucher }) {
           destination: transfer.destination?.name ?? "",
         })}
       />
+      <VoucherReviewDialog
+        review={review}
+        onCancel={() => setReview(null)}
+        onConfirm={() => {
+          setReview(null)
+          void submit()
+        }}
+      />
       <form
-        onSubmit={(event) => void submit(event)}
+        onSubmit={validate}
         noValidate
         className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start"
       >
@@ -263,11 +331,10 @@ function TransferReceiptForm({ transfer }: { transfer: Voucher }) {
                         ` · ${t("vouchers.detail.batch")} ${batchLabel(line.batch, line)}`}
                     </p>
                   </div>
-                  {gap !== null && gap !== 0 && (
-                    <Badge variant={gap < 0 ? "warning" : "info"}>
-                      {t("vouchers.receive.gap", {
-                        quantity: quantityLabel(line.baseUnit, Math.abs(gap)),
-                        direction: gap < 0 ? "missing" : "extra",
+                  {gap !== null && gap < 0 && (
+                    <Badge variant="warning">
+                      {t("vouchers.receive.missing", {
+                        quantity: quantityLabel(line.baseUnit, -gap),
                       })}
                     </Badge>
                   )}
@@ -283,6 +350,8 @@ function TransferReceiptForm({ transfer }: { transfer: Voucher }) {
                     <InputGroupInput
                       id={inputId}
                       inputMode="decimal"
+                      min={0}
+                      max={line.quantity}
                       value={received[index]}
                       aria-invalid={submitted && !!errors[index]}
                       onChange={(event) =>
@@ -317,7 +386,7 @@ function TransferReceiptForm({ transfer }: { transfer: Voucher }) {
               <InputGroupInput
                 id="occurredOn"
                 type="date"
-                min={sentOn}
+                min={earliest && earliest > sentOn ? earliest : sentOn}
                 max={today}
                 value={occurredOn}
                 onChange={(event) => setOccurredOn(event.target.value)}

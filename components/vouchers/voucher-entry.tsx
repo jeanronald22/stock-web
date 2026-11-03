@@ -2,17 +2,20 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
+  ArrowRightIcon,
   ArrowRightLeftIcon,
+  CircleCheckIcon,
   ClipboardClockIcon,
   LockKeyholeIcon,
   PlusIcon,
   Undo2Icon,
   WarehouseIcon,
+  XIcon,
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   Controller,
   useForm,
@@ -71,6 +74,7 @@ import {
 import {
   correctionTypes,
   customerTypes,
+  isReturnType,
   returnOrigins,
   shortagesOf,
   supplierTypes,
@@ -78,6 +82,7 @@ import {
   VoucherType,
   type EntryType,
   type Returnable,
+  type ReturnVoucherType,
 } from "@/lib/api/vouchers"
 import { formatQuantityInput } from "@/lib/forms/quantity"
 import { isOnline } from "@/lib/offline/connectivity"
@@ -91,6 +96,8 @@ import {
   RecordRoutes,
   Routes,
 } from "@/lib/routes"
+import { cn } from "@/lib/utils"
+import { earliestVoucherDay } from "@/lib/vouchers/backdating"
 import {
   readLastWarehouse,
   rememberLastWarehouse,
@@ -99,8 +106,14 @@ import {
 import { CustomerField } from "./customer-field"
 import { DamagePhotosField } from "./damage-photos-field"
 import { ReasonField } from "./reason-field"
+import { ReturnOriginPicker } from "./return-origin-picker"
 import { SupplierField } from "./supplier-field"
 import { VoucherDetailsFields } from "./voucher-details-fields"
+import {
+  reviewOf,
+  VoucherReviewDialog,
+  type VoucherReview,
+} from "./voucher-review-dialog"
 import {
   BASE_UNIT_CHOICE,
   newLine,
@@ -121,7 +134,17 @@ const BATCH_FIELD = "batch"
  */
 export function VoucherEntry({ type }: { type: EntryType }) {
   const t = useTranslations("vouchers.entry.denied")
+  const searchParams = useSearchParams()
   const { can } = useStockAccess()
+  // Retour client libre (D50) : le stock remonterait sans sortie à laquelle se rattacher, seul un
+  // responsable l'enregistre ; les autres partent de la sortie. Une saisie reprise reste ouverte.
+  if (
+    type === VoucherType.customerReturn &&
+    !can(StockPermission.correctStock) &&
+    !searchParams.get(EntryQueryParams.origin) &&
+    !searchParams.get(EntryQueryParams.draft)
+  )
+    return <ReturnOriginRequired type={type} />
   if (correctionTypes.has(type) && !can(StockPermission.correctStock))
     return (
       <PageBody>
@@ -140,6 +163,26 @@ export function VoucherEntry({ type }: { type: EntryType }) {
       </PageBody>
     )
   return <VoucherEntryLoader type={type} />
+}
+
+/** Retour client sans sortie d'origine, pour qui ne corrige pas le stock : on part de la sortie. */
+function ReturnOriginRequired({ type }: { type: ReturnVoucherType }) {
+  const t = useTranslations()
+  return (
+    <PageBody>
+      <PageHeader
+        title={t(`vouchers.entry.${type}.title`)}
+        breadcrumbs={[
+          { label: t("vouchers.title"), href: Routes.vouchers },
+          { label: t(`vouchers.entry.${type}.title`) },
+        ]}
+        description={t("vouchers.returns.pick.required")}
+      />
+      <div className="mt-8 max-w-3xl">
+        <ReturnOriginPicker type={type} />
+      </div>
+    </PageBody>
+  )
 }
 
 /** Retour depuis un bon (D31, ?origine=…) : les lignes qui restent à retourner sont proposées. */
@@ -248,6 +291,7 @@ function VoucherEntryLoader({ type }: { type: EntryType }) {
       startingWarehouseId={startingWarehouseId}
       startingSupplier={startingSupplier.data}
       issueApproval={settings.data.issueApproval}
+      backdateDays={settings.data.backdateDays}
       draft={
         draftEntry && draft?.entryType === type
           ? { id: draftEntry.id, values: draft.values }
@@ -272,6 +316,7 @@ function VoucherEntryForm({
   startingWarehouseId,
   startingSupplier,
   issueApproval,
+  backdateDays,
   draft,
 }: {
   type: EntryType
@@ -286,6 +331,8 @@ function VoucherEntryForm({
   startingSupplier: Supplier | undefined
   /** Règle de l'entreprise (D33) : les sorties des magasiniers passent par une validation. */
   issueApproval: boolean
+  /** Règle de l'entreprise (D50) : un bon se date au plus tant de jours en arrière. */
+  backdateDays: number
   /** Saisie reprise de la file hors ligne (D39). */
   draft: { id: string; values: VoucherFormValues } | undefined
 }) {
@@ -305,8 +352,16 @@ function VoucherEntryForm({
   )
   const enqueue = useEnqueue()
   const [today] = useState(todayOn)
+  const { access, can, covers } = useStockAccess()
+  const earliest = earliestVoucherDay(today, backdateDays, access)
   // Casse : photos choisies avant la validation, envoyées juste après (le bon doit exister).
   const [photos, setPhotos] = useState<File[]>([])
+  const [recorded, setRecorded] = useState<Recorded | null>(null)
+  // Bon à revoir avant validation : ses valeurs, et ce qui mérite un second regard.
+  const [reviewing, setReviewing] = useState<{
+    values: VoucherFormValues
+    review: VoucherReview
+  } | null>(null)
   const addPhoto = useAddVoucherPhoto()
 
   const [defaultWarehouseId] = useState(() => {
@@ -339,17 +394,23 @@ function VoucherEntryForm({
           required: t("validation.required"),
           tooLong: (max) => t("validation.tooLong", { max }),
           invalidNumber: t("validation.invalidNumber"),
+          negative: t("validation.negative"),
           positive: t("validation.positive"),
           wholeNumber: t("validation.wholeNumber"),
           batchRequired: t("vouchers.form.batchRequired"),
           linesRequired: t("vouchers.form.linesRequired"),
           futureDate: t("vouchers.form.futureDate"),
+          tooOld: t("vouchers.form.tooOld", { days: backdateDays }),
           reasonRequired: t("vouchers.reasons.required"),
           noteRequired: t("vouchers.form.noteRequired"),
           exceedsOrigin: t("vouchers.returns.exceeds"),
+          customerRequired: t("vouchers.returns.customerRequired"),
+          supplierRequired: t("vouchers.returns.supplierRequired"),
+          returnNoteRequired: t("vouchers.returns.noteRequired"),
         },
         today,
-        type
+        type,
+        earliest
       )
     ),
     defaultValues: draft?.values ?? {
@@ -397,7 +458,6 @@ function VoucherEntryForm({
       occurredOn: today,
     },
   })
-  const { can, covers } = useStockAccess()
   const warehouseId = useWatch({ control: form.control, name: "warehouseId" })
   // Même règle que l'API (VoucherApprovals) : qui corrige le stock du dépôt sort sans demande.
   const needsApproval =
@@ -407,7 +467,10 @@ function VoucherEntryForm({
   const submitRequest = useSubmitRequest()
   const lineCount = useWatch({ control: form.control, name: "lines" }).length
   const supplier = useWatch({ control: form.control, name: "supplier" })
+  const customer = useWatch({ control: form.control, name: "customer" })
   const fromOrigin = !!origin
+  // Retour sans bon d'origine (D50) : le tiers et la raison sont exigés, et on propose d'en partir.
+  const freeReturn = isReturnType(type) && !fromOrigin
 
   /** Sortie refusée : le disponible réel s'affiche sous chaque ligne en manque. */
   const placeShortages = (error: unknown): boolean => {
@@ -528,13 +591,15 @@ function VoucherEntryForm({
       })
       rememberLastWarehouse(subject, organization.id, values.warehouseId)
       if (draft) await removeOutboxEntry(draft.id)
-      toast.success(t("requests.sent"), {
-        action: {
-          label: t("requests.see"),
-          onClick: () => router.push(RecordRoutes.request(request.id)),
-        },
+      if (previous) {
+        toast.success(t("requests.sent"))
+        return router.replace(RecordRoutes.request(request.id))
+      }
+      setRecorded({
+        message: t("requests.sent"),
+        href: RecordRoutes.request(request.id),
+        linkLabel: t("requests.see"),
       })
-      if (previous) return router.replace(RecordRoutes.request(request.id))
       startNext(values)
     } catch (error) {
       if (isNetworkError(error)) return queue(values, true)
@@ -561,17 +626,16 @@ function VoucherEntryForm({
         return
       }
       const photosSent = await sendPhotos(voucher.id)
-      toast[photosSent ? "success" : "warning"](
-        photosSent
-          ? t(`vouchers.entry.${type}.done`, { number: voucher.number })
-          : t("vouchers.photos.partial", { number: voucher.number }),
-        {
-          action: {
-            label: t("vouchers.entry.see"),
-            onClick: () => router.push(RecordRoutes.voucher(voucher.id)),
-          },
-        }
-      )
+      const message = photosSent
+        ? t(`vouchers.entry.${type}.done`, { number: voucher.number })
+        : t("vouchers.photos.partial", { number: voucher.number })
+      // Plutôt qu'un message qui s'efface : le bon reste accessible tant que l'on saisit le suivant.
+      setRecorded({
+        message,
+        href: RecordRoutes.voucher(voucher.id),
+        linkLabel: t("vouchers.entry.see"),
+        warning: !photosSent,
+      })
       startNext(values)
     } catch (error) {
       if (isNetworkError(error)) return queue(values, false)
@@ -580,6 +644,13 @@ function VoucherEntryForm({
         toast.error(t("vouchers.form.batchMismatchToast"))
       else toast.error(errorMessage(error))
     }
+  }
+
+  /** Un écart avec le bon de livraison ou une date passée se confirme : le bon ne se modifiera plus. */
+  const validate = (values: VoucherFormValues) => {
+    const review = reviewOf(values, today)
+    if (review) return setReviewing({ values, review })
+    return submit(values)
   }
 
   const submitButton = (
@@ -611,8 +682,23 @@ function VoucherEntryForm({
         description={t(`vouchers.entry.${type}.description`)}
       />
       {origin && <OriginBanner origin={origin} />}
+      <VoucherReviewDialog
+        review={reviewing?.review ?? null}
+        onCancel={() => setReviewing(null)}
+        onConfirm={() => {
+          if (reviewing) void submit(reviewing.values)
+          setReviewing(null)
+        }}
+      />
+      {recorded && (
+        <RecordedBanner
+          key={recorded.href}
+          recorded={recorded}
+          onDismiss={() => setRecorded(null)}
+        />
+      )}
       <form
-        onSubmit={(event) => void form.handleSubmit(submit)(event)}
+        onSubmit={(event) => void form.handleSubmit(validate)(event)}
         noValidate
         className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start"
       >
@@ -684,26 +770,36 @@ function VoucherEntryForm({
               <Controller
                 control={form.control}
                 name="supplier"
-                render={({ field }) => (
-                  <Field>
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor="supplier">
                       {t("vouchers.form.supplier")}{" "}
-                      <span className="font-normal text-muted-foreground">
-                        ({t("common.optional")})
-                      </span>
+                      {!freeReturn && (
+                        <span className="font-normal text-muted-foreground">
+                          ({t("common.optional")})
+                        </span>
+                      )}
                     </FieldLabel>
                     <SupplierField
                       value={field.value}
                       onChange={field.onChange}
                     />
+                    <FieldError errors={[fieldState.error]} />
                   </Field>
                 )}
               />
             )}
             {customerTypes.has(type) && !fromOrigin && (
-              <PartyCustomerField form={form} />
+              <PartyCustomerField form={form} required={freeReturn} />
             )}
           </div>
+          {freeReturn && (supplier ?? customer) && (
+            <ReturnOriginPicker
+              type={type}
+              partyId={(supplier ?? customer)?.id}
+              partyName={(supplier ?? customer)?.name}
+            />
+          )}
           <VoucherLinesField
             form={form}
             type={type}
@@ -720,7 +816,13 @@ function VoucherEntryForm({
           {type === VoucherType.damage && (
             <DamagePhotosField files={photos} onChange={setPhotos} />
           )}
-          <VoucherDetailsFields form={form} type={type} today={today} />
+          <VoucherDetailsFields
+            form={form}
+            type={type}
+            today={today}
+            earliest={earliest}
+            noteRequired={freeReturn}
+          />
           {needsApproval && (
             <p className="flex gap-2 rounded-xl bg-warning-muted/60 p-3 text-sm text-warning-muted-foreground">
               <ClipboardClockIcon
@@ -739,6 +841,74 @@ function VoucherEntryForm({
         </div>
       </form>
     </PageBody>
+  )
+}
+
+/** Dernier bon (ou dernière demande) enregistré depuis cet écran. */
+type Recorded = {
+  message: string
+  href: string
+  linkLabel: string
+  /** Enregistré, mais une photo n'est pas passée. */
+  warning?: boolean
+}
+
+/**
+ * Après validation, l'écran se vide pour le bon suivant : ce rappel garde l'accès au bon qui vient
+ * d'être enregistré, jusqu'au suivant ou jusqu'à ce qu'on le ferme.
+ */
+function RecordedBanner({
+  recorded,
+  onDismiss,
+}: {
+  recorded: Recorded
+  onDismiss: () => void
+}) {
+  const t = useTranslations("common")
+  const ref = useRef<HTMLDivElement>(null)
+  // L'écran vidé, la saisie repart d'en haut : le rappel est visible au-dessus.
+  useEffect(() => {
+    // Bloc, pas expression : scrollIntoView peut rendre une promesse, que React prendrait pour un nettoyage.
+    ref.current?.scrollIntoView({ block: "nearest" })
+  }, [])
+  return (
+    <div
+      ref={ref}
+      role="status"
+      className={cn(
+        "mt-6 flex items-center gap-3 rounded-xl border px-4 py-3 text-sm",
+        recorded.warning
+          ? "border-warning/50 bg-warning-muted text-warning-muted-foreground"
+          : "border-success/40 bg-success-muted text-success-muted-foreground"
+      )}
+    >
+      <CircleCheckIcon
+        className={cn(
+          "size-5 shrink-0",
+          recorded.warning ? "text-warning" : "text-success"
+        )}
+        aria-hidden
+      />
+      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1">
+        <span className="font-medium">{recorded.message}</span>
+        <Link
+          href={recorded.href}
+          className="inline-flex items-center gap-1 font-semibold text-primary hover:underline"
+        >
+          {recorded.linkLabel}
+          <ArrowRightIcon className="size-4" aria-hidden />
+        </Link>
+      </div>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        aria-label={t("close")}
+        onClick={onDismiss}
+      >
+        <XIcon />
+      </Button>
+    </div>
   )
 }
 
@@ -765,26 +935,39 @@ function OriginBanner({ origin }: { origin: Returnable }) {
 /** Client ou chantier d'une sortie ou d'un retour client (D30). */
 function PartyCustomerField({
   form,
+  required,
 }: {
   form: UseFormReturn<VoucherFormValues>
+  /** Retour client sans sortie d'origine (D50). */
+  required: boolean
 }) {
   const t = useTranslations()
   const customer = useWatch({ control: form.control, name: "customer" })
   const counterparty = useWatch({ control: form.control, name: "counterparty" })
+  const error = form.formState.errors.customer
+  // Le choix efface l'erreur posée à la validation.
+  const revalidate = { shouldValidate: form.formState.isSubmitted }
   return (
-    <Field>
+    <Field data-invalid={!!error}>
       <FieldLabel htmlFor="customer">
         {t("vouchers.form.customer")}{" "}
-        <span className="font-normal text-muted-foreground">
-          ({t("common.optional")})
-        </span>
+        {!required && (
+          <span className="font-normal text-muted-foreground">
+            ({t("common.optional")})
+          </span>
+        )}
       </FieldLabel>
       <CustomerField
         customer={customer}
         counterparty={customer ? "" : counterparty}
-        onCustomerChange={(chosen) => form.setValue("customer", chosen)}
-        onCounterpartyChange={(name) => form.setValue("counterparty", name)}
+        onCustomerChange={(chosen) =>
+          form.setValue("customer", chosen, revalidate)
+        }
+        onCounterpartyChange={(name) =>
+          form.setValue("counterparty", name, revalidate)
+        }
       />
+      <FieldError errors={[error]} />
     </Field>
   )
 }

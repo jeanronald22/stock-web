@@ -129,7 +129,7 @@ test("réception puis sortie : le stock suit, une sortie trop forte est refusée
   await expect(page.getByRole("combobox", { name: "Dépôt" })).toContainText(
     "Dépôt Bonabéri"
   )
-  await page.getByRole("button", { name: "Voir le bon" }).click()
+  await page.getByRole("link", { name: "Voir le bon" }).click()
   await expect(
     page.getByRole("heading", { name: `REC-${year}-0001` })
   ).toBeVisible()

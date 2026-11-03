@@ -1,6 +1,13 @@
 "use client"
 
-import { createContext, use, useEffect, useState } from "react"
+import {
+  createContext,
+  use,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react"
 
 import {
   publicConfigSchema,
@@ -19,14 +26,25 @@ function storeConfig(config: PublicConfig) {
   }
 }
 
-function storedConfig(): PublicConfig | null {
+/** Configuration gardée telle qu'écrite : une chaîne, que React compare d'un rendu à l'autre. */
+function storedRaw(): string | null {
   try {
-    const raw = localStorage.getItem(StorageKeys.runtimeConfig)
+    return localStorage.getItem(StorageKeys.runtimeConfig)
+  } catch {
+    return null
+  }
+}
+
+function parseConfig(raw: string | null): PublicConfig | null {
+  try {
     return raw ? publicConfigSchema.parse(JSON.parse(raw)) : null
   } catch {
     return null
   }
 }
+
+/** Rien ne la change de l'extérieur pendant la visite : pas d'abonnement. */
+const noSubscription = () => () => {}
 
 export function useRuntimeConfig(): PublicConfig {
   const config = use(RuntimeConfigContext)
@@ -53,6 +71,10 @@ export function RuntimeConfigProvider({
 }) {
   const [state, setState] = useState<State>({ status: "loading" })
   const [attempt, setAttempt] = useState(0)
+  // La dernière configuration reçue démarre l'application sans attendre le réseau, et suffit
+  // hors ligne (D39). Le rendu du serveur n'a pas de stockage local : null pendant l'hydratation.
+  const raw = useSyncExternalStore(noSubscription, storedRaw, () => null)
+  const stored = useMemo(() => parseConfig(raw), [raw])
 
   useEffect(() => {
     let cancelled = false
@@ -66,26 +88,28 @@ export function RuntimeConfigProvider({
         if (!cancelled) setState({ status: "ready", config })
       })
       .catch(() => {
-        // Sans réseau, la dernière configuration reçue suffit pour redémarrer (D39).
-        const stored = storedConfig()
-        if (!cancelled)
-          setState(
-            stored ? { status: "ready", config: stored } : { status: "failed" }
-          )
+        if (!cancelled) setState({ status: "failed" })
       })
     return () => {
       cancelled = true
     }
   }, [attempt])
 
-  if (state.status === "loading") return loading
-  if (state.status === "failed") {
-    return failed(() => {
-      setState({ status: "loading" })
-      setAttempt((value) => value + 1)
-    })
+  // Une réponse identique à la configuration gardée garde son objet : en changer recréerait la
+  // connexion pour rien.
+  const config =
+    state.status === "ready" &&
+    (!stored || JSON.stringify(stored) !== JSON.stringify(state.config))
+      ? state.config
+      : stored
+
+  if (!config) {
+    if (state.status === "failed")
+      return failed(() => {
+        setState({ status: "loading" })
+        setAttempt((value) => value + 1)
+      })
+    return loading
   }
-  return (
-    <RuntimeConfigContext value={state.config}>{children}</RuntimeConfigContext>
-  )
+  return <RuntimeConfigContext value={config}>{children}</RuntimeConfigContext>
 }
