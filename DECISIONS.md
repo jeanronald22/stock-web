@@ -208,7 +208,7 @@ Côté utilisateur, ce sont les écrans de « Mon compte » : créer son entrepr
 
 ## D23. Revue : écarts au modèle validé (D10) et plan de réalignement (2026-10-14)
 
-Les articles, dépôts, fournisseurs et bons (D19 à D22) ont été construits sans repartir du modèle validé (`docs/modele-donnees.html`) ni du questionnaire terrain (`docs/questionnaire-controleur-stock.pdf`). Écarts constatés :
+Les articles, dépôts, fournisseurs et bons (D19 à D22) ont été construits sans repartir du modèle validé (`docs/modele-donnees.html`) ni du questionnaire terrain (gardé hors du dépôt : ses réponses sont confidentielles). Écarts constatés :
 
 | Modèle D10 | Construit | Écart |
 |---|---|---|
