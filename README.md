@@ -12,6 +12,9 @@ repository) and signs users in through Keycloak.
 
 ## Demo
 
+**Live application: https://kreskala.mboumgni.dev** (staging environment: create an account with
+your e-mail address, then a company, to explore every screen).
+
 [![Kreskala Stock presentation video](docs/media/kreskala-apercu.gif)](docs/media/kreskala-presentation.mp4)
 
 Full presentation (2 min 40, French voice-over):

@@ -2,6 +2,8 @@
 
 Application web (PWA) de Kreskala Stock : Next.js 16, React 19, shadcn/ui (Base UI), Tailwind 4.
 
+Application en ligne (recette) : https://kreskala.mboumgni.dev
+
 ## Démarrer en local
 
 Prérequis : la pile de `stock-api` (PostgreSQL, Keycloak, API), voir son README.
