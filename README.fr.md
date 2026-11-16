@@ -1,0 +1,67 @@
+# stock-web
+
+Application web (PWA) de Kreskala Stock : Next.js 16, React 19, shadcn/ui (Base UI), Tailwind 4.
+
+## Démarrer en local
+
+Prérequis : la pile de `stock-api` (PostgreSQL, Keycloak, API), voir son README.
+
+```bash
+cp .env.example .env.local   # adresses de Keycloak et de l'API
+npm install
+npm run dev                  # http://localhost:3100
+```
+
+Connexion : ouvrir http://localhost:3100/connexion, puis « Créer un compte ». Les e-mails de
+confirmation et de mot de passe oublié arrivent dans la boîte factice Mailpit : http://localhost:8025.
+
+Ports dédiés au projet : application web 3100, API 8081, Keycloak 8180, PostgreSQL 5436.
+
+## Configuration
+
+Lue par le serveur à l'exécution (`/runtime-config`), jamais figée au build : une même image sert
+tous les environnements.
+
+| Variable | Rôle |
+|---|---|
+| `KEYCLOAK_URL` | adresse de Keycloak |
+| `KEYCLOAK_REALM` | realm (`kreskala`) |
+| `KEYCLOAK_CLIENT_ID` | client public (`stock-web`) |
+| `API_URL` | adresse de `stock-api` |
+
+## Vérifications
+
+```bash
+npm run typecheck && npm run lint && npm run build
+npm run test:e2e   # parcours complet contre la pile réelle, voir e2e/README.md
+```
+
+## Organisation
+
+| Dossier | Contenu |
+|---|---|
+| `app/(app)` | espace connecté : connexion, inscription (`/bienvenue`), choix d'entreprise, accueil |
+| `lib/api` | client HTTP (jeton, langue, entreprise active, erreurs RFC 9457), requêtes TanStack Query |
+| `lib/auth` | connexion OIDC (Keycloak, PKCE) |
+| `messages` | textes FR et EN ; le français est la référence typée |
+| `components/ui` | composants shadcn alignés sur la charte (rayon 0,45 rem, cibles tactiles de 44 px) |
+
+## Données de démonstration
+
+Remplit une entreprise existante (dépôts, fournisseurs, articles, réceptions et sorties) par l'API,
+en local, avec un compte propriétaire. Les identifiants passent par l'environnement :
+
+```bash
+SEED_EMAIL=vous@exemple.com SEED_PASSWORD='…' SEED_ORGANIZATION="Vimelec" npm run seed:demo
+```
+
+Relançable sans doublon. `SEED_ORGANIZATION` est facultatif (première entreprise dont le compte est
+propriétaire) ; `SEED_APP_URL` et `SEED_API_URL` changent les adresses (par défaut 3100 et 8081).
+
+## Intégration continue et recette
+
+`.github/workflows/ci.yml` : à chaque pull request vers `develop` ou `main`, lint, types et build.
+À chaque push sur `develop`, en plus, l'image `stock-web` (`Dockerfile`) est publiée sur ghcr.io
+puis le service web de la recette est mis à jour. La pile de recette est décrite dans `stock-api`
+(`deploy/recette`). Les tests e2e (Playwright) ne tournent pas encore dans la CI : ils demandent
+la pile complète.
