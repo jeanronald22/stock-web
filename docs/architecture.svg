@@ -1,0 +1,161 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 730" width="1400" height="730" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <title>Kreskala Stock: system architecture</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10Z" fill="#525252"/>
+    </marker>
+    <marker id="arrow-brand" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10Z" fill="#007A55"/>
+    </marker>
+  </defs>
+
+  <rect width="1400" height="730" rx="16" fill="#FFFFFF"/>
+
+  <!-- Titre -->
+  <g transform="translate(40 26) scale(0.75)">
+    <g fill="#007A55"><rect x="7" y="7" width="9" height="34" rx="2"/><path d="M15 21L29 7H39Q41 7 39.6 8.4L15 33Z"/></g>
+    <rect x="28" y="28" width="13" height="13" rx="2" fill="#00BC7D"/>
+  </g>
+  <text x="86" y="51" font-size="22" font-weight="700" fill="#0A0A0A">Kreskala Stock</text>
+  <text x="258" y="51" font-size="16" fill="#525252">system architecture</text>
+
+  <!-- Navigateur -->
+  <rect x="40" y="100" width="400" height="420" rx="12" fill="#ECFDF5" stroke="#007A55" stroke-width="1.5"/>
+  <text x="60" y="130" font-size="12" font-weight="600" letter-spacing="1.2" fill="#007A55">BROWSER / PHONE</text>
+  <text x="60" y="156" font-size="18" font-weight="700" fill="#0A0A0A">stock-web: installable PWA</text>
+  <text x="60" y="177" font-size="13" fill="#525252">this repository · offline first · French and English</text>
+
+  <g font-size="13" fill="#0A0A0A">
+    <rect x="60" y="198" width="360" height="62" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/>
+    <text x="76" y="223" font-weight="600">Interface</text>
+    <text x="76" y="244" fill="#525252">Next.js 16 · React 19 · shadcn/ui · Tailwind 4</text>
+
+    <rect x="60" y="272" width="360" height="62" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/>
+    <text x="76" y="297" font-weight="600">Session</text>
+    <text x="76" y="318" fill="#525252">oidc-client-ts · authorization code + PKCE</text>
+
+    <rect x="60" y="346" width="360" height="62" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/>
+    <text x="76" y="371" font-weight="600">Data</text>
+    <text x="76" y="392" fill="#525252">TanStack Query · cache kept on the device</text>
+
+    <rect x="60" y="420" width="360" height="80" rx="8" fill="#FFFFFF" stroke="#E5E5E5"/>
+    <text x="76" y="445" font-weight="600">Offline</text>
+    <text x="76" y="466" fill="#525252">Service worker (Serwist) · IndexedDB outbox</text>
+    <text x="76" y="485" fill="#525252">client-made UUIDs · idempotent resend</text>
+  </g>
+
+  <!-- Flux navigateur → services -->
+  <g font-size="12" fill="#525252" text-anchor="middle">
+    <line x1="440" y1="160" x2="656" y2="160" stroke="#525252" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="548" y="134">app shell, static files</text>
+    <text x="548" y="150">/runtime-config</text>
+
+    <line x1="440" y1="290" x2="656" y2="290" stroke="#525252" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="548" y="264">OpenID Connect</text>
+    <text x="548" y="280">sign-in, token refresh</text>
+
+    <line x1="440" y1="440" x2="656" y2="440" stroke="#007A55" stroke-width="2" marker-end="url(#arrow-brand)"/>
+    <text x="548" y="398">REST / JSON</text>
+    <text x="548" y="414">Bearer JWT (aud stock-api)</text>
+    <text x="548" y="430">X-Organization-Id</text>
+  </g>
+
+  <!-- Caddy -->
+  <rect x="660" y="100" width="60" height="420" rx="10" fill="#0A0A0A"/>
+  <text transform="translate(696 310) rotate(-90)" text-anchor="middle" font-size="14" font-weight="600" fill="#FFFFFF">Caddy · HTTPS reverse proxy</text>
+
+  <!-- Serveur -->
+  <rect x="760" y="76" width="600" height="468" rx="12" fill="#F5F5F4" stroke="#525252" stroke-width="1.2" stroke-dasharray="6 5"/>
+  <text x="780" y="100" font-size="12" font-weight="600" letter-spacing="1.2" fill="#525252">SERVER · DOCKER COMPOSE · CONTAINERS BOUND TO 127.0.0.1</text>
+
+  <g stroke="#525252" stroke-width="1.5">
+    <line x1="720" y1="160" x2="786" y2="160" marker-end="url(#arrow)"/>
+    <line x1="720" y1="290" x2="786" y2="290" marker-end="url(#arrow)"/>
+    <line x1="720" y1="440" x2="786" y2="440" stroke="#007A55" stroke-width="2" marker-end="url(#arrow-brand)"/>
+  </g>
+
+  <!-- Serveur Next.js -->
+  <rect x="790" y="120" width="310" height="80" rx="10" fill="#FFFFFF" stroke="#007A55" stroke-width="1.5"/>
+  <text x="808" y="150" font-size="16" font-weight="700" fill="#0A0A0A">Next.js server</text>
+  <text x="808" y="172" font-size="13" fill="#525252">stock-web image · config read at start-up</text>
+  <text x="808" y="189" font-size="13" fill="#525252">one image for every environment</text>
+
+  <!-- Keycloak -->
+  <rect x="790" y="240" width="310" height="100" rx="10" fill="#FFFFFF" stroke="#525252" stroke-width="1.2"/>
+  <text x="808" y="270" font-size="16" font-weight="700" fill="#0A0A0A">Keycloak 26</text>
+  <text x="808" y="292" font-size="13" fill="#525252">“Who are you?” · realm kreskala</text>
+  <text x="808" y="309" font-size="13" fill="#525252">e-mail + password, public client stock-web</text>
+  <text x="808" y="326" font-size="13" fill="#525252">custom extension: one-time code sign-in</text>
+
+  <!-- API -->
+  <rect x="790" y="380" width="310" height="144" rx="10" fill="#FFFFFF" stroke="#525252" stroke-width="1.2"/>
+  <text x="808" y="408" font-size="16" font-weight="700" fill="#0A0A0A">stock-api</text>
+  <text x="884" y="408" font-size="13" fill="#525252">Kotlin · Spring Boot · Modulith</text>
+  <rect x="806" y="424" width="134" height="84" rx="8" fill="#ECFDF5" stroke="#007A55"/>
+  <text x="818" y="447" font-size="13" font-weight="600" fill="#004F3B">platform</text>
+  <text x="818" y="466" font-size="12" fill="#525252">companies, team,</text>
+  <text x="818" y="482" font-size="12" fill="#525252">roles, invitations,</text>
+  <text x="818" y="498" font-size="12" fill="#525252">KYB</text>
+  <rect x="950" y="424" width="134" height="84" rx="8" fill="#ECFDF5" stroke="#007A55"/>
+  <text x="962" y="447" font-size="13" font-weight="600" fill="#004F3B">stock</text>
+  <text x="962" y="466" font-size="12" fill="#525252">items, warehouses,</text>
+  <text x="962" y="482" font-size="12" fill="#525252">vouchers, ledger</text>
+  <text x="962" y="498" font-size="12" fill="#525252">(append-only)</text>
+
+  <!-- API → Keycloak : clés de signature -->
+  <line x1="870" y1="380" x2="870" y2="344" stroke="#525252" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="882" y="366" font-size="12" fill="#525252">signing keys (JWKS), private network</text>
+
+  <!-- PostgreSQL -->
+  <path d="M1170 262v238c0 14 36 24 80 24s80-10 80-24V262" fill="#FFFFFF" stroke="#525252" stroke-width="1.2"/>
+  <ellipse cx="1250" cy="262" rx="80" ry="22" fill="#FFFFFF" stroke="#525252" stroke-width="1.2"/>
+  <text x="1250" y="352" text-anchor="middle" font-size="16" font-weight="700" fill="#0A0A0A">PostgreSQL 17</text>
+  <text x="1250" y="374" text-anchor="middle" font-size="13" fill="#525252">Flyway migrations</text>
+  <text x="1250" y="392" text-anchor="middle" font-size="13" fill="#525252">every business row</text>
+  <text x="1250" y="409" text-anchor="middle" font-size="13" fill="#525252">carries organization_id</text>
+  <text x="1250" y="440" text-anchor="middle" font-size="12" fill="#525252">never exposed</text>
+
+  <line x1="1100" y1="290" x2="1166" y2="290" stroke="#525252" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="1100" y1="470" x2="1166" y2="470" stroke="#525252" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Services externes -->
+  <g stroke="#525252" stroke-width="1.5">
+    <line x1="873" y1="524" x2="873" y2="606" marker-end="url(#arrow)"/>
+    <line x1="1017" y1="524" x2="1017" y2="606" marker-end="url(#arrow)"/>
+  </g>
+  <rect x="790" y="610" width="166" height="80" rx="10" fill="#FFFFFF" stroke="#525252" stroke-width="1.2"/>
+  <text x="806" y="638" font-size="15" font-weight="700" fill="#0A0A0A">Cloudflare R2</text>
+  <text x="806" y="658" font-size="12" fill="#525252">photos, private bucket,</text>
+  <text x="806" y="674" font-size="12" fill="#525252">served on signed links</text>
+  <rect x="972" y="610" width="166" height="80" rx="10" fill="#FFFFFF" stroke="#525252" stroke-width="1.2"/>
+  <text x="988" y="638" font-size="15" font-weight="700" fill="#0A0A0A">Resend</text>
+  <text x="988" y="658" font-size="12" fill="#525252">e-mail: invitations,</text>
+  <text x="988" y="674" font-size="12" fill="#525252">alerts, account</text>
+  <text x="1158" y="646" font-size="12" font-weight="600" letter-spacing="1.2" fill="#525252">EXTERNAL SERVICES</text>
+  <text x="1158" y="664" font-size="12" fill="#525252">each behind an interface</text>
+
+  <!-- Livraison continue -->
+  <text x="40" y="592" font-size="12" font-weight="600" letter-spacing="1.2" fill="#525252">DELIVERY · EVERY PUSH TO DEVELOP</text>
+  <g font-size="13">
+    <rect x="40" y="610" width="186" height="80" rx="10" fill="#FFFFFF" stroke="#525252" stroke-width="1.2"/>
+    <text x="56" y="638" font-size="15" font-weight="700" fill="#0A0A0A">GitHub Actions</text>
+    <text x="56" y="658" font-size="12" fill="#525252">lint · types · build</text>
+    <text x="56" y="674" font-size="12" fill="#525252">on every pull request</text>
+
+    <rect x="262" y="610" width="186" height="80" rx="10" fill="#FFFFFF" stroke="#525252" stroke-width="1.2"/>
+    <text x="278" y="638" font-size="15" font-weight="700" fill="#0A0A0A">ghcr.io</text>
+    <text x="278" y="658" font-size="12" fill="#525252">Docker images tagged</text>
+    <text x="278" y="674" font-size="12" fill="#525252">develop and commit SHA</text>
+
+    <rect x="484" y="610" width="216" height="80" rx="10" fill="#FFFFFF" stroke="#525252" stroke-width="1.2"/>
+    <text x="500" y="638" font-size="15" font-weight="700" fill="#0A0A0A">deploy.sh over SSH</text>
+    <text x="500" y="658" font-size="12" fill="#525252">restricted key · health check</text>
+    <text x="500" y="674" font-size="12" fill="#525252">automatic rollback</text>
+  </g>
+  <g stroke="#525252" stroke-width="1.5" fill="none">
+    <line x1="226" y1="650" x2="258" y2="650" marker-end="url(#arrow)"/>
+    <line x1="448" y1="650" x2="480" y2="650" marker-end="url(#arrow)"/>
+    <path d="M740 610V536" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+    <path d="M700 650H740V610" stroke-dasharray="5 4"/>
+  </g>
+</svg>
